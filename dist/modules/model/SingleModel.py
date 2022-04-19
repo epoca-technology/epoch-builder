@@ -116,7 +116,7 @@ class SingleModel:
         # Finally, return the prediction results
         return {
             "r": result,
-            "t": current_timestamp,
+            "t": int(current_timestamp),
             "md": [self._get_prediction_metadata(preds, description, rsi, short_ema, long_ema)]
         }
 

@@ -5,7 +5,7 @@ from tqdm import tqdm
 from modules.candlestick import Candlestick
 from modules.utils import Utils
 from modules.model import IModel, IPrediction
-from modules.backtest import IBacktestConfig, Position, IBacktestResult, IPerformance
+from modules.backtest import IBacktestConfig, Position, IPerformance
 
 
 
@@ -25,6 +25,8 @@ class Backtest:
             id: str
                 The identification/description of the Backtest Instance. This value must be compatible
                 with file systems as it will be part of the result name like {BACKTEST_ID}_{TIMESTAMP}.json
+            description: str
+                A description to specify the purpose of the backtest.
 
         Backtest Start and End Range:
             start: int
@@ -69,8 +71,9 @@ class Backtest:
             config: IBacktestConfig
                 The configuration that will be used during the backtesting process
         """
-        # ID
+        # ID & Description
         self.id = config['id']
+        self.description = config['description']
 
         # Initialize the models to be tested
         self.models = config['models']
@@ -78,7 +81,7 @@ class Backtest:
 
         # Initialize the candlesticks based on the max lookback and the provided start and end dates
         Candlestick.init(max([m.get_max_lookback() for m in self.models]), config.get('start'), config.get('end'))
-
+        
         # Init the start and end
         self.start = int(Candlestick.DF.iloc[0]['ot'])
         self.end = int(Candlestick.DF.iloc[-1]['ct'])
@@ -219,6 +222,7 @@ class Backtest:
         self.results.append({
             'backtest': {
                 'id': self.id,
+                'description': self.description,
                 'start': self.start,
                 'end': self.end,
                 'take_profit': self.take_profit,
@@ -248,21 +252,9 @@ class Backtest:
 
         # Write the results on a JSON File
         with open(f"{Backtest.RESULTS_PATH}/{self._get_result_file_name()}", "w") as outfile:
-            outfile.write(dumps(self._get_results()))
+            outfile.write(dumps(self.results))
 
 
-
-
-
-
-
-    def _get_results(self) -> List[IBacktestResult]:
-        """Sorts the Backtest Results by points and returns the list to be saved.
-
-        Returns:
-            List[IBacktestResult]
-        """
-        return sorted(self.results, key=lambda d: d['performance']['points'], reverse=True) 
 
 
 

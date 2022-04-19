@@ -114,7 +114,6 @@ class Candlestick:
 
 
 
-
     @staticmethod
     def _get_date_timestamp(date_value: Union[str, int, None]) -> Union[int, None]:
         """Given a date_value, it will process it according to its format and return the 

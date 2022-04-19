@@ -75,8 +75,11 @@ class IPerformance(TypedDict):
 # A backtest instance can be initialized with the following configuration. Different
 # configurations can be spread among multiple backtest instances.
 class IBacktestConfig(TypedDict):
-    # Identification / Description
+    # Identification
     id: str
+
+    # Description of the backtest (purpose)
+    description: str
 
     # Start and end time - If none provided, will use all the available data
     start: Union[str, int, None]
@@ -99,6 +102,7 @@ class IBacktestConfig(TypedDict):
 # The backtest configuration which is inserted into each of the Model Backtest Results
 class IBacktest(TypedDict):
     id: str
+    description: str
     start: int  # The first candlestick's open time
     end: int    # The last candlestick's close time
     take_profit: float
@@ -114,7 +118,7 @@ class IBacktest(TypedDict):
 
 # Model Backtest Result
 # These results are saved by model. The result file which is generated at the end
-# of the execution, contains a List[IModelBacktestResult]
+# of the execution, contains a List[IBacktestResult]
 class IBacktestResult(TypedDict):
     backtest: IBacktest
     model: IModel

@@ -116,7 +116,7 @@ class Position:
         self.active = {
             't': prediction['r'],
             'p': prediction,
-            'ot': candlestick['ot'],
+            'ot': int(candlestick['ot']),
             'op': candlestick['o'],
             'tpp': take_profit,
             'slp': stop_loss,
@@ -214,7 +214,7 @@ class Position:
                 The close time of the candlestick in which the position was closed.
         """
         # Complete the position
-        self.active['ct'] = close_time
+        self.active['ct'] = int(close_time)
         self.active['cp'] = close_price
         self.active['o'] = outcome
 
