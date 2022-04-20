@@ -37,10 +37,9 @@ from modules.backtest import Backtest
 # BACKTEST INSTANCE
 # The Instance of the Backtest that will be executed
 backtest: Backtest = Backtest({
-    "id": "BASIC_ARIMA_TP1_SL1_6",
-    "description": "The purpose of this backtest is to find out which of these models actually work :)\
-        If a multiline is needed, we can is that back slash.",
-    "start": '12/04/2022',
+    "id": "ARIMA_BACKTEST_2",
+    "description": "This backtest was created in order to be able to test multiple file analysis in the GUI.",
+    "start": '1/04/2022',
     "end": None,
     "take_profit": 1,
     "stop_loss": 1,
@@ -48,11 +47,11 @@ backtest: Backtest = Backtest({
     "models": [
 
         Model({
-            'id': 'ARIMA_CUSTOM_REPO',
+            'id': 'FIXED_DURATION_01',
             "single_models": [{
-                'lookback': 100,
-                'arima': { 'predictions': 10, 'p': 5, 'd': 3, 'q': 7 },
-                'interpreter': { 'long': 0.07, 'short': 0.07, 'rsi': {'active': True, 'overbought': 70, 'oversold': 30} }
+                'lookback': 200,
+                'arima': { 'predictions': 5, 'p': 2, 'd': 1, 'q': 4 },
+                'interpreter': { 'long': 0.05, 'short': 0.05, 'rsi': {'active': True, 'overbought': 70, 'oversold': 30}, 'ema': {'active': True, 'distance': 1} }
             }]
         }),
 

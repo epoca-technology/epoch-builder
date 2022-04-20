@@ -206,7 +206,7 @@ class Utils:
         Returns:
             int
         """
-        return int(ms / 60000)
+        return round(ms / 60000)
 
 
 
