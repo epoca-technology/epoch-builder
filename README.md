@@ -21,6 +21,10 @@ The dependencies are located in the **requirements.txt** file and can be install
 ```
 prediction-backtesting
     │
+    backtest_results/
+    ├───BACKTEST_01_1649788629072.json
+    ├───BACKTEST_02_1650551357902.json
+    │
     candlesticks/
     ├───candlesticks.csv
     ├───prediction_candlesticks.csv
@@ -31,11 +35,15 @@ prediction-backtesting
     │   │  └──SomeModule.py
     │   └──some_other_module/
     │      └──SomeOtherModule.py
-    ├───run.py
     │
-    simulation_results/
-    ├───1649788629072.json
-    └───1649788629072.json
+    ├───tests/
+    │   ├──some_module_test.py
+    │   └──some_other_module_test.py
+    │
+    ├───run_backtest.py
+    │
+    Backtest.sh
+    UnitTests.sh
 ```
 
 
@@ -45,31 +53,31 @@ prediction-backtesting
 
 - Generate the **candlesticks.csv** and **prediction_candlesticks.csv** files through the **compose** program and place them inside of the **./candlesticks** directory.
 
-- Input the desired configuration values in **./dist/run.py** 
+- Input the desired configuration values in **./dist/run_*.py** 
 
 
 
 
 #
-## Trading Simulation
+## Backtests
 
-Set the PYTHONPATH environment variable on your machine with:
+Set the permissions on the executables (This only needs to be done once):
 
-`export PYTHONPATH=$(pwd)/dist`
+`chmod u+x Backtest.sh && chmod u+x UnitTests.sh`
 
-Run the trading simulations with the following script: 
+Run the Backtest by executing the following:
 
-`python3 dist/run.py`
+`./Backtest.sh`
 
-Once the execution completes, the results will be placed under the **simulation_results** directory in the following format: `$SIMULATION_TIMESTAMP.json`
+Once the execution completes, the results will be placed under the **backtest_results** directory in the following format: **{BACKTEST_ID}_{TIMESTAMP}.json**
 
 
 #
-## Tests
+## Unit Tests
 
 Run an end-to-end unit test with the following command:
 
-`python3 -m unittest discover -s dist/tests -p '*_test.py'`
+`./UnitTests`
 
 
 

@@ -9,7 +9,7 @@ from modules.model import SingleModel, MultiModel, IPrediction, IModel
 # Position Record
 # When a position is closed, it is saved in a list that can be reviewed in the GUI when
 # the backtest completes.
-class IPosition(TypedDict):
+class IBacktestPosition(TypedDict):
     # Type of position: 1 = long, -1 = short
     t: int
 
@@ -42,13 +42,13 @@ class IPosition(TypedDict):
 # Performance
 # Once a model has finished the testing process it builds a performance dict 
 # containing all the details.
-class IPerformance(TypedDict):
+class IBacktestPerformance(TypedDict):
     # Points
     points: float            # Total Points Accumulated
     points_hist: List[float] # Historical fluctuation of points
 
     # Positions List
-    positions: List[IPosition]
+    positions: List[IBacktestPosition]
 
     # Counts
     long_num: int     # Number of closed long positions
@@ -122,4 +122,4 @@ class IBacktest(TypedDict):
 class IBacktestResult(TypedDict):
     backtest: IBacktest
     model: IModel
-    performance: IPerformance
+    performance: IBacktestPerformance

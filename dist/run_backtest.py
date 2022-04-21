@@ -37,7 +37,7 @@ from modules.backtest import Backtest
 # BACKTEST INSTANCE
 # The Instance of the Backtest that will be executed
 backtest: Backtest = Backtest({
-    "id": "ARIMA_BACKTEST_2",
+    "id": "SOME_BACKTEST_MOCK",
     "description": "This backtest was created in order to be able to test multiple file analysis in the GUI.",
     "start": '1/04/2022',
     "end": None,
@@ -50,7 +50,7 @@ backtest: Backtest = Backtest({
             'id': 'FIXED_DURATION_01',
             "single_models": [{
                 'lookback': 200,
-                'arima': { 'predictions': 5, 'p': 2, 'd': 1, 'q': 4 },
+                'arima': { 'predictions': 7, 'p': 2, 'd': 1, 'q': 2 },
                 'interpreter': { 'long': 0.05, 'short': 0.05, 'rsi': {'active': True, 'overbought': 70, 'oversold': 30}, 'ema': {'active': True, 'distance': 1} }
             }]
         }),

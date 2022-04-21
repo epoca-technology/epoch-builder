@@ -2,7 +2,7 @@ from typing import Tuple, List
 from pandas import Series
 from modules.utils import Utils
 from modules.model import IPrediction
-from modules.backtest import IPerformance
+from modules.backtest import IBacktestPerformance
 
 
 
@@ -32,10 +32,10 @@ class Position:
                 The history of how points have fluctuated during the process.
 
         Positions:
-            active: Union[IPosition, None]:
+            active: Union[IBacktestPosition, None]:
                 This property is populated when there is an active position. Otherwise,
                 new positions can be opened.
-            positions: List[IPosition]
+            positions: List[IBacktestPosition]
                 The list of positions that have been closed in the instance.
 
         Position Counters:
@@ -298,12 +298,12 @@ class Position:
 
 
 
-    def get_performance(self) -> IPerformance:
+    def get_performance(self) -> IBacktestPerformance:
         """Returns the performance dictionary based on the instance
         data.
 
         Returns:
-            IPerformance
+            IBacktestPerformance
         """
         return {
             'points': self.points[-1],

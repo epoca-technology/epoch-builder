@@ -99,10 +99,10 @@ class UtilsTestCase(unittest.TestCase):
 
     # Can convert MilliSeconds into Minutes
     def testFromMilliSecondsToMinutes(self):
-        self.assertEqual(Utils.from_milliseconds_to_minutes(50000), 0)
+        self.assertEqual(Utils.from_milliseconds_to_minutes(50000), 1)
         self.assertEqual(Utils.from_milliseconds_to_minutes(60000), 1)
         self.assertEqual(Utils.from_milliseconds_to_minutes(120000), 2)
-        self.assertEqual(Utils.from_milliseconds_to_minutes(115000), 1)
+        self.assertEqual(Utils.from_milliseconds_to_minutes(115000), 2)
 
 
     # Can convert a Date String into a ms timestamp

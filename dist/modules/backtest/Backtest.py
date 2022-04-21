@@ -5,7 +5,7 @@ from tqdm import tqdm
 from modules.candlestick import Candlestick
 from modules.utils import Utils
 from modules.model import IModel, IPrediction
-from modules.backtest import IBacktestConfig, Position, IPerformance
+from modules.backtest import IBacktestConfig, Position, IBacktestPerformance
 
 
 
@@ -204,7 +204,7 @@ class Backtest:
 
 
 
-    def _append_result(self, model_start: int, model: IModel, performance: IPerformance) -> None:
+    def _append_result(self, model_start: int, model: IModel, performance: IBacktestPerformance) -> None:
         """Appends the model's results to the list once it has completed backtesting.
 
         Args:
@@ -212,7 +212,7 @@ class Backtest:
                 The time in which the model's backtesting started.
             model: IModel
                 The model that went through the backtesting.
-            performance: IPerformance
+            performance: IBacktestPerformance
                 The performance of the model.
         """
         # Init the end time
