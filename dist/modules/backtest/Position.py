@@ -15,10 +15,7 @@ class Position:
     retuls.
 
     Class Properties:
-        REWARD: float
-            The number of points that will be added if the position is successful
-        PENALTY: float
-            The number of points that will be substracted if the position is unsuccessful
+        
 
     Instance Properties:
         Configuration
@@ -28,6 +25,10 @@ class Position:
                 The stop loss percentage that will be used in positions.
 
         Points Data:
+            reward: float
+                The number of points (TP - 1) that will be added if the position is successful. 
+            penalty: float
+                The number of points (SL + 1) that will be substracted if the position is unsuccessful
             points: List[float]
                 The history of how points have fluctuated during the process.
 
@@ -52,10 +53,6 @@ class Position:
             
     """
 
-    # The points to be added or substracted based on the position outcome
-    REWARD: float = 1.0
-    PENALTY: float = -1.2
-
 
 
 
@@ -76,7 +73,9 @@ class Position:
         self.take_profit = take_profit
         self.stop_loss = stop_loss
 
-        # Init Points
+        # Init Points Data
+        self.reward = take_profit - 0.1
+        self.penalty = -(stop_loss + 0.1)
         self.points: List[float] = [0]
 
         # Init Positions
@@ -273,7 +272,7 @@ class Position:
             float
         """
         # Calculate the outcome points
-        outcome_points: float = Position.REWARD if outcome else Position.PENALTY
+        outcome_points: float = self.reward if outcome else self.penalty
         
         # Add the points to the list
         self.points.append(round(self.points[-1] + outcome_points, 2))

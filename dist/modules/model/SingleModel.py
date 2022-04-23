@@ -97,28 +97,37 @@ class SingleModel:
             include_ema=self.interpreter.ema['active'],
         )
 
-        # Initialize the Arima Model
-        arima_model: ARIMA = ARIMA(
-            order=(self.arima['p'], self.arima['d'], self.arima['q']), 
-            seasonal_order=(self.arima['P'], self.arima['D'], self.arima['Q'], self.arima['m']),
-            suppress_warnings=True
-        )
+        # Initialize Arima safely
+        try:
+            # Initialize the Arima Model
+            arima_model: ARIMA = ARIMA(
+                order=(self.arima['p'], self.arima['d'], self.arima['q']), 
+                seasonal_order=(self.arima['P'], self.arima['D'], self.arima['Q'], self.arima['m']),
+                suppress_warnings=True
+            )
 
-        # Fit the model to the retrieved series
-        arima_model.fit(series)
+            # Fit the model to the retrieved series
+            arima_model.fit(series)
 
-        # Generate the predictions
-        preds: List[float] = around(arima_model.predict(self.arima['predictions']), decimals=2).tolist()
+            # Generate the predictions
+            preds: List[float] = around(arima_model.predict(self.arima['predictions']), decimals=2).tolist()
 
-        # Interpret the predictions
-        result, description = self.interpreter.get_interpretation(preds, rsi, short_ema, long_ema)
-        
-        # Finally, return the prediction results
-        return {
-            "r": result,
-            "t": int(current_timestamp),
-            "md": [self._get_prediction_metadata(preds, description, rsi, short_ema, long_ema)]
-        }
+            # Interpret the predictions
+            result, description = self.interpreter.get_interpretation(preds, rsi, short_ema, long_ema)
+            
+            # Finally, return the prediction results
+            return {
+                "r": result,
+                "t": int(current_timestamp),
+                "md": [self._get_prediction_metadata(preds, description, rsi, short_ema, long_ema)]
+            }
+        except Exception as e:
+            print(f"Arima Prediction Error: {str(e)}")
+            return {
+                "r": 0,
+                "t": int(current_timestamp),
+                "md": [{'d': 'neutral-due-to-error: ' + str(e)}]
+            }
 
 
 

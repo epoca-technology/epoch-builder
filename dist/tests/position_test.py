@@ -103,11 +103,11 @@ class PositionTestCase(unittest.TestCase):
         self.assertEqual(p.positions[0]['ct'], c[-1]['ct'])
         self.assertEqual(p.positions[0]['cp'], p.positions[0]['tpp'])
         self.assertTrue(p.positions[0]['o'])
-        self.assertEqual(p.positions[0]['pts'], 1)
+        self.assertEqual(p.positions[0]['pts'], 0.9)
 
         # Make sure the points were added
         self.assertEqual(len(p.points), 2)
-        self.assertEqual(p.points[-1], 1)
+        self.assertEqual(p.points[-1], 0.9)
 
         # Check the counters
         self.assertEqual(p.successful_num, 1)
@@ -151,11 +151,11 @@ class PositionTestCase(unittest.TestCase):
         self.assertEqual(p.positions[0]['ct'], c[-1]['ct'])
         self.assertEqual(p.positions[0]['cp'], p.positions[0]['slp'])
         self.assertFalse(p.positions[0]['o'])
-        self.assertEqual(p.positions[0]['pts'], -1.2)
+        self.assertEqual(p.positions[0]['pts'], -1.1)
 
         # Make sure the points were added
         self.assertEqual(len(p.points), 2)
-        self.assertEqual(p.points[-1], -1.2)
+        self.assertEqual(p.points[-1], -1.1)
 
         # Check the counters
         self.assertEqual(p.successful_num, 0)
@@ -207,11 +207,11 @@ class PositionTestCase(unittest.TestCase):
         self.assertEqual(p.positions[0]['ct'], c[-1]['ct'])
         self.assertEqual(p.positions[0]['cp'], p.positions[0]['tpp'])
         self.assertTrue(p.positions[0]['o'])
-        self.assertEqual(p.positions[0]['pts'], 1)
+        self.assertEqual(p.positions[0]['pts'], 2.4)
 
         # Make sure the points were added
         self.assertEqual(len(p.points), 2)
-        self.assertEqual(p.points[-1], 1)
+        self.assertEqual(p.points[-1], 2.4)
 
 
         # Check the counters
@@ -254,11 +254,11 @@ class PositionTestCase(unittest.TestCase):
         self.assertEqual(p.positions[0]['ct'], c[-1]['ct'])
         self.assertEqual(p.positions[0]['cp'], p.positions[0]['slp'])
         self.assertFalse(p.positions[0]['o'])
-        self.assertEqual(p.positions[0]['pts'], -1.2)
+        self.assertEqual(p.positions[0]['pts'], -3.99)
 
         # Make sure the points were added
         self.assertEqual(len(p.points), 2)
-        self.assertEqual(p.points[-1], -1.2)
+        self.assertEqual(p.points[-1], -3.99)
 
         # Check the counters
         self.assertEqual(p.successful_num, 0)
@@ -321,8 +321,8 @@ class PositionTestCase(unittest.TestCase):
 
         # Validate the integrity of the performance
         perf = p.get_performance()
-        self.assertEqual(perf['points'], 0.6)
-        self.assertEqual(perf['points_hist'][-1], 0.6)
+        self.assertEqual(perf['points'], 0.5)
+        self.assertEqual(perf['points_hist'][-1], 0.5)
         self.assertEqual(len(perf['points_hist']), 5 + 1)
         self.assertEqual(len(perf['positions']), 5)
         self.assertEqual(perf['long_num'], 3)
@@ -389,15 +389,15 @@ class PositionTestCase(unittest.TestCase):
         p = Position(1, 1)
 
         current = p._update_points(True)
-        self.assertEqual(current, 1)
+        self.assertEqual(current, 0.9)
         self.assertEqual(len(p.points), 2)
 
         current = p._update_points(True)
-        self.assertEqual(current, 2)
+        self.assertEqual(current, 1.8)
         self.assertEqual(len(p.points), 3)
 
         current = p._update_points(False)
-        self.assertEqual(current, 0.8)
+        self.assertEqual(current, 0.7)
         self.assertEqual(len(p.points), 4)
 
         current = p._update_points(False)
@@ -405,20 +405,20 @@ class PositionTestCase(unittest.TestCase):
         self.assertEqual(len(p.points), 5)
 
         current = p._update_points(True)
-        self.assertEqual(current, 0.6)
+        self.assertEqual(current, 0.5)
         self.assertEqual(len(p.points), 6)
 
         current = p._update_points(True)
-        self.assertEqual(current, 1.6)
+        self.assertEqual(current, 1.4)
         self.assertEqual(len(p.points), 7)
 
         current = p._update_points(False)
-        self.assertEqual(current, 0.4)
+        self.assertEqual(current, 0.3)
         self.assertEqual(len(p.points), 8)
 
         # Retrieve the performance and make sure the points list matches
         perf = p.get_performance()
-        self.assertEqual(perf['points'], 0.4)
+        self.assertEqual(perf['points'], 0.3)
         self.assertEqual(len(perf['points_hist']), 8)
 
 
