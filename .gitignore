@@ -47,9 +47,10 @@ Thumbs.db
 *.wmv
 
 
-# CSV Files
+# Candlesticks CSV Files
 candlesticks/
-*.csv
+candlesticks.csv
+prediction_candlesticks.csv
 
 
 # Results Directory

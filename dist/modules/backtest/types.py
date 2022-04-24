@@ -70,11 +70,10 @@ class IBacktestPerformance(TypedDict):
 ## Backtest ##
 
 
-
-# Backtest Configuration
-# A backtest instance can be initialized with the following configuration. Different
-# configurations can be spread among multiple backtest instances.
-class IBacktestConfig(TypedDict):
+# Backtest Config File
+# The Backtest configuration that resides in the configuration file. This data is proccessed and 
+# turned into IBacktestConfig
+class IBacktestConfigFile(TypedDict):
     # Identification
     id: str
 
@@ -92,6 +91,15 @@ class IBacktestConfig(TypedDict):
     # The number of minutes the model will remain idle after closing a position
     idle_minutes_on_position_close: int
 
+    # The list of Model & MultiModel instances that will be put through the backtesting process
+    models: List[IModel]
+
+
+
+# Backtest Configuration
+# A backtest instance can be initialized with the following configuration. Different
+# configurations can be spread among multiple backtest instances.
+class IBacktestConfig(IBacktestConfigFile):
     # The list of Model & MultiModel instances that will be put through the backtesting process
     models: List[Union[SingleModel, MultiModel]]
 

@@ -1,9 +1,8 @@
-from json import load
 from modules.model import Model
-from modules.backtest import Backtest, IBacktestConfigFile
+from modules.backtest import Backtest
 
 
-# BACKTEST CONFIGURATION FILE
+# BACKTEST CONFIGURATION
 # A Backtest instance can perform a backtesting process on a series of models.
 #
 # Identification:
@@ -26,31 +25,81 @@ from modules.backtest import Backtest, IBacktestConfigFile
 #   idle_minutes_on_position_close: The number of minutes the model will not trade for after closing a position.
 # 
 # Models:
-#   models: The list of Model Configurations that will be put through the backtest. 
+#   models: The list of Model Instances that will be put through the backtest. 
 #
 # BACKTEST PROCESS
 # The Backtest Instance will run the test on the models in order and will output the results to the 
 # directory /backtest_results
 
 
-# BACKTEST CONFIGURATION
-# Opens and loads the configuration file that should be placed in the root of the project.
-config_file = open('Backtest_config.json')
-config: IBacktestConfigFile = load(config_file)
 
 
 # BACKTEST INSTANCE
 # The Instance of the Backtest that will be executed
 backtest: Backtest = Backtest({
-    "id": config['id'],
-    "description": config['description'],
-    "start": config['start'],
-    "end": config['end'],
-    "take_profit": config['take_profit'],
-    "stop_loss": config['stop_loss'],
-    "idle_minutes_on_position_close": config['idle_minutes_on_position_close'],
-    "models": [Model(m) for m in config['models']]
+    "id": "A539_LB300_L_S",
+    "description": "The purpose of this backtest is to find out how different long and short parameters can affect the performance.",
+    "start": '1/10/2021',
+    "end": '22/04/2022',
+    "take_profit": 1,
+    "stop_loss": 1.5,
+    "idle_minutes_on_position_close": 30,
+    "models": [
+
+        Model({
+            'id': 'A539_LB300_L01_S01',
+            "single_models": [{
+                'lookback': 300,
+                'arima': { 'predictions': 10, 'p': 5, 'd': 3, 'q': 9 },
+                'interpreter': { 'long': 0.1, 'short': 0.1 }
+            }]
+        }),
+
+
+        Model({
+            'id': 'A539_LB300_L05_S05',
+            "single_models": [{
+                'lookback': 300,
+                'arima': { 'predictions': 10, 'p': 5, 'd': 3, 'q': 9 },
+                'interpreter': { 'long': 0.5, 'short': 0.5 }
+            }]
+        }),
+
+
+        Model({
+            'id': 'A539_LB300_L1_S1',
+            "single_models": [{
+                'lookback': 300,
+                'arima': { 'predictions': 10, 'p': 5, 'd': 3, 'q': 9 },
+                'interpreter': { 'long': 1, 'short': 1 }
+            }]
+        }),
+
+
+        Model({
+            'id': 'A539_LB300_L3_S3',
+            "single_models": [{
+                'lookback': 300,
+                'arima': { 'predictions': 10, 'p': 5, 'd': 3, 'q': 9 },
+                'interpreter': { 'long': 3, 'short': 3 }
+            }]
+        }),
+
+
+        Model({
+            'id': 'A539_LB300_L5_S5',
+            "single_models": [{
+                'lookback': 300,
+                'arima': { 'predictions': 10, 'p': 5, 'd': 3, 'q': 9 },
+                'interpreter': { 'long': 5, 'short': 5 }
+            }]
+        }),
+    ]
 })
+
+
+
+
 
 
 # BACKTEST EXECUTION

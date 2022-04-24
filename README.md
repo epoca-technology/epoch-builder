@@ -42,6 +42,7 @@ prediction-backtesting
     │
     ├───run_backtest.py
     │
+    Backtest_config.json
     Backtest.sh
     UnitTests.sh
 ```
@@ -53,17 +54,16 @@ prediction-backtesting
 
 - Generate the **candlesticks.csv** and **prediction_candlesticks.csv** files through the **compose** program and place them inside of the **./candlesticks** directory.
 
-- Input the desired configuration values in **./dist/run_*.py** 
+- Set the permissions on the executables (This only needs to be done once):
 
+  `chmod u+x Backtest.sh && chmod u+x UnitTests.sh`
 
 
 
 #
 ## Backtests
 
-Set the permissions on the executables (This only needs to be done once):
-
-`chmod u+x Backtest.sh && chmod u+x UnitTests.sh`
+Input the desired configuration values in **Backtest_config.json**
 
 Run the Backtest by executing the following:
 
