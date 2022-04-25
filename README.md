@@ -40,10 +40,15 @@ prediction-backtesting
     │   ├──some_module_test.py
     │   └──some_other_module_test.py
     │
+    ├───run_arima_combinations.py
     ├───run_backtest.py
+    │
+    ArimaCombinations_config.json
+    ArimaCombinations.sh
     │
     Backtest_config.json
     Backtest.sh
+    │
     UnitTests.sh
 ```
 
@@ -56,14 +61,24 @@ prediction-backtesting
 
 - Set the permissions on the executables (This only needs to be done once):
 
-  `chmod u+x Backtest.sh && chmod u+x UnitTests.sh`
+  `chmod u+x ArimaCombinations.sh && chmod u+x Backtest.sh && chmod u+x UnitTests.sh`
 
+
+
+#
+## Arima Combinations
+
+The Arima Combinations script is a script that generates **Backtest_config** and places them in the **plutustester** directory. Before executing the script input the desired configuration values in **Backtest_config.json**.
+
+Run the generator by executing the following:
+
+`./ArimaCombinations`
 
 
 #
 ## Backtests
 
-Input the desired configuration values in **Backtest_config.json**
+Input the desired configuration values in **ArimaCombinations_config.json**
 
 Run the Backtest by executing the following:
 

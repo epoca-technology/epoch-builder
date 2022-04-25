@@ -33,12 +33,12 @@ test_y = concat([test_x.pop(x) for x in ['up', 'down']], axis=1)
 
 # Initialize the model
 model = Sequential([
-    LSTM(128, input_shape=(train_x.shape[1],1,), return_sequences=True),
-    LSTM(64, return_sequences=True),
-    LSTM(32, return_sequences=True),
+    LSTM(100, input_shape=(train_x.shape[1],1,), return_sequences=True),
+    LSTM(90, return_sequences=True),
+    LSTM(80, return_sequences=True),
     Dropout(0.25),
-    LSTM(16, return_sequences=True),  
-    LSTM(8, return_sequences=False),
+    LSTM(70, return_sequences=True),  
+    LSTM(60, return_sequences=False),
     Dense(2, activation='softmax')
 ])
 
@@ -50,12 +50,12 @@ model.compile(optimizer=adam_v2.Adam(learning_rate=0.001),
 
 # Train the model
 print("\n\nTRAINING:")
-es = EarlyStopping(monitor='val_categorical_accuracy', mode='max', min_delta=0.001, patience=5)
+es = EarlyStopping(monitor='val_categorical_accuracy', mode='max', min_delta=0.001, patience=3)
 history = model.fit(
     train_x,
     train_y,
     validation_split=0.2,
-    batch_size=32,
+    batch_size=64,
     epochs=100,
     callbacks=[es]
 )
@@ -76,7 +76,13 @@ print("Accuracy: ", accuracy)
 
 # Test predictions
 print("\n\nPREDICTING:")
-features = [2, 1, 0, 1, 2]
-preds = model.predict([features])
-print(features)
-print(preds)
+features = [
+    [2, 0, 2, 1, 2, 2, 0, 1, 2, 2],
+    [0, 1, 1, 1, 2, 0, 1, 2, 1, 0],
+    [2, 0, 0, 1, 2, 1, 0, 2, 1, 1],
+]
+preds = model.predict(features)
+for i in range(len(features)):
+    print (f"\nInput: {features[i]}")
+    print (f"Up: {preds[i][0]}%")
+    print (f"Down: {preds[i][1]}%")

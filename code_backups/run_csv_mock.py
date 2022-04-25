@@ -3,28 +3,14 @@ from pandas import DataFrame
 from random import random
 
 
-# Row Interface
-class IRow(TypedDict):
-    # Arima Features
-    # The columns values can be the following:
-    # 0: Neutral
-    # 1: Short
-    # 2: Long
-    arima01: int
-    arima02: int
-    arima03: int
-    arima04: int
-    arima05: int
-
-    # Labels
-    # Vales can be 1 or 0 based on the outcome
-    up: int
-    down: int
+# Init features and labels
+features: List[str] = ['arima01', 'arima02', 'arima03', 'arima04', 'arima05', 'arima06', 'arima07', 'arima08', 'arima09', 'arima10' ]
+labels: List[str] = ['up', 'down']
 
 
 
 # Helper Functions
-def _get_row(index: int) -> IRow:
+def _get_row(index: int) -> dict:
     if index % 2:
         return _get_random_row()
     elif index % 3:
@@ -34,6 +20,11 @@ def _get_row(index: int) -> IRow:
             'arima03': 2,
             'arima04': 1,
             'arima05': 2,
+            'arima06': 2,
+            'arima07': 0,
+            'arima08': 1,
+            'arima09': 2,
+            'arima10': 2,
             'up': 1,
             'down': 0,
         }
@@ -44,6 +35,11 @@ def _get_row(index: int) -> IRow:
             'arima03': 1,
             'arima04': 1,
             'arima05': 2,
+            'arima06': 0,
+            'arima07': 1,
+            'arima08': 2,
+            'arima09': 1,
+            'arima10': 0,
             'up': 0,
             'down': 1,
         }
@@ -51,17 +47,17 @@ def _get_row(index: int) -> IRow:
         return _get_random_row()
 
 
-def _get_random_row() -> IRow:
+def _get_random_row() -> dict:
+    # Init the row
+    row = {nm: _get_random_feature() for nm in features}
+
+    # Retrieve the label values and add them to the dict
     up, down = _get_random_labels()
-    return {
-        'arima01': _get_random_feature(),
-        'arima02': _get_random_feature(),
-        'arima03': _get_random_feature(),
-        'arima04': _get_random_feature(),
-        'arima05': _get_random_feature(),
-        'up': up,
-        'down': down,
-    }
+    row['up'] = up
+    row['down'] = down
+
+    # Finally, return the row
+    return row
 
 def _get_random_feature() -> int:
     random_val: float = random()
@@ -80,15 +76,15 @@ def _get_random_labels() -> Tuple[int, int]:
 
 
 
-
 # Initialize the DF
-df: DataFrame = DataFrame(data={'arima01': [], 'arima02': [], 'arima03': [], 'arima04': [], 'arima05': [], 'up': [], 'down': []})
+df: DataFrame = DataFrame(data={nm: [] for nm in features + labels})
+#df: DataFrame = DataFrame(data={'arima01':[],'arima02':[],'arima03':[],'arima04':[],'arima05':[],'arima06': [],'arima07': [],'arima08': [],'arima09': [],'arima10': [],'up': [], 'down': []})
 
 # Input the row count
 row_count: int = int(input("Enter the number of rows: "))
 
 # Build the random rows
-rows: List[IRow] = [_get_row(i) for i in range(row_count)]
+rows: List[dict] = [_get_row(i) for i in range(row_count)]
 
 # Append them to the DF
 df = df.append(rows)
@@ -97,4 +93,4 @@ df = df.append(rows)
 df = df.astype(int)
 
 # Create the CSV File
-df.to_csv('csv_mock.csv', index=False)
+df.to_csv('decision_data/decision_data_dump.csv', index=False)

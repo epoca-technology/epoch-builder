@@ -1,0 +1,11 @@
+{
+    "id": "APDQ",
+    "description": "The purpose of this backtest is to find out how different p, d, q combinations can output better results.",
+    "start": "1/10/2021",
+    "end": "22/04/2022",
+    "take_profit": 1,
+    "stop_loss": 1.5,
+    "idle_minutes_on_position_close": 30,
+    "focus_number": 3,
+    "batch_size": 30
+}

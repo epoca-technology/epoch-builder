@@ -1,0 +1,219 @@
+{
+    "id": "APDQ_3",
+    "description": "The purpose of this backtest is to find out how different p, d, q combinations can brin better results.",
+    "start": "1/10/2021",
+    "end": "22/04/2022",
+    "take_profit": 1,
+    "stop_loss": 1.5,
+    "idle_minutes_on_position_close": 30,
+    "models": [
+        {
+            "id": "A101",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 1, "d": 0, "q": 1 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A110",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 1, "d": 1, "q": 0 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A111",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 1, "d": 1, "q": 1 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A121",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 1, "d": 2, "q": 1 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A112",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 1, "d": 1, "q": 2 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A201",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 2, "d": 0, "q": 1 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A202",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 2, "d": 0, "q": 2 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A122",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 1, "d": 2, "q": 2 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A102",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 1, "d": 0, "q": 2 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A211",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 2, "d": 1, "q": 1 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A221",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 2, "d": 2, "q": 1 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A222",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 2, "d": 2, "q": 2 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A312",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 3, "d": 1, "q": 2 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A213",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 2, "d": 1, "q": 3 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A302",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 3, "d": 0, "q": 2 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A303",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 3, "d": 0, "q": 3 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A203",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 2, "d": 0, "q": 3 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A313",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 3, "d": 1, "q": 3 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A332",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 3, "d": 3, "q": 2 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A333",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 3, "d": 3, "q": 3 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A301",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 3, "d": 0, "q": 1 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A113",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 1, "d": 1, "q": 3 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A223",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 2, "d": 2, "q": 3 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A331",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 3, "d": 3, "q": 1 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A232",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 2, "d": 3, "q": 2 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        },
+        {
+            "id": "A233",
+            "single_models": [{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": 2, "d": 3, "q": 3 },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
+        }
+    ]
+}

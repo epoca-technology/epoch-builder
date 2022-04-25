@@ -52,6 +52,9 @@ candlesticks/
 candlesticks.csv
 prediction_candlesticks.csv
 
+# Plutus Tester Directory
+plutus_tester/
 
 # Results Directory
 backtest_results/
+
