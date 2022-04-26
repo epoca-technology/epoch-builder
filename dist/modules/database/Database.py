@@ -6,12 +6,13 @@ from modules.model import IPrediction
 
 
 # If the Database's directory doesn't exist, create it
-if not os.path.exists('./db'):
-    os.makedirs('./db')
+DB_PATH: str = 'db'
+if not os.path.exists(DB_PATH):
+    os.makedirs(DB_PATH)
 
 
 ## Databases Init ##
-ARIMA_PREDICTIONS_DB = SqliteDict("db/db.sqlite", tablename="arima_predictions", autocommit=True, outer_stack=False)
+ARIMA_PREDICTIONS_DB: SqliteDict = SqliteDict(f"{DB_PATH}/db.sqlite", tablename="arima_predictions", autocommit=True, outer_stack=False)
 
 
 

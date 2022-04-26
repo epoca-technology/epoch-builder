@@ -29,6 +29,14 @@ prediction-backtesting
     ├───candlesticks.csv
     ├───prediction_candlesticks.csv
     │
+    db/
+    ├───db.sqlite
+    │
+    db_merge/
+    ├───db1.sqlite
+    ├───db2.sqlite
+    ├───result.sqlite
+    │
     dist/
     ├───modules/
     │   ├──some_module/
@@ -42,12 +50,15 @@ prediction-backtesting
     │
     ├───run_arima_combinations.py
     ├───run_backtest.py
+    ├───run_db_merge.py
     │
     ArimaCombinations_config.json
     ArimaCombinations.sh
     │
     Backtest_config.json
     Backtest.sh
+    │
+    DBMerge.sh
     │
     UnitTests.sh
 ```
@@ -61,7 +72,7 @@ prediction-backtesting
 
 - Set the permissions on the executables (This only needs to be done once):
 
-  `chmod u+x ArimaCombinations.sh && chmod u+x Backtest.sh && chmod u+x UnitTests.sh`
+  `chmod u+x ArimaCombinations.sh Backtest.sh DBMerge.sh UnitTests.sh`
 
 
 
@@ -84,7 +95,21 @@ Run the Backtest by executing the following:
 
 `./Backtest.sh`
 
-Once the execution completes, the results will be placed under the **backtest_results** directory in the following format: **{BACKTEST_ID}_{TIMESTAMP}.json**
+Once the execution completes, the results will be placed under the **./backtest_results** directory in the following format: **{BACKTEST_ID}_{TIMESTAMP}.json**
+
+
+
+#
+## DB Merge
+
+Place the .sqlite files in the **./db_merge** directory. 
+
+Run the Merge by executing the following:
+
+`./DBMerge.sh`
+
+Once the execution completes, the merged database file will be placed under the **./db_merge** directory with the following name: **result.sqlite**
+
 
 
 #

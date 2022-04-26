@@ -60,3 +60,4 @@ backtest_results/
 
 # Database
 db/
+db_merge/
