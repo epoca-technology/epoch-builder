@@ -4,3 +4,4 @@ pmdarima==1.8.5
 ta==0.9.0
 tqdm==4.64.0
 tensorflow==2.8.0
+sqlitedict==2.0.0

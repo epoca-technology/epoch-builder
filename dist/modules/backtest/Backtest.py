@@ -141,8 +141,8 @@ class Backtest:
                 # Check if it is the last candlestick
                 is_last_candlestick: bool = candlestick_index == Candlestick.DF.index[-1]
 
-                # Initialize the current prediction close time
-                current_prediction_ct: int = Candlestick.get_current_prediction_ct(candlestick['ot'])
+                # Retrieve the current prediction range
+                _, last_ct = Candlestick.get_current_prediction_range(model.lookback, candlestick['ot'])
 
                 # Active Position
                 # If there is an active position, check it against the new candlestick and
@@ -165,16 +165,16 @@ class Backtest:
                 elif (position.active == None) \
                     and (candlestick['ot'] > idle_until) \
                         and (not is_last_candlestick) \
-                            and (last_prediction_ct != current_prediction_ct):
+                            and (last_prediction_ct != last_ct):
                     # Perform a prediction
-                    pred: IPrediction = model.predict(candlestick['ot'])
+                    pred: IPrediction = model.predict(candlestick['ot'], enable_cache=False)
 
                     # If the result isn't neutral, open a position
                     if pred['r'] != 0:
                         position.open_position(candlestick, pred)
 
                     # Update the last prediction ct
-                    last_prediction_ct = current_prediction_ct
+                    last_prediction_ct = last_ct
 
                 # Update the progress bar
                 progress_bar.update()

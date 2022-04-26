@@ -58,3 +58,5 @@ plutus_tester/
 # Results Directory
 backtest_results/
 
+# Database
+db/

@@ -2,6 +2,7 @@ from typing import List, Union
 from numpy import around
 from pmdarima import ARIMA
 from modules.candlestick import Candlestick
+from modules.database import save_prediction, get_prediction
 from modules.model import IModel, Interpreter, IPrediction, IPredictionMetaData, IArimaConfig
 
 
@@ -73,12 +74,54 @@ class SingleModel:
 
 
 
+    def predict(self, current_timestamp: int, enable_cache: bool = False) -> IPrediction:
+        """In order to optimize performance, if cache is enabled, it will check the db
+        before performing an actual prediction. If the prediction is not found, it will
+        perform it and store it afterwards. If cache is not enabled, it will just 
+        perform a traditional prediction without storing the results.
+
+        Args:
+            current_timestamp: int
+                The current time in milliseconds.
+            enable_cache: bool
+                If true, it will check the db before calling the actual predict method.
+        
+        Returns:
+            IPrediction
+        """
+        # Check if the cache is enabled
+        if enable_cache:
+            # Retrieve the candlestick range
+            first_ot, last_ct = Candlestick.get_current_prediction_range(self.lookback, current_timestamp)
+
+            # Retrieve it from the database
+            pred: Union[IPrediction, None] = get_prediction(self.id, first_ot, last_ct)
+
+            # Check if the prediction does not exist
+            if pred == None:
+                # Generate it
+                pred = self._call_predict(current_timestamp)
+
+                # Store it in the database
+                save_prediction(self.id, first_ot, last_ct, pred)
+
+                # Finally, return it
+                return pred
+
+            # Otherwise, return it
+            else:
+                return pred
+
+        # Otherwise, handle a traditional prediction
+        else:
+            return self._call_predict(current_timestamp)
 
 
 
 
 
-    def predict(self, current_timestamp: int) -> IPrediction:
+
+    def _call_predict(self, current_timestamp: int) -> IPrediction:
         """Given the current time, it will perform a prediction and return it as 
         well as its metadata.
 

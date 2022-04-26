@@ -6,4 +6,4 @@ LOOKBACK = 300
 Candlestick.init(LOOKBACK)
 
 # Notify the user
-print("PREDICTION BACKTESTING UNIT TESTS:\n")
+print("PREDICTION BACKTESTING UNIT TESTS\n")

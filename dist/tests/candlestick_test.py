@@ -1,4 +1,5 @@
 import unittest
+from modules.utils import Utils
 from modules.candlestick import Candlestick
 
 
@@ -56,6 +57,24 @@ class CandlestickTestCase(unittest.TestCase):
         self.assertIsInstance(rsi, float)
         self.assertIsInstance(short_ema, float)
         self.assertIsInstance(long_ema, float)
+
+
+
+
+    # Can retrieve the range of a prediction (first_ot & last_ct)
+    def testGetCurrentPredictionRange(self):
+        # Initialize a default candlestick
+        default_df = Candlestick.DF.iloc[2998]
+
+        # Retrieve the current range
+        first_ot, last_ct = Candlestick.get_current_prediction_range(LOOKBACK, default_df['ot'])
+
+        # Make sure both values are lower than the current time
+        self.assertLess(first_ot, default_df['ot'])
+        self.assertLess(last_ct, default_df['ot'])
+        #print("Current: ", Utils.from_milliseconds_to_date_string(default_df['ot']))
+        #print("Last CT: ", Utils.from_milliseconds_to_date_string(last_ct))
+        #print("First OT: ", Utils.from_milliseconds_to_date_string(first_ot))
 
 
 

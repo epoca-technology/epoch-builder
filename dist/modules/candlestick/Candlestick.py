@@ -242,7 +242,7 @@ class Candlestick:
 
         # Subset the Prediction DF to only include the rows that will be used and reset indexes
         df: DataFrame = Candlestick.PREDICTION_DF[Candlestick.PREDICTION_DF['ct'] <= current_timestamp].iloc[-lookback:]
-        df.reset_index(drop=True, inplace=True)
+        #df.reset_index(drop=True, inplace=True)
 
         # Make sure the number of rows in the df matches the lookback value
         if df.shape[0] != lookback:
@@ -332,15 +332,23 @@ class Candlestick:
 
 
 
-    def get_current_prediction_ct(current_time: int) -> int:
-        """Returns the close time of the last prediction candlestick to be used
-        by the model according to the current 1m candlestick.
+
+    @staticmethod
+    def get_current_prediction_range(lookback: int, current_time: int) -> Tuple[int, int]:
+        """Based on the model's lookback and the current time, it will retrieve the open time
+        and the close time of the first and the last candlestick used to generate the prediction.
 
         Args:
+            lookback: int
+                The number of candlesticks the model looks into the past to make a prediction.
             current_time: int
                 The ot of the current 1m candlestick.
 
         Returns:
-            int
+            Tuple[int, int] (first_ot, last_ct)
         """
-        return Candlestick.PREDICTION_DF[Candlestick.PREDICTION_DF['ct'] <= current_time].iloc[-1]['ct']
+        # Subset the DataFrame
+        df: DataFrame = Candlestick.PREDICTION_DF[Candlestick.PREDICTION_DF['ct'] <= current_time].iloc[-lookback:]
+
+        # Return the first ot and the last ct
+        return int(df.iloc[0]['ot']), int(df.iloc[-1]['ct'])
