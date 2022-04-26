@@ -78,7 +78,6 @@ def _get_random_labels() -> Tuple[int, int]:
 
 # Initialize the DF
 df: DataFrame = DataFrame(data={nm: [] for nm in features + labels})
-#df: DataFrame = DataFrame(data={'arima01':[],'arima02':[],'arima03':[],'arima04':[],'arima05':[],'arima06': [],'arima07': [],'arima08': [],'arima09': [],'arima10': [],'up': [], 'down': []})
 
 # Input the row count
 row_count: int = int(input("Enter the number of rows: "))

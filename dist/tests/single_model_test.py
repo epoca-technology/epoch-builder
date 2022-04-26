@@ -1,6 +1,8 @@
 import unittest
+from typing import Union
 from copy import deepcopy
 from modules.candlestick import Candlestick
+from modules.database import get_prediction, delete_prediction
 from modules.model import SingleModel, IModel, IPrediction
 
 
@@ -233,6 +235,52 @@ class SingleModelTestCase(unittest.TestCase):
         self.assertIsInstance(pred['md'][0]['sema'], float)
         self.assertIsInstance(pred['md'][0]['lema'], float)
 
+
+
+
+    # Can predict without storing data in cache
+    def testPredictWithoutCache(self):
+        # Init the config
+        config = deepcopy(BASIC_CONFIG)
+
+        # Initialize the model
+        m = SingleModel(config)
+
+        # Perform a prediction
+        pred: IPrediction = m.predict(CURRENT_TIME, enable_cache=False)
+
+        # Retrieve the prediction range
+        first_ot, last_ct = Candlestick.get_current_prediction_range(config['single_models'][0]['lookback'], CURRENT_TIME)
+
+        # Make sure the prediction was not stored
+        cached_pred: Union[IPrediction, None] = get_prediction(config['id'], first_ot, last_ct)
+        self.assertEqual(cached_pred, None)
+
+
+
+    # Can predict storing data in cache
+    def testPredictWithCache(self):
+        # Init the config
+        config = deepcopy(BASIC_CONFIG)
+
+        # Initialize the model
+        m = SingleModel(config)
+
+        # Perform a prediction
+        pred: IPrediction = m.predict(CURRENT_TIME, enable_cache=True)
+
+        # Retrieve the prediction range
+        first_ot, last_ct = Candlestick.get_current_prediction_range(config['single_models'][0]['lookback'], CURRENT_TIME)
+
+        # Make sure the prediction was stored
+        cached_pred: Union[IPrediction, None] = get_prediction(config['id'], first_ot, last_ct)
+        self.assertFalse(cached_pred == None)
+        self.assertDictEqual(pred, cached_pred)
+
+        # Clean up the prediction
+        delete_prediction(config['id'], first_ot, last_ct)
+        cached_pred = get_prediction(config['id'], first_ot, last_ct)
+        self.assertTrue(cached_pred == None)
 
 
 

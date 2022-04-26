@@ -6,8 +6,8 @@ from modules.model import IPrediction
 
 
 # If the Database's directory doesn't exist, create it
-if not os.path.exists('./database'):
-    os.makedirs('./database')
+if not os.path.exists('./db'):
+    os.makedirs('./db')
 
 
 ## Databases Init ##
@@ -31,9 +31,9 @@ def save_prediction(model_id: str, first_ot: int, last_ct: int, pred: IPredictio
     Args:
         model_id: str
             The ID of the Arima Model. F.e: A601
-        first_ot: Union[int, float]
+        first_ot: int
             The open timestamp of the first prediction candlestick.
-        last_ct: Union[int, float]
+        last_ct: int
             The close timestamp of the last prediction candlestick.
         pred: IPrediction
             The prediction to save in the db.
@@ -43,16 +43,16 @@ def save_prediction(model_id: str, first_ot: int, last_ct: int, pred: IPredictio
 
 
 
-def get_prediction(model_id: str, first_ot: Union[int, float], last_ct: Union[int, float]) -> Union[IPrediction, None]:
+def get_prediction(model_id: str, first_ot: int, last_ct: int) -> Union[IPrediction, None]:
     """Retrieves an arima prediction if it currently exists, otherwise returns None. If a prediction is found,
     the 't' property will be replaced with the provided current_timestamp.
 
     Args:
         model_id: str
             The ID of the Arima Model. F.e: A601
-        first_ot: Union[int, float]
+        first_ot: int
             The open timestamp of the first prediction candlestick.
-        last_ct: Union[int, float]
+        last_ct: int
             The close timestamp of the last prediction candlestick.
 
     Returns:
@@ -64,15 +64,15 @@ def get_prediction(model_id: str, first_ot: Union[int, float], last_ct: Union[in
 
 
 
-def delete_prediction(model_id: str, first_ot: Union[int, float], last_ct: Union[int, float]) -> None:
+def delete_prediction(model_id: str, first_ot: int, last_ct: int) -> None:
     """Deletes an Arima Prediction from the Database.
 
     Args:
         model_id: str
             The ID of the Arima Model. F.e: A601
-        first_ot: Union[int, float]
+        first_ot: int
             The open timestamp of the first prediction candlestick.
-        last_ct: Union[int, float]
+        last_ct: int
             The close timestamp of the last prediction candlestick.
 
     Returns:
@@ -88,15 +88,15 @@ def delete_prediction(model_id: str, first_ot: Union[int, float], last_ct: Union
 
 
 
-def _get_prediction_key(model_id: str, first_ot: Union[int, float], last_ct: Union[int, float]) -> str:
+def _get_prediction_key(model_id: str, first_ot: int, last_ct: int) -> str:
     """Returns the key that should be used to save or retrieve the prediction.
 
     Args:
         model_id: str
             The ID of the Arima Model. F.e: A601
-        first_ot: Union[int, float]
+        first_ot: int
             The open timestamp of the first prediction candlestick.
-        last_ct: Union[int, float]
+        last_ct: int
             The close timestamp of the last prediction candlestick.
     
     Returns:
