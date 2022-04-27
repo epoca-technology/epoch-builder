@@ -150,9 +150,8 @@ class ISingleModelConfig(TypedDict):
 # Model
 # This is final state of a Model or a MultiModel after having been initialized.
 # A Model can be any of the following:
-# SingleModel(1): Determines results based on the prediction of a single model.
-# MultiModel(n): Determines results based on the predictions of multiple single models.
-# StrategyModel(0): Determines results based on the other models.
+# SingleModel(1, 0): Determines results based on the prediction of a single model.
+# MultiModel(n, 0): Determines results based on the predictions of multiple single models.
 class IModel(TypedDict):
     id: str                                 # The ID of the model.
     consensus: Union[int, None]             # Only present in MultiModels

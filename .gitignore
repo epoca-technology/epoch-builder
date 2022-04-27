@@ -46,14 +46,10 @@ Thumbs.db
 *.mov
 *.wmv
 
-
 # Candlesticks CSV Files
 candlesticks/
 candlesticks.csv
 prediction_candlesticks.csv
-
-# Plutus Tester Directory
-plutus_tester/
 
 # Results Directory
 backtest_results/
@@ -61,3 +57,9 @@ backtest_results/
 # Database
 db/
 db_merge/
+
+# Plutus Tester Backtests
+plutus_tester_backtests/
+
+# Training Data
+training_data/

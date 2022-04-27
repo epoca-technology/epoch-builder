@@ -52,6 +52,16 @@ prediction-backtesting
     ├───run_backtest.py
     ├───run_db_merge.py
     │
+    plutus_tester_backtests/
+    ├───COMBINATION_ID/
+    │   ├──COMBINATION_ID_1.json
+    │   └──COMBINATION_ID_2.json
+    │
+    training_data/
+    ├───@TODO/
+    │   ├──@TODO.json
+    │   └──@TODO.json
+    │
     ArimaCombinations_config.json
     ArimaCombinations.sh
     │
@@ -59,6 +69,9 @@ prediction-backtesting
     Backtest.sh
     │
     DBMerge.sh
+    │
+    TrainingData_config.json
+    TrainingData.sh
     │
     UnitTests.sh
 ```
@@ -72,14 +85,14 @@ prediction-backtesting
 
 - Set the permissions on the executables (This only needs to be done once):
 
-  `chmod u+x ArimaCombinations.sh Backtest.sh DBMerge.sh UnitTests.sh`
+  `chmod u+x ArimaCombinations.sh Backtest.sh DBMerge.sh TrainingData.sh UnitTests.sh`
 
 
 
 #
 ## Arima Combinations
 
-The Arima Combinations script is a script that generates **Backtest_config** and places them in the **plutustester** directory. Before executing the script input the desired configuration values in **Backtest_config.json**.
+Arima Combinations is a script that generates **Backtest_config** files and places them in the **plutus_tester_backtests** directory. Before executing the script, input the desired configuration values in **ArimaCombinations_config.json**.
 
 Run the generator by executing the following:
 
@@ -99,12 +112,19 @@ Once the execution completes, the results will be placed under the **./backtest_
 
 
 
+
+#
+## Training Data
+
+@TODO 
+
+
+
+
 #
 ## DB Merge
 
-Place the .sqlite files in the **./db_merge** directory. 
-
-Run the Merge by executing the following:
+Place the .sqlite files in the **./db_merge** directory and run the following:
 
 `./DBMerge.sh`
 

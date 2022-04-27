@@ -1,10 +1,10 @@
 import os
-from typing import List
+from typing import Union
 from json import dumps
 from tqdm import tqdm
 from modules.candlestick import Candlestick
 from modules.utils import Utils
-from modules.model import IModel, IPrediction
+from modules.model import IModel, Model, IPrediction
 from modules.backtest import IBacktestConfig, Position, IBacktestPerformance
 
 
@@ -76,7 +76,7 @@ class Backtest:
         self.description = config['description']
 
         # Initialize the models to be tested
-        self.models = config['models']
+        self.models = [Model(m) for m in config['models']]
         self.results = []
 
         # Initialize the candlesticks based on the max lookback and the provided start and end dates

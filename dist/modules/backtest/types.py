@@ -70,10 +70,12 @@ class IBacktestPerformance(TypedDict):
 ## Backtest ##
 
 
-# Backtest Config File
-# The Backtest configuration that resides in the configuration file. This data is proccessed and 
-# turned into IBacktestConfig
-class IBacktestConfigFile(TypedDict):
+
+
+# Backtest Configuration
+# A backtest instance can be initialized with the following configuration. Different
+# configurations can be spread among multiple backtest instances.
+class IBacktestConfig(TypedDict):
     # Identification
     id: str
 
@@ -96,18 +98,9 @@ class IBacktestConfigFile(TypedDict):
 
 
 
-# Backtest Configuration
-# A backtest instance can be initialized with the following configuration. Different
-# configurations can be spread among multiple backtest instances.
-class IBacktestConfig(IBacktestConfigFile):
-    # The list of Model & MultiModel instances that will be put through the backtesting process
-    models: List[Union[SingleModel, MultiModel]]
-
-
-
 
 # Backtest
-# The backtest configuration which is inserted into each of the Model Backtest Results
+# The backtest configuration summary that is inserted into each of the Model Backtest Results
 class IBacktest(TypedDict):
     id: str
     description: str
