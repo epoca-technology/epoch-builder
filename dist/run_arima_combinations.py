@@ -8,7 +8,7 @@ from modules.arima_combinations import ArimaCombinations, IArimaCombinationsConf
 # CONFIGURATION
 # Opens and loads the configuration file that should be placed in the root of the project.
 print("ARIMA COMBINATIONS\n")
-config_file = open('ArimaCombinations_config.json')
+config_file = open('config/ArimaCombinations.json')
 config: IArimaCombinationsConfig = load(config_file)
 
 

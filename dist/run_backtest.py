@@ -34,7 +34,7 @@ from modules.backtest import Backtest, IBacktestConfig
 
 # BACKTEST CONFIGURATION
 # Opens and loads the configuration file that should be placed in the root of the project.
-config_file = open('Backtest_config.json')
+config_file = open('config/Backtest.json')
 config: IBacktestConfig = load(config_file)
 
 
@@ -45,7 +45,7 @@ backtest: Backtest = Backtest(config)
 
 # BACKTEST EXECUTION
 # Runs Backtests for each model, 1 by 1 as well as displaying the progress per instance. 
-# Results as saved as the instances complete. If the test is interrupted before
+# Results as saved when the Backtest Instances completes. If the test is interrupted before
 # completion, results will not be saved.
 print("PREDICTION BACKTESTING RUNNING")
 print(f"\n{backtest.id}:\n")

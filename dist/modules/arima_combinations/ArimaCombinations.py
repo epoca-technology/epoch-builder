@@ -1,8 +1,9 @@
-import os
+from os import makedirs
+from os.path import exists
 from typing import List, Tuple
 from itertools import product
 from json import dumps
-from modules.backtest import IBacktestConfigFile
+from modules.backtest import IBacktestConfig
 from modules.model import IModel
 from modules.arima_combinations import IArimaCombinationsConfig, IArimaCombination
 
@@ -41,7 +42,7 @@ class ArimaCombinations:
     """
     
     # Directory where the Backtest configuration files will be placed
-    OUTPUT_PATH: str = './plutus_tester_backtests'
+    OUTPUT_PATH: str = './backtest_configurations'
 
 
 
@@ -209,11 +210,11 @@ class ArimaCombinations:
 
 
 
-    def _save_file(self, backtest_file: IBacktestConfigFile):
+    def _save_file(self, backtest_file: IBacktestConfig):
         """Saves the backtest file into the output directory.
 
         Args:
-            backtest_file: IBacktestConfigFile
+            backtest_file: IBacktestConfig
                 The file to be saved in the output directory.
 
         Raises:
@@ -221,19 +222,19 @@ class ArimaCombinations:
                 If the backtest file already exists.
         """
         # If the results directory doesn't exist, create it
-        if not os.path.exists(ArimaCombinations.OUTPUT_PATH):
-            os.makedirs(ArimaCombinations.OUTPUT_PATH)
+        if not exists(ArimaCombinations.OUTPUT_PATH):
+            makedirs(ArimaCombinations.OUTPUT_PATH)
 
         # Initialize the backtest directory and the file
         backtest_dir_path: str = f"{ArimaCombinations.OUTPUT_PATH}/{self.base_id}_{self.focus_number}"
         backtest_file_path: str = f"{backtest_dir_path}/{backtest_file['id']}.json"
 
         # If the backtest directory does not exist, create it
-        if not os.path.exists(backtest_dir_path):
-            os.makedirs(backtest_dir_path)
+        if not exists(backtest_dir_path):
+            makedirs(backtest_dir_path)
 
         # If the backtest file already exists, raise an error
-        if os.path.exists(backtest_file_path):
+        if exists(backtest_file_path):
             raise ValueError(f"The file {backtest_file_path} already exists.")
 
         # Write the results on a JSON File

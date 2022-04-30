@@ -44,6 +44,9 @@ class SingleModel:
         # Initialize the Interpreter Instance
         self.interpreter = Interpreter(config['single_models'][0]['interpreter'])
 
+        # Validate the integrity of the model
+        self._validate_integrity()
+
 
 
 
@@ -261,3 +264,33 @@ class SingleModel:
                 "interpreter": self.interpreter.get_interpreter(),
             }]
         }
+
+
+
+
+    
+
+
+    def _validate_integrity(self) -> None:
+        """If the ID follows the Apdq guidelines, it will make sure that its
+        configuration matches the arima configuration.
+
+        Raises:
+            ValueError:
+                If there is a missmatch between the config in the ID and the actual
+                Arima configuration.
+        """
+        # Split the ID into chunks
+        chunks: List[str] = self.id.split('A')
+
+        # Check if the second chunk is pdq
+        if len(chunks) == 2 and len(chunks[1]) == 3:
+            # Validate p
+            if int(chunks[1][0]) != self.arima['p']:
+                raise ValueError(f"Arima Configuration Missmatch for p. Received {chunks[1][0]} and {self.arima['p']}")
+            # Validate d
+            if int(chunks[1][1]) != self.arima['d']:
+                raise ValueError(f"Arima Configuration Missmatch for d. Received {chunks[1][1]} and {self.arima['d']}")
+            # Validate q
+            if int(chunks[1][2]) != self.arima['q']:
+                raise ValueError(f"Arima Configuration Missmatch for q. Received {chunks[1][2]} and {self.arima['q']}")

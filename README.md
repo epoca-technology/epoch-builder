@@ -21,6 +21,11 @@ The dependencies are located in the **requirements.txt** file and can be install
 ```
 prediction-backtesting
     │
+    backtest_configurations/
+    ├───COMBINATION_ID/
+    │   ├──COMBINATION_ID_1.json
+    │   └──COMBINATION_ID_2.json
+    │
     backtest_results/
     ├───BACKTEST_01_1649788629072.json
     ├───BACKTEST_02_1650551357902.json
@@ -28,6 +33,11 @@ prediction-backtesting
     candlesticks/
     ├───candlesticks.csv
     ├───prediction_candlesticks.csv
+    │
+    config/
+    ├───ArimaCombinations.json
+    ├───Backtest.json
+    ├───TrainingData.json
     │
     db/
     ├───db.sqlite
@@ -51,26 +61,22 @@ prediction-backtesting
     ├───run_arima_combinations.py
     ├───run_backtest.py
     ├───run_db_merge.py
-    │
-    plutus_tester_backtests/
-    ├───COMBINATION_ID/
-    │   ├──COMBINATION_ID_1.json
-    │   └──COMBINATION_ID_2.json
+    ├───run_training_data.py
     │
     training_data/
-    ├───@TODO/
-    │   ├──@TODO.json
-    │   └──@TODO.json
+    ├───1649788629072/ <- Generated Data
+    │   ├──data.csv
+    │   └──receipt.json
     │
-    ArimaCombinations_config.json
+    ├───data.csv       <- Used for training a model
+    ├───receipt.json   <- Used to validate the data & the model
+    │
     ArimaCombinations.sh
     │
-    Backtest_config.json
     Backtest.sh
     │
     DBMerge.sh
     │
-    TrainingData_config.json
     TrainingData.sh
     │
     UnitTests.sh
@@ -92,7 +98,7 @@ prediction-backtesting
 #
 ## Arima Combinations
 
-Arima Combinations is a script that generates **Backtest_config** files and places them in the **plutus_tester_backtests** directory. Before executing the script, input the desired configuration values in **ArimaCombinations_config.json**.
+Arima Combinations is a script that generates **Backtest Configuration Files** and places them in the **backtest_configurations** directory. Before executing the script, input the desired configuration values in **config/ArimaCombinations.json**.
 
 Run the generator by executing the following:
 
@@ -102,9 +108,7 @@ Run the generator by executing the following:
 #
 ## Backtests
 
-Input the desired configuration values in **ArimaCombinations_config.json**
-
-Run the Backtest by executing the following:
+Input the desired configuration values in **config/Backtest.json** and run:
 
 `./Backtest.sh`
 
@@ -116,7 +120,11 @@ Once the execution completes, the results will be placed under the **./backtest_
 #
 ## Training Data
 
-@TODO 
+Input the desired configuration values in **config/TrainingData.json** and run:
+
+`./TrainingData`
+
+Once the execution completes, the files **data.csv** and **receipt.json** will be placed under the **training_data/{TIMESTAMP}** directory.
 
 
 

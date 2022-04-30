@@ -51,15 +51,15 @@ candlesticks/
 candlesticks.csv
 prediction_candlesticks.csv
 
-# Results Directory
+# Backtest Results Directory
 backtest_results/
+
+# Backtest Configurations
+backtest_configurations/
 
 # Database
 db/
 db_merge/
-
-# Plutus Tester Backtests
-plutus_tester_backtests/
 
 # Training Data
 training_data/

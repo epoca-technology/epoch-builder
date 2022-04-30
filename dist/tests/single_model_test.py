@@ -285,6 +285,36 @@ class SingleModelTestCase(unittest.TestCase):
 
 
 
+    # Can validate the integrity of a model when it follows the Apdq guideline
+    def testValidateIntegrity(self):
+        # Can initialize a valid model
+        SingleModel({
+            'id': 'A314',
+            'single_models': [{
+                'lookback': 150,
+                'arima': { 'predictions': 10, 'p': 3, 'd': 1, 'q': 4 },
+                'interpreter': {
+                    'long': 0.5, 
+                    'short': 0.5,
+                }
+            }]
+        })
+
+        # Cannot initialize a model with an invalid integrity
+        with self.assertRaises(ValueError):
+            SingleModel({
+                'id': 'A314',
+                'single_models': [{
+                    'lookback': 150,
+                    'arima': { 'predictions': 10, 'p': 3, 'd': 1, 'q': 6 },
+                    'interpreter': {
+                        'long': 0.5, 
+                        'short': 0.5,
+                    }
+                }]
+            })
+
+
 
 
 # Test Execution

@@ -1,4 +1,5 @@
-import os
+from os import makedirs
+from os.path import exists
 from typing import Union
 from json import dumps
 from tqdm import tqdm
@@ -140,7 +141,7 @@ class Backtest:
                 # If there is an active position, check it against the new candlestick and
                 # enable idling if it was closed no matter the outcome
                 if position.active != None:
-                    # Check if the new candlestick
+                    # Check the position with the new candlestick
                     closed_position: bool = position.check_position(candlestick)
 
                     # Enable idling if a position has been closed
@@ -231,8 +232,8 @@ class Backtest:
         """Saves the backtest results into the system's directory.
         """
         # If the results directory doesn't exist, create it
-        if not os.path.exists(Backtest.RESULTS_PATH):
-            os.makedirs(Backtest.RESULTS_PATH)
+        if not exists(Backtest.RESULTS_PATH):
+            makedirs(Backtest.RESULTS_PATH)
 
         # Write the results on a JSON File
         with open(f"{Backtest.RESULTS_PATH}/{self._get_result_file_name()}", "w") as outfile:
