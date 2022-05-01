@@ -1,12 +1,12 @@
 from os import makedirs
 from os.path import exists
-from typing import Union
+from typing import List, Union
 from json import dumps
 from tqdm import tqdm
 from modules.candlestick import Candlestick
 from modules.utils import Utils
-from modules.model import IModel, Model, IPrediction
-from modules.backtest import IBacktestConfig, Position, IBacktestPerformance
+from modules.model import IModel, Model, IPrediction, SingleModel, MultiModel
+from modules.backtest import IBacktestConfig, Position, IBacktestPerformance, IBacktestResult
 
 
 
@@ -46,7 +46,7 @@ class Backtest:
         Models:
             models: List[Model, MultiModel]
                 The list of models that will be backtested
-            results: List[IModelBacktestResult]
+            results: List[IBacktestResult]
                 The list of results by model. This list will be sorted by points prior to outputting it
                 to a json file.
 
@@ -73,26 +73,26 @@ class Backtest:
                 The configuration that will be used during the backtesting process
         """
         # ID & Description
-        self.id = config['id']
-        self.description = config['description']
+        self.id: str = config['id']
+        self.description: str = config['description']
 
         # Initialize the models to be tested
-        self.models = [Model(m) for m in config['models']]
-        self.results = []
+        self.models: List[Union[SingleModel, MultiModel]] = [Model(m) for m in config['models']]
+        self.results: List[IBacktestResult] = []
 
         # Initialize the candlesticks based on the max lookback and the provided start and end dates
         Candlestick.init(max([m.get_max_lookback() for m in self.models]), config.get('start'), config.get('end'))
         
         # Init the start and end
-        self.start = int(Candlestick.DF.iloc[0]['ot'])
-        self.end = int(Candlestick.DF.iloc[-1]['ct'])
+        self.start: int = int(Candlestick.DF.iloc[0]['ot'])
+        self.end: int = int(Candlestick.DF.iloc[-1]['ct'])
 
         # Postitions Take Profit & Stop Loss
-        self.take_profit = config['take_profit']
-        self.stop_loss = config['stop_loss']
+        self.take_profit: float = config['take_profit']
+        self.stop_loss: float = config['stop_loss']
 
         # Idle on position close
-        self.idle_minutes_on_position_close = config['idle_minutes_on_position_close']
+        self.idle_minutes_on_position_close: int = config['idle_minutes_on_position_close']
 
 
 

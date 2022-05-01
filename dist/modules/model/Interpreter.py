@@ -51,10 +51,10 @@ class Interpreter:
                 The configuration to interpret predictions.
         """
         # Initialize the instance properties
-        self.long = config['long']
-        self.short = config['short']
-        self.rsi = self._get_rsi_config(config.get('rsi'))
-        self.ema = self._get_ema_config(config.get('ema'))
+        self.long: float = config['long']
+        self.short: float = config['short']
+        self.rsi: IRSIConfig = self._get_rsi_config(config.get('rsi'))
+        self.ema: IEMAConfig = self._get_ema_config(config.get('ema'))
 
 
 

@@ -1,7 +1,8 @@
 from typing import Union
 from ..model.types import IRSIConfig, IEMAConfig, IInterpreterConfig, IArimaConfig, \
     IPrediction, IPredictionMetaData, ISingleModelConfig, IModel, ITrainingDataConfig, \
-        ITrainingDataActivePosition, ITrainingDataReceipt, ITrainingDataPredictionAnalysis
+        ITrainingDataActivePosition, ITrainingDataReceipt, ITrainingDataPriceActionInsight, \
+            ITrainingDataPredictionInsight
 from ..model.Interpreter import Interpreter
 from ..model.SingleModel import SingleModel
 from ..model.TrainingData import TrainingData

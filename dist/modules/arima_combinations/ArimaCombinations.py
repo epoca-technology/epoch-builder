@@ -1,6 +1,6 @@
 from os import makedirs
 from os.path import exists
-from typing import List, Tuple
+from typing import List, Tuple, Union
 from itertools import product
 from json import dumps
 from modules.backtest import IBacktestConfig
@@ -54,15 +54,15 @@ class ArimaCombinations:
             config: IArimaCombinationsConfig
                 The configuration to be used to generate the Backtest Files.
         """
-        self.base_id = config['id']
-        self.description = config['description']
-        self.start = config['start']
-        self.end = config['end']
-        self.take_profit = config['take_profit']
-        self.stop_loss = config['stop_loss']
-        self.idle_minutes_on_position_close = config['idle_minutes_on_position_close']
-        self.focus_number = config['focus_number']
-        self.batch_size = config['batch_size']
+        self.base_id: str = config['id']
+        self.description: str = config['description']
+        self.start: Union[str, int, None] = config['start']
+        self.end: Union[str, int, None] = config['end']
+        self.take_profit: float = config['take_profit']
+        self.stop_loss: float = config['stop_loss']
+        self.idle_minutes_on_position_close: int = config['idle_minutes_on_position_close']
+        self.focus_number: int = config['focus_number']
+        self.batch_size: int = config['batch_size']
 
 
 

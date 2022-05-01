@@ -37,12 +37,12 @@ class SingleModel:
                 Received: {len(config['single_models'])}")
 
         # Initialize the instance properties
-        self.id = config['id']
-        self.arima = self._get_arima_config(config['single_models'][0]['arima'])
-        self.lookback = config['single_models'][0]['lookback']
+        self.id: str = config['id']
+        self.arima: IArimaConfig = self._get_arima_config(config['single_models'][0]['arima'])
+        self.lookback: int = config['single_models'][0]['lookback']
 
         # Initialize the Interpreter Instance
-        self.interpreter = Interpreter(config['single_models'][0]['interpreter'])
+        self.interpreter: Interpreter = Interpreter(config['single_models'][0]['interpreter'])
 
         # Validate the integrity of the model
         self._validate_integrity()

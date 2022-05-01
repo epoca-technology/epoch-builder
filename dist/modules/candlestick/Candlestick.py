@@ -86,12 +86,12 @@ class Candlestick:
                 If it cannot load the DataFrames for any reason or the values are invalid.
         """
         # Initialize the start and the end timestamps if provided
-        start = Candlestick._get_date_timestamp(start)
-        end = Candlestick._get_date_timestamp(end)
+        start: Union[int, None] = Candlestick._get_date_timestamp(start)
+        end: Union[int, None] = Candlestick._get_date_timestamp(end)
 
         # Init the Default & Forecast Candlestick DataFrames
-        Candlestick.DF = Candlestick._get_df(Candlestick.DEFAULT_CANDLESTICK_CONFIG, start, end)
-        Candlestick.PREDICTION_DF = Candlestick._get_df(Candlestick.PREDICTION_CANDLESTICK_CONFIG, start, end)
+        Candlestick.DF: DataFrame = Candlestick._get_df(Candlestick.DEFAULT_CANDLESTICK_CONFIG, start, end)
+        Candlestick.PREDICTION_DF: DataFrame = Candlestick._get_df(Candlestick.PREDICTION_CANDLESTICK_CONFIG, start, end)
 
         # The models need data prior to the current time to perform predictions. Since the default candlesticks
         # will be used for simulating, the df needs to start from a point in which there are enough forecast

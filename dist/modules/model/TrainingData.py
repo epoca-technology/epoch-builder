@@ -7,7 +7,7 @@ from tqdm import tqdm
 from modules.candlestick import Candlestick
 from modules.utils import Utils
 from modules.model import ITrainingDataConfig, SingleModel, ITrainingDataActivePosition, IPrediction, \
-    ITrainingDataReceipt, ITrainingDataPredictionAnalysis
+    ITrainingDataReceipt, ITrainingDataPredictionInsight
 
 
 
@@ -22,6 +22,9 @@ class TrainingData:
             The directory in which the generated training data will be places.
 
     Instance Properties:
+        test_mode: bool
+            If test_mode is enabled, it won't initialize the candlesticks and will perform predictions
+            with cache disabled
         id: str
             The identification of the training data. This value is generated based on the single models
             that will be used to generate the training data.
@@ -50,16 +53,19 @@ class TrainingData:
 
     ## Init ##
 
-    def __init__(self, config: ITrainingDataConfig):
+    def __init__(self, config: ITrainingDataConfig, test_mode: bool = False):
         """Initializes the Training Data Instance as well as the candlesticks.
 
         Args:
             config: ITrainingDataConfig
                 The configuration that will be used to generate the training data.
+            test_mode: bool
+                Indicates if the execution is running from unit tests.
 
         Raises:
             ValueError:
                 If less than 5 single models are provided.
+                If a duplicate single model is found.
                 If the single models don't have the same lookback.
         """
         # Make sure that at least 5 single models were provided
@@ -67,18 +73,33 @@ class TrainingData:
             raise ValueError(f"A minimum of 5 single models are required in order to generate the training data. \
                 Received: {len(config['single_models'])}")
 
-        # Initialize the models to be tested
-        self.single_models: List[SingleModel] = [SingleModel(m) for m in config['single_models']]
-        
-        # Make sure all the single models have the same lookback
-        if not all(m.lookback == self.single_models[0].lookback for m in self.single_models):
-            raise ValueError("All single models must have the exact same lookback in order to generate the training data.")
+        # Initialize the type of execution
+        self.test_mode: bool = test_mode
 
-        # Generate the training data ID
-        self.id: str = ''.join([m.id for m in self.single_models])
+        # Initialize the data that will be populated
+        self.id: str = ''
+        self.single_models: List[SingleModel] = []
+        df_data: Dict = {}
+        first_lookback: int = config['single_models'][0]['single_models'][0]['lookback']
 
-        # Initialize the candlesticks
-        Candlestick.init(self.single_models[0].lookback, config.get('start'), config.get('end'))
+        # Iterate over each single model
+        for m in config['single_models']:
+            # Make sure it isn't a duplicate
+            if m['id'] in self.id:
+                raise ValueError(f"Duplicate Single Model provided: {m['id']}")
+            
+            # Make sure the lookbacks are identical
+            if m['single_models'][0]['lookback'] != first_lookback:
+                raise ValueError(f"Single Model lookback missmatch: {m['single_models'][0]['lookback']} != {first_lookback}")
+
+            # Populate Instance Data
+            self.id = self.id + m['id']
+            self.single_models.append(SingleModel(m))
+            df_data[m['id']] = []
+
+        # Initialize the candlesticks if not unit testing
+        if not self.test_mode:
+            Candlestick.init(self.single_models[0].lookback, config.get('start'), config.get('end'))
 
         # Init the start and end
         self.start: int = int(Candlestick.DF.iloc[0]['ot'])
@@ -89,7 +110,9 @@ class TrainingData:
         self.down_percent_change: float = config['down_percent_change']
 
         # Initialize the DF
-        self.df: DataFrame = DataFrame(data={column_name: [] for column_name in [m.id for m in self.single_models] + ['up', 'down']})
+        df_data['up'] = []
+        df_data['down'] = []
+        self.df: DataFrame = DataFrame(data=df_data)
 
         # Initialize the active position
         self.active: Union[ITrainingDataActivePosition, None] = None
@@ -154,7 +177,7 @@ class TrainingData:
         up_price, down_price = self._get_position_range(candlestick['o'])
 
         # Generate the single model predictions
-        preds: Dict = {m.id: self._get_prediction_result(m.predict(candlestick['ot'], enable_cache=True)) for m in self.single_models}
+        preds: Dict = {m.id: self._get_prediction_result(m.predict(candlestick['ot'], enable_cache=not self.test_mode)) for m in self.single_models}
 
         # Finally, populate the active position dict
         self.active = {
@@ -247,7 +270,7 @@ class TrainingData:
         self.active['row']['down'] = 1 if not up else 0
 
         # Append the row to the DataFrame
-        self.df.append([self.active['row']])
+        self.df = self.df.append(self.active['row'], ignore_index=True)
 
         # Unset the active position
         self.active = None
@@ -286,12 +309,15 @@ class TrainingData:
         result_dir: str = f"{TrainingData.OUTPUT_PATH}/{current_time}"
         makedirs(result_dir)
 
+        # Convert all the values to integers
+        self.df = self.df.astype(int)
+
         # Create the CSV File
         self.df.to_csv(f"{result_dir}/data.csv", index=False)
 
         # Write the Receipt File
         with open(f"{result_dir}/receipt.json", "w") as receipt_file:
-            receipt_file.write(dumps(self._get_receipt(execution_start, current_time), indent=4))
+            receipt_file.write(dumps(self._get_receipt(execution_start, current_time)))
 
 
 
@@ -320,11 +346,11 @@ class TrainingData:
             'duration_minutes': Utils.from_milliseconds_to_minutes(current_time - execution_start),
             'rows': self.df.shape[0],
             'columns': self.df.shape[1],
-            'price_action_analysis': {
+            'price_action_insight': {
                 'up': Utils.get_percentage_out_of_total(self.df['up'].value_counts()[1], self.df.shape[0]),
                 'down': Utils.get_percentage_out_of_total(self.df['down'].value_counts()[1], self.df.shape[0]),
             },
-            'predictions_analysis': {m.id: self._get_prediction_analysis_for_model(m.id) for m in self.single_models}
+            'predictions_insight': {m.id: self._get_prediction_insight_for_model(m.id) for m in self.single_models}
         }
 
 
@@ -332,7 +358,7 @@ class TrainingData:
 
 
 
-    def _get_prediction_analysis_for_model(self, model_id: str) -> ITrainingDataPredictionAnalysis:
+    def _get_prediction_insight_for_model(self, model_id: str) -> ITrainingDataPredictionInsight:
         """Retrieves the prediction analysis for a given model.
 
         Args:
@@ -340,7 +366,7 @@ class TrainingData:
                 The ID of the model.
         
         Return:
-            ITrainingDataPredictionAnalysis
+            ITrainingDataPredictionInsight
         """
         return {
             'long': Utils.get_percentage_out_of_total(self.df[model_id].value_counts()[2], self.df.shape[0]),

@@ -1,8 +1,8 @@
-from typing import Tuple, List
+from typing import Tuple, List, Union
 from pandas import Series
 from modules.utils import Utils
 from modules.model import IPrediction
-from modules.backtest import IBacktestPerformance
+from modules.backtest import IBacktestPerformance, IBacktestPosition
 
 
 
@@ -33,7 +33,7 @@ class Position:
                 The history of how points have fluctuated during the process.
 
         Positions:
-            active: Union[IBacktestPosition, None]:
+            active: Union[IBacktestPosition, None]
                 This property is populated when there is an active position. Otherwise,
                 new positions can be opened.
             positions: List[IBacktestPosition]
@@ -70,24 +70,24 @@ class Position:
                 The percentage that will be used to set the stop loss price on the positions.
         """
         # Init Config
-        self.take_profit = take_profit
-        self.stop_loss = stop_loss
+        self.take_profit: float = take_profit
+        self.stop_loss: float = stop_loss
 
         # Init Points Data
-        self.reward = take_profit - 0.1
-        self.penalty = -(stop_loss + 0.1)
+        self.reward: float = take_profit - 0.1
+        self.penalty: float = -(stop_loss + 0.1)
         self.points: List[float] = [0]
 
         # Init Positions
-        self.active = None
-        self.positions = []
+        self.active: Union[IBacktestPosition, None] = None
+        self.positions: List[IBacktestPosition] = []
 
         # Position Counters
-        self.successful_num = 0
-        self.long_num = 0
-        self.successful_long_num = 0
-        self.short_num = 0
-        self.successful_short_num = 0
+        self.successful_num: int = 0
+        self.long_num: int = 0
+        self.successful_long_num: int = 0
+        self.short_num: int = 0
+        self.successful_short_num: int = 0
 
 
 
