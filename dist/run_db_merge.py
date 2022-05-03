@@ -2,9 +2,12 @@ from os import makedirs, listdir, remove
 from os.path import exists, isfile, join
 from typing import List
 from sqlitedict import SqliteDict
+from modules.model import IPrediction
 
 # Heading
 print("DB MERGE\n")
+
+print("Merging...\n")
 
 # Init constants
 DB_MERGE_PATH: str = "db_merge"
@@ -42,15 +45,77 @@ for db in dbs + [local_db]:
 # Commit the merge
 result_db.commit()
 
+# Calculate the # of items in the local and the merge result dbs
+local_db_len: int = len(local_db)
+result_db_len: int = len(result_db)
+db_lens: List[int] = [local_db_len]
+
 # Print the summary
 print(f"Merged ({len(dbs) + 1}):")
-print(f"{local_db.filename}: {len(local_db)} rows")
+print(f"{local_db.filename}: {local_db_len} rows")
 for db in dbs:
-    print(f"{db.filename}: {len(db)} rows")
+    db_len: int = len(db)
+    db_lens.append(db_len)
+    print(f"{db.filename}: {db_len} rows")
 print(f"\nResult:")
 print(f"{result_db.filename}: {len(result_db)} rows")
+
+# Close the result db
+result_db.close()
+
+
+
+## Integrity Validation ##
+print("\nValidating Integrity...\n")
+
+# Init Helpers
+
+def _is_prediction(pred: IPrediction) -> bool:
+    """Checks if a stored prediction is valid.
+
+    Args:
+        pred: IPrediction
+    
+    Returns: 
+        bool
+    """
+    return isinstance(pred, dict) and isinstance(pred.get('r'), int) \
+        and isinstance(pred.get('t'), int) and isinstance(pred.get('md'), list)
+
+
+
+# The merge result must have the highest number of rows
+if result_db_len < max(db_lens):
+    remove(RESULT_PATH)
+    raise RuntimeError(f"The result db does not have the highest number of rows. {result_db_len} < {max(db_lens)}")
+
+# Reopen the merge result db
+result_db = SqliteDict(RESULT_PATH, tablename="arima_predictions", outer_stack=False)
+
+# The len must be identical to the one recorded before closing the connection
+if result_db_len != len(result_db):
+    remove(RESULT_PATH)
+    raise RuntimeError(f"The re-opened result db does not have the same amount of rows as it had before closing the \
+        connection. {result_db_len} != {len(result_db)}")
+
+# Iterate over each item and make sure the content is valid
+for key, item in result_db.items():
+    if not _is_prediction(item):
+        remove(RESULT_PATH)
+        raise RuntimeError(f"The prediction {key} contents do not follow the correct structure.")
+
+
+
+
+
+## Clean Up ##
 
 
 # Clean the db_merge directory
 for fn in file_names:
     remove(f"{DB_MERGE_PATH}/{fn}")
+
+
+
+
+print("DB MERGE COMPLETED")

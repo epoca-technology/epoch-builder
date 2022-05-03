@@ -41,11 +41,11 @@ prediction-backtesting
     │
     db/
     ├───db.sqlite
+    ├───merge_result.sqlite <- Output when running ./DBMerge.sh
     │
     db_merge/
     ├───db1.sqlite
     ├───db2.sqlite
-    ├───result.sqlite
     │
     dist/
     ├───modules/
@@ -132,11 +132,12 @@ Once the execution completes, the files **data.csv** and **receipt.json** will b
 #
 ## DB Merge
 
-Place the .sqlite files in the **./db_merge** directory and run the following:
+Merges the Local DB file from **db/db.sqlite** and all the DB files located in **db_merge**. 
 
 `./DBMerge.sh`
 
-Once the execution completes, the merged database file will be placed under the **./db_merge** directory with the following name: **result.sqlite**
+Once the execution completes, the result is placed in **db/merge_result.sqlite** and the files located in **db_merge** are automatically deleted.
+
 
 
 
