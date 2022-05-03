@@ -1,0 +1,19 @@
+{
+    "description": "",
+    "start": "01/04/2022",
+    "end": "22/04/2022",
+    "up_percent_change": 1,
+    "down_percent_change": 1,
+    "arima_models": [
+        { "id": "A604","arima_models": [{"arima": {"p": 6, "d": 0,"q": 4}}] },
+        { "id": "A506","arima_models": [{"arima": {"p": 5, "d": 0,"q": 6}}] },
+        { "id": "A303","arima_models": [{"arima": {"p": 3, "d": 0,"q": 3}}] },
+        { "id": "A203","arima_models": [{"arima": {"p": 2, "d": 0,"q": 3}}] },
+        { "id": "A603","arima_models": [{"arima": {"p": 6, "d": 0,"q": 3}}] },
+        { "id": "A606","arima_models": [{"arima": {"p": 6, "d": 0,"q": 6}}] },
+        { "id": "A401","arima_models": [{"arima": {"p": 4, "d": 0,"q": 1}}] },
+        { "id": "A304","arima_models": [{"arima": {"p": 3, "d": 0,"q": 4}}] },
+        { "id": "A511","arima_models": [{"arima": {"p": 5, "d": 1,"q": 1}}] },
+        { "id": "A416","arima_models": [{"arima": {"p": 4, "d": 1,"q": 6}}] }
+    ]
+}

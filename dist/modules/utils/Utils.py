@@ -1,6 +1,7 @@
 from typing import Union, List
-import time
+from time import time
 from datetime import datetime
+from uuid import UUID, uuid4
 
 
 
@@ -148,7 +149,7 @@ class Utils:
         Returns:
             int
         """
-        return Utils.from_seconds_to_milliseconds(time.time())
+        return Utils.from_seconds_to_milliseconds(time())
 
 
 
@@ -273,3 +274,41 @@ class Utils:
         """
         return int(timestamp_ms + (Utils.from_seconds_to_milliseconds(60) * minutes))
     
+
+
+
+
+
+
+
+    ## UUID Helpers ##
+
+
+
+
+    @staticmethod
+    def generate_uuid4() -> str:
+        """Generates a random Universally Unique Identifier.
+
+        Returns:
+            str
+        """
+        return str(uuid4())
+
+
+
+
+
+    @staticmethod
+    def is_uuid4(uuid: str) -> bool:
+        """Verifies if a provided uuid is valid.
+
+        Returns:
+            bool
+        """
+        uuid_obj: Union[UUID, None] = None
+        try:
+            uuid_obj = UUID(str(uuid), version=4)
+        except ValueError:
+            return False
+        return str(uuid_obj) == uuid

@@ -35,6 +35,10 @@ class ArimaModelTestCase(unittest.TestCase):
 
 
 
+    ## Initialization ##
+
+
+
     # Can initialize a model with default values
     def testInitWithDefaultValues(self):
         # Init the config
@@ -103,6 +107,11 @@ class ArimaModelTestCase(unittest.TestCase):
 
 
 
+
+    ## Predictions
+
+
+
     # Can perform predictions with a basic config
     def testBasicPrediction(self):
         # Init the config
@@ -112,7 +121,7 @@ class ArimaModelTestCase(unittest.TestCase):
         m = ArimaModel(config)
         
         # Perform a prediction
-        pred: IPrediction = m.predict(CURRENT_TIME)
+        pred: IPrediction = m.predict(CURRENT_TIME, enable_cache=False)
 
         # Validate the integrity of the result
         self.assertIsInstance(pred['r'], int)
@@ -145,6 +154,9 @@ class ArimaModelTestCase(unittest.TestCase):
         # Perform a prediction
         pred: IPrediction = m.predict(CURRENT_TIME, enable_cache=False)
 
+        # When not using cache, the prediction's metadata should not be minimized
+        self.assertIsInstance(pred['md'][0].get('pl'), list)
+
         # Retrieve the prediction range
         first_ot, last_ct = Candlestick.get_lookback_prediction_range(m.get_lookback(), CURRENT_TIME)
 
@@ -167,6 +179,9 @@ class ArimaModelTestCase(unittest.TestCase):
         # Perform a prediction
         pred: IPrediction = m.predict(CURRENT_TIME, enable_cache=True)
 
+        # When using cache, the prediction's metadata should be minimized
+        self.assertEqual(pred['md'][0].get('pl'), None)
+
         # Retrieve the prediction range
         first_ot, last_ct = Candlestick.get_lookback_prediction_range(m.get_lookback(), CURRENT_TIME)
 
@@ -174,6 +189,7 @@ class ArimaModelTestCase(unittest.TestCase):
         cached_pred: Union[IPrediction, None] = get_prediction(m.id, first_ot, last_ct)
         self.assertFalse(cached_pred == None)
         self.assertDictEqual(pred, cached_pred)
+        self.assertEqual(cached_pred['md'][0].get('pl'), None)
 
         # Clean up the prediction
         delete_prediction(m.id, first_ot, last_ct)
@@ -186,7 +202,7 @@ class ArimaModelTestCase(unittest.TestCase):
 
 
     # Can perform a Sarima prediction and store it in cache
-    def testPredictWithCache(self):
+    def testPredictSarimaWithCache(self):
         # Init the config
         config = deepcopy(BASIC_CONFIG)
         config['id'] = "A2221116"
@@ -198,6 +214,9 @@ class ArimaModelTestCase(unittest.TestCase):
         # Perform a prediction
         pred: IPrediction = m.predict(CURRENT_TIME, enable_cache=True)
 
+        # When using cache, the prediction's metadata should be minimized
+        self.assertEqual(pred['md'][0].get('pl'), None)
+
         # Retrieve the prediction range
         first_ot, last_ct = Candlestick.get_lookback_prediction_range(m.get_lookback(), CURRENT_TIME)
 
@@ -205,6 +224,7 @@ class ArimaModelTestCase(unittest.TestCase):
         cached_pred: Union[IPrediction, None] = get_prediction(m.id, first_ot, last_ct)
         self.assertFalse(cached_pred == None)
         self.assertDictEqual(pred, cached_pred)
+        self.assertEqual(cached_pred['md'][0].get('pl'), None)
 
         # Clean up the prediction
         delete_prediction(m.id, first_ot, last_ct)
@@ -237,10 +257,7 @@ class ArimaModelTestCase(unittest.TestCase):
                     'lookback': 150,
                     'predictions': 10, 
                     'arima': { 'p': 3, 'd': 1, 'q': 6 },
-                    'interpreter': {
-                        'long': 0.5, 
-                        'short': 0.5,
-                    }
+                    'interpreter': { 'long': 0.5, 'short': 0.5 }
                 }]
             })
 

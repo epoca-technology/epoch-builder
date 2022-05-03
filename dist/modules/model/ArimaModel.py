@@ -4,8 +4,8 @@ from pandas import Series
 from pmdarima import ARIMA
 from modules.candlestick import Candlestick
 from modules.database import save_prediction, get_prediction
-from modules.model import ModelInterface, IModel, Interpreter, IPrediction, IArimaConfig, \
-    IArimaModelConfig, IInterpreterConfig
+from modules.model import ModelInterface, IModel, ArimaModelInterpreter, IArimaConfig, \
+    IArimaModelConfig, IArimaModelInterpreterConfig, IPrediction, IPredictionMetaData
 
 
 
@@ -19,7 +19,7 @@ class ArimaModel(ModelInterface):
             The default value that will be used if the lookback isn't provided.
         DEFAULT_PREDICTIONS: int
             The default value that will be used if the predictions isn't provided.
-        DEFAULT_INTERPRETER: IInterpreterConfig
+        DEFAULT_INTERPRETER: IArimaModelInterpreterConfig
             The default config that will be used if the interpreter isn't provided.
 
     Instance Properties:
@@ -41,7 +41,7 @@ class ArimaModel(ModelInterface):
     DEFAULT_PREDICTIONS: int = 10
 
     # Default Interpreter
-    DEFAULT_INTERPRETER: IInterpreterConfig = { 'long': 0.05, 'short': 0.05 }
+    DEFAULT_INTERPRETER: IArimaModelInterpreterConfig = { 'long': 0.05, 'short': 0.05 }
 
 
 
@@ -80,7 +80,7 @@ class ArimaModel(ModelInterface):
             if isinstance(model_config.get('predictions'), int) else ArimaModel.DEFAULT_PREDICTIONS
 
         # Initialize the Interpreter Instance
-        self.interpreter: Interpreter = Interpreter(model_config['interpreter'] \
+        self.interpreter: ArimaModelInterpreter = ArimaModelInterpreter(model_config['interpreter'] \
             if isinstance(model_config.get('interpreter'), dict) else ArimaModel.DEFAULT_INTERPRETER)
 
         # Validate the integrity of the model
@@ -148,7 +148,7 @@ class ArimaModel(ModelInterface):
             # Check if the prediction does not exist
             if pred == None:
                 # Generate it
-                pred = self._call_predict(current_timestamp)
+                pred = self._call_predict(current_timestamp, minimized_metadata=True)
 
                 # Store it in the database
                 save_prediction(self.id, first_ot, last_ct, pred)
@@ -162,20 +162,22 @@ class ArimaModel(ModelInterface):
 
         # Otherwise, handle a traditional prediction
         else:
-            return self._call_predict(current_timestamp)
+            return self._call_predict(current_timestamp, minimized_metadata=False)
 
 
 
 
 
 
-    def _call_predict(self, current_timestamp: int) -> IPrediction:
+    def _call_predict(self, current_timestamp: int, minimized_metadata: bool) -> IPrediction:
         """Given the current time, it will perform a prediction and return it as 
         well as its metadata.
 
         Args:
             current_timestamp: int
                 The current time in milliseconds.
+            minimized_metadata: bool
+                If this property is enabled, the metadata will only include the description.
 
         Returns:
             IPrediction
@@ -200,9 +202,14 @@ class ArimaModel(ModelInterface):
 
             # Interpret the predictions
             result, description = self.interpreter.interpret(preds)
+
+            # Build the metadata
+            metadata: IPredictionMetaData = { 'd': description }
+            if not minimized_metadata:
+                metadata['pl'] = preds
             
             # Finally, return the prediction results
-            return { "r": result, "t": int(current_timestamp), "md": [{ "pl": preds, "d": description }] }
+            return { "r": result, "t": int(current_timestamp), "md": [ metadata ] }
         except Exception as e:
             print(f"{self.id} Prediction Error: {str(e)}")
             return { "r": 0, "t": int(current_timestamp), "md": [{'d': 'neutral-due-to-error: ' + str(e)}] }

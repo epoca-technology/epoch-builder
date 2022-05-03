@@ -1,10 +1,10 @@
 from typing import Union, Any
-from ..model.types import IInterpreterConfig, IArimaConfig, IArimaModelConfig, \
+from ..model.types import IArimaModelInterpreterConfig, IArimaConfig, IArimaModelConfig, \
     IPrediction, IPredictionMetaData, IModel, ITrainingDataConfig, \
-        ITrainingDataActivePosition, ITrainingDataReceipt, ITrainingDataPriceActionInsight, \
+        ITrainingDataActivePosition, ITrainingDataFile, ITrainingDataPriceActionsInsight, \
             ITrainingDataPredictionInsight
-from ..model.ModelInterface import ModelInterface
-from ..model.Interpreter import Interpreter
+from ..model.Interface import ModelInterface
+from ..model.ArimaModelInterpreter import ArimaModelInterpreter
 from ..model.ArimaModel import ArimaModel
 from ..model.TrainingData import TrainingData
 

@@ -22,6 +22,9 @@ class Backtest:
             The path in which the results must be stored.
 
     Instance Properties:
+        test_mode: bool
+            If test_mode is enabled, it won't initialize the candlesticks and will perform predictions
+            with cache disabled
         Identification: 
             id: str
                 The identification/description of the Backtest Instance. This value must be compatible
@@ -74,6 +77,9 @@ class Backtest:
             test_mode: bool
                 Indicates if the execution is running from unit tests.
         """
+        # Initialize the type of execution
+        self.test_mode: bool = test_mode
+
         # ID & Description
         self.id: str = config['id']
         self.description: str = config['description']
@@ -83,7 +89,7 @@ class Backtest:
         self.results: List[IBacktestResult] = []
 
         # Initialize the candlesticks based on the models' lookback and the provided start and end dates
-        if not test_mode:
+        if not self.test_mode:
             Candlestick.init(self.models[0].get_lookback(), config.get('start'), config.get('end'))
         
         # Init the start and end
@@ -158,7 +164,7 @@ class Backtest:
                 # 2) It isn't the last candlestick 
                 elif (position.active == None) and (candlestick['ot'] > idle_until) and (not is_last_candlestick):
                     # Perform a prediction
-                    pred: IPrediction = model.predict(candlestick['ot'], enable_cache=True)
+                    pred: IPrediction = model.predict(candlestick['ot'], enable_cache=not self.test_mode)
 
                     # If the result isn't neutral, open a position
                     if pred['r'] != 0:

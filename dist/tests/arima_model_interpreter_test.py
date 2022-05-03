@@ -1,7 +1,7 @@
 from typing import List
 import unittest
 from modules.utils import Utils
-from modules.model import Interpreter
+from modules.model import ArimaModelInterpreter
 
 
 
@@ -30,7 +30,7 @@ def _get_preds(change: float, base: float = BASE) -> List[float]:
 
 
 # Test Class
-class InterpreterTestCase(unittest.TestCase):
+class ArimaModelInterpreterTestCase(unittest.TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -50,7 +50,7 @@ class InterpreterTestCase(unittest.TestCase):
 
     # Can initialize an interpreter
     def testInitializeInterpreter(self):
-        i = Interpreter({"long": 1.5, "short": 1.5})
+        i = ArimaModelInterpreter({"long": 1.5, "short": 1.5})
         self.assertEqual(i.long, 1.5)
         self.assertEqual(i.short, 1.5)
 
@@ -68,7 +68,7 @@ class InterpreterTestCase(unittest.TestCase):
     # Can interpret a basic long
     def testBasicLongInterpretation(self):
         # Init the interpreter
-        i = Interpreter({"long": 0.5, "short": 0.5})
+        i = ArimaModelInterpreter({"long": 0.5, "short": 0.5})
 
         # Can interpret a long position if the prediction change is equals
         result, description = i.interpret(_get_preds(0.5))
@@ -91,7 +91,7 @@ class InterpreterTestCase(unittest.TestCase):
     # Can interpret a basic short
     def testBasicShortInterpretation(self):
         # Init the interpreter
-        i = Interpreter({"long": 0.5, "short": 0.5})
+        i = ArimaModelInterpreter({"long": 0.5, "short": 0.5})
 
         # Can interpret a long position if the prediction change is equals
         result, description = i.interpret(_get_preds(-0.5))

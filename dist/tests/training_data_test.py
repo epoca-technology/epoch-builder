@@ -13,16 +13,17 @@ from modules.model import TrainingData, ITrainingDataConfig
 
 # Config
 DEFAULT_CONFIG: ITrainingDataConfig = {
-    'start': None, 
-    'end': None, 
+    "description": "Unit Test",
+    "start": "22/03/2022", 
+    "end": "22/04/2022", 
     'up_percent_change': 1, 
     'down_percent_change': 1, 
     'arima_models': [
-        {'id': 'A101','arima_models': [{'arima': { 'p': 1, 'd': 0, 'q': 1 }}]},
-        {'id': 'A111','arima_models': [{'arima': { 'p': 1, 'd': 1, 'q': 1 }}]},
-        {'id': 'A112','arima_models': [{'arima': { 'p': 1, 'd': 1, 'q': 2 }}]},
-        {'id': 'A121','arima_models': [{'arima': { 'p': 1, 'd': 2, 'q': 1 }}]},
-        {'id': 'A211','arima_models': [{'arima': { 'p': 2, 'd': 1, 'q': 1 }}]}
+        { "id": "A101","arima_models": [{"arima": {"p": 1, "d": 0,"q": 1}}] },
+        { "id": "A111","arima_models": [{"arima": {"p": 1, "d": 1,"q": 1}}] },
+        { "id": "A112","arima_models": [{"arima": {"p": 1, "d": 1,"q": 2}}] },
+        { "id": "A121","arima_models": [{"arima": {"p": 1, "d": 2,"q": 1}}] },
+        { "id": "A211","arima_models": [{"arima": {"p": 2, "d": 1,"q": 1}}] }
     ]
 }
 
@@ -92,11 +93,15 @@ class TrainingDataTestCase(unittest.TestCase):
             if sm['id'] != td.arima_models[i].id:
                 self.fail(f"Single Model ID Missmatch: {sm['id']} != {td.arima_models[i].id}")
 
+        # Make sure the ID and the description were initialized
+        self.assertTrue(Utils.is_uuid4(td.id))
+        self.assertEqual(td.description, config['description'])
+
         # Make sure the ID was generated successfully
-        expected_id: str = ''
+        expected_arima_id: str = ''
         for sm in config['arima_models']:
-            expected_id = expected_id + sm['id']
-        self.assertEqual(expected_id, td.id)
+            expected_arima_id = expected_arima_id + sm['id']
+        self.assertEqual(expected_arima_id, td.arima_id)
 
         # Make sure the dates have been set correctly
         self.assertEqual(td.start, int(Candlestick.DF.iloc[0]['ot']))

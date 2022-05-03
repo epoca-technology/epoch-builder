@@ -7,7 +7,7 @@ from tqdm import tqdm
 from modules.candlestick import Candlestick
 from modules.utils import Utils
 from modules.model import ITrainingDataConfig, ArimaModel, ITrainingDataActivePosition, IPrediction, \
-    ITrainingDataReceipt, ITrainingDataPriceActionInsight, ITrainingDataPredictionInsight
+    ITrainingDataFile, ITrainingDataPriceActionsInsight, ITrainingDataPredictionInsight
 
 
 
@@ -26,8 +26,11 @@ class TrainingData:
             If test_mode is enabled, it won't initialize the candlesticks and will perform predictions
             with cache disabled
         id: str
-            The identification of the training data. This value is generated based on the Arima Models
-            that will be used to generate the training data.
+            Universally Unique Identifier (uuid4)
+        arima_id: str
+            A secondary ID generated based on the ArimaModels.
+        description: str
+            Summary describing the purpose and expectations of the Training Data Generation.
         start: int
             The open timestamp of the first 1m candlestick.
         end: int
@@ -76,8 +79,12 @@ class TrainingData:
         # Initialize the type of execution
         self.test_mode: bool = test_mode
 
+        # Initialize the description
+        self.description: str = config['description']
+
         # Initialize the data that will be populated
-        self.id: str = ''
+        self.id: str = Utils.generate_uuid4()
+        self.arima_id: str = ''
         self.arima_models: List[ArimaModel] = []
         df_data: Dict = {}
         first_lookback: Union[int, None] = None
@@ -85,11 +92,11 @@ class TrainingData:
         # Iterate over each Arima Model
         for m in config['arima_models']:
             # Make sure it isn't a duplicate
-            if m['id'] in self.id:
+            if m['id'] in self.arima_id:
                 raise ValueError(f"Duplicate Arima Model provided: {m['id']}")
 
             # Populate Instance Data
-            self.id = self.id + m['id']
+            self.arima_id = self.arima_id + m['id']
             self.arima_models.append(ArimaModel(m))
             df_data[m['id']] = []
             
@@ -179,7 +186,7 @@ class TrainingData:
         up_price, down_price = self._get_position_range(candlestick['o'])
 
         # Generate the Arima Model predictions
-        preds: Dict = {m.id: self._get_prediction_result(m.predict(candlestick['ot'], enable_cache=not self.test_mode)) for m in self.arima_models}
+        preds: Dict[str, int] = {m.id: self._get_prediction_result(m.predict(candlestick['ot'], enable_cache=not self.test_mode)) for m in self.arima_models}
 
         # Finally, populate the active position dict
         self.active = {
@@ -300,33 +307,20 @@ class TrainingData:
             execution_start: int
                 The time in which the execution started.
         """
-        # Init the current time
-        current_time: int = Utils.get_time()
-
         # If the output directory doesn't exist, create it
         if not exists(TrainingData.OUTPUT_PATH):
             makedirs(TrainingData.OUTPUT_PATH)
 
-        # Create the results directory
-        result_dir: str = f"{TrainingData.OUTPUT_PATH}/{current_time}"
-        makedirs(result_dir)
-
-        # Convert all the values to integers
-        self.df = self.df.astype(int)
-
-        # Create the CSV File
-        self.df.to_csv(f"{result_dir}/data.csv", index=False)
-
-        # Write the Receipt File
-        with open(f"{result_dir}/receipt.json", "w") as receipt_file:
-            receipt_file.write(dumps(self._get_receipt(execution_start, current_time)))
+        # Write the Training Data File
+        with open(f"{TrainingData.OUTPUT_PATH}/{self.id}.json", "w") as training_data_file:
+            training_data_file.write(dumps(self._get_file(execution_start)))
 
 
 
 
 
-    def _get_receipt(self, execution_start: int, current_time: int) -> ITrainingDataReceipt:
-        """Builds a receipt based on all the data collected during the execution.
+    def _get_file(self, execution_start: int) -> ITrainingDataFile:
+        """Builds the Training Data File containing all the data collected.
 
         Args:
             execution_start: int
@@ -335,10 +329,19 @@ class TrainingData:
                 The current time (used to create the output directory).
 
         Returns:
-            ITrainingDataReceipt
+            ITrainingDataFile
         """
+        # Initialize the current time
+        current_time: int = Utils.get_time()
+
+        # Convert all the values to integers
+        self.df = self.df.astype(int)
+
+        # Return the File Data
         return {
             'id': self.id,
+            'arima_id': self.arima_id,
+            'description': self.description,
             'creation': current_time,
             'start': self.start,
             'end': self.end,
@@ -349,7 +352,8 @@ class TrainingData:
             'rows': self.df.shape[0],
             'columns': self.df.shape[1],
             'price_action_insight': self._get_price_action_insight(),
-            'predictions_insight': {m.id: self._get_prediction_insight_for_model(m.id) for m in self.arima_models}
+            'predictions_insight': {m.id: self._get_prediction_insight_for_model(m.id) for m in self.arima_models},
+            'training_data': self.df.to_dict('records')
         }
 
 
@@ -358,11 +362,11 @@ class TrainingData:
 
 
 
-    def _get_price_action_insight(self) -> ITrainingDataPriceActionInsight:
+    def _get_price_action_insight(self) -> ITrainingDataPriceActionsInsight:
         """Retrieves the price action insight.
 
         Returns:
-            ITrainingDataPriceActionInsight
+            ITrainingDataPriceActionsInsight
         """
         return {
             'up': Utils.get_percentage_out_of_total(self.df['up'].value_counts()[1], self.df.shape[0]),

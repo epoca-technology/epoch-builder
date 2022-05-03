@@ -1,4 +1,5 @@
 import unittest
+from typing import List, Any
 import time
 from modules.utils import Utils
 
@@ -124,6 +125,53 @@ class UtilsTestCase(unittest.TestCase):
         self.assertEqual(Utils.add_minutes(1502942880000, 2), 1502943000000)
         self.assertEqual(Utils.add_minutes(1502944020000, 4), 1502944260000)
         self.assertEqual(Utils.add_minutes(1502945340000, 30), 1502947140000)
+
+
+
+
+
+
+    ## UUID Helpers ##
+
+
+
+    # Can generate valid UUIDs
+    def testGenerateUUID(self):
+        # Generate a list of uuids
+        uuids: List[str] = [
+            Utils.generate_uuid4(),
+            Utils.generate_uuid4(),
+            Utils.generate_uuid4(),
+            Utils.generate_uuid4(),
+            Utils.generate_uuid4(),
+        ]
+        
+        # Iterate over them and make sure they are valid
+        for id in uuids:
+            self.assertTrue(Utils.is_uuid4(id) and isinstance(id, str) and len(id) > 0)
+
+
+
+
+    # Can identify invalid UUIDs
+    def testValidateUUIDs(self):
+        # Generate a list of invalid uuids
+        uuids: List[Any] = [
+            'some-random-string',
+            'd9428888-122b-11e1-b85c-61cd3cbb3210', # v1 uuid
+            123.45,
+            True,
+            {'foo': 'bar'},
+            (123456, 321654),
+        ]
+        
+        # Iterate over them and make sure they are valid
+        for id in uuids:
+            self.assertFalse(Utils.is_uuid4(id))
+
+
+
+
 
 
 

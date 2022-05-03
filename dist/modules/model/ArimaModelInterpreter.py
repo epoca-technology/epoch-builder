@@ -1,12 +1,12 @@
 from typing import List, Tuple
 from modules.utils import Utils
-from modules.model import IInterpreterConfig
+from modules.model import IArimaModelInterpreterConfig
 
 
 
 
-class Interpreter:
-    """Interpreter Class
+class ArimaModelInterpreter:
+    """ArimaModelInterpreter Class
 
     This class takes care of processing a series of inputs and predictions. Based on the 
     provided configuration, it outputs a forecast value which will be used for trading.
@@ -28,7 +28,7 @@ class Interpreter:
 
   
 
-    def __init__(self, config: IInterpreterConfig):
+    def __init__(self, config: IArimaModelInterpreterConfig):
         """Initializes the Interpreter Class based on the provided configuration.
 
         Args:
@@ -98,7 +98,7 @@ class Interpreter:
 
 
 
-    def get_interpreter(self) -> IInterpreterConfig:
+    def get_interpreter(self) -> IArimaModelInterpreterConfig:
         """Returns the interpreter's data after having been initialized.
 
         Returns:
