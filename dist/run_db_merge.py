@@ -35,7 +35,7 @@ local_db: SqliteDict = SqliteDict(LOCAL_PATH, tablename="arima_predictions", out
 dbs: List[SqliteDict] = [SqliteDict(f"{DB_MERGE_PATH}/{fn}", tablename="arima_predictions", outer_stack=False) for fn in file_names]
 
 # Iterate over all dbs and dump the values into the result db
-for db in dbs:
+for db in dbs + [local_db]:
     for key, value in db.items():
         result_db[key] = value
 
