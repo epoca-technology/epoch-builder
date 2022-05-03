@@ -1,5 +1,5 @@
 from typing import TypedDict, Union, List
-from modules.model import IPrediction, IModel
+from modules.model import SingleModel, MultiModel, IPrediction, IModel
 
 
 

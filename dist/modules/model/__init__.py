@@ -1,12 +1,14 @@
-from typing import Union
-from ..model.types import IRSIConfig, IEMAConfig, IInterpreterConfig, IArimaConfig, \
-    IPrediction, IPredictionMetaData, ISingleModelConfig, IModel, ITrainingDataConfig, \
+from typing import Union, Any
+from ..model.types import IInterpreterConfig, IArimaConfig, IArimaModelConfig, \
+    IPrediction, IPredictionMetaData, IModel, ITrainingDataConfig, \
         ITrainingDataActivePosition, ITrainingDataReceipt, ITrainingDataPriceActionInsight, \
             ITrainingDataPredictionInsight
+from ..model.ModelInterface import ModelInterface
 from ..model.Interpreter import Interpreter
-from ..model.SingleModel import SingleModel
+from ..model.ArimaModel import ArimaModel
 from ..model.TrainingData import TrainingData
-from ..model.MultiModel import MultiModel
+
+
 
 
 
@@ -16,8 +18,8 @@ from ..model.MultiModel import MultiModel
 
 # Model Factory
 # Based on given configuration, it returns the appropiate Model Instance
-def Model(config: IModel) -> Union[SingleModel, MultiModel]:
-    """Returns the instance of a SingleModel or a MultiModel based on the 
+def Model(config: IModel) -> Any:
+    """Returns the instance of an ArimaModel, DecisionModel or MultiDecisionModel based on the 
     provided configuration.
 
     Args:
@@ -25,6 +27,18 @@ def Model(config: IModel) -> Union[SingleModel, MultiModel]:
             The configuration of module to return the instance of.
 
     Returns:
-        Union[SingleModel, MultiModel]
+        Union[ArimaModel, DecisionModel, MultiDecisionModel]
     """
-    return MultiModel(config) if len(config['single_models']) > 1 else SingleModel(config)
+    # Check if it is an ArimaModel
+    if ArimaModel.is_config(config):
+        return ArimaModel(config)
+
+    # Check if it is a DecisionModel
+    # @TODO
+
+    # Check if it is a MultiDecisionModel
+    # @TODO
+
+    # Otherwise, the provided configuration is invalid
+    else:
+        raise ValueError("Couldnt find an instance for the provided model configuration.")

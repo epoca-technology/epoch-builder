@@ -17,12 +17,47 @@ DEFAULT_CONFIG: ITrainingDataConfig = {
     'end': None, 
     'up_percent_change': 1, 
     'down_percent_change': 1, 
-    'arima_models': [
-        {'id': 'A101','arima_models': [{'arima': { 'p': 1, 'd': 0, 'q': 1 }}]},
-        {'id': 'A111','arima_models': [{'arima': { 'p': 1, 'd': 1, 'q': 1 }}]},
-        {'id': 'A112','arima_models': [{'arima': { 'p': 1, 'd': 1, 'q': 2 }}]},
-        {'id': 'A121','arima_models': [{'arima': { 'p': 1, 'd': 2, 'q': 1 }}]},
-        {'id': 'A211','arima_models': [{'arima': { 'p': 2, 'd': 1, 'q': 1 }}]}
+    'single_models': [
+        {
+            'id': 'A101',
+            'single_models': [{
+                'lookback': 300,
+                'arima': { 'predictions': 10, 'p': 1, 'd': 0, 'q': 1 },
+                'interpreter': { 'long': 0.5, 'short': 0.5 }
+            }]
+        },
+        {
+            'id': 'A111',
+            'single_models': [{
+                'lookback': 300,
+                'arima': { 'predictions': 10, 'p': 1, 'd': 1, 'q': 1 },
+                'interpreter': { 'long': 0.5, 'short': 0.5 }
+            }]
+        },
+        {
+            'id': 'A112',
+            'single_models': [{
+                'lookback': 300,
+                'arima': { 'predictions': 10, 'p': 1, 'd': 1, 'q': 2 },
+                'interpreter': { 'long': 0.5, 'short': 0.5 }
+            }]
+        },
+        {
+            'id': 'A121',
+            'single_models': [{
+                'lookback': 300,
+                'arima': { 'predictions': 10, 'p': 1, 'd': 2, 'q': 1 },
+                'interpreter': { 'long': 0.5, 'short': 0.5 }
+            }]
+        },
+        {
+            'id': 'A211',
+            'single_models': [{
+                'lookback': 300,
+                'arima': { 'predictions': 10, 'p': 2, 'd': 1, 'q': 1 },
+                'interpreter': { 'long': 0.5, 'short': 0.5 }
+            }]
+        },
     ]
 }
 
@@ -87,14 +122,14 @@ class TrainingDataTestCase(unittest.TestCase):
         td: TrainingData = TrainingData(config, test_mode=True)
 
         # Make sure the models have been initialized correctly
-        self.assertEqual(len(td.arima_models), len(config['arima_models']))
-        for i, sm in enumerate(config['arima_models']):
-            if sm['id'] != td.arima_models[i].id:
-                self.fail(f"Single Model ID Missmatch: {sm['id']} != {td.arima_models[i].id}")
+        self.assertEqual(len(td.single_models), len(config['single_models']))
+        for i, sm in enumerate(config['single_models']):
+            if sm['id'] != td.single_models[i].id:
+                self.fail(f"Single Model ID Missmatch: {sm['id']} != {td.single_models[i].id}")
 
         # Make sure the ID was generated successfully
         expected_id: str = ''
-        for sm in config['arima_models']:
+        for sm in config['single_models']:
             expected_id = expected_id + sm['id']
         self.assertEqual(expected_id, td.id)
 
@@ -108,29 +143,29 @@ class TrainingDataTestCase(unittest.TestCase):
 
         # Validate the integrity of the DF
         self.assertEqual(td.df.shape[0], 0)
-        self.assertEqual(td.df.shape[1], len(config['arima_models']) + 2)
+        self.assertEqual(td.df.shape[1], len(config['single_models']) + 2)
         
 
 
-    # Cannot initialize with less than 5 Arima Models
+    # Cannot initialize with less than 5 single models
     def testInitializeWithLessThan5Models(self):
         config: ITrainingDataConfig = deepcopy(DEFAULT_CONFIG)
-        config['arima_models'] = config['arima_models'][0:3]
+        config['single_models'] = config['single_models'][0:3]
         with self.assertRaises(ValueError):
             TrainingData(config, test_mode=True)
 
 
-    # Cannot initialize with duplicate Arima Models
+    # Cannot initialize with duplicate single models
     def testInitializeWithDuplicateModels(self):
         config: ITrainingDataConfig = deepcopy(DEFAULT_CONFIG)
-        config['arima_models'][3] = config['arima_models'][4]
+        config['single_models'][3] = config['single_models'][4]
         with self.assertRaises(ValueError):
             TrainingData(config, test_mode=True)
 
-    # Cannot initialize with different Arima Models lookbacks
+    # Cannot initialize with different single models lookbacks
     def testInitializeWithDifferentLookbacks(self):
         config: ITrainingDataConfig = deepcopy(DEFAULT_CONFIG)
-        config['arima_models'][3]['arima_models'][0]['lookback'] = 280
+        config['single_models'][3]['single_models'][0]['lookback'] = 280
         with self.assertRaises(ValueError):
             TrainingData(config, test_mode=True)
 

@@ -1,5 +1,7 @@
 from typing import Tuple, Union, TypedDict
 from pandas import DataFrame, Series, read_csv
+from ta.momentum import rsi
+from ta.trend import ema_indicator
 from modules.utils import Utils
 
 
@@ -58,7 +60,7 @@ class Candlestick:
     
 
 
-    ## Initialization ##
+    ## DataFrames Initializer ##
 
 
 
@@ -201,41 +203,128 @@ class Candlestick:
 
 
 
-    ## Lookback Candlesticks Data ##
-
-
-
+    ## Prediction Candlesticks Data ##
 
 
     @staticmethod
-    def get_lookback_close_prices(lookback: int, current_time: int) -> Series:
-        """Retrieves a series containing all the close prices for the given lookback
-        range.
+    def get_data_to_predict_on(
+        current_timestamp: int,
+        lookback: int, 
+        include_rsi: bool,
+        include_ema: bool
+    ) -> Tuple[Series, Union[float, None], Union[float, None], Union[float, None]]:
+        """Retrieves the prediction data based on provided params.
 
         Args:
+            current_timestamp: int
+                Current 1m candlestick's open timestamp in milliseconds
             lookback: int
                 The lookback number set in the model.
-            current_time: int
-                Current 1m candlestick's open timestamp in milliseconds
+            include_rsi: bool 
+                Includes the RSI value in the packed tuple. If False, will
+                populate the value with None instead.
+            include_ema: bool
+                Includes the short and long EMA values in the packed tuple. 
+                If False, will populate the value with None instead.
 
         Returns:
-            Series
+            Tuple[Series, Union[float, None], Union[float, None], Union[float, None]]
+                (Series, RSI, Short EMA, Long EMA)
 
         Raises:
             ValueError:
                 If the subset forecast df has less or more rows than the provided lookback.
         """
+        # Init TA values
+        rsi: Union[bool, None] = None
+        short_ema: Union[bool, None] = None
+        long_ema: Union[bool, None] = None
 
         # Subset the Prediction DF to only include the rows that will be used and reset indexes
-        df: DataFrame = Candlestick.PREDICTION_DF[Candlestick.PREDICTION_DF['ct'] <= current_time].iloc[-lookback:]
+        df: DataFrame = Candlestick.PREDICTION_DF[Candlestick.PREDICTION_DF['ct'] <= current_timestamp].iloc[-lookback:]
+        #df.reset_index(drop=True, inplace=True)
 
         # Make sure the number of rows in the df matches the lookback value
         if df.shape[0] != lookback:
             raise ValueError(f"The number of rows in the subset prediction df is different to the lookback provided. \
                 DF Shape: {str(df.shape[0])}, Lookback: {lookback}")
 
-        # Return the close price series
-        return df['c']
+        # Include the RSI if applies
+        if include_rsi:
+            rsi = Candlestick._get_rsi(df['c'])
+
+        # Include the EMA if applies
+        if include_ema:
+            short_ema, long_ema = Candlestick._get_ema(df['c'])
+
+        # Return the packed values
+        return df['c'], rsi, short_ema, long_ema
+
+
+
+
+
+
+    @staticmethod
+    def _get_rsi(close_series: Series, window: int = 7) -> float:
+        """Returns the last RSI value for a given series.
+
+        Args:
+            close_series: Series
+                The close price series that will be used by the indicator.
+            window: int 
+                The number of periods to be used in the RSI calculation (Default: 7).
+        
+        Returns:
+            float
+        
+        Raises:
+            ValueError:
+                If the number of rows in the series is equals or less to the RSI window size
+        """
+        # Make sure the number of rows is greater than the window
+        if close_series.shape[0] <= window:
+            raise ValueError(f"The number of rows in the series must be greater than the RSI Window. \
+                Received: {close_series.shape[0]}")
+                
+        # Calculate and return the RSI
+        rsi_result: Series = rsi(close_series, window=window)
+        return round(rsi_result.iloc[-1], 2)
+
+
+
+
+
+    @staticmethod
+    def _get_ema(close_series: Series, short_window: int = 7, long_window = 20) -> Tuple[float, float]:
+        """Returns the last EMA values for a given series.
+
+        Args:
+            close_series: Series
+                The close price series that will be used by the indicator.
+            short_window: int 
+                The number of periods to be used by the Short EMA (Default: 7).
+            long_window: int
+                The number of periods to be used by the Long EMA (Default: 20).
+        
+        Returns:
+            Tuple(float, float)
+
+        Raises:
+            ValueError:
+                If the rows in the series are less than the short or long EMA window.
+        """
+        # Make sure the number of rows is greater than the short and long window
+        if close_series.shape[0] <= short_window or close_series.shape[0] <= long_window:
+            raise ValueError(f"The number of rows in the series must be greater than the short and long EMA windows. \
+                Received: {close_series.shape[0]}")
+
+        # Init the short and long EMAs
+        short_ema: Series = ema_indicator(close_series, window=short_window)
+        long_ema: Series = ema_indicator(close_series, window=long_window)
+        
+        # Pack the last values and return them
+        return round(short_ema.iloc[-1], 2), round(long_ema.iloc[-1], 2)
 
 
 
@@ -245,7 +334,7 @@ class Candlestick:
 
 
     @staticmethod
-    def get_lookback_prediction_range(lookback: int, current_time: int) -> Tuple[int, int]:
+    def get_current_prediction_range(lookback: int, current_time: int) -> Tuple[int, int]:
         """Based on the model's lookback and the current time, it will retrieve the open time
         and the close time of the first and the last candlestick used to generate the prediction.
 

@@ -1,9 +1,9 @@
 from modules.candlestick import Candlestick
-from modules.model import ArimaModel
 
 
 # Initialize the candlesticks
-Candlestick.init(ArimaModel.DEFAULT_LOOKBACK)
+LOOKBACK = 300
+Candlestick.init(LOOKBACK)
 
 # Notify the user
 print("PREDICTION BACKTESTING UNIT TESTS\n")

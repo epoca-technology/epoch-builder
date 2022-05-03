@@ -7,41 +7,7 @@
     "stop_loss": 1.5,
     "idle_minutes_on_position_close": 30,
     "models": [
-        {
-            "id": "A101",
-            "single_models": [
-                {
-                    "lookback": 300,
-                    "arima": {
-                        "predictions": 10,
-                        "p": 1,
-                        "d": 0,
-                        "q": 1
-                    },
-                    "interpreter": {
-                        "long": 0.05,
-                        "short": 0.05
-                    }
-                }
-            ]
-        },
-        {
-            "id": "A111",
-            "single_models": [
-                {
-                    "lookback": 300,
-                    "arima": {
-                        "predictions": 10,
-                        "p": 1,
-                        "d": 1,
-                        "q": 1
-                    },
-                    "interpreter": {
-                        "long": 0.05,
-                        "short": 0.05
-                    }
-                }
-            ]
-        }
+        { "id": "A101","arima_models": [{"arima": {"p": 1, "d": 0,"q": 1}}] },
+        { "id": "A111","arima_models": [{"arima": {"p": 1, "d": 1,"q": 1}}] }
     ]
 }

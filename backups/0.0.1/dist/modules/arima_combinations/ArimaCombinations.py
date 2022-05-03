@@ -3,8 +3,8 @@ from os.path import exists
 from typing import List, Tuple, Union
 from itertools import product
 from json import dumps
-from modules.model import IModel
 from modules.backtest import IBacktestConfig
+from modules.model import IModel
 from modules.arima_combinations import IArimaCombinationsConfig, IArimaCombination
 
 
@@ -197,7 +197,11 @@ class ArimaCombinations:
         """
         return {
             "id": f"A{comb['p']}{comb['d']}{comb['q']}",
-            "arima_models":[{"arima": { "p": comb['p'], "d": comb['d'], "q": comb['q'] }}]
+            "single_models":[{
+                "lookback": 300,
+                "arima": { "predictions": 10, "p": comb['p'], "d": comb['d'], "q": comb['q'] },
+                "interpreter": { "long": 0.05, "short": 0.05 }
+            }]
         }
 
 

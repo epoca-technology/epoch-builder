@@ -6,8 +6,8 @@ from pandas import DataFrame, Series
 from tqdm import tqdm
 from modules.candlestick import Candlestick
 from modules.utils import Utils
-from modules.model import ITrainingDataConfig, ArimaModel, ITrainingDataActivePosition, IPrediction, \
-    ITrainingDataReceipt, ITrainingDataPriceActionInsight, ITrainingDataPredictionInsight
+from modules.model import ITrainingDataConfig, SingleModel, ITrainingDataActivePosition, IPrediction, \
+    ITrainingDataReceipt, ITrainingDataPredictionInsight
 
 
 
@@ -26,7 +26,7 @@ class TrainingData:
             If test_mode is enabled, it won't initialize the candlesticks and will perform predictions
             with cache disabled
         id: str
-            The identification of the training data. This value is generated based on the Arima Models
+            The identification of the training data. This value is generated based on the single models
             that will be used to generate the training data.
         start: int
             The open timestamp of the first 1m candlestick.
@@ -36,13 +36,13 @@ class TrainingData:
             The percentage that needs to go up to close an up position
         down_percent_change: float
             The percentage that needs to go down to close a down position
-        arima_models: List[ArimaModel]
-            The list of ArimaModels that will be used to generate the training data.
+        single_models: List[SingleModel]
+            The list of single models that will be used to generate the training data.
         df: DataFrame
             Pandas Dataframe containing all the features and labels populated every time a position
             is closed. This DF will be dumped as a csv once the process completes.
         active: Union[ITrainingDataActivePosition, None]
-            Dictionary containing all the Arima Model predictions as well as the up and down price
+            Dictionary containing all the single model predictions as well as the up and down price
             details.
     """
 
@@ -64,44 +64,42 @@ class TrainingData:
 
         Raises:
             ValueError:
-                If less than 5 Arima Models are provided.
-                If a duplicate Arima Model is found.
-                If the Arima Models don't have the same lookback.
+                If less than 5 single models are provided.
+                If a duplicate single model is found.
+                If the single models don't have the same lookback.
         """
-        # Make sure that at least 5 Arima Models were provided
-        if len(config['arima_models']) < 5:
-            raise ValueError(f"A minimum of 5 Arima Models are required in order to generate the training data. \
-                Received: {len(config['arima_models'])}")
+        # Make sure that at least 5 single models were provided
+        if len(config['single_models']) < 5:
+            raise ValueError(f"A minimum of 5 single models are required in order to generate the training data. \
+                Received: {len(config['single_models'])}")
 
         # Initialize the type of execution
         self.test_mode: bool = test_mode
 
         # Initialize the data that will be populated
         self.id: str = ''
-        self.arima_models: List[ArimaModel] = []
+        self.single_models: List[SingleModel] = []
         df_data: Dict = {}
-        first_lookback: Union[int, None] = None
+        first_lookback: int = config['single_models'][0]['single_models'][0]['lookback']
 
-        # Iterate over each Arima Model
-        for m in config['arima_models']:
+        # Iterate over each single model
+        for m in config['single_models']:
             # Make sure it isn't a duplicate
             if m['id'] in self.id:
-                raise ValueError(f"Duplicate Arima Model provided: {m['id']}")
+                raise ValueError(f"Duplicate Single Model provided: {m['id']}")
+            
+            # Make sure the lookbacks are identical
+            if m['single_models'][0]['lookback'] != first_lookback:
+                raise ValueError(f"Single Model lookback missmatch: {m['single_models'][0]['lookback']} != {first_lookback}")
 
             # Populate Instance Data
             self.id = self.id + m['id']
-            self.arima_models.append(ArimaModel(m))
+            self.single_models.append(SingleModel(m))
             df_data[m['id']] = []
-            
-            # Make sure the lookbacks are identical
-            if first_lookback == None:
-                first_lookback = self.arima_models[0].lookback
-            if self.arima_models[-1].lookback != first_lookback:
-                raise ValueError(f"Arima Model lookback missmatch: {self.arima_models[-1].lookback} != {first_lookback}")
 
         # Initialize the candlesticks if not unit testing
         if not self.test_mode:
-            Candlestick.init(self.arima_models[0].lookback, config.get('start'), config.get('end'))
+            Candlestick.init(self.single_models[0].lookback, config.get('start'), config.get('end'))
 
         # Init the start and end
         self.start: int = int(Candlestick.DF.iloc[0]['ot'])
@@ -169,7 +167,7 @@ class TrainingData:
 
 
     def _open_position(self, candlestick: Series) -> None:
-        """Creates a new position based on the open_price and the Arima Models.
+        """Creates a new position based on the open_price and the single models.
 
         Args:
             candlestick: Series
@@ -178,8 +176,8 @@ class TrainingData:
         # Calculate the position range
         up_price, down_price = self._get_position_range(candlestick['o'])
 
-        # Generate the Arima Model predictions
-        preds: Dict = {m.id: self._get_prediction_result(m.predict(candlestick['ot'], enable_cache=not self.test_mode)) for m in self.arima_models}
+        # Generate the single model predictions
+        preds: Dict = {m.id: self._get_prediction_result(m.predict(candlestick['ot'], enable_cache=not self.test_mode)) for m in self.single_models}
 
         # Finally, populate the active position dict
         self.active = {
@@ -211,13 +209,13 @@ class TrainingData:
 
 
     def _get_prediction_result(self, pred: IPrediction) -> int:
-        """Given a Arima Model Prediction, it will convert its value to 
+        """Given a Single Model Prediction, it will convert its value to 
         the value required by the decision model to learn properly.
         Long (1) = 2, Short (-1) = 1, Neutral (0) = 0.
 
         Args:
             pred: IPrediction
-                A prediction generated by a Arima Model.
+                A prediction generated by a Single Model.
 
         Returns:
             int (0|1|2)
@@ -344,12 +342,15 @@ class TrainingData:
             'end': self.end,
             'up_percent_change': self.up_percent_change,
             'down_percent_change': self.down_percent_change,
-            'arima_models': [m.get_model() for m in self.arima_models],
+            'single_models': [m.get_model() for m in self.single_models],
             'duration_minutes': Utils.from_milliseconds_to_minutes(current_time - execution_start),
             'rows': self.df.shape[0],
             'columns': self.df.shape[1],
-            'price_action_insight': self._get_price_action_insight(),
-            'predictions_insight': {m.id: self._get_prediction_insight_for_model(m.id) for m in self.arima_models}
+            'price_action_insight': {
+                'up': Utils.get_percentage_out_of_total(self.df['up'].value_counts()[1], self.df.shape[0]),
+                'down': Utils.get_percentage_out_of_total(self.df['down'].value_counts()[1], self.df.shape[0]),
+            },
+            'predictions_insight': {m.id: self._get_prediction_insight_for_model(m.id) for m in self.single_models}
         }
 
 
@@ -357,25 +358,8 @@ class TrainingData:
 
 
 
-
-    def _get_price_action_insight(self) -> ITrainingDataPriceActionInsight:
-        """Retrieves the price action insight.
-
-        Returns:
-            ITrainingDataPriceActionInsight
-        """
-        return {
-            'up': Utils.get_percentage_out_of_total(self.df['up'].value_counts()[1], self.df.shape[0]),
-            'down': Utils.get_percentage_out_of_total(self.df['down'].value_counts()[1], self.df.shape[0]),
-        }
-
-
-
-
-
-
     def _get_prediction_insight_for_model(self, model_id: str) -> ITrainingDataPredictionInsight:
-        """Retrieves the prediction insight for a given model.
+        """Retrieves the prediction analysis for a given model.
 
         Args:
             model_id: str

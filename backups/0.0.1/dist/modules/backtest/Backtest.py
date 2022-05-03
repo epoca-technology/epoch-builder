@@ -1,11 +1,11 @@
 from os import makedirs
 from os.path import exists
-from typing import List, Union, Any
+from typing import List, Union
 from json import dumps
 from tqdm import tqdm
 from modules.candlestick import Candlestick
 from modules.utils import Utils
-from modules.model import IModel, Model, IPrediction, ArimaModel
+from modules.model import IModel, Model, IPrediction, SingleModel, MultiModel
 from modules.backtest import IBacktestConfig, Position, IBacktestPerformance, IBacktestResult
 
 
@@ -65,26 +65,23 @@ class Backtest:
     ## Initialization ##
 
 
-    def __init__(self, config: IBacktestConfig, test_mode: bool = False):
+    def __init__(self, config: IBacktestConfig):
         """Initializes the Backtesting Instance as well as the Candlesticks.
 
         Args:
             config: IBacktestConfig
                 The configuration that will be used during the backtesting process
-            test_mode: bool
-                Indicates if the execution is running from unit tests.
         """
         # ID & Description
         self.id: str = config['id']
         self.description: str = config['description']
 
         # Initialize the models to be tested
-        self.models: List[ArimaModel] = [Model(m) for m in config['models']]
+        self.models: List[Union[SingleModel, MultiModel]] = [Model(m) for m in config['models']]
         self.results: List[IBacktestResult] = []
 
-        # Initialize the candlesticks based on the models' lookback and the provided start and end dates
-        if not test_mode:
-            Candlestick.init(self.models[0].get_lookback(), config.get('start'), config.get('end'))
+        # Initialize the candlesticks based on the max lookback and the provided start and end dates
+        Candlestick.init(max([m.get_max_lookback() for m in self.models]), config.get('start'), config.get('end'))
         
         # Init the start and end
         self.start: int = int(Candlestick.DF.iloc[0]['ot'])
