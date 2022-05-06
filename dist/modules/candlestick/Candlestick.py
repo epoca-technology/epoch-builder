@@ -45,7 +45,7 @@ class Candlestick:
 
     # Prediction Candlesticks Configuration
     PREDICTION_CANDLESTICK_CONFIG: ICandlestickConfig = {
-        "columns": ("ot", "ct", "c"),
+        "columns": ("ot", "ct", "o", "h", "l", "c"),
         "csv_file": "candlesticks/prediction_candlesticks.csv"
     }
 
@@ -206,6 +206,41 @@ class Candlestick:
 
 
 
+    @staticmethod
+    def get_lookback_df(lookback: int, current_time: int) -> DataFrame:
+        """Retrieves the prediction candlesticks DataFrame containing all the initialized
+        columns
+
+        Args:
+            lookback: int
+                The lookback number set in the model.
+            current_time: int
+                Current 1m candlestick's open timestamp in milliseconds
+
+        Returns:
+            DataFrame
+
+        Raises:
+            ValueError:
+                If the prediction subset DF rows are not identical to the provided lookback.
+        """
+
+        # Subset the Prediction DF to only include the rows that will be used and reset indexes
+        df: DataFrame = Candlestick.PREDICTION_DF[Candlestick.PREDICTION_DF['ct'] <= current_time].iloc[-lookback:]
+
+        # Make sure the number of rows in the df matches the lookback value
+        if df.shape[0] != lookback:
+            raise ValueError(f"The number of rows in the subset prediction df is different to the lookback provided. \
+                DF Rows: {df.shape[0]}, Lookback: {lookback}")
+
+        # Finally, return the DF
+        return df
+
+
+
+
+
+
 
     @staticmethod
     def get_lookback_close_prices(lookback: int, current_time: int) -> Series:
@@ -225,17 +260,7 @@ class Candlestick:
             ValueError:
                 If the subset forecast df has less or more rows than the provided lookback.
         """
-
-        # Subset the Prediction DF to only include the rows that will be used and reset indexes
-        df: DataFrame = Candlestick.PREDICTION_DF[Candlestick.PREDICTION_DF['ct'] <= current_time].iloc[-lookback:]
-
-        # Make sure the number of rows in the df matches the lookback value
-        if df.shape[0] != lookback:
-            raise ValueError(f"The number of rows in the subset prediction df is different to the lookback provided. \
-                DF Shape: {str(df.shape[0])}, Lookback: {lookback}")
-
-        # Return the close price series
-        return df['c']
+        return Candlestick.get_lookback_df(lookback, current_time)['c']
 
 
 
@@ -259,7 +284,7 @@ class Candlestick:
             Tuple[int, int] (first_ot, last_ct)
         """
         # Subset the DataFrame
-        df: DataFrame = Candlestick.PREDICTION_DF[Candlestick.PREDICTION_DF['ct'] <= current_time].iloc[-lookback:]
+        df: DataFrame = Candlestick.get_lookback_df(lookback, current_time)
 
         # Return the first ot and the last ct
         return int(df.iloc[0]['ot']), int(df.iloc[-1]['ct'])

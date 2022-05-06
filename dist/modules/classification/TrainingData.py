@@ -6,7 +6,8 @@ from pandas import DataFrame, Series
 from tqdm import tqdm
 from modules.candlestick import Candlestick
 from modules.utils import Utils
-from modules.model import ITrainingDataConfig, ArimaModel, ITrainingDataActivePosition, IPrediction, \
+from modules.model import ArimaModel, IPrediction
+from modules.classification import ITrainingDataConfig, ITrainingDataActivePosition, \
     ITrainingDataFile, ITrainingDataPriceActionsInsight, ITrainingDataPredictionInsight
 
 
@@ -102,8 +103,8 @@ class TrainingData:
             
             # Make sure the lookbacks are identical
             if first_lookback == None:
-                first_lookback = self.arima_models[0].lookback
-            if self.arima_models[-1].lookback != first_lookback:
+                first_lookback = self.arima_models[0].get_lookback() 
+            if self.arima_models[-1].get_lookback() != first_lookback:
                 raise ValueError(f"Arima Model lookback missmatch: {self.arima_models[-1].lookback} != {first_lookback}")
 
         # Initialize the candlesticks if not unit testing

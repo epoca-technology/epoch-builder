@@ -4,7 +4,7 @@ from copy import deepcopy
 from pandas import Series
 from modules.candlestick import Candlestick
 from modules.utils import Utils
-from modules.model import TrainingData, ITrainingDataConfig
+from modules.classification import TrainingData, ITrainingDataConfig
 
 
 
