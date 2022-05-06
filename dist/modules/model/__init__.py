@@ -1,5 +1,5 @@
 from typing import Union, Any
-from ..model.types import IArimaModelInterpreterConfig, IArimaConfig, IArimaModelConfig, \
+from ..model.types import IArimaModelInterpreterConfig, IArimaModelConfig, \
     IPrediction, IPredictionMetaData, IModel, ITrainingDataConfig, \
         ITrainingDataActivePosition, ITrainingDataFile, ITrainingDataPriceActionsInsight, \
             ITrainingDataPredictionInsight
