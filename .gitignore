@@ -61,8 +61,8 @@ backtest_configurations/
 db/
 db_merge/
 
-# Regression Models
-regression_models/
+# Saved Keras Models
+saved_keras_models/
 
 # Training Data
 training_data/

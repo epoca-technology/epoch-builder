@@ -1,6 +1,6 @@
+from typing import List, Union, Any
 from os import makedirs
 from os.path import exists
-from typing import List, Union, Any
 from json import dumps
 from tqdm import tqdm
 from modules.candlestick import Candlestick

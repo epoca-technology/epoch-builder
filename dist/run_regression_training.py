@@ -7,8 +7,8 @@ from modules.regression import IRegressionTrainingConfig, RegressionTraining
 # configuration file.
 #
 # Identification:
-#   name: Must be compatible with all file systems as the directory in which the model is saved will
-#       use this value.
+#   id: The ID of the model. Must be descriptive, compatible with filesystems and preffixed with 'R_'
+#   description: Any relevant data that should be attached to the trained model.
 #
 # Training Configuration:
 #    lookback: The number of prediction candlesticks that will look into the past in order to make a prediction.
@@ -17,12 +17,13 @@ from modules.regression import IRegressionTrainingConfig, RegressionTraining
 #    loss: The loss function to be used to train the model
 #    metric: The metric function to be used to evaluate the training the model
 #    batch_size: The size of the training batches
+#    keras_model: The configuration to be used to initialize a Keras Model
 #
 #
 # REGRESSION TRAINING PROCESS
 # The Regression Training Instance will initialize all the required properties, build a model and
 # train it. Once the process completes, the model and the training certificate will be saved in the
-# {OUTPUT_PATH}/{MODEL_NAME}.
+# {OUTPUT_PATH}/{MODEL_ID}.
 
 
 # REGRESSION TRAINING CONFIGURATION
@@ -41,5 +42,5 @@ regression_training: RegressionTraining = RegressionTraining(config)
 # Results as saved when the execution has completed. If the execution is interrupted before
 # completion, results will not be saved.
 print("REGRESSION TRAINING RUNNING\n")
-regression_training.train()
+regression_training.run()
 print("\nREGRESSION TRAINING COMPLETED")

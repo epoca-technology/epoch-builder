@@ -1,5 +1,5 @@
 from ..regression.types import IRegressionConfig, IRegressionTrainingConfig, ITrainingWindowGeneratorConfig, \
-    IRegressionTrainingHistory, IRegressionTrainingCertificate
+    IRegressionTrainingCertificate
 from ..regression.Regression import Regression
 from ..regression.TrainingWindowGenerator import TrainingWindowGenerator
 from ..regression.RegressionTraining import RegressionTraining

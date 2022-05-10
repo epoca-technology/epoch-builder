@@ -1,6 +1,6 @@
-from typing import TypedDict, List, Union
+from typing import TypedDict, List, Dict
 from pandas import DataFrame
-from modules.keras_models import IKerasModelConfig
+from modules.keras_models import IKerasModelConfig, IKerasModelSummary, IKerasModelTrainingHistory
 
 
 
@@ -30,8 +30,8 @@ class IRegressionConfig(TypedDict):
 # Regression Training Configuration
 # The configuration that will be used to initialize, train and save the model.
 class IRegressionTrainingConfig(TypedDict):
-    # The name of the model. 
-    name: str
+    # The ID of the model. Must be descriptive, compatible with filesystems and preffixed with 'R_'
+    id: str
 
     # Any relevant data that should be attached to the trained model.
     description: str
@@ -90,15 +90,7 @@ class ITrainingWindowGeneratorConfig(TypedDict):
 
 
 
-# Training History
-#
-class IRegressionTrainingHistory(TypedDict):
-    loss: List[float]
-    val_loss: List[float]
-    mean_absolute_error: Union[List[float], None]
-    val_mean_absolute_error: Union[List[float], None]
-    mean_squared_error: Union[List[float], None]
-    val_mean_squared_error: Union[List[float], None]
+
 
 
 
@@ -107,6 +99,48 @@ class IRegressionTrainingHistory(TypedDict):
 # Regression Training Certificate
 #
 class IRegressionTrainingCertificate(TypedDict):
+    ## Identification ##
     id: str
-    name: str
     description: str
+
+
+    ## Training Data ##
+
+    # Date Range
+    training_data_start: int    # Open Time of the first prediction candlestick
+    training_data_end: int      # Close Time of the last prediction candlestick
+
+    # Dataset Sizes
+    train_size: int     # Number of rows in the train dataset
+    val_size: int       # Number of rows in the val dataset
+    test_size: int      # Number of rows in the test dataset
+
+    # Data Summary - Description extracted directly from the normalized dataframe
+    training_data_summary: Dict[str, Dict[str, float]]
+
+
+    ## Training Configuration ##
+    lookback: int
+    predictions: int
+    learning_rate: float
+    optimizer: str
+    loss: str
+    metric: str
+    batch_size: int
+    keras_model_config: IKerasModelConfig
+
+
+    ## Training ##
+
+    # Date Range
+    training_start: int     # Time in which the training started
+    training_end: int       # Time in which the training ended
+
+    # Training performance by epoch
+    training_history: IKerasModelTrainingHistory
+
+    # Result of the evaluation of the test dataset
+    test_evaluation: List[float]
+
+    # The summary of the KerasModel that has been trained and saved
+    keras_model_summary: IKerasModelSummary

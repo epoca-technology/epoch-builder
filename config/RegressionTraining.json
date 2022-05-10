@@ -1,16 +1,16 @@
 {
-    "name": "LSTM_MEDIUM_STACK_BALANCED_DROPOUT_LB50_P5_LR001_ADAM_MSE",
+    "id": "R_CSS_512256_relu_44_LB100_P10_LR001_ADAM_MAE",
     "description": "This is just a test to see how it goes.",
-    "lookback": 50,
-    "predictions": 5,
-    "learning_rate": 0.0001,
-    "optimizer": "adam",
+    "lookback": 100,
+    "predictions": 10,
+    "learning_rate": 0.001,
+    "optimizer": "rmsprop",
     "loss": "mae",
     "metric": "mse",
     "batch_size": 32,
     "keras_model": {
-        "name": "LSTM_MEDIUM_STACK_BALANCED_DROPOUT",
-        "units": [80, 80, 80, 80],
-        "dropout_rates": [0.2, 0.2, 0.2]
+        "name": "CNN_SOFT_STACK",
+        "filters": [256, 128],
+        "activations": ["relu", "relu"]
     }
 }
