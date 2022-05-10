@@ -77,6 +77,8 @@ prediction-backtesting
     │
     DBMerge.sh
     │
+    RegressionTraining.sh
+    │
     TrainingData.sh
     │
     UnitTests.sh
@@ -91,7 +93,7 @@ prediction-backtesting
 
 - Set the permissions on the executables (This only needs to be done once):
 
-  `chmod u+x ArimaCombinations.sh Backtest.sh DBMerge.sh TrainingData.sh UnitTests.sh`
+  `chmod u+x ArimaCombinations.sh Backtest.sh DBMerge.sh RegressionTraining.sh TrainingData.sh UnitTests.sh`
 
 
 

@@ -31,9 +31,10 @@ class Candlestick:
         DF: DataFrame
             One Minute Candlesticks DataFrame with the following columns: ot, ct, o, h, l, c
         PREDICTION_DF: DataFrame 
-            Prediction Candlesticks DataFrame with the following columns: ot, ct, c
-
-    Public Methods:
+            Prediction Candlesticks DataFrame with the following columns: ot, ct, o, h, l, c
+        NORMALIZED_PREDICTION_DF: Union[DataFrame, None] 
+            Prediction Candlesticks DataFrame with the following columns normalized: o, h, l, c.
+            Only initialized when normalized is set to True
         
     """
 
@@ -53,7 +54,7 @@ class Candlestick:
     # DataFrames
     DF: DataFrame = DataFrame()
     PREDICTION_DF: DataFrame = DataFrame()
-
+    NORMALIZED_PREDICTION_DF: Union[DataFrame, None] = None
 
     
 
@@ -66,7 +67,8 @@ class Candlestick:
     def init(
         max_lookback: int, 
         start: Union[str, int, None] = None, 
-        end: Union[str, int, None] = None
+        end: Union[str, int, None] = None,
+        normalized_df: bool = True
     ) -> None:
         """Initializes the Candlestick Class based on the provided date range (If any).
         It also removes the 1m candlesticks that are within the lookback period.
@@ -78,6 +80,9 @@ class Candlestick:
                 Start Date for the candlestick dataframes.
             end: Union[str, int, None]
                 End Date for the candlestick dataframes.
+            normalized_df: bool
+                If this arg is True, it will also create a normalized DF based on the 
+                PREDICTION_DF
 
         Raises:
             ValueError: 
@@ -107,6 +112,17 @@ class Candlestick:
         if Candlestick.DF.shape[0] <= Candlestick.PREDICTION_DF.shape[0]:
             raise ValueError(f"The default candlesticks dataframe must contain more rows than the prediction dataframe. \
                 {Candlestick.DF.shape[0]} <= {Candlestick.PREDICTION_DF.shape[0]}")
+
+        # Check if the normalized df needs to be initialized
+        if normalized_df:
+            # Populate the MIN & MAX
+            min: float = Candlestick.PREDICTION_DF['l'].min()
+            max: float = Candlestick.PREDICTION_DF['h'].max()
+
+            # Initialize the normalized df
+            Candlestick.NORMALIZED_PREDICTION_DF = Candlestick.PREDICTION_DF[['o', 'h', 'l', 'c']].apply(lambda x: (x - min) / (max - min))
+
+
 
 
 
@@ -207,7 +223,7 @@ class Candlestick:
 
 
     @staticmethod
-    def get_lookback_df(lookback: int, current_time: int) -> DataFrame:
+    def get_lookback_df(lookback: int, current_time: int, normalized: bool = False) -> DataFrame:
         """Retrieves the prediction candlesticks DataFrame containing all the initialized
         columns
 
@@ -216,6 +232,9 @@ class Candlestick:
                 The lookback number set in the model.
             current_time: int
                 Current 1m candlestick's open timestamp in milliseconds
+            normalized: bool
+                If True, returns the normalized DF instead of the traditional. Keep in mind
+                that the normalized df does not include ot or ct
 
         Returns:
             DataFrame
@@ -225,8 +244,9 @@ class Candlestick:
                 If the prediction subset DF rows are not identical to the provided lookback.
         """
 
-        # Subset the Prediction DF to only include the rows that will be used and reset indexes
-        df: DataFrame = Candlestick.PREDICTION_DF[Candlestick.PREDICTION_DF['ct'] <= current_time].iloc[-lookback:]
+        # Subset the Prediction DF to only include the rows that will be used
+        df: DataFrame = Candlestick.PREDICTION_DF[Candlestick.PREDICTION_DF['ct'] <= current_time].iloc[-lookback:]\
+            if not normalized else Candlestick.NORMALIZED_PREDICTION_DF[Candlestick.PREDICTION_DF['ct'] <= current_time].iloc[-lookback:]
 
         # Make sure the number of rows in the df matches the lookback value
         if df.shape[0] != lookback:

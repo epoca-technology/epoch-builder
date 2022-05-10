@@ -1,0 +1,16 @@
+{
+    "name": "LSTM_MEDIUM_STACK_BALANCED_DROPOUT_LB50_P5_LR001_ADAM_MSE",
+    "description": "This is just a test to see how it goes.",
+    "lookback": 50,
+    "predictions": 5,
+    "learning_rate": 0.0001,
+    "optimizer": "adam",
+    "loss": "mae",
+    "metric": "mse",
+    "batch_size": 32,
+    "keras_model": {
+        "name": "LSTM_MEDIUM_STACK_BALANCED_DROPOUT",
+        "units": [80, 80, 80, 80],
+        "dropout_rates": [0.2, 0.2, 0.2]
+    }
+}

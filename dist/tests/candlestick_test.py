@@ -22,6 +22,38 @@ class CandlestickTestCase(unittest.TestCase):
 
 
 
+    # Can retrieve a lookback df
+    def testGetLookbackDF(self):
+        # Initialize a default candlestick
+        default_df = Candlestick.DF.iloc[185255]
+
+        # Retrieve the lookback df
+        df = Candlestick.get_lookback_df(300, default_df['ot'])
+        self.assertEqual(df.shape[0], 300)
+        self.assertEqual(df.shape[1], len(Candlestick.PREDICTION_CANDLESTICK_CONFIG['columns']))
+
+        # The values should not be normalized
+        norm_df = df[(df['o'] <= 1) | (df['h'] <= 1) | (df['l'] <= 1) | (df['c'] <= 1)]
+        self.assertEqual(norm_df.shape[0], 0)
+
+
+
+
+    # Can retrieve a normalized lookback df
+    def testGetNormalizedLookbackDF(self):
+        # Initialize a default candlestick
+        default_df = Candlestick.DF.iloc[185255]
+
+        # Retrieve the lookback df
+        df = Candlestick.get_lookback_df(300, default_df['ot'], normalized=True)
+        self.assertEqual(df.shape[0], 300)
+        self.assertEqual(df.shape[1], 4) # o, h, l, c
+        
+        # The values should not be normalized
+        norm_df = df[(df['o'] <= 1) | (df['h'] <= 1) | (df['l'] <= 1) | (df['c'] <= 1)]
+        self.assertEqual(norm_df.shape[0], 300)
+
+
 
 
     # Can retrieve the close prices for any lookback

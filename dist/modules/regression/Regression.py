@@ -3,7 +3,7 @@ from typing import Union
 
 
 
-class Forecasting:
+class Regression:
     """
     """
 

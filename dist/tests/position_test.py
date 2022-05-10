@@ -7,7 +7,7 @@ from modules.backtest import Position
 
 
 # Make Panda's floats more readable
-set_option('display.float_format', lambda x: '%.2f' % x)
+#set_option('display.float_format', lambda x: '%.2f' % x)
 
 
 ## Test Helpers

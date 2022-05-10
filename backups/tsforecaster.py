@@ -9,7 +9,6 @@ from keras.layers import Dense, Flatten, Reshape, Conv1D, LSTM, Lambda, LSTMCell
 from keras.callbacks import EarlyStopping
 from keras.optimizers import adam_v2
 from keras.preprocessing.timeseries import timeseries_dataset_from_array
-from modules.utils import Utils
 
 
 # Make Panda's floats more readable
