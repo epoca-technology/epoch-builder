@@ -1,6 +1,6 @@
 from typing import TypedDict, List, Union, Dict, Any
 from modules.arima import IArimaConfig
-
+from modules.interpreter import IPercentChangeInterpreterConfig
 
 
 
@@ -63,16 +63,6 @@ class IPrediction(TypedDict):
 
 
 
-# Arima Interpreter Configuration
-# The configuration used in order to interpret the model's predictions based on the 
-# percentual change from the first to the last prediction.
-class IArimaModelInterpreterConfig(TypedDict):
-    long: float
-    short: float
-
-
-
-
 
 # ArimaModel Configuration
 # The configuration that will be use to generate and interpret predictions.
@@ -87,7 +77,7 @@ class IArimaModelConfig(TypedDict):
     arima: IArimaConfig
 
     # The interpreter that will determine the prediction's result
-    interpreter: IArimaModelInterpreterConfig
+    interpreter: IPercentChangeInterpreterConfig
 
 
 
@@ -98,12 +88,19 @@ class IArimaModelConfig(TypedDict):
 
 
 
-## DecisionModel ##
+## Regression Model ##
 
 
 
 
-## MultiDecisionModel ##
+
+
+
+## Classification Model ##
+
+
+
+
 
 
 
@@ -121,17 +118,17 @@ class IModel(TypedDict):
 
     # The number of decision models that must agree in order to output a non-neutral prediction result.
     # This property only exists in MultiDeceisionModel
-    consensus: Union[int, None]
+    #consensus: Union[int, None]
 
     # The minimum probability required to output a non-neutral prediction result. Only present in 
     # DecisionModels & MultiDecisionModels
-    minimum_probability: Union[float, None]
+    #minimum_probability: Union[float, None]
 
     # The list of ArimaModels that will be used to predict accordingly based on the type of model.
-    arima_models: List[IArimaModelConfig]
+    arima_models: Union[List[IArimaModelConfig], None]
 
     # @TODO
-    decision_models: Union[List[Any], None]
+    #decision_models: Union[List[Any], None]
 
 
 

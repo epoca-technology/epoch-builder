@@ -1,18 +1,54 @@
 {
-    "id": "Apdq_1_1",
-    "description": "The purpose of this backtest is to find out how different p, d, q combinations can output better results.",
+    "id": "Apdq_2_1",
+    "description": "The purpose of this backtest is to find out how different p, d, q combinations can output better results with different TP and SL.",
     "start": "1/10/2021",
     "end": "22/04/2022",
     "take_profit": 1,
-    "stop_loss": 1.5,
+    "stop_loss": 1,
     "idle_minutes_on_position_close": 30,
     "models": [
         {
-            "id": "A101",
+            "id": "A202",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 2,
+                        "d": 0,
+                        "q": 2
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A222",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 2,
+                        "d": 2,
+                        "q": 2
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A122",
             "arima_models": [
                 {
                     "arima": {
                         "p": 1,
+                        "d": 2,
+                        "q": 2
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A201",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 2,
                         "d": 0,
                         "q": 1
                     }
@@ -20,13 +56,73 @@
             ]
         },
         {
-            "id": "A111",
+            "id": "A212",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 2,
+                        "d": 1,
+                        "q": 2
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A221",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 2,
+                        "d": 2,
+                        "q": 1
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A121",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 1,
+                        "d": 2,
+                        "q": 1
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A112",
             "arima_models": [
                 {
                     "arima": {
                         "p": 1,
                         "d": 1,
+                        "q": 2
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A211",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 2,
+                        "d": 1,
                         "q": 1
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A102",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 1,
+                        "d": 0,
+                        "q": 2
                     }
                 }
             ]

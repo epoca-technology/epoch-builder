@@ -1,8 +1,6 @@
 from typing import Union, Any
-from ..model.types import IArimaModelInterpreterConfig, IArimaModelConfig, \
-    IPrediction, IPredictionMetaData, IModel
+from ..model.types import IArimaModelConfig, IPrediction, IPredictionMetaData, IModel
 from ..model.Interface import ModelInterface
-from ..model.ArimaModelInterpreter import ArimaModelInterpreter
 from ..model.ArimaModel import ArimaModel
 
 

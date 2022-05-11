@@ -6,7 +6,7 @@ from modules.keras_models import IKerasModelSummary, IKerasModelLayer
 
 
 
-def get_summary(model: Union[Sequential, Any], include_weights: bool = False) -> IKerasModelSummary:
+def get_summary(model: Union[Sequential, Any]) -> IKerasModelSummary:
     """Based on a given trained model, it will extract all the relevant information and return
     the full summary.
 

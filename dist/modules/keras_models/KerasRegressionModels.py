@@ -88,7 +88,7 @@ def CNN_STACKLESS(config: IKerasModelConfig) -> Sequential:
     validate(config, 'regression', 'CNN_STACKLESS', required_filters=1, required_activations=1)
     return Sequential([
         Lambda(lambda x: x[:, -config["lookback"]:, :], name="Lambda_1"),
-        Conv1D(filters=config["filters"][0], activation=config["activations"][0], kernel_size=(config["lookback"]), name="Conv1D_1"),
+        Conv1D(filters=config["filters"][0], activation=config["activations"][0], kernel_size=(config["lookback"],), name="Conv1D_1"),
         Dense(units=config['predictions'], kernel_initializer=zeros, name="Dense_1"),
         Flatten(name="Flatten_1")
     ])
@@ -101,7 +101,7 @@ def CNN_STACKLESS_MAX_POOLING(config: IKerasModelConfig) -> Sequential:
     validate(config, 'regression', 'CNN_STACKLESS_MAX_POOLING', required_filters=1, required_activations=1, required_pool_sizes=1)
     return Sequential([
         Lambda(lambda x: x[:, -config["lookback"]:, :], name="Lambda_1"),
-        Conv1D(filters=config["filters"][0], activation=config["activations"][0], kernel_size=(config["lookback"]), name="Conv1D_1"),
+        Conv1D(filters=config["filters"][0], activation=config["activations"][0], kernel_size=(config["lookback"],), name="Conv1D_1"),
         MaxPooling1D(pool_size=config["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         Dense(units=config['predictions'], kernel_initializer=zeros, name="Dense_1"),
         Flatten(name="Flatten_1")
@@ -114,8 +114,8 @@ def CNN_SOFT_STACK(config: IKerasModelConfig) -> Sequential:
     validate(config, 'regression', 'CNN_SOFT_STACK', required_filters=2, required_activations=2)
     return Sequential([
         Lambda(lambda x: x[:, -config["lookback"]:, :], name="Lambda_1"),
-        Conv1D(filters=config["filters"][0], activation=config["activations"][0], kernel_size=(config["lookback"]), name="Conv1D_1"),
-        Conv1D(filters=config["filters"][1], activation=config["activations"][1], padding='same', kernel_size=(config["lookback"]), name="Conv1D_2"),
+        Conv1D(filters=config["filters"][0], activation=config["activations"][0], kernel_size=(config["lookback"],), name="Conv1D_1"),
+        Conv1D(filters=config["filters"][1], activation=config["activations"][1], padding='same', kernel_size=(int(config["lookback"]/2),), name="Conv1D_2"),
         Dense(units=config['predictions'], kernel_initializer=zeros, name="Dense_1"),
         Flatten(name="Flatten_1")
     ])

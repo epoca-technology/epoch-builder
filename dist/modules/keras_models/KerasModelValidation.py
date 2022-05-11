@@ -1,4 +1,8 @@
+from typing import Union, List
 from ..keras_models.types import IKerasModelConfig
+
+
+
 
 
 def validate(
@@ -34,46 +38,60 @@ def validate(
 
     Raises:
         ValueError:
-            If the provided configuration doesnt match the model's requirements.
+            If the provided configuration doesnt match the model's requirements in any way.
     """
     # Make sure the name matches
     if config['name'] != name:
         raise ValueError(f"Model Name Missmatch. {config['name']} != {name}")
 
-    # Make sure the predictions have been provided
+    # Make sure the lookback and predictions have been provided in case of a regression
     if model_type == 'regression' and (not isinstance(config['lookback'], int) or not isinstance(config['predictions'], int)):
-        raise ValueError(f"The provided lookback and or predictions are not valid integers. Received: {config['lookback']}, {config['predictions']}")
+        raise ValueError(f"The provided lookback and or predictions are not valid integers. \
+            Received: {str(config['lookback'])}, {str(config['predictions'])}")
 
     # Validate the units
-    if required_units == 0 and config.get('units') is not None:
-        raise ValueError(f"If there are no required units there shouldnt be units in the config. Received {str(config['units'])}")
-    elif required_units > 0 and (config.get('units') is None or len(config['units']) < required_units):
-        raise ValueError(f"The provided units did not meet the requirements. Received {str(config['units'])}")
+    _validate_config_param(required_units, 'units', config.get('units'))
 
     # Validate the required dropout rates
-    if required_dropout_rates == 0 and config.get('dropout_rates') is not None:
-        raise ValueError(f"If there are no required dropout_rates there shouldnt be dropout_rates in the config. \
-            Received {str(config['dropout_rates'])}")
-    elif required_dropout_rates > 0 and (config.get('dropout_rates') is None or len(config['dropout_rates']) < required_dropout_rates):
-        raise ValueError(f"The provided dropout_rates did not meet the requirements. Received {str(config['dropout_rates'])}")
+    _validate_config_param(required_dropout_rates, 'dropout_rates', config.get('dropout_rates'))
 
     # Validate the required activations
-    if required_activations == 0 and config.get('activations') is not None:
-        raise ValueError(f"If there are no required activations there shouldnt be activations in the config. \
-            Received {str(config['activations'])}")
-    elif required_activations > 0 and (config.get('activations') is None or len(config['activations']) < required_activations):
-        raise ValueError(f"The provided activations did not meet the requirements. Received {str(config['activations'])}")
+    _validate_config_param(required_activations, 'activations', config.get('activations'))
 
     # Validate the required filters
-    if required_filters == 0 and config.get('filters') is not None:
-        raise ValueError(f"If there are no required filters there shouldnt be filters in the config. \
-            Received {str(config['filters'])}")
-    elif required_filters > 0 and (config.get('filters') is None or len(config['filters']) < required_filters):
-        raise ValueError(f"The provided filters did not meet the requirements. Received {str(config['filters'])}")
+    _validate_config_param(required_filters, 'filters', config.get('filters'))
 
     # Validate the required pool_sizes
-    if required_pool_sizes == 0 and config.get('pool_sizes') is not None:
-        raise ValueError(f"If there are no required pool_sizes there shouldnt be pool_sizes in the config. \
-            Received {str(config['pool_sizes'])}")
-    elif required_pool_sizes > 0 and (config.get('pool_sizes') is None or len(config['pool_sizes']) < required_pool_sizes):
-        raise ValueError(f"The provided pool_sizes did not meet the requirements. Received {str(config['pool_sizes'])}")
+    _validate_config_param(required_pool_sizes, 'pool_sizes', config.get('pool_sizes'))
+
+
+
+
+
+
+
+
+
+def _validate_config_param(requirement: int, param_name: str, param: Union[List[Union[int, float, str]], None]) -> None:
+    """Validates the configuration against the requirements. Note that this is a strict validation. As well as
+    checking the requirements, it will make sure that no incorrect config params are allowed.
+
+    Args:
+        requirement: int
+            The number of items required.
+        param_name: str
+            The name of the parameter to be validated.
+        param: Union[List[Union[int, float, str]], None]
+            The value of the parameter to be validated.
+
+    Raises:
+        ValueError:
+            If the value is not required but provided by mistake.
+            If the value is required and it wasn't provided.
+            If the provided value does not meet the requirement.
+    """
+    if requirement == 0 and param is not None:
+        raise ValueError(f"If there are no required {param_name} it should not be in the config. \
+            Received {str(param)}")
+    elif requirement > 0 and (param is None or len(param) < requirement):
+        raise ValueError(f"The provided {param_name} did not meet the requirements. Received {str(param)}")

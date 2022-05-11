@@ -414,7 +414,7 @@ class RegressionTraining:
             "training_end": Utils.get_time(),
             "training_history": training_history,
             "test_evaluation": test_evaluation,
-            "keras_model_summary": get_summary(model, include_weights=True),
+            "keras_model_summary": get_summary(model),
         }
 
 

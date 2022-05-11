@@ -28,7 +28,7 @@ set_option('display.float_format', lambda x: '%.6f' % x)
 id: str = ''
 lookback: int = 0
 predictions: int = 0
-with File('./saved_keras_models/R_CSMP_256_relu_LB50_P5_LR001_ADAM_MAE/model.h5', mode='r') as f:
+with File('./saved_keras_models/R_CSS_512256_relu_44_LB100_P10_LR001_ADAM_MAE/model.h5', mode='r') as f:
     id = f.attrs['id']
     lookback = f.attrs['lookback']
     predictions = f.attrs['predictions']
@@ -44,7 +44,7 @@ Candlestick.init(lookback, normalized_df=True)
 
 
 # Init the lookback df
-df: DataFrame = Candlestick.get_lookback_df(lookback, Candlestick.DF.iloc[55789]['ot'], normalized=True)
+df: DataFrame = Candlestick.get_lookback_df(lookback, Candlestick.DF.iloc[1255789]['ot'], normalized=True)
 
 
 

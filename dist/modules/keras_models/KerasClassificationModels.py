@@ -33,5 +33,5 @@ def LSTM_HARD_STACK(config: IKerasModelConfig) -> Sequential:
         LSTM(units=config["units"][3], return_sequences=True, name="LSTM_4"),
         LSTM(units=config["units"][4], return_sequences=True, name="LSTM_5"),
         LSTM(units=config["units"][5], return_sequences=False, name="LSTM_6"),
-        Dense(2, activation='softmax')
+        Dense(units=2, activation='softmax')
     ])

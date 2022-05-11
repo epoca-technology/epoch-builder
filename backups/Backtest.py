@@ -141,10 +141,18 @@ class Backtest:
             # The model will remain in an idle state until a candlestick's ot is greater than this value.
             idle_until: int = 0
 
+            # Last Prediction Close Time
+            # This is the last prediction candlestick that was used by models. In order to optimize the backtest,
+            # a model should only predict on different prediction candlesticks.
+            last_prediction_ct: int = 0
+
             # Iterate over each 1 minute candlestick
             for candlestick_index, candlestick in Candlestick.DF.iterrows():
                 # Check if it is the last candlestick
                 is_last_candlestick: bool = candlestick_index == Candlestick.DF.index[-1]
+
+                # Retrieve the current prediction range
+                _, last_ct = Candlestick.get_lookback_prediction_range(model.lookback, candlestick['ot'])
 
                 # Active Position
                 # If there is an active position, check it against the new candlestick and
@@ -162,7 +170,11 @@ class Backtest:
                 # To perform predictions, the following criteria must be met:
                 # 1) The model isnt idle 
                 # 2) It isn't the last candlestick 
-                elif (position.active == None) and (candlestick['ot'] > idle_until) and (not is_last_candlestick):
+                # 3) The last prediction candlestick close time is different to the current one
+                elif (position.active == None) \
+                    and (candlestick['ot'] > idle_until) \
+                        and (not is_last_candlestick) \
+                            and (last_prediction_ct != last_ct):
                     # Perform a prediction
                     pred: IPrediction = model.predict(candlestick['ot'], enable_cache=not self.test_mode)
 
@@ -170,12 +182,16 @@ class Backtest:
                     if pred['r'] != 0:
                         position.open_position(candlestick, pred)
 
+                    # Update the last prediction ct
+                    last_prediction_ct = last_ct
+
                 # Update the progress bar
                 progress_bar.update()
 
             # Append the Model's Results
             self._append_result(model_start, model.get_model(), position.get_performance())
         
+
         # Save the results
         self._save_results()
 
