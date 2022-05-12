@@ -1,1 +1,1 @@
-from ..database.Database import save_prediction, get_prediction, delete_prediction
+from ..database.Database import save_pred, get_pred, delete_pred

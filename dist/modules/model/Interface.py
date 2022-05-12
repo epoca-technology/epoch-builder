@@ -3,7 +3,7 @@ from modules.model import IPrediction, IModel
 
 
 # Model Interface
-# ArimaModel, DecisionModel and MultiDecisionModel implement the following interface
+# ArimaModel, RegressionModel and ClassificationModel implement the following interface
 # in order to ensure compatibility across any of the processes.
 class ModelInterface:
     # Performs a prediction based on the current time

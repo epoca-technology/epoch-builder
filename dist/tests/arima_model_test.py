@@ -2,7 +2,7 @@ import unittest
 from typing import Union
 from copy import deepcopy
 from modules.candlestick import Candlestick
-from modules.database import get_prediction, delete_prediction
+from modules.database import get_pred, delete_pred
 from modules.model import ArimaModel, IModel, IPrediction
 
 
@@ -161,7 +161,7 @@ class ArimaModelTestCase(unittest.TestCase):
         first_ot, last_ct = Candlestick.get_lookback_prediction_range(m.get_lookback(), CURRENT_TIME)
 
         # Make sure the prediction was not stored
-        cached_pred: Union[IPrediction, None] = get_prediction(m.id, first_ot, last_ct)
+        cached_pred: Union[IPrediction, None] = get_pred(m.id, first_ot, last_ct)
         self.assertEqual(cached_pred, None)
 
 
@@ -186,14 +186,14 @@ class ArimaModelTestCase(unittest.TestCase):
         first_ot, last_ct = Candlestick.get_lookback_prediction_range(m.get_lookback(), CURRENT_TIME)
 
         # Make sure the prediction was stored
-        cached_pred: Union[IPrediction, None] = get_prediction(m.id, first_ot, last_ct)
+        cached_pred: Union[IPrediction, None] = get_pred(m.id, first_ot, last_ct)
         self.assertFalse(cached_pred == None)
         self.assertDictEqual(pred, cached_pred)
         self.assertEqual(cached_pred['md'][0].get('pl'), None)
 
         # Clean up the prediction
-        delete_prediction(m.id, first_ot, last_ct)
-        cached_pred = get_prediction(m.id, first_ot, last_ct)
+        delete_pred(m.id, first_ot, last_ct)
+        cached_pred = get_pred(m.id, first_ot, last_ct)
         self.assertTrue(cached_pred == None)
 
 
@@ -221,14 +221,14 @@ class ArimaModelTestCase(unittest.TestCase):
         first_ot, last_ct = Candlestick.get_lookback_prediction_range(m.get_lookback(), CURRENT_TIME)
 
         # Make sure the prediction was stored
-        cached_pred: Union[IPrediction, None] = get_prediction(m.id, first_ot, last_ct)
+        cached_pred: Union[IPrediction, None] = get_pred(m.id, first_ot, last_ct)
         self.assertFalse(cached_pred == None)
         self.assertDictEqual(pred, cached_pred)
         self.assertEqual(cached_pred['md'][0].get('pl'), None)
 
         # Clean up the prediction
-        delete_prediction(m.id, first_ot, last_ct)
-        cached_pred = get_prediction(m.id, first_ot, last_ct)
+        delete_pred(m.id, first_ot, last_ct)
+        cached_pred = get_pred(m.id, first_ot, last_ct)
         self.assertTrue(cached_pred == None)
 
 

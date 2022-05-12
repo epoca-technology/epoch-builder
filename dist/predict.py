@@ -34,6 +34,7 @@ with File('./saved_keras_models/R_CSS_512256_relu_44_LB100_P10_LR001_ADAM_MAE/mo
     predictions = f.attrs['predictions']
     model = load_model_from_hdf5(f)
 
+print("\nModel Metadata:")
 print(id)
 print(lookback)
 print(predictions)

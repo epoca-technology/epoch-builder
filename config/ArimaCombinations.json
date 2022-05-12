@@ -6,6 +6,6 @@
     "take_profit": 1.5,
     "stop_loss": 1,
     "idle_minutes_on_position_close": 30,
-    "focus_number": 7,
+    "focus_number": 9,
     "batch_size": 70
 }

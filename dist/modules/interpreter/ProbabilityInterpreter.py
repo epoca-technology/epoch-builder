@@ -7,8 +7,7 @@ from modules.interpreter import IProbabilityInterpreterConfig, InterpreterInterf
 class ProbabilityInterpreter(InterpreterInterface):
     """ProbabilityInterpreter Class
 
-    This class takes a series of predictions and performs an interpretation based on the
-    percentage change found between the first and the last predictions.
+    This class takes the up and down probabilities and performs an interpretation.
 
     Class Properties:
         MIN_PROBABILITY_VALUE: float
