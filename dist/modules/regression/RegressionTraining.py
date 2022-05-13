@@ -1,8 +1,11 @@
-from typing import Union, Tuple, List, Dict, Any
+from typing import Union, Tuple, List, Any
 from os import makedirs
 from os.path import exists
+from random import randint
+from numpy import mean
 from pandas import DataFrame
 from json import dumps
+from tqdm import tqdm
 from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras import Sequential
 from keras.losses import MeanSquaredError, MeanAbsoluteError
@@ -12,8 +15,9 @@ from keras.optimizers import adam_v2, rmsprop_v2
 from h5py import File as h5pyFile
 from modules.candlestick import Candlestick
 from modules.utils import Utils
-from modules.keras_models import KerasModel, IKerasModelConfig, IKerasModelTrainingHistory, get_summary
-from modules.regression import IRegressionTrainingConfig, TrainingWindowGenerator, IRegressionTrainingCertificate
+from modules.keras_models import KerasModel, IKerasModelConfig, IKerasModelTrainingHistory, get_summary, KERAS_MODELS_PATH
+from modules.regression import IRegressionTrainingConfig, TrainingWindowGenerator, IRegressionTrainingCertificate, \
+    Regression, IRegressionEvaluation
 
 
 
@@ -21,21 +25,19 @@ from modules.regression import IRegressionTrainingConfig, TrainingWindowGenerato
 class RegressionTraining:
     """RegressionTraining Class
 
-    This class handles the training of a Forecasting Model.
+    This class handles the training of a Regression Model.
 
     Class Properties:
-        OUTPUT_PATH: str
-            The directory in which the models will be stored.
         MAX_EPOCHS: int
             The maximum amount of epochs the training process can go through.
-        DEFAULT_LR: float
-            The default learning rate to be used by the optimizer if none is provided.
+        MAX_REGRESSION_EVALUATIONS: int
+            The max number of evaluations that will be performed on the trained regression model
 
     Instance Properties:
-        test_mode: bool
-            If test_mode is enabled, it won't initialize the candlesticks.
         id: str
             A descriptive identifier compatible with filesystems
+        model_path: str
+            The directory in which the model will be stored.
         description: str
             Important information regarding the model that will be trained.
         lookback: int
@@ -53,6 +55,8 @@ class RegressionTraining:
             The metric function that will be used for training.
         batch_size: int
             The size of the training dataset batches.
+        shuffle_data: bool
+            If True, it will shuffle the train, val and test datasets prior to training.
         keras_model: IKerasModelConfig
             The configuration that will be used to build the Keras Model.
         window: ForecastingTrainingWindowGenerator
@@ -65,12 +69,12 @@ class RegressionTraining:
             The number of rows included in the test dataset.
     """
 
-    # Directory where the model and the training certificate will be stored
-    OUTPUT_PATH: str = './saved_keras_models'
-
     # The maximum number of EPOCHs a model can go through during training
     MAX_EPOCHS: int = 200
-    #MAX_EPOCHS: int = 1
+
+    # The max number of evaluations that will be performed on the trained regression model
+    MAX_REGRESSION_EVALUATIONS: int = 20000
+
 
 
 
@@ -86,21 +90,19 @@ class RegressionTraining:
         Args:
             config: IRegressionTrainingConfig
                 The configuration that will be used to train the model.
-            test_mode: bool
-                Indicates if the execution is running from unit tests.
 
         Raises:
             ValueError:
                 If the model is not correctly preffixed.
                 If the model's directory already exists.
         """
-        # Initialize the type of execution
-        self.test_mode: bool = test_mode
-
         # Initialize the id
         self.id: str = config['id']
         if self.id[0:2] != 'R_':
             raise ValueError("The ID of the Regression Model must be preffixed with R_")
+
+        # Initialize the Model's path
+        self.model_path: str = f"{KERAS_MODELS_PATH}/{self.id}"
 
         # Initialize the description
         self.description: str = config['description']
@@ -126,14 +128,13 @@ class RegressionTraining:
         # Initialize the Batch Size
         self.batch_size: int = config["batch_size"]
 
+        # Initialize the Data Shuffling
+        self.shuffle_data: bool = config["shuffle_data"]
+
         # Initialize the Keras Model's Configuration and populate the lookback and the # of predictions
         self.keras_model: IKerasModelConfig = config["keras_model"]
         self.keras_model["lookback"] = self.lookback
         self.keras_model["predictions"] = self.predictions
-
-        # Initialize the candlesticks if not unit testing
-        if not self.test_mode:
-            Candlestick.init(self.lookback, normalized_df=True)
 
         # Split the candlesticks into train, val and test
         train_df, val_df, test_df = self._get_data()
@@ -147,7 +148,8 @@ class RegressionTraining:
             "val_df": val_df,
             "test_df": test_df,
             "label_columns": ["c"],
-            "batch_size": self.batch_size
+            "batch_size": self.batch_size,
+            "shuffle_data": self.shuffle_data
         })
 
         # Initialize the Dataset Sizes
@@ -277,9 +279,15 @@ class RegressionTraining:
 
 
 
-    def run(self) -> None:
+    def train(self) -> IRegressionTrainingCertificate:
         """Compiles, trains and saves the model as well as the training certificate.
+
+        Returns:
+            IRegressionTrainingCertificate
         """
+        # Init the progress bar
+        progress_bar: tqdm = tqdm( bar_format='{l_bar}{bar:20}{r_bar}{bar:-20b}', total=100)
+        
         # Store the start time
         start_time: int = Utils.get_time()
 
@@ -287,51 +295,188 @@ class RegressionTraining:
         early_stopping = EarlyStopping(monitor='val_loss', patience=5, mode='min')
 
         # Retrieve the Keras Model
+        progress_bar.set_description("Initializing Model")
         model: Sequential = KerasModel(model_type='regression', config=self.keras_model)
+        progress_bar.update(5)
 
         # Compile the model
+        progress_bar.set_description("Compiling Model")
         model.compile(loss=self.loss, optimizer=self.optimizer, metrics=[self.metric])
+        progress_bar.update(10)
   
         # Train the model
-        print(f"Training {self.id}...\n")
+        progress_bar.set_description("Training Model")
         history_object: History = model.fit(
             self.window.train, 
             epochs=RegressionTraining.MAX_EPOCHS,
             validation_data=self.window.val,
-            callbacks=[ early_stopping ]
+            callbacks=[ early_stopping ],
+            verbose=0
         )
+        progress_bar.update(55)
 
         # Initialize the Training History
         history: IKerasModelTrainingHistory = history_object.history
 
         # Evaluate the test dataset
-        print(f"\nEvaluating test data...")
-        test_evaluation: List[float] = model.evaluate(self.window.test) # [loss, metric]
+        progress_bar.set_description("Evaluating Test Dataset")
+        test_evaluation: List[float] = model.evaluate(self.window.test, verbose=0) # [loss, metric]
+        progress_bar.update(70)
 
-        # Finally, save the model
-        self._save_model(start_time, model, history, test_evaluation)
+        # Save the model
+        progress_bar.set_description("Saving Model...")
+        self._save_model(model)
+        progress_bar.update(75)
 
-
-
-
-
-
-
-
-
-
+        # Perform the regression evaluation
+        progress_bar.set_description("Evaluating Regression")
+        regression_evaluation: IRegressionEvaluation = self._evaluate_regression()
+        progress_bar.update(98)
 
 
-    ## Trained Model Handling ##
+        # Save the certificate
+        progress_bar.set_description("Saving Certificate")
+        certificate: IRegressionTrainingCertificate = self._save_certificate(
+            start_time, 
+            model, 
+            history, 
+            test_evaluation, 
+            regression_evaluation
+        )
+        progress_bar.set_description("Completed")
+        progress_bar.update(100)
+
+        # Return it so it can be added to the batch
+        return certificate
 
 
-    def _save_model(
+
+
+
+
+
+
+
+
+
+
+
+    ## Regression Evaluation ##
+
+
+
+
+    def _evaluate_regression(self) -> IRegressionEvaluation:
+        """Loads the trained model that has just been saved and performs a series
+        of evaluations on random sequences based on the model's config.
+
+        Returns:
+            IRegressionEvaluation
+        """
+        # Initialize the Regression Instance
+        regression: Regression = Regression(self.id)
+
+        # Init the min and max values for the random candlestick index
+        min_i: int = 0
+        max_i: int = int(Candlestick.DF.shape[0] * 0.95)
+
+        # Init evaluation data
+        evals: int = 0
+        increase: List[float] = []
+        increase_successful: List[float] = []
+        decrease: List[float] = []
+        decrease_successful: List[float] = []
+
+
+        # Perform the evaluation
+        for i in range(RegressionTraining.MAX_REGRESSION_EVALUATIONS):
+            # @TODO
+            pass
+
+        # Initialize the lens for performance
+        increase_num: int = len(increase)
+        increase_successful_num: int = len(increase_successful)
+        decrease_num: int = len(decrease)
+        decrease_successful_num: int = len(decrease_successful)
+
+        # Finally, return the results
+        return {
+            # Evaluations
+            "evaluations": evals,
+            "max_evaluations": RegressionTraining.MAX_REGRESSION_EVALUATIONS,
+
+            # Prediction counts
+            "increase_num": increase_num,
+            "increase_successful_num": increase_successful_num,
+            "decrease_num": decrease_num,
+            "decrease_successful_num": decrease_successful_num,
+
+            # Accuracy
+            "increase_acc": Utils.get_percentage_out_of_total(increase_successful_num, increase_num if increase_num > 0 else 1),
+            "decrease_acc": Utils.get_percentage_out_of_total(decrease_successful_num, decrease_num if decrease_num > 0 else 1),
+            "acc": Utils.get_percentage_out_of_total(increase_successful_num+decrease_successful_num, evals if evals > 0 else 1),
+            
+            # Predictions Overview
+            "increase_max": max(increase if increase_num > 0 else [0]),
+            "increase_min": min(increase if increase_num > 0 else [0]),
+            "increase_mean": mean(increase if increase_num > 0 else [0]),
+            "increase_successful_max": max(increase_successful if increase_successful_num > 0 else [0]),
+            "increase_successful_min": min(increase_successful if increase_successful_num > 0 else [0]),
+            "increase_successful_mean": mean(increase_successful if increase_successful_num > 0 else [0]),
+            "decrease_max": max(decrease if decrease_num > 0 else [0]),
+            "decrease_min": min(decrease if decrease_num > 0 else [0]),
+            "decrease_mean": mean(decrease if decrease_num > 0 else [0]),
+            "decrease_successful_max": max(decrease_successful if decrease_successful_num > 0 else [0]),
+            "decrease_successful_min": min(decrease_successful if decrease_successful_num > 0 else [0]),
+            "decrease_successful_mean": mean(decrease_successful if decrease_successful_num > 0 else [0]),
+        }
+
+
+
+
+
+
+
+
+
+
+
+    ## Trained Model Saving ##
+
+
+
+    def _save_model(self, model: Union[Sequential, Any]) -> None:
+        """Saves a trained model in the output directory as well as the training certificate.
+
+        Args:
+            model: ...
+                The instance of the trained model.
+        """
+        # Create the model's directory
+        makedirs(self.model_path)
+        
+        # Save the model with the required metadata
+        with h5pyFile(f"{self.model_path}/model.h5", mode='w') as f:
+            save_model_to_hdf5(model, f)
+            f.attrs['id'] = self.id
+            f.attrs['description'] = self.description
+            f.attrs['lookback'] = self.lookback
+            f.attrs['predictions'] = self.predictions
+
+
+
+
+
+
+
+    def _save_certificate(
         self, 
         start_time: int, 
         model: Union[Sequential, Any], 
         training_history: IKerasModelTrainingHistory, 
-        test_evaluation: List[float]
-    ) -> None:
+        test_evaluation: List[float],
+        regression_evaluation: Any
+    ) -> IRegressionTrainingCertificate:
         """Saves a trained model in the output directory as well as the training certificate.
 
         Args:
@@ -343,20 +488,28 @@ class RegressionTraining:
                 The dictionary containing the training history.
             test_evaluation: List[float]
                 The results when evaluating the test dataset.
-        """
-        # Create the model's directory
-        makedirs(f"{RegressionTraining.OUTPUT_PATH}/{self.id}")
-        
-        # Save the model with the required metadata
-        with h5pyFile(f"{RegressionTraining.OUTPUT_PATH}/{self.id}/model.h5", mode='w') as f:
-            save_model_to_hdf5(model, f)
-            f.attrs['id'] = self.id
-            f.attrs['lookback'] = self.lookback
-            f.attrs['predictions'] = self.predictions
+            regression_evaluation: ...
+                The results of the regression post-training evaluation.
 
-        # Save the certificate file
-        with open(f"{RegressionTraining.OUTPUT_PATH}/{self.id}/certificate.json", "w") as outfile:
-            outfile.write(dumps(self._get_certificate(model, start_time, training_history, test_evaluation)))
+        Returns:
+            IRegressionTrainingCertificate
+        """
+        # Build the certificate
+        certificate: IRegressionTrainingCertificate = self._get_certificate(
+            model, 
+            start_time, 
+            training_history, 
+            test_evaluation, 
+            regression_evaluation
+        )
+
+        # Save the file
+        with open(f"{self.model_path}/certificate.json", "w") as outfile:
+            outfile.write(dumps(certificate))
+
+        # Finally, return it so it can be added to the batch
+        return certificate
+
 
 
 
@@ -368,7 +521,8 @@ class RegressionTraining:
         model: Union[Sequential, Any],
         start_time: int, 
         training_history: IKerasModelTrainingHistory, 
-        test_evaluation: List[float]
+        test_evaluation: List[float],
+        regression_evaluation: Any
     ) -> IRegressionTrainingCertificate:
         """Builds the certificate that contains all the data regarding the training process
         that will be saved alongside the model.
@@ -407,6 +561,7 @@ class RegressionTraining:
             "loss": self.loss.name,
             "metric": self.metric.name,
             "batch_size": self.batch_size,
+            "shuffle_data": self.shuffle_data,
             "keras_model_config": self.keras_model,
 
             # Training
@@ -414,7 +569,18 @@ class RegressionTraining:
             "training_end": Utils.get_time(),
             "training_history": training_history,
             "test_evaluation": test_evaluation,
-            "keras_model_summary": get_summary(model),
+
+            # Post Training Evaluation
+            "regression_evaluation": regression_evaluation,
+
+            # The configuration of the Regression
+            "regression_config": {
+                "id": self.id,
+                "description": self.description,
+                "lookback": self.lookback,
+                "predictions": self.predictions,
+                "summary": get_summary(model)
+            },
         }
 
 
@@ -434,9 +600,9 @@ class RegressionTraining:
                 If the model's directory already exists.
         """
         # If the output directory doesn't exist, create it
-        if not exists(RegressionTraining.OUTPUT_PATH):
-            makedirs(RegressionTraining.OUTPUT_PATH)
+        if not exists(KERAS_MODELS_PATH):
+            makedirs(KERAS_MODELS_PATH)
 
         # Make sure the model's directory does not exist
-        if exists(f"{RegressionTraining.OUTPUT_PATH}/{self.id}"):
+        if exists(self.model_path):
             raise ValueError(f"The model {self.id} already exists.")

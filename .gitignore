@@ -62,6 +62,8 @@ db/
 db_merge/
 
 # Saved Keras Models
+keras_models_configurations/
+saved_keras_models_certificates/
 saved_keras_models/
 
 # Training Data

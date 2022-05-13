@@ -50,6 +50,8 @@ class TrainingWindowGenerator:
             label_indices will be [50, 51, 52, 53, 54]
         batch_size: int
             The size of the batch that will be used to build the train datasets.
+        shuffle_data: bool
+            If True, it will shuffle the train, val and test datasets prior to training.
     """
 
 
@@ -88,6 +90,9 @@ class TrainingWindowGenerator:
 
         # Initialize the batch size
         self.batch_size: int = config['batch_size']
+
+        # Initialize the data shuffling
+        self.shuffle_data: bool = config['shuffle_data']
 
 
 
@@ -166,7 +171,7 @@ class TrainingWindowGenerator:
             targets=None,
             sequence_length=self.total_window_size,
             sequence_stride=1,
-            shuffle=True,
+            shuffle=self.shuffle_data,
             batch_size=self.batch_size
         )
 

@@ -11,8 +11,9 @@ print("Merging...\n")
 
 # Init constants
 DB_MERGE_PATH: str = "db_merge"
-RESULT_PATH: str = f"db/merge_result.sqlite"
-LOCAL_PATH: str = f"db/db.sqlite"
+RESULT_PATH: str = "db/merge_result.sqlite"
+RESULT_JOURNAL_PATH: str = "db/merge_result.sqlite-journal"
+LOCAL_PATH: str = "db/db.sqlite"
 
 # Make sure the db path exists, otherwise create it, raise and error and provide instrutions
 if not exists(DB_MERGE_PATH):
@@ -20,8 +21,8 @@ if not exists(DB_MERGE_PATH):
     raise RuntimeError(f"The {DB_MERGE_PATH} directory must be in the root of the project and contain at least 1 db file.")
 
 # If there is a result file, raise an error
-if isfile(RESULT_PATH):
-    raise RuntimeError(f"The file {RESULT_PATH} cannot exist prior to running a DB Merge.")
+if isfile(RESULT_PATH) or isfile(RESULT_JOURNAL_PATH):
+    raise RuntimeError(f"The files {RESULT_PATH} and {RESULT_JOURNAL_PATH} cannot exist prior to running a DB Merge.")
 
 # Extract the names of the databases that will be merged
 file_names: List[str] = list(filter(lambda f: ".sqlite" in f, [f for f in listdir(DB_MERGE_PATH) if isfile(join(DB_MERGE_PATH, f))]))

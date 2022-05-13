@@ -10,9 +10,22 @@ from modules.keras_models import IKerasModelConfig, IKerasModelSummary, IKerasMo
 
 
 # Regresion Configuration
-# ...
+# The configuration that was used to train and will predict based on.
 class IRegressionConfig(TypedDict):
-    foo: str
+    # The identifier of the model
+    id: str
+
+    # Important information regarding the trained model
+    description: str
+
+    # The number of candlesticks it will lookback to make a prediction
+    lookback: int
+
+    # The number of predictions it will generate
+    predictions: int
+
+    # The summary of the KerasModel
+    summary: IKerasModelSummary
 
 
 
@@ -24,6 +37,8 @@ class IRegressionConfig(TypedDict):
 
 
 ## Regression Training ##
+
+
 
 
 
@@ -57,8 +72,27 @@ class IRegressionTrainingConfig(TypedDict):
     # Batch Size
     batch_size: int
 
+    # Train Data Shuffling
+    shuffle_data: bool
+
     # Keras Model Configuration
     keras_model: IKerasModelConfig
+
+
+
+
+
+# Regression Training Batch
+# Keras Models and created and evaluated in batches. Moreover, multiple batches can be combined
+# in the GUI
+class IRegressionTrainingBatch(TypedDict):
+    # Descriptive name to easily identify the batch. Must be compatible with filesystems.
+    name: str
+
+    # The configurations for the models that will be trained within the batch.
+    models: List[IRegressionTrainingConfig]
+
+
 
 
 
@@ -87,6 +121,53 @@ class ITrainingWindowGeneratorConfig(TypedDict):
     # Batch Size
     batch_size: int
 
+    # Train Data Shuffling
+    shuffle_data: bool
+
+
+
+
+
+
+
+# Regression Evaluation
+# Evaluation performed right after the model is trained in order to get an overview of the
+# potential accuracy, as well as the prediction type distribution.
+# Each evaluation is performed using a random candlestick open time and is evaluated against
+# the candlestick placed at the end of the window based on the model's predictions config.
+class IRegressionEvaluation(TypedDict):
+    # The number of evaluations performed on the Regression
+    evaluations: int
+    max_evaluations: int
+
+    # The number of times the Regression predicted a price increase
+    increase_num: int
+    increase_successful_num: int
+
+    # The number of times the Regression predicted a price decrease
+    decrease_num: int
+    decrease_successful_num: int
+
+    # Accuracy
+    increase_acc: int
+    decrease_acc: int
+    acc: int
+
+    # Increase Predictions Overview
+    increase_max: float
+    increase_min: float
+    increase_mean: float
+    increase_successful_max: float
+    increase_successful_min: float
+    increase_successful_mean: float
+
+    # Decrease Predictions Overview
+    decrease_max: float
+    decrease_min: float
+    decrease_mean: float
+    decrease_successful_max: float
+    decrease_successful_min: float
+    decrease_successful_mean: float
 
 
 
@@ -97,7 +178,8 @@ class ITrainingWindowGeneratorConfig(TypedDict):
 
 
 # Regression Training Certificate
-#
+# Once the training, saving and evaluation completes, a certificate containing all the
+# data is saved and issued for batching.
 class IRegressionTrainingCertificate(TypedDict):
     ## Identification ##
     id: str
@@ -126,7 +208,8 @@ class IRegressionTrainingCertificate(TypedDict):
     optimizer: str
     loss: str
     metric: str
-    batch_size: int
+    batch_size: int    
+    shuffle_data: bool
     keras_model_config: IKerasModelConfig
 
 
@@ -140,7 +223,10 @@ class IRegressionTrainingCertificate(TypedDict):
     training_history: IKerasModelTrainingHistory
 
     # Result of the evaluation of the test dataset
-    test_evaluation: List[float]
+    test_evaluation: List[float] # [loss, metric]
 
-    # The summary of the KerasModel that has been trained and saved
-    keras_model_summary: IKerasModelSummary
+    # Regression Post-Training Evaluation
+    regression_evaluation: IRegressionEvaluation
+
+    # The configuration of the Regression
+    regression_config: IRegressionConfig

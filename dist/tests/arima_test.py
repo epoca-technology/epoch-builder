@@ -45,7 +45,6 @@ class ArimaTestCase(unittest.TestCase):
 
 
 
-
     # Can perform a Sarima Prediction
     def testSarimaPrediction(self):
         # Init the instance

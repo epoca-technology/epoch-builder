@@ -9,11 +9,11 @@ def validate(
     config: IKerasModelConfig,
     model_type: str,
     name: str,
-    required_units: int = 0,
-    required_dropout_rates: int = 0,
-    required_activations: int = 0,
-    required_filters: int = 0,
-    required_pool_sizes: int = 0,
+    units: int = 0,
+    dropout_rates: int = 0,
+    activations: int = 0,
+    filters: int = 0,
+    pool_sizes: int = 0,
 ) -> None:
     """Given a configuration dict and a series of requirements, it will validate the 
     integrity of it.
@@ -25,15 +25,15 @@ def validate(
             The type of model that will be validated.
         name: str
             The name of the model that will be built.
-        required_units: int
+        units: int
             The number of unit items that should have been provided in the config.
-        required_dropout_rates: int
+        dropout_rates: int
             The number of dropout rates items that should have been provided in the config.
-        required_activations: int
+        activations: int
             The number of activation items that should have been provided in the config.
-        required_filters: int
+        filters: int
             The number of filter items  that should have been provided in the config.
-        required_pool_sizes: int
+        pool_sizes: int
             The number of pool_size items  that should have been provided in the config.
 
     Raises:
@@ -50,19 +50,19 @@ def validate(
             Received: {str(config['lookback'])}, {str(config['predictions'])}")
 
     # Validate the units
-    _validate_config_param(required_units, 'units', config.get('units'))
+    _validate_config_param(units, 'units', config.get('units'))
 
     # Validate the required dropout rates
-    _validate_config_param(required_dropout_rates, 'dropout_rates', config.get('dropout_rates'))
+    _validate_config_param(dropout_rates, 'dropout_rates', config.get('dropout_rates'))
 
     # Validate the required activations
-    _validate_config_param(required_activations, 'activations', config.get('activations'))
+    _validate_config_param(activations, 'activations', config.get('activations'))
 
     # Validate the required filters
-    _validate_config_param(required_filters, 'filters', config.get('filters'))
+    _validate_config_param(filters, 'filters', config.get('filters'))
 
     # Validate the required pool_sizes
-    _validate_config_param(required_pool_sizes, 'pool_sizes', config.get('pool_sizes'))
+    _validate_config_param(pool_sizes, 'pool_sizes', config.get('pool_sizes'))
 
 
 

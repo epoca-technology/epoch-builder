@@ -1,6 +1,5 @@
 from typing import List
 from pandas import Series
-from numpy import around
 from pmdarima import ARIMA
 from modules.arima import IArimaConfig
 
@@ -89,4 +88,4 @@ class Arima:
         arima_model.fit(close_prices)
 
         # Finally, generate the predictions
-        return around(arima_model.predict(self.predictions), decimals=2).tolist()
+        return arima_model.predict(self.predictions).tolist()
