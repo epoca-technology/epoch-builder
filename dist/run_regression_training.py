@@ -67,7 +67,7 @@ for index, model_config in enumerate(config["models"]):
 
     # Print the progress
     if index == 0:
-        print("REGRESSION TRAINING RUNNING\n")
+        print("REGRESSION TRAINING RUNNING")
     print(f"{index + 1}/{len(config['models'])}) {model_config['id']}")
 
     # Train the model

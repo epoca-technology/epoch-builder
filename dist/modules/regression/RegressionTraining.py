@@ -5,7 +5,6 @@ from random import randint
 from numpy import mean
 from pandas import DataFrame
 from json import dumps
-from tqdm import tqdm
 from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras import Sequential
 from keras.losses import MeanSquaredError, MeanAbsoluteError
@@ -72,8 +71,11 @@ class RegressionTraining:
     # The maximum number of EPOCHs a model can go through during training
     MAX_EPOCHS: int = 200
 
-    # The max number of evaluations that will be performed on the trained regression model
-    MAX_REGRESSION_EVALUATIONS: int = 20000
+    # The max number of evaluations that will be performed on the trained regression model.
+    # Notice that if the number of evals is much smaller than the max it means there could be
+    # an irregularity with the model as the predictions percentages aren't changing within
+    # the window.
+    MAX_REGRESSION_EVALUATIONS: int = 5000
 
 
 
@@ -285,8 +287,6 @@ class RegressionTraining:
         Returns:
             IRegressionTrainingCertificate
         """
-        # Init the progress bar
-        progress_bar: tqdm = tqdm( bar_format='{l_bar}{bar:20}{r_bar}{bar:-20b}', total=100)
         
         # Store the start time
         start_time: int = Utils.get_time()
@@ -295,17 +295,15 @@ class RegressionTraining:
         early_stopping = EarlyStopping(monitor='val_loss', patience=5, mode='min')
 
         # Retrieve the Keras Model
-        progress_bar.set_description("Initializing Model")
+        print("\n    1/7) Initializing Model...")
         model: Sequential = KerasModel(model_type='regression', config=self.keras_model)
-        progress_bar.update(5)
 
         # Compile the model
-        progress_bar.set_description("Compiling Model")
+        print("    2/7) Compiling Model...")
         model.compile(loss=self.loss, optimizer=self.optimizer, metrics=[self.metric])
-        progress_bar.update(10)
   
         # Train the model
-        progress_bar.set_description("Training Model")
+        print("    3/7) Training Model...")
         history_object: History = model.fit(
             self.window.train, 
             epochs=RegressionTraining.MAX_EPOCHS,
@@ -313,29 +311,24 @@ class RegressionTraining:
             callbacks=[ early_stopping ],
             verbose=0
         )
-        progress_bar.update(55)
 
         # Initialize the Training History
         history: IKerasModelTrainingHistory = history_object.history
 
         # Evaluate the test dataset
-        progress_bar.set_description("Evaluating Test Dataset")
+        print("    4/7) Evaluating Test Dataset...")
         test_evaluation: List[float] = model.evaluate(self.window.test, verbose=0) # [loss, metric]
-        progress_bar.update(70)
 
         # Save the model
-        progress_bar.set_description("Saving Model...")
+        print("    5/7) Saving Model...")
         self._save_model(model)
-        progress_bar.update(75)
 
         # Perform the regression evaluation
-        progress_bar.set_description("Evaluating Regression")
+        print("    6/7) Evaluating Regression...")
         regression_evaluation: IRegressionEvaluation = self._evaluate_regression()
-        progress_bar.update(98)
-
 
         # Save the certificate
-        progress_bar.set_description("Saving Certificate")
+        print("    7/7) Saving Certificate...")
         certificate: IRegressionTrainingCertificate = self._save_certificate(
             start_time, 
             model, 
@@ -343,8 +336,6 @@ class RegressionTraining:
             test_evaluation, 
             regression_evaluation
         )
-        progress_bar.set_description("Completed")
-        progress_bar.update(100)
 
         # Return it so it can be added to the batch
         return certificate
@@ -378,7 +369,7 @@ class RegressionTraining:
 
         # Init the min and max values for the random candlestick index
         min_i: int = 0
-        max_i: int = int(Candlestick.DF.shape[0] * 0.95)
+        max_i: int = int(Candlestick.DF.shape[0] * 0.95) # Omit the tail to prevent index errors
 
         # Init evaluation data
         evals: int = 0
@@ -387,12 +378,46 @@ class RegressionTraining:
         decrease: List[float] = []
         decrease_successful: List[float] = []
 
-
         # Perform the evaluation
         for i in range(RegressionTraining.MAX_REGRESSION_EVALUATIONS):
-            # @TODO
-            pass
+            # Generate a random candlestick ot
+            random_ot: float = Candlestick.DF.iloc[randint(min_i, max_i)]['ot']
 
+            # Retrieve the normalized lookback df
+            lookback_df: DataFrame = Candlestick.get_lookback_df(regression.lookback, random_ot, normalized=True)
+
+            # Generate the predictions and calculate the % change in price
+            preds: List[float] = regression.predict(lookback_df)
+            preds_change: float = Utils.get_percentage_change(preds[0], preds[-1])
+
+            # Check if there was a non-neutral change
+            if preds_change > 0 or preds_change < 0:
+                # Retrieve the close price of the last candlestick in the window. This is the last candlestick
+                # in the lookback_df[-1] + self.predictions subset.
+                window_cp: float = \
+                    Candlestick.NORMALIZED_PREDICTION_DF[
+                        Candlestick.PREDICTION_DF['ot'] > random_ot
+                    ].iloc[regression.predictions - 1:regression.predictions].iloc[0]['c']
+
+                # Calculate the actual change in price from the last lookback candlestick and the 
+                # actual window close price
+                real_change: float = Utils.get_percentage_change(lookback_df.iloc[-1]['c'], window_cp)
+
+                # Increment the evals performed
+                evals += 1
+
+                # Check if an increase was predicted and evaluate the outcome
+                if preds_change > 0:
+                    increase.append(preds_change)
+                    if real_change > 0:
+                        increase_successful.append(preds_change)
+
+                # Check if a decrease was predicted and evaluate the outcome
+                elif preds_change < 0:
+                    decrease.append(preds_change)
+                    if real_change < 0:
+                        decrease_successful.append(preds_change)
+            
         # Initialize the lens for performance
         increase_num: int = len(increase)
         increase_successful_num: int = len(increase_successful)
