@@ -10,6 +10,8 @@ Plutus' Prediction Backtesting is a project designed to experiment with differen
 
 - Pip: v20.0.2
 
+- [PostgreSQL: v14.3](./docs/POSTGRES.md) (On the Plutus Tester Server)
+
 The dependencies are located in the **requirements.txt** file and can be installed with:
 
 `pip3 install -r requirements.txt`

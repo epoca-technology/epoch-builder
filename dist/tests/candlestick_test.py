@@ -3,7 +3,8 @@ from pandas import Series
 from modules.model import ArimaModel
 from modules.candlestick import Candlestick
 from modules.utils import Utils
-import numpy
+
+
 
 # Initialize the candlesticks
 LOOKBACK = ArimaModel.DEFAULT_LOOKBACK
@@ -35,14 +36,6 @@ class CandlestickTestCase(unittest.TestCase):
         # The values should not be normalized
         norm_df = df[(df['o'] <= 1) | (df['h'] <= 1) | (df['l'] <= 1) | (df['c'] <= 1)]
         self.assertEqual(norm_df.shape[0], 0)
-
-        print(df.iloc[0]['ot'])
-        print(df.iloc[-1]['ot'])
-        print(Candlestick.PREDICTION_DF[Candlestick.PREDICTION_DF['ot'] > df.iloc[-1]['ot']].iloc[9:10])
-        #print(df.iloc[df.iloc[-1].index.values[0] + 10]['ot'])
-
-        #print(numpy.mean([0.55, 0.61, 0.58, 0.89, 0.91]))
-        #print(type(numpy.mean([0.55, 0.61, 0.58, 0.89, 0.91])))
 
 
 

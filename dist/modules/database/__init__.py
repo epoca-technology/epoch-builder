@@ -1,1 +1,1 @@
-from ..database.Database import save_pred, get_pred, delete_pred
+from ..database.Database import Database, save_pred, get_pred, delete_pred
