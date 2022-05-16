@@ -1,5 +1,5 @@
 {
-    "id": "Apdq_2_1",
+    "id": "Apdq_4_1",
     "description": "The purpose of this backtest is to find out how different p, d, q combinations can output better results with different TP and SL.",
     "start": "1/10/2021",
     "end": "22/04/2022",
@@ -8,47 +8,11 @@
     "idle_minutes_on_position_close": 30,
     "models": [
         {
-            "id": "A202",
+            "id": "A401",
             "arima_models": [
                 {
                     "arima": {
-                        "p": 2,
-                        "d": 0,
-                        "q": 2
-                    }
-                }
-            ]
-        },
-        {
-            "id": "A222",
-            "arima_models": [
-                {
-                    "arima": {
-                        "p": 2,
-                        "d": 2,
-                        "q": 2
-                    }
-                }
-            ]
-        },
-        {
-            "id": "A122",
-            "arima_models": [
-                {
-                    "arima": {
-                        "p": 1,
-                        "d": 2,
-                        "q": 2
-                    }
-                }
-            ]
-        },
-        {
-            "id": "A201",
-            "arima_models": [
-                {
-                    "arima": {
-                        "p": 2,
+                        "p": 4,
                         "d": 0,
                         "q": 1
                     }
@@ -56,11 +20,11 @@
             ]
         },
         {
-            "id": "A212",
+            "id": "A412",
             "arima_models": [
                 {
                     "arima": {
-                        "p": 2,
+                        "p": 4,
                         "d": 1,
                         "q": 2
                     }
@@ -68,47 +32,275 @@
             ]
         },
         {
-            "id": "A221",
+            "id": "A403",
             "arima_models": [
                 {
                     "arima": {
-                        "p": 2,
-                        "d": 2,
-                        "q": 1
+                        "p": 4,
+                        "d": 0,
+                        "q": 3
                     }
                 }
             ]
         },
         {
-            "id": "A121",
+            "id": "A443",
             "arima_models": [
                 {
                     "arima": {
-                        "p": 1,
-                        "d": 2,
-                        "q": 1
+                        "p": 4,
+                        "d": 4,
+                        "q": 3
                     }
                 }
             ]
         },
         {
-            "id": "A112",
+            "id": "A334",
             "arima_models": [
                 {
                     "arima": {
-                        "p": 1,
+                        "p": 3,
+                        "d": 3,
+                        "q": 4
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A414",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 4,
                         "d": 1,
+                        "q": 4
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A431",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 4,
+                        "d": 3,
+                        "q": 1
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A422",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 4,
+                        "d": 2,
                         "q": 2
                     }
                 }
             ]
         },
         {
-            "id": "A211",
+            "id": "A134",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 1,
+                        "d": 3,
+                        "q": 4
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A143",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 1,
+                        "d": 4,
+                        "q": 3
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A114",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 1,
+                        "d": 1,
+                        "q": 4
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A424",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 4,
+                        "d": 2,
+                        "q": 4
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A242",
             "arima_models": [
                 {
                     "arima": {
                         "p": 2,
+                        "d": 4,
+                        "q": 2
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A224",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 2,
+                        "d": 2,
+                        "q": 4
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A314",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 3,
+                        "d": 1,
+                        "q": 4
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A402",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 4,
+                        "d": 0,
+                        "q": 2
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A442",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 4,
+                        "d": 4,
+                        "q": 2
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A342",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 3,
+                        "d": 4,
+                        "q": 2
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A433",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 4,
+                        "d": 3,
+                        "q": 3
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A404",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 4,
+                        "d": 0,
+                        "q": 4
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A444",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 4,
+                        "d": 4,
+                        "q": 4
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A142",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 1,
+                        "d": 4,
+                        "q": 2
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A344",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 3,
+                        "d": 4,
+                        "q": 4
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A144",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 1,
+                        "d": 4,
+                        "q": 4
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A411",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 4,
                         "d": 1,
                         "q": 1
                     }
@@ -116,13 +308,229 @@
             ]
         },
         {
-            "id": "A102",
+            "id": "A244",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 2,
+                        "d": 4,
+                        "q": 4
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A413",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 4,
+                        "d": 1,
+                        "q": 3
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A304",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 3,
+                        "d": 0,
+                        "q": 4
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A441",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 4,
+                        "d": 4,
+                        "q": 1
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A421",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 4,
+                        "d": 2,
+                        "q": 1
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A324",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 3,
+                        "d": 2,
+                        "q": 4
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A341",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 3,
+                        "d": 4,
+                        "q": 1
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A432",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 4,
+                        "d": 3,
+                        "q": 2
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A104",
             "arima_models": [
                 {
                     "arima": {
                         "p": 1,
                         "d": 0,
-                        "q": 2
+                        "q": 4
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A204",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 2,
+                        "d": 0,
+                        "q": 4
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A423",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 4,
+                        "d": 2,
+                        "q": 3
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A124",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 1,
+                        "d": 2,
+                        "q": 4
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A141",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 1,
+                        "d": 4,
+                        "q": 1
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A343",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 3,
+                        "d": 4,
+                        "q": 3
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A241",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 2,
+                        "d": 4,
+                        "q": 1
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A434",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 4,
+                        "d": 3,
+                        "q": 4
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A214",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 2,
+                        "d": 1,
+                        "q": 4
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A234",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 2,
+                        "d": 3,
+                        "q": 4
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A243",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 2,
+                        "d": 4,
+                        "q": 3
                     }
                 }
             ]

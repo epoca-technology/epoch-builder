@@ -1,9 +1,8 @@
-from typing import Any, Optional, Tuple, List, Union
+from typing import Any, Optional, Tuple, List
 from psycopg2.pool import SimpleConnectionPool
 from psycopg2.extras import RealDictCursor, Json
 from psycopg2.extensions import new_type, DECIMAL, register_type, register_adapter
-from modules.database.DatabaseTables import TABLES
-from modules.model import IPrediction
+from modules.database import IDatabaseConnectionConfig, TABLES, IDatabaseSummary, IDatabaseTableSummary
 
 
 
@@ -50,6 +49,17 @@ register_adapter(dict, Json)
 
 
 
+# DATABASE CONNECTION CONFIGURATION
+# This is the configuration that will be used to establish a connection with the
+# database.
+DB_CONNECTION_CONFIG: IDatabaseConnectionConfig = {
+    "host_ip": "192.168.2.101",
+    "user": "postgres",
+    "password": "oPyjNQqeP8LewFFELIA2BuwoTi8RkYDLaAvhyvWT",
+    "database": "postgres",
+    "port": "5442",
+}
+
 
 
 
@@ -66,13 +76,15 @@ class Database:
             The type of execution.
         POOL: SimpleConnectionPool
             Pool of connections.
+        DB_MANAGEMENT_PATH: str
+            This is the path where the backup and restore actions should place or read files
+            from.
     """
 
-    # TEST MODE
+    # Test Mode
     # If TEST_MODE is enabled, the db module will use the test table names instead of the 
     # real ones in order to prevent potential incidents.
     TEST_MODE: bool = False
-
 
 
     # Pool Connection
@@ -83,12 +95,23 @@ class Database:
     POOL: SimpleConnectionPool = SimpleConnectionPool(
         3,
         10,
-        host="192.168.2.101",
-        user="postgres",
-        password="oPyjNQqeP8LewFFELIA2BuwoTi8RkYDLaAvhyvWT",
-        database="postgres",
-        port="5442"
+        host=DB_CONNECTION_CONFIG["host_ip"],
+        user=DB_CONNECTION_CONFIG["user"],
+        password=DB_CONNECTION_CONFIG["password"],
+        database=DB_CONNECTION_CONFIG["database"],
+        port=DB_CONNECTION_CONFIG["port"]
     )
+
+
+    # Database Management Path
+    # This is the path where the backup and restore actions should place or read files
+    # from.
+    DB_MANAGEMENT_PATH: str = "db_management"
+
+
+
+
+
 
 
 
@@ -208,7 +231,7 @@ class Database:
 
 
         # Delete them from the db
-        Database.write_query(f"DROP TABLE IF EXISTS ${table_union}")
+        Database.write_query(f"DROP TABLE IF EXISTS {table_union}")
 
 
 
@@ -243,6 +266,50 @@ class Database:
 
 
 
+    ## DATABASE SUMMARY ##
+
+
+    @staticmethod
+    def get_summary() -> IDatabaseSummary:
+        """Retrieves the summary of the database and its configuration.
+
+        Returns:
+            IDatabaseSummary
+        """
+        # Retrieve the version of the database
+        version_snap: List[Any] = Database.read_query("SELECT version();")
+
+        # Retrieve the total size
+        total_size_snap: List[Any] = Database.read_query(f"SELECT pg_database_size('{DB_CONNECTION_CONFIG['database']}');")
+
+        # Retrieve the tables' summaries
+        tables: List[IDatabaseTableSummary] = []
+        test_tables: List[IDatabaseTableSummary] = []
+
+        # Iterate over each table and build the summaries
+        for table in TABLES:
+            # Build the table summary
+            table_size_snap: List[Any] = Database.read_query(f"SELECT pg_total_relation_size('{table['name']}');")
+            tables.append({
+                "name": table["name"],
+                "size": table_size_snap[0]["pg_total_relation_size"]
+            })
+
+            # Build the test table summary
+            test_table_size_snap: List[Any] = Database.read_query(f"SELECT pg_total_relation_size('test_{table['name']}');")
+            test_tables.append({
+                "name": "test_" + table["name"],
+                "size": test_table_size_snap[0]["pg_total_relation_size"]
+            })
+
+        # Finally, return the summary
+        return {
+            "connection_config": DB_CONNECTION_CONFIG,
+            "version": version_snap[0]["version"],
+            "size": total_size_snap[0]["pg_database_size"],
+            "tables": tables,
+            "test_tables": test_tables,
+        }
 
 
 
@@ -251,122 +318,3 @@ class Database:
 ## DATABASE INITIALIZATION ##
 # When the Database module is initialized, make sure that all tables exist.
 Database.initialize_tables()
-
-
-
-
-
-
-
-
-
-
-
-## LEGACY DB IMPLEMENTATION ##
-# This implementation has been deprecated in favor of a PostgreSQL Database and will be 
-# removed once the migration is completed and tested.
-
-
-import os
-from sqlitedict import SqliteDict
-
-
-# If the Database's directory doesn't exist, create it
-DB_PATH: str = 'db'
-if not os.path.exists(DB_PATH):
-    os.makedirs(DB_PATH)
-
-
-## Database Init ##
-DB: SqliteDict = SqliteDict(f"{DB_PATH}/db.sqlite", tablename="arima_predictions", autocommit=True, outer_stack=False)
-
-
-
-
-
-# Predictions Management
-# In order to accelerate the execution times of the backtesting, predictions are saved in a 
-# local database in a key: val format based on the id of the model, the first ot and the last
-# ct of the lookback range.
-# An example of a key that holds a prediction is: A601_1502942400000_1509139799999
-# The keys may be longer in Regression and Classification Models. So far, the limit of the keys
-# is unknown. However, they impact performance.
-
-
-
-
-def save_pred(model_id: str, first_ot: int, last_ct: int, pred: IPrediction) -> None:
-    """Saves a Model Prediction in the database for optimization purposes.
-
-    Args:
-        model_id: str
-            The ID of the Model. F.e: A601
-        first_ot: int
-            The open timestamp of the first prediction candlestick.
-        last_ct: int
-            The close timestamp of the last prediction candlestick.
-        pred: IPrediction
-            The prediction to save in the db.
-    """
-    DB[_get_pred_key(model_id, first_ot, last_ct)] = pred
-
-
-
-
-
-def get_pred(model_id: str, first_ot: int, last_ct: int) -> Union[IPrediction, None]:
-    """Retrieves a Model Prediction if it exists, otherwise returns None.
-
-    Args:
-        model_id: str
-            The ID of the Model. F.e: A601
-        first_ot: int
-            The open timestamp of the first prediction candlestick.
-        last_ct: int
-            The close timestamp of the last prediction candlestick.
-
-    Returns:
-        Union[IPrediction, None]
-    """
-    return DB.get(_get_pred_key(model_id, first_ot, last_ct))
-
-
-
-
-
-def delete_pred(model_id: str, first_ot: int, last_ct: int) -> None:
-    """Deletes a Model Prediction from the Database.
-
-    Args:
-        model_id: str
-            The ID of the Model. F.e: A601
-        first_ot: int
-            The open timestamp of the first prediction candlestick.
-        last_ct: int
-            The close timestamp of the last prediction candlestick.
-    """
-    # Init the key
-    key: str = _get_pred_key(model_id, first_ot, last_ct)
-
-    # if the record exists, delete it
-    if key in DB:
-        del DB[key]
-
-
-
-
-def _get_pred_key(model_id: str, first_ot: int, last_ct: int) -> str:
-    """Returns the key that should be used to save or retrieve the prediction.
-
-    Args:
-        model_id: str
-            The ID of the Arima Model. F.e: A601
-        first_ot: int
-            The open timestamp of the first prediction candlestick.
-        last_ct: int
-            The close timestamp of the last prediction candlestick.
-    
-    Returns:
-        str
-    """
-    return f"{model_id}_{first_ot}_{last_ct}"

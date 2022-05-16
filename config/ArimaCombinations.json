@@ -3,9 +3,9 @@
     "description": "The purpose of this backtest is to find out how different p, d, q combinations can output better results with different TP and SL.",
     "start": "1/10/2021",
     "end": "22/04/2022",
-    "take_profit": 1.5,
-    "stop_loss": 2,
+    "take_profit": 1,
+    "stop_loss": 1,
     "idle_minutes_on_position_close": 30,
-    "focus_number": 9,
-    "batch_size": 500
+    "focus_number": 4,
+    "batch_size": 120
 }

@@ -171,6 +171,13 @@ class ArimaPredictionCacheTestCase(TestCase):
         pred = get_arima_pred(s['id'], s['first_ot'], s['last_ct'], s['predictions'], 1.50, 2.00)
         self.assertEqual(pred, s['pred'])
 
+        # Delete the sample
+        delete_arima_pred(s['id'], s['first_ot'], s['last_ct'], s['predictions'], s['long'], s['short'])
+
+        # Make sure the sample is gone
+        pred = get_arima_pred(s['id'], s['first_ot'], s['last_ct'], s['predictions'], s['long'], s['short'])
+        self.assertEqual(pred, None)
+
 
 
 # Test Execution

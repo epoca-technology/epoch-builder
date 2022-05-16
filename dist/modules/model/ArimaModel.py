@@ -1,9 +1,9 @@
 from typing import List, Union
 from pandas import Series
 from modules.candlestick import Candlestick
-from modules.database import save_pred, get_pred
 from modules.arima import Arima
 from modules.interpreter import PercentageChangeInterpreter, IPercentChangeInterpreterConfig
+from modules.prediction_cache import save_arima_pred, get_arima_pred
 from modules.model import ModelInterface, IModel, IArimaModelConfig, IPrediction, IPredictionMetaData
 
 
@@ -122,7 +122,14 @@ class ArimaModel(ModelInterface):
             first_ot, last_ct = Candlestick.get_lookback_prediction_range(self.lookback, current_timestamp)
 
             # Retrieve it from the database
-            pred: Union[IPrediction, None] = get_pred(self.id, first_ot, last_ct)
+            pred: Union[IPrediction, None] = get_arima_pred(
+                self.id, 
+                first_ot, 
+                last_ct, 
+                self.predictions, 
+                self.interpreter.long,
+                self.interpreter.short
+            )
 
             # Check if the prediction does not exist
             if pred == None:
@@ -130,7 +137,15 @@ class ArimaModel(ModelInterface):
                 pred = self._call_predict(current_timestamp, minimized_metadata=True)
 
                 # Store it in the database
-                save_pred(self.id, first_ot, last_ct, pred)
+                save_arima_pred(
+                    self.id, 
+                    first_ot, 
+                    last_ct, 
+                    self.predictions, 
+                    self.interpreter.long,
+                    self.interpreter.short,
+                    pred
+                )
 
                 # Finally, return it
                 return pred

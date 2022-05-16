@@ -1,16 +1,5 @@
-from typing import TypedDict, Callable, List
-
-
-
-# Database Table Type
-# Includes the base name of the table as well as the sql to create it safely
-class IDatabaseTable(TypedDict):
-    name: str
-    sql: Callable[[str], str]
-
-
-
-
+from typing import List
+from modules.database import IDatabaseTable
 
 
 
