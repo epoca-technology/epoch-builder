@@ -1,5 +1,5 @@
 from typing import Any, Optional, Tuple, List
-from psycopg2.pool import SimpleConnectionPool
+from psycopg2 import connect
 from psycopg2.extras import RealDictCursor, Json
 from psycopg2.extensions import new_type, DECIMAL, register_type, register_adapter
 from modules.database import IDatabaseConnectionConfig, TABLES, IDatabaseSummary, IDatabaseTableSummary
@@ -49,7 +49,11 @@ register_adapter(dict, Json)
 
 
 
-# DATABASE CONNECTION CONFIGURATION
+
+## DATABASE CONNECTION ##
+
+
+# CONFIGURATION
 # This is the configuration that will be used to establish a connection with the
 # database.
 DB_CONNECTION_CONFIG: IDatabaseConnectionConfig = {
@@ -63,7 +67,31 @@ DB_CONNECTION_CONFIG: IDatabaseConnectionConfig = {
 
 
 
-## DATABASE MANAGER ##
+# CONNECTION
+# The established connection with the database. This instance can be used to 
+# generate cursors or commit writes.
+CONNECTION: Any = connect(
+    host=DB_CONNECTION_CONFIG["host_ip"],
+    user=DB_CONNECTION_CONFIG["user"],
+    password=DB_CONNECTION_CONFIG["password"],
+    database=DB_CONNECTION_CONFIG["database"],
+    port=DB_CONNECTION_CONFIG["port"]
+)
+
+
+
+
+# CONNECTION CURSOR
+# A ready to go connection cursor.
+CURSOR: Any = CONNECTION.cursor(cursor_factory=DICT_CURSOR)
+
+
+
+
+
+
+
+## DATABASE SINGLETON ##
 
 
 class Database:
@@ -74,8 +102,6 @@ class Database:
     Class Properties:
         TEST_MODE: bool
             The type of execution.
-        POOL: SimpleConnectionPool
-            Pool of connections.
         DB_MANAGEMENT_PATH: str
             This is the path where the backup and restore actions should place or read files
             from.
@@ -86,21 +112,6 @@ class Database:
     # real ones in order to prevent potential incidents.
     TEST_MODE: bool = False
 
-
-    # Pool Connection
-    # A connection can be requested from the pool at any time.
-    # Make sure to perform the following actions once the actions complete:
-    # cursor.close()
-    # pool.putconn(connection)
-    POOL: SimpleConnectionPool = SimpleConnectionPool(
-        3,
-        10,
-        host=DB_CONNECTION_CONFIG["host_ip"],
-        user=DB_CONNECTION_CONFIG["user"],
-        password=DB_CONNECTION_CONFIG["password"],
-        database=DB_CONNECTION_CONFIG["database"],
-        port=DB_CONNECTION_CONFIG["port"]
-    )
 
 
     # Database Management Path
@@ -135,23 +146,14 @@ class Database:
         Returns:
             List[Any]
         """
-        # Initialize a Connection and the Cursor
-        conn = Database.POOL.getconn()
-        cur = conn.cursor(cursor_factory=DICT_CURSOR)
-
-        # Execute the query
-        try:
-            # Handle the case accordingly
-            if values:
-                cur.execute(text, values)
-            else:
-                cur.execute(text)
-            
-            # Return the Execution Response
-            return cur.fetchall()
-        finally:
-            cur.close()
-            Database.POOL.putconn(conn)
+        # Handle the case accordingly
+        if values:
+            CURSOR.execute(text, values)
+        else:
+            CURSOR.execute(text)
+        
+        # Return the Execution Response
+        return CURSOR.fetchall()
 
 
 
@@ -169,23 +171,14 @@ class Database:
             text (str): The query to be executed.
             values? (Tuple[Any]): The values to be used for the query substitutions.
         """
-        # Initialize a Connection and the Cursor
-        conn = Database.POOL.getconn()
-        cur = conn.cursor()
-
-        # Execute the query
-        try:
-            # Handle the case accordingly
-            if values:
-                cur.execute(text, values)
-            else:
-                cur.execute(text)
-            
-            # Commit the write action
-            conn.commit()
-        finally:
-            cur.close()
-            Database.POOL.putconn(conn)
+        # Handle the case accordingly
+        if values:
+            CURSOR.execute(text, values)
+        else:
+            CURSOR.execute(text)
+        
+        # Commit the write action
+        CONNECTION.commit()
 
 
 
