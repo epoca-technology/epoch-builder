@@ -207,11 +207,11 @@ class PositionTestCase(unittest.TestCase):
         self.assertEqual(p.positions[0]['ct'], c[-1]['ct'])
         self.assertEqual(p.positions[0]['cp'], p.positions[0]['tpp'])
         self.assertTrue(p.positions[0]['o'])
-        self.assertEqual(p.positions[0]['pts'], 2.4)
+        self.assertEqual(p.positions[0]['pts'], 2.25)
 
         # Make sure the points were added
         self.assertEqual(len(p.points), 2)
-        self.assertEqual(p.points[-1], 2.4)
+        self.assertEqual(p.points[-1], 2.25)
 
 
         # Check the counters
@@ -254,11 +254,11 @@ class PositionTestCase(unittest.TestCase):
         self.assertEqual(p.positions[0]['ct'], c[-1]['ct'])
         self.assertEqual(p.positions[0]['cp'], p.positions[0]['slp'])
         self.assertFalse(p.positions[0]['o'])
-        self.assertEqual(p.positions[0]['pts'], -3.99)
+        self.assertEqual(p.positions[0]['pts'], -4.28)
 
         # Make sure the points were added
         self.assertEqual(len(p.points), 2)
-        self.assertEqual(p.points[-1], -3.99)
+        self.assertEqual(p.points[-1], -4.28)
 
         # Check the counters
         self.assertEqual(p.successful_num, 0)

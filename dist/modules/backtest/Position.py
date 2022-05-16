@@ -15,7 +15,10 @@ class Position:
     retuls.
 
     Class Properties:
-        
+        FEE: float
+            This percentage is used to simulate the fee charged by the exchange to open & close
+            postitions in the Futures Market.
+
 
     Instance Properties:
         Configuration
@@ -26,9 +29,9 @@ class Position:
 
         Points Data:
             reward: float
-                The number of points (TP - 1) that will be added if the position is successful. 
+                The number of points (TP - FEE%) that will be added if the position is successful. 
             penalty: float
-                The number of points (SL + 1) that will be substracted if the position is unsuccessful
+                The number of points (SL + FEE%) that will be substracted if the position is unsuccessful
             points: List[float]
                 The history of how points have fluctuated during the process.
 
@@ -55,6 +58,13 @@ class Position:
 
 
 
+    # Fee
+    FEE: float = 10
+
+
+
+
+
 
     ## Initialization ##
 
@@ -74,8 +84,8 @@ class Position:
         self.stop_loss: float = stop_loss
 
         # Init Points Data
-        self.reward: float = take_profit - 0.1
-        self.penalty: float = -(stop_loss + 0.1)
+        self.reward: float = Utils.alter_number_by_percentage(take_profit, -(Position.FEE))
+        self.penalty: float = -(Utils.alter_number_by_percentage(stop_loss, Position.FEE))
         self.points: List[float] = [0]
 
         # Init Positions
