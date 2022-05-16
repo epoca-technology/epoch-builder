@@ -1,4 +1,4 @@
-# PREDICTION BACKTESTING
+# PREDICTION BACKTESTING v0.0.2
 
 Plutus' Prediction Backtesting is a project designed to experiment with different Prediction Models in order to optimize profits.
 
@@ -36,18 +36,21 @@ prediction-backtesting
     ├───candlesticks.csv
     ├───prediction_candlesticks.csv
     │
+    classification_training_data/
+    │   ├──10a505f1-c2f7-4c77-9759-15ff460fcd27.json
+    │   └──123e4567-e89b-12d3-a456-426614174000.json
+    │
     config/
     ├───ArimaCombinations.json
     ├───Backtest.json
-    ├───TrainingData.json
+    ├───ClassificationTrainingData.json
+    ├───RegressionTraining.json
     │
-    db/
-    ├───db.sqlite
-    ├───merge_result.sqlite <- Output when running ./DBMerge.sh
-    │
-    db_merge/
-    ├───db1.sqlite
-    ├───db2.sqlite
+    db_management/
+    ├───backup/
+    │   └──1652662191014.dump <- Backup File Generated through the CLI
+    ├───restore/
+    │   └──1652495666677.dump <- Backup File to be restored
     │
     dist/
     ├───modules/
@@ -62,26 +65,19 @@ prediction-backtesting
     │
     ├───run_arima_combinations.py
     ├───run_backtest.py
-    ├───run_db_merge.py
-    ├───run_training_data.py
-    │
-    training_data/
-    ├───1649788629072/ <- Generated Data
-    │   ├──data.csv
-    │   └──receipt.json
-    │
-    ├───data.csv       <- Used for training a model
-    ├───receipt.json   <- Used to validate the data & the model
+    ├───run_classification_training_data.py
+    ├───run_db_management.py
+    ├───run_regression_training.py
     │
     ArimaCombinations.sh
     │
     Backtest.sh
     │
-    DBMerge.sh
+    ClassificationTrainingData.sh
+    │
+    DatabaseManagement.sh
     │
     RegressionTraining.sh
-    │
-    TrainingData.sh
     │
     UnitTests.sh
 ```
@@ -95,7 +91,40 @@ prediction-backtesting
 
 - Set the permissions on the executables (This only needs to be done once):
 
-  `chmod u+x ArimaCombinations.sh Backtest.sh DatabaseManagement.sh RegressionTraining.sh TrainingData.sh UnitTests.sh`
+  `chmod u+x ArimaCombinations.sh Backtest.sh ClassificationTrainingData.sh DatabaseManagement.sh RegressionTraining.sh UnitTests.sh`
+
+
+
+
+#
+## Database Management
+
+Basic utility that allows interactions with the PostgreSQL Database such as:
+
+- Visualize the Database Summary
+
+- Create a Database Backup
+
+- Restore a Database Backup
+
+In order to execute the utility run the following:
+
+`./DatabaseManagement.sh`
+
+
+### Database Backup
+
+When the Database Backup is executed, the dump file is placed in the following path:
+
+**db_management/backup**
+
+### Database Restore
+
+Before running the restore function, make sure to have placed the backup file that you wish to restore in the following path:
+
+**db_management/restore**
+
+
 
 
 
@@ -109,6 +138,8 @@ Run the generator by executing the following:
 `./ArimaCombinations`
 
 
+
+
 #
 ## Backtests
 
@@ -120,27 +151,29 @@ Once the execution completes, the results will be placed under the **./backtest_
 
 
 
-
 #
-## Training Data
+## Regression Training
 
-Input the desired configuration values in **config/TrainingData.json** and run:
+Input the desired configuration values in **config/RegressionTraining.json** and run:
 
-`./TrainingData`
+`./RegressionTraining.sh`
 
-Once the execution completes, the files **data.csv** and **receipt.json** will be placed under the **training_data/{TIMESTAMP}** directory.
-
-
+@TODO
 
 
 #
-## DB Merge
+## Classification Training Data
 
-Merges the Local DB file from **db/db.sqlite** and all the DB files located in **db_merge**. 
+Input the desired configuration values in **config/ClassificationTrainingData.json** and run:
 
-`./DBMerge.sh`
+`./ClassificationTrainingData`
 
-Once the execution completes, the result is placed in **db/merge_result.sqlite** and the files located in **db_merge** are automatically deleted.
+Once the execution completes, a file with a **uuid4 as the name** will be generated and placed in the **classification_training_data** directory.
+
+
+
+
+
 
 
 

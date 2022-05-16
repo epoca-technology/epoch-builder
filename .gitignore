@@ -46,10 +46,6 @@ Thumbs.db
 *.mov
 *.wmv
 
-# Candlesticks CSV Files
-candlesticks/
-candlesticks.csv
-prediction_candlesticks.csv
 
 # Backtest Results Directory
 backtest_results/
@@ -57,15 +53,18 @@ backtest_results/
 # Backtest Configurations
 backtest_configurations/
 
+# Candlesticks CSV Files
+candlesticks/
+candlesticks.csv
+prediction_candlesticks.csv
+
+# Classification Training Data
+classification_training_data/
+
 # Database Management
 db_management/
-db/
-db_merge/
 
 # Saved Keras Models
 saved_keras_models_configurations/
 saved_keras_models_certificates/
 saved_keras_models/
-
-# Training Data
-training_data/
