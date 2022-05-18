@@ -1,59 +1,8 @@
 {
-    "name": "LSTM_VARIATIONS",
+    "name": "LSTM_MOCKS",
     "models": [
         {
-            "id": "R_LSTM_HARD_STACK_LB50_P10_LR001_ADAM_MAE_SHUFFLE",
-            "description": "This is just a test to see how it goes.",
-            "lookback": 50,
-            "predictions": 10,
-            "learning_rate": 0.001,
-            "optimizer": "adam",
-            "loss": "mae",
-            "metric": "mse",
-            "batch_size": 32,
-            "shuffle_data": true,
-            "keras_model": {
-                "name": "LSTM_HARD_STACK",
-                "units": [80, 80, 80, 80, 80, 80],
-                "dropout_rates": [0.2]
-            }
-        },
-        {
-            "id": "R_LSTM_HARD_STACK_LB50_P10_LR001_ADAM_MAE_NO_SHUFFLE",
-            "description": "This is just a test to see how it goes.",
-            "lookback": 50,
-            "predictions": 10,
-            "learning_rate": 0.001,
-            "optimizer": "adam",
-            "loss": "mae",
-            "metric": "mse",
-            "batch_size": 32,
-            "shuffle_data": false,
-            "keras_model": {
-                "name": "LSTM_HARD_STACK",
-                "units": [80, 80, 80, 80, 80, 80],
-                "dropout_rates": [0.2]
-            }
-        },
-        {
-            "id": "R_LSTM_HARD_STACK_LB50_P10_LR001_ADAM_MSE_SHUFFLE",
-            "description": "This is just a test to see how it goes.",
-            "lookback": 50,
-            "predictions": 10,
-            "learning_rate": 0.001,
-            "optimizer": "adam",
-            "loss": "mse",
-            "metric": "mae",
-            "batch_size": 32,
-            "shuffle_data": true,
-            "keras_model": {
-                "name": "LSTM_HARD_STACK",
-                "units": [80, 80, 80, 80, 80, 80],
-                "dropout_rates": [0.2]
-            }
-        },
-        {
-            "id": "R_LSTM_HARD_STACK_LB50_P10_LR001_ADAM_MSE_NO_SHUFFLE",
+            "id": "R_MOCK_1",
             "description": "This is just a test to see how it goes.",
             "lookback": 50,
             "predictions": 10,
@@ -64,8 +13,9 @@
             "batch_size": 32,
             "shuffle_data": false,
             "keras_model": {
-                "name": "LSTM_HARD_STACK",
-                "units": [80, 80, 80, 80, 80, 80],
+                "name": "LSTM_MEDIUM_STACK",
+                "units": [512, 256, 128, 64],
+                "activations": ["relu", "relu", "relu", "relu"],
                 "dropout_rates": [0.2]
             }
         }

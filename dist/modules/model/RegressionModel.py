@@ -1,0 +1,235 @@
+from typing import List
+from pandas import DataFrame
+from modules.candlestick import Candlestick
+from modules.regression import Regression
+from modules.interpreter import PercentageChangeInterpreter
+from modules.model import ModelInterface, IModel, IPrediction, IPredictionMetaData, IRegressionModelConfig
+
+
+
+
+
+
+class RegressionModel(ModelInterface):
+    """RegressionModel Class
+    
+    This class is responsible of handling interactions with Keras Regression Models.
+
+    Class Properties:
+        ...
+
+    Instance Properties:
+        id: str
+            The identifier of the saved keras model.
+        regression: Regression
+            The instance of the Keras Regression Model.
+        interpreter: PercentageChangeInterpreter
+            The Interpreter instance that will be used to interpret Regression Predictions.
+
+    """
+
+
+    ## Initialization ## 
+
+
+    def __init__(self, config: IModel):
+        """Initializes the instance properties, the regression model and the Interpreter's Instance.
+
+        Args:
+            config: IModel
+                The configuration to be used to initialize the model's instance
+        """
+        # Make sure there is 1 Arima Model
+        if len(config['regression_models']) != 1:
+            raise ValueError(f"A RegressionModel can only be initialized if 1 configuration item is provided. \
+                Received: {len(config['regression_models'])}")
+
+        # Initialize the ID of the model
+        self.id: str = config['id']
+
+        # Initialize the Model's Config
+        model_config: IRegressionModelConfig = config['regression_models'][0]
+
+        # Initialize the regression
+        self.regression: Regression = Regression(model_config['regression_id'])
+
+        # Initialize the Interpreter Instance
+        self.interpreter: PercentageChangeInterpreter = PercentageChangeInterpreter(model_config['interpreter'])
+
+
+
+
+
+    ## Predictions ##
+
+
+
+    def predict(self, current_timestamp: int, enable_cache: bool = False) -> IPrediction:
+        """In order to optimize performance, if cache is enabled, it will check the db
+        before performing an actual prediction. If the prediction is not found, it will
+        perform it and store it afterwards. If cache is not enabled, it will just 
+        perform a traditional prediction without storing the results.
+
+        Args:
+            current_timestamp: int
+                The current time in milliseconds.
+            enable_cache: bool
+                If true, it will check the db before calling the actual predict method.
+        
+        Returns:
+            IPrediction
+        """
+        # Check if the cache is enabled
+        if enable_cache:
+            """# Retrieve the candlestick range
+            first_ot, last_ct = Candlestick.get_lookback_prediction_range(self.lookback, current_timestamp)
+
+            # Retrieve it from the database
+            pred: Union[IPrediction, None] = get_arima_pred(
+                self.id, 
+                first_ot, 
+                last_ct, 
+                self.predictions, 
+                self.interpreter.long,
+                self.interpreter.short
+            )
+
+            # Check if the prediction does not exist
+            if pred == None:
+                # Generate it
+                pred = self._call_predict(current_timestamp, minimized_metadata=True)
+
+                # Store it in the database
+                save_arima_pred(
+                    self.id, 
+                    first_ot, 
+                    last_ct, 
+                    self.predictions, 
+                    self.interpreter.long,
+                    self.interpreter.short,
+                    pred
+                )
+
+                # Finally, return it
+                return pred
+
+            # Otherwise, return it
+            else:
+                return pred"""
+            return self._call_predict(current_timestamp, minimized_metadata=True)
+
+        # Otherwise, handle a traditional prediction
+        else:
+            return self._call_predict(current_timestamp, minimized_metadata=False)
+
+
+
+
+
+
+
+
+    def _call_predict(self, current_timestamp: int, minimized_metadata: bool) -> IPrediction:
+        """Given the current time, it will perform a prediction and return it as 
+        well as its metadata.
+
+        Args:
+            current_timestamp: int
+                The current time in milliseconds.
+            minimized_metadata: bool
+                If this property is enabled, the metadata will only include the description.
+
+        Returns:
+            IPrediction
+        """
+        # Retrieve the normalized lookback df
+        norm_df: DataFrame = Candlestick.get_lookback_df(self.regression.lookback, current_timestamp, normalized=True)
+
+        # Generate the predictions
+        preds: List[float] = self.regression.predict(norm_df)
+
+        # Interpret the predictions
+        result, description = self.interpreter.interpret(preds)
+
+        # Build the metadata
+        metadata: IPredictionMetaData = { 'd': description }
+        if not minimized_metadata:
+            metadata['npl'] = preds
+        
+        # Finally, return the prediction results
+        return { "r": result, "t": int(current_timestamp), "md": [ metadata ] }
+
+
+
+
+
+
+
+
+
+
+    ## General Retrievers ##
+
+
+
+
+
+
+    def get_lookback(self) -> int:
+        """Returns the lookback value of the model.
+
+        Args:
+            None
+
+        Returns:
+            int
+        """
+        return self.regression.lookback
+
+    
+
+
+
+
+
+
+
+    def get_model(self) -> IModel:
+        """Dumps the model's data into a dictionary that will be used
+        to get the insights based on its performance.
+
+        Args:
+            None
+
+        Returns:
+            IModel
+        """
+        return {
+            "id": self.id,
+            "regression_models": [{
+                "regression_id": self.regression.id,
+                "interpreter": self.interpreter.get_config(),
+                "regression": self.regression.get_config()
+            }]
+        }
+
+
+
+
+
+
+    @staticmethod
+    def is_config(model: IModel) -> bool:
+        """Verifies if a model is a RegressionModel.
+
+        Args:
+            model: IModel
+                A model configuration dict.
+
+        Returns:
+            bool
+        """
+        return isinstance(model.get('regression_models'), list) \
+                and len(model['regression_models']) == 1 \
+                    and model.get('arima_models') == None \
+                        and model.get('classification_models') == None

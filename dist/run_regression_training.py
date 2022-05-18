@@ -4,7 +4,7 @@ from os.path import exists
 from json import load, dumps
 from modules.utils import Utils
 from modules.candlestick import Candlestick
-from modules.keras_models import KERAS_MODELS_CERTIFICATES_PATH
+from modules.keras_models import KERAS_PATH
 from modules.regression import IRegressionTrainingBatch, RegressionTraining, IRegressionTrainingCertificate
 
 
@@ -68,7 +68,7 @@ for index, model_config in enumerate(config["models"]):
     # Print the progress
     if index == 0:
         print("REGRESSION TRAINING RUNNING")
-    print(f"{index + 1}/{len(config['models'])}) {model_config['id']}")
+    print(f"\n{index + 1}/{len(config['models'])}) {model_config['id']}")
 
     # Train the model
     cert: IRegressionTrainingCertificate = regression_training.train()
@@ -77,8 +77,8 @@ for index, model_config in enumerate(config["models"]):
     certificates.append(cert)
 
 # Save the certificates
-if not exists(KERAS_MODELS_CERTIFICATES_PATH):
-    makedirs(KERAS_MODELS_CERTIFICATES_PATH)
-with open(f"{KERAS_MODELS_CERTIFICATES_PATH}/{config['name']}_{Utils.get_time()}.json", "w") as outfile:
+if not exists(KERAS_PATH["batched_training_certificates"]):
+    makedirs(KERAS_PATH["batched_training_certificates"])
+with open(f"{KERAS_PATH['batched_training_certificates']}/{config['name']}_{Utils.get_time()}.json", "w") as outfile:
     outfile.write(dumps(certificates, indent=4))
 print("\nREGRESSION TRAINING COMPLETED")

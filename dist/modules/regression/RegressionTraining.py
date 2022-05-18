@@ -14,7 +14,7 @@ from keras.optimizers import adam_v2, rmsprop_v2
 from h5py import File as h5pyFile
 from modules.candlestick import Candlestick
 from modules.utils import Utils
-from modules.keras_models import KerasModel, IKerasModelConfig, IKerasModelTrainingHistory, get_summary, KERAS_MODELS_PATH
+from modules.keras_models import KerasModel, IKerasModelConfig, IKerasModelTrainingHistory, get_summary, KERAS_PATH
 from modules.regression import IRegressionTrainingConfig, TrainingWindowGenerator, IRegressionTrainingCertificate, \
     Regression, IRegressionEvaluation
 
@@ -69,15 +69,16 @@ class RegressionTraining:
     """
 
     # The maximum number of EPOCHs a model can go through during training
-    MAX_EPOCHS: int = 200
+    MAX_EPOCHS: int = 1000
 
     # The max number of evaluations that will be performed on the trained regression model.
     # Notice that if the number of evals is much smaller than the max it means there could be
     # an irregularity with the model as the predictions percentages aren't changing within
     # the window.
-    MAX_REGRESSION_EVALUATIONS: int = 5000
+    MAX_REGRESSION_EVALUATIONS: int = 2000
 
-
+    # The max number of training epochs that can occur without showing improvements.
+    EARLY_STOPPING_PATIENCE: int = 10
 
 
 
@@ -104,7 +105,7 @@ class RegressionTraining:
             raise ValueError("The ID of the Regression Model must be preffixed with R_")
 
         # Initialize the Model's path
-        self.model_path: str = f"{KERAS_MODELS_PATH}/{self.id}"
+        self.model_path: str = f"{KERAS_PATH['models']}/{self.id}"
 
         # Initialize the description
         self.description: str = config['description']
@@ -292,11 +293,11 @@ class RegressionTraining:
         start_time: int = Utils.get_time()
 
         # Initialize the early stopping callback
-        early_stopping = EarlyStopping(monitor='val_loss', patience=5, mode='min')
+        early_stopping = EarlyStopping(monitor='val_loss', patience=RegressionTraining.EARLY_STOPPING_PATIENCE, mode='min')
 
         # Retrieve the Keras Model
         print("\n    1/7) Initializing Model...")
-        model: Sequential = KerasModel(model_type='regression', config=self.keras_model)
+        model: Union[Sequential, Any] = KerasModel(model_type='regression', config=self.keras_model)
 
         # Compile the model
         print("    2/7) Compiling Model...")
@@ -625,8 +626,8 @@ class RegressionTraining:
                 If the model's directory already exists.
         """
         # If the output directory doesn't exist, create it
-        if not exists(KERAS_MODELS_PATH):
-            makedirs(KERAS_MODELS_PATH)
+        if not exists(KERAS_PATH["models"]):
+            makedirs(KERAS_PATH["models"])
 
         # Make sure the model's directory does not exist
         if exists(self.model_path):

@@ -6,7 +6,7 @@ from tensorflow.python.keras.saving.hdf5_format import load_model_from_hdf5
 from keras import Sequential
 from keras.preprocessing.timeseries import timeseries_dataset_from_array
 from h5py import File as h5pyFile
-from modules.keras_models import KERAS_MODELS_PATH, get_summary
+from modules.keras_models import KERAS_PATH, get_summary
 from modules.regression import IRegressionConfig
 
 
@@ -52,7 +52,7 @@ class Regression:
                 If any of the other metadata is invalid.
         """
         # Load the model
-        with h5pyFile(f"{KERAS_MODELS_PATH}/{id}/model.h5", mode='r') as model_file:
+        with h5pyFile(f"{KERAS_PATH['models']}/{id}/model.h5", mode='r') as model_file:
             self.id: str = model_file.attrs['id']
             self.description: str = model_file.attrs['description']
             self.lookback: int = int(model_file.attrs['lookback'])          # Downcast to int

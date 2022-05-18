@@ -58,13 +58,8 @@ candlesticks/
 candlesticks.csv
 prediction_candlesticks.csv
 
-# Classification Training Data
-classification_training_data/
-
 # Database Management
 db_management/
 
-# Saved Keras Models
-saved_keras_models_configurations/
-saved_keras_models_certificates/
-saved_keras_models/
+# Keras Assets
+keras_assets/

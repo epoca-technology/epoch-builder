@@ -23,7 +23,7 @@ class ArimaModel(ModelInterface):
 
     Instance Properties:
         id: str
-            The name of the model that makes it identifiable.
+            The Arima identifier.
         lookback: int
             The number of prediction candlesticks that will be used to generate predictions.
         predictions: int
@@ -58,7 +58,7 @@ class ArimaModel(ModelInterface):
         """
         # Make sure there is 1 Arima Model
         if len(config['arima_models']) != 1:
-            raise ValueError(f"A SingleModel can only be initialized if 1 configuration item is provided. \
+            raise ValueError(f"An ArimaModel can only be initialized if 1 configuration item is provided. \
                 Received: {len(config['arima_models'])}")
 
         # Initialize the ID
@@ -267,7 +267,9 @@ class ArimaModel(ModelInterface):
         """
         return ArimaModel._is_id(model['id']) \
             and isinstance(model.get('arima_models'), list) \
-                and len(model['arima_models']) == 1
+                and len(model['arima_models']) == 1 \
+                    and model.get('regression_models') == None \
+                        and model.get('classification_models') == None
 
 
 
