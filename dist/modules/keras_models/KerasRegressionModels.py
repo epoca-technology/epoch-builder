@@ -12,10 +12,28 @@ from modules.keras_models import IKerasModelConfig, validate
 
 
 
+## Unit Test Model ##
+
+# R_UNIT_TEST 
+# 1 units:       Dense_1
+# 1 activations: Dense_1
+def R_UNIT_TEST(m: IKerasModelConfig) -> Sequential:
+    validate(m, 'regression', 'R_UNIT_TEST', units=1, activations=1)
+    return Sequential([
+        Lambda(lambda x: x[:, -1:, :], name="Lambda_1"),
+        Dense(m["units"][0], activation=m["activations"][0], kernel_initializer="normal", name="Dense_1"),
+        Dense(m['predictions'], kernel_initializer=zeros, name="Dense_2"),
+        Flatten(name="Flatten_1")
+    ])
+
+
 
 
 
 ## Dense Neural Network ##
+
+
+
 
 
 # DNN_STACK1_LI 

@@ -127,7 +127,9 @@ class IClassificationModelConfig(TypedDict):
     # The interpreter that will determine the prediction's result
     interpreter: IProbabilityInterpreterConfig
 
-    
+    # The entire configuration used by the classification. This value is only present
+    # when the function get_model is used.
+    classification: Union[Any, None]
 
 
 

@@ -1,4 +1,4 @@
-from typing import TypedDict, List, Dict
+from typing import TypedDict, List, Dict, Union
 from pandas import DataFrame
 from modules.keras_models import IKerasModelConfig, IKerasModelSummary, IKerasModelTrainingHistory
 
@@ -88,6 +88,10 @@ class IRegressionTrainingConfig(TypedDict):
 class IRegressionTrainingBatch(TypedDict):
     # Descriptive name to easily identify the batch. Must be compatible with filesystems.
     name: str
+
+    # Start and end time - If none provided, will use all the available data
+    start: Union[str, int, None]
+    end: Union[str, int, None]
 
     # The configurations for the models that will be trained within the batch.
     models: List[IRegressionTrainingConfig]

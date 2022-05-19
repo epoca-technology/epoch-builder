@@ -1,22 +1,23 @@
 {
-    "name": "LSTM_MOCKS",
+    "name": "REGRESSION_UNIT_TEST",
+    "start": null,
+    "end": null,
     "models": [
         {
-            "id": "R_MOCK_1",
-            "description": "This is just a test to see how it goes.",
+            "id": "R_UNIT_TEST",
+            "description": "This model is to be used for unit testing purposes.",
             "lookback": 50,
             "predictions": 10,
             "learning_rate": 0.001,
             "optimizer": "adam",
-            "loss": "mse",
-            "metric": "mae",
+            "loss": "mae",
+            "metric": "mse",
             "batch_size": 32,
             "shuffle_data": false,
             "keras_model": {
-                "name": "LSTM_MEDIUM_STACK",
-                "units": [512, 256, 128, 64],
-                "activations": ["relu", "relu", "relu", "relu"],
-                "dropout_rates": [0.2]
+                "name": "R_UNIT_TEST",
+                "units": [64],
+                "activations": ["relu"]
             }
         }
     ]

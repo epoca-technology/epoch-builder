@@ -296,7 +296,7 @@ class RegressionTraining:
         early_stopping = EarlyStopping(monitor='val_loss', patience=RegressionTraining.EARLY_STOPPING_PATIENCE, mode='min')
 
         # Retrieve the Keras Model
-        print("\n    1/7) Initializing Model...")
+        print("    1/7) Initializing Model...")
         model: Union[Sequential, Any] = KerasModel(model_type='regression', config=self.keras_model)
 
         # Compile the model
