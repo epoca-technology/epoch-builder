@@ -1,11 +1,11 @@
-from typing import List, Union, Any
+from typing import List, Union
 from os import makedirs
 from os.path import exists
 from json import dumps
 from tqdm import tqdm
 from modules.candlestick import Candlestick
 from modules.utils import Utils
-from modules.model import IModel, Model, IPrediction, ArimaModel
+from modules.model import IModel, Model, IPrediction, ArimaModel, RegressionModel, ClassificationModel
 from modules.backtest import IBacktestConfig, Position, IBacktestPerformance, IBacktestResult
 
 
@@ -47,17 +47,15 @@ class Backtest:
                 The number of minutes that the model will be idle when a position is closed.
 
         Models:
-            models: List[Model, MultiModel]
+            models: List[Union[ArimaModel, RegressionModel, ClassificationModel]]
                 The list of models that will be backtested
             results: List[IBacktestResult]
                 The list of results by model. This list will be sorted by points prior to outputting it
                 to a json file.
-
-
     """
 
     # Directory where results will be dumped
-    RESULTS_PATH: str = './backtest_results'
+    RESULTS_PATH: str = './backtest_assets/results'
 
 
 
@@ -85,7 +83,7 @@ class Backtest:
         self.description: str = config['description']
 
         # Initialize the models to be tested
-        self.models: List[ArimaModel] = [Model(m) for m in config['models']]
+        self.models: List[Union[ArimaModel, RegressionModel, ClassificationModel]] = [Model(m) for m in config['models']]
         self.results: List[IBacktestResult] = []
 
         # Initialize the candlesticks based on the models' lookback and the provided start and end dates

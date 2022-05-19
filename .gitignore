@@ -47,16 +47,11 @@ Thumbs.db
 *.wmv
 
 
-# Backtest Results Directory
-backtest_results/
-
-# Backtest Configurations
-backtest_configurations/
+# Backtest Assets
+backtest_assets/
 
 # Candlesticks CSV Files
 candlesticks/
-candlesticks.csv
-prediction_candlesticks.csv
 
 # Database Management
 db_management/

@@ -42,7 +42,7 @@ class ArimaCombinations:
     """
     
     # Directory where the Backtest configuration files will be placed
-    OUTPUT_PATH: str = './backtest_configurations'
+    OUTPUT_PATH: str = './backtest_assets/configurations'
 
 
 

@@ -23,22 +23,20 @@ The dependencies are located in the **requirements.txt** file and can be install
 ```
 prediction-backtesting
     │
-    backtest_configurations/
-    ├───COMBINATION_ID/
-    │   ├──COMBINATION_ID_1.json
-    │   └──COMBINATION_ID_2.json
+    backtest_assets/
+    ├───configurations/
+    │   ├──arima
+    │   │  └──...
+    │   └──classification
+    │      └──...
     │
-    backtest_results/
-    ├───BACKTEST_01_1649788629072.json
-    ├───BACKTEST_02_1650551357902.json
+    ├───results/
+    │   ├──BACKTEST_01_1649788629072.json
+    │   └──BACKTEST_02_1650551357902.json
     │
     candlesticks/
     ├───candlesticks.csv
     ├───prediction_candlesticks.csv
-    │
-    classification_training_data/
-    │   ├──10a505f1-c2f7-4c77-9759-15ff460fcd27.json
-    │   └──123e4567-e89b-12d3-a456-426614174000.json
     │
     config/
     ├───ArimaCombinations.json
@@ -69,6 +67,28 @@ prediction-backtesting
     ├───run_db_management.py
     ├───run_regression_training.py
     │
+    keras_assets/
+    ├───batched_training_certificates/
+    │   ├──REGRESSION_UNIT_TEST_1652967541197.json
+    │   └──CLASSIFICATION_UNIT_TEST_1652967541197.json
+    │
+    ├───classification_training_data/
+    │   └──fed1a436-190f-473b-8f21-ae1f2ede0734.json
+    │
+    ├───model_configs/
+    │      ├──Classification/
+    │      │  └──SomeBatchConfig.json
+    │      └──Regression/
+    │         └──SomeBatchConfig.json
+    │
+    ├───models/
+    │      ├──R_UNIT_TEST/
+    │      │  ├──certificate.json
+    │      │  └──model.h5
+    │      └──C_UNIT_TEST/
+    │         ├──certificate.json
+    │         └──model.h5
+    │
     ArimaCombinations.sh
     │
     Backtest.sh
@@ -92,6 +112,8 @@ prediction-backtesting
 - Set the permissions on the executables (This only needs to be done once):
 
   `chmod u+x ArimaCombinations.sh Backtest.sh ClassificationTrainingData.sh DatabaseManagement.sh RegressionTraining.sh UnitTests.sh`
+
+
 
 
 
@@ -131,11 +153,13 @@ Before running the restore function, make sure to have placed the backup file th
 #
 ## Arima Combinations
 
-Arima Combinations is a script that generates **Backtest Configuration Files** and places them in the **backtest_configurations** directory. Before executing the script, input the desired configuration values in **config/ArimaCombinations.json**.
+Arima Combinations is a script that generates **Backtest Configuration Files** and places them in the **backtest_assets/configurations** directory. Before executing the script, input the desired configuration values in **config/ArimaCombinations.json**.
 
 Run the generator by executing the following:
 
 `./ArimaCombinations`
+
+
 
 
 
@@ -147,7 +171,10 @@ Input the desired configuration values in **config/Backtest.json** and run:
 
 `./Backtest.sh`
 
-Once the execution completes, the results will be placed under the **./backtest_results** directory in the following format: **{BACKTEST_ID}_{TIMESTAMP}.json**
+Once the execution completes, the results will be placed under the **./backtest_assets/results** directory in the following format: **{BACKTEST_ID}_{TIMESTAMP}.json**
+
+
+
 
 
 
@@ -158,7 +185,10 @@ Input the desired configuration values in **config/RegressionTraining.json** and
 
 `./RegressionTraining.sh`
 
-@TODO
+Once the execution completes, the models and their certificates are saved in **keras_assets/models**. The certificates batch on the other hand is stored in **keras_assets/batched_training_certificates**.
+
+
+
 
 
 #
@@ -168,10 +198,7 @@ Input the desired configuration values in **config/ClassificationTrainingData.js
 
 `./ClassificationTrainingData`
 
-Once the execution completes, a file with a **uuid4 as the name** will be generated and placed in the **classification_training_data** directory.
-
-
-
+Once the execution completes, a file with a **uuid4 as the name** will be generated and placed in the **keras_assets/classification_training_data** directory.
 
 
 
@@ -184,6 +211,11 @@ Once the execution completes, a file with a **uuid4 as the name** will be genera
 Run an end-to-end unit test with the following command:
 
 `./UnitTests`
+
+For the unit tests to pass, a Postgres connection must be successfully established and the unit test keras models must be in the correct directory.
+
+
+
 
 
 
