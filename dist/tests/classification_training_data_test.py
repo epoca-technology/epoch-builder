@@ -1,10 +1,11 @@
 import unittest
 from typing import List
 from copy import deepcopy
-from pandas import Series
+from pandas import Series, DataFrame
 from modules.candlestick import Candlestick
 from modules.utils import Utils
-from modules.classification import TrainingData, ITrainingDataConfig
+from modules.classification import ClassificationTrainingData, ITrainingDataConfig, ICompressedTrainingData, \
+    compress_training_data, decompress_training_data
 
 
 
@@ -16,14 +17,14 @@ DEFAULT_CONFIG: ITrainingDataConfig = {
     "description": "Unit Test",
     "start": "22/03/2022", 
     "end": "22/04/2022", 
-    'up_percent_change': 1, 
-    'down_percent_change': 1, 
-    'arima_models': [
+    'up_percent_change': 2, 
+    'down_percent_change': 2, 
+    'models': [
         { "id": "A101","arima_models": [{"arima": {"p": 1, "d": 0,"q": 1}}] },
         { "id": "A111","arima_models": [{"arima": {"p": 1, "d": 1,"q": 1}}] },
         { "id": "A112","arima_models": [{"arima": {"p": 1, "d": 1,"q": 2}}] },
         { "id": "A121","arima_models": [{"arima": {"p": 1, "d": 2,"q": 1}}] },
-        { "id": "A211","arima_models": [{"arima": {"p": 2, "d": 1,"q": 1}}] }
+        { "id": "R_UNIT_TEST","regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": {"long": 1.5, "short": 1.5}}] }
     ]
 }
 
@@ -85,23 +86,17 @@ class TrainingDataTestCase(unittest.TestCase):
         config: ITrainingDataConfig = deepcopy(DEFAULT_CONFIG)
 
         # Init the instance
-        td: TrainingData = TrainingData(config, test_mode=True)
+        td: ClassificationTrainingData = ClassificationTrainingData(config, test_mode=True)
 
         # Make sure the models have been initialized correctly
-        self.assertEqual(len(td.arima_models), len(config['arima_models']))
-        for i, sm in enumerate(config['arima_models']):
-            if sm['id'] != td.arima_models[i].id:
-                self.fail(f"Single Model ID Missmatch: {sm['id']} != {td.arima_models[i].id}")
+        self.assertEqual(len(td.models), len(config['models']))
+        for i, m in enumerate(config['models']):
+            if m['id'] != td.models[i].id:
+                self.fail(f"Model ID Missmatch: {m['id']} != {td.models[i].id}")
 
         # Make sure the ID and the description were initialized
         self.assertTrue(Utils.is_uuid4(td.id))
         self.assertEqual(td.description, config['description'])
-
-        # Make sure the ID was generated successfully
-        expected_arima_id: str = ''
-        for sm in config['arima_models']:
-            expected_arima_id = expected_arima_id + sm['id']
-        self.assertEqual(expected_arima_id, td.arima_id)
 
         # Make sure the dates have been set correctly
         self.assertEqual(td.start, int(Candlestick.DF.iloc[0]['ot']))
@@ -113,31 +108,24 @@ class TrainingDataTestCase(unittest.TestCase):
 
         # Validate the integrity of the DF
         self.assertEqual(td.df.shape[0], 0)
-        self.assertEqual(td.df.shape[1], len(config['arima_models']) + 2)
+        self.assertEqual(td.df.shape[1], len(config['models']) + 2)
         
 
 
-    # Cannot initialize with less than 5 Arima Models
+    # Cannot initialize with less than 5 Models
     def testInitializeWithLessThan5Models(self):
         config: ITrainingDataConfig = deepcopy(DEFAULT_CONFIG)
-        config['arima_models'] = config['arima_models'][0:3]
+        config['models'] = config['models'][0:3]
         with self.assertRaises(ValueError):
-            TrainingData(config, test_mode=True)
+            ClassificationTrainingData(config, test_mode=True)
 
 
-    # Cannot initialize with duplicate Arima Models
+    # Cannot initialize with duplicate Models
     def testInitializeWithDuplicateModels(self):
         config: ITrainingDataConfig = deepcopy(DEFAULT_CONFIG)
-        config['arima_models'][3] = config['arima_models'][4]
+        config['models'][3] = config['models'][4]
         with self.assertRaises(ValueError):
-            TrainingData(config, test_mode=True)
-
-    # Cannot initialize with different Arima Models lookbacks
-    def testInitializeWithDifferentLookbacks(self):
-        config: ITrainingDataConfig = deepcopy(DEFAULT_CONFIG)
-        config['arima_models'][3]['arima_models'][0]['lookback'] = 280
-        with self.assertRaises(ValueError):
-            TrainingData(config, test_mode=True)
+            ClassificationTrainingData(config, test_mode=True)
 
 
 
@@ -163,6 +151,50 @@ class TrainingDataTestCase(unittest.TestCase):
 
 
 
+
+
+
+
+
+
+
+
+    ## Training Data Compression ##
+
+
+
+    # Can compress and decompress training data
+    def testCompressAndDecompressTrainingData(self):
+        # Initialize the DataFrame
+        df = DataFrame(data={
+            DEFAULT_CONFIG["models"][0]["id"]: [1, 2, 1, 0, 2],
+            DEFAULT_CONFIG["models"][1]["id"]: [2, 1, 0, 0, 1],
+            DEFAULT_CONFIG["models"][2]["id"]: [1, 2, 2, 2, 0],
+            DEFAULT_CONFIG["models"][3]["id"]: [2, 1, 2, 2, 1],
+            DEFAULT_CONFIG["models"][4]["id"]: [0, 0, 1, 2, 1],
+            "up":                              [1, 0, 0, 1, 1],
+            "down":                            [0, 1, 1, 0, 0],
+        })
+
+        # Compress the training data and validate its integrity
+        compressed: ICompressedTrainingData = compress_training_data(df)
+
+        # Validate the columns
+        columns: List[str] = [m["id"] for m in DEFAULT_CONFIG["models"]] + ["up", "down"]
+        self.assertListEqual(compressed["columns"], columns)
+
+        # Validate the rows
+        self.assertListEqual(compressed["rows"], [
+            [1, 2, 1, 2, 0, 1, 0],
+            [2, 1, 2, 1, 0, 0, 1],
+            [1, 0, 2, 2, 1, 0, 1],
+            [0, 0, 2, 2 ,2, 1, 0],
+            [2, 1, 0, 1 ,1 ,1, 0]
+        ])
+
+        # Decompress the data and validate its integrity
+        decompressed: DataFrame = decompress_training_data(compressed)
+        self.assertTrue(df.equals(decompressed))
 
 
 

@@ -1,14 +1,15 @@
 {
-    "description": "Unit Test",
+    "description": "UNIT_TEST: DO NOT DELETE.",
     "start": "22/03/2022",
     "end": "22/04/2022",
-    "up_percent_change": 1,
-    "down_percent_change": 1,
-    "arima_models": [
+    "up_percent_change": 2,
+    "down_percent_change": 2,
+    "models": [
         { "id": "A101","arima_models": [{"arima": {"p": 1, "d": 0,"q": 1}}] },
         { "id": "A111","arima_models": [{"arima": {"p": 1, "d": 1,"q": 1}}] },
         { "id": "A112","arima_models": [{"arima": {"p": 1, "d": 1,"q": 2}}] },
         { "id": "A121","arima_models": [{"arima": {"p": 1, "d": 2,"q": 1}}] },
-        { "id": "A211","arima_models": [{"arima": {"p": 2, "d": 1,"q": 1}}] }
+        { "id": "A211","arima_models": [{"arima": {"p": 2, "d": 1,"q": 1}}] },
+        { "id": "R_UNIT_TEST","regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": {"long": 1.5, "short": 1.5}}] }
     ]
 }

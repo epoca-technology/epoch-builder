@@ -1,5 +1,5 @@
 from json import load
-from modules.classification import TrainingData, ITrainingDataConfig
+from modules.classification import ClassificationTrainingData, ITrainingDataConfig
 
 
 # TRAINING DATA CONFIGURATION FILE
@@ -19,8 +19,8 @@ from modules.classification import TrainingData, ITrainingDataConfig
 #   down_percent_change: The percentage that the price needs to decrease in order to close a down position.
 #   idle_minutes_on_position_close: The number of minutes the model will not trade for after closing a position.
 # 
-# Arima Models:
-#   arima_models: The list of Arima Model Configurations that will be used to generate the data.
+# Models:
+#   models: The list of ArimaModel|RegressionModel Configurations that will be used to generate the data.
 #
 # TRAINING DATA PROCESS
 # The Training Data Instance will create a trading simulation environment similar to the Backtest. However, 
@@ -30,13 +30,13 @@ from modules.classification import TrainingData, ITrainingDataConfig
 
 # TRAINING DATA CONFIGURATION
 # Opens and loads the configuration file that should be placed in the root of the project.
-config_file = open('config/TrainingData.json')
+config_file = open('config/ClassificationTrainingData.json')
 config: ITrainingDataConfig = load(config_file)
 
 
 # TRAINING DATA INSTANCE
 # The Instance of the Training Data that will be executed
-training_data: TrainingData = TrainingData(config)
+training_data: ClassificationTrainingData = ClassificationTrainingData(config)
 
 
 # TRAINING DATA EXECUTION

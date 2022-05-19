@@ -1,6 +1,18 @@
-from typing import TypedDict, List, Union, Dict, Any
+from typing import TypedDict, List, Union, Dict
 from modules.model import IModel
 
+
+## CLASSIFICATION ##
+
+
+
+
+
+
+
+
+
+## CLASSIFICATION TRAINING DATA ##
 
 
 
@@ -14,9 +26,6 @@ class ITrainingDataActivePosition(TypedDict):
     up_price: float         # The price in which the position will be closed as up
     down_price: float       # The price in which the position will be closed as down
     row: Dict[str, int]     # Model's features which will be completed with labels once the position closes
-
-
-
 
 
 
@@ -55,21 +64,32 @@ class ITrainingDataConfig(TypedDict):
     up_percent_change: float
     down_percent_change: float
 
-    # The list of Model configs that will be used
-    arima_models: List[IModel]
+    # The list of ArimaModels|RegressionModels that will be used to predict
+    models: List[IModel]
+
+
+
+
+
+# Compressed Training Data
+# In order to optimize the size of the training data file, the data is converted into a dict
+# with the rows and columns lists.
+class ICompressedTrainingData(TypedDict):
+    columns: List[str]
+    rows: List[int]
 
 
 
 
 
 # Training Data File
-# The dict that contains all the information needed to train DecisionModels.
-class ITrainingDataFile(ITrainingDataConfig):
+# The dict that contains all the information needed to train a ClassificationModel.
+class ITrainingDataFile(TypedDict):
     # Universally Unique Identifier (uuid4)
     id: str
 
-    # Secondary Identifier generated based on the arima_models
-    arima_id: str
+    # The description of the Training Data that will be generated.
+    description: str
 
     # The timestamp in which the Training Data was generated
     creation: int
@@ -81,9 +101,16 @@ class ITrainingDataFile(ITrainingDataConfig):
     # The number of minutes that took to generate the training data
     duration_minutes: int
 
+    # Percentages that will determine if the price moved up or down after a position is opened
+    up_percent_change: float
+    down_percent_change: float
+
     # Shape of the data
-    rows: int
-    columns: int
+    #rows: int
+    #columns: int
+
+    # List of ArimaModels|RegressionModels
+    models: List[IModel]
 
     # Price Actions Insight - The up and down percentage proportions
     price_actions_insight: ITrainingDataPriceActionsInsight
@@ -94,9 +121,17 @@ class ITrainingDataFile(ITrainingDataConfig):
     predictions_insight: Dict[str, Dict[str, float]]
 
     # Training Data
-    # The list of rows that are appended on position close. This is the data that
-    # will be used to train models.
-    training_data: List[Dict[str, int]]
+    # The training data generated in a compressed format.
+    training_data: ICompressedTrainingData
+
+
+
+
+
+
+
+
+## CLASSIFICATION TRAINING ##
 
 
 
