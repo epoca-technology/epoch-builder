@@ -49,7 +49,7 @@ START_CANDLESTICK['c'] = 40052.18
 
 
 ## Test Class ##
-class PositionTestCase(unittest.TestCase):
+class BacktestPositionTestCase(unittest.TestCase):
     # Before Tests
     def setUp(self):
         pass

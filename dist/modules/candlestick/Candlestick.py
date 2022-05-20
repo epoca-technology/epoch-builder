@@ -54,7 +54,7 @@ class Candlestick:
     # DataFrames
     DF: DataFrame = DataFrame()
     PREDICTION_DF: DataFrame = DataFrame()
-    NORMALIZED_PREDICTION_DF: Union[DataFrame, None] = None
+    NORMALIZED_PREDICTION_DF: DataFrame = DataFrame()
 
     
 
@@ -64,12 +64,7 @@ class Candlestick:
 
 
     @staticmethod
-    def init(
-        max_lookback: int, 
-        start: Union[str, int, None] = None, 
-        end: Union[str, int, None] = None,
-        normalized_df: bool = True
-    ) -> None:
+    def init(max_lookback: int, start: Union[str, int, None] = None, end: Union[str, int, None] = None) -> None:
         """Initializes the Candlestick Class based on the provided date range (If any).
         It also removes the 1m candlesticks that are within the lookback period.
 
@@ -80,9 +75,6 @@ class Candlestick:
                 Start Date for the candlestick dataframes.
             end: Union[str, int, None]
                 End Date for the candlestick dataframes.
-            normalized_df: bool
-                If this arg is True, it will also create a normalized DF based on the 
-                PREDICTION_DF
 
         Raises:
             ValueError: 
@@ -113,14 +105,13 @@ class Candlestick:
             raise ValueError(f"The default candlesticks dataframe must contain more rows than the prediction dataframe. \
                 {Candlestick.DF.shape[0]} <= {Candlestick.PREDICTION_DF.shape[0]}")
 
-        # Check if the normalized df needs to be initialized
-        if normalized_df:
-            # Populate the MIN & MAX
-            min: float = Candlestick.PREDICTION_DF['l'].min()
-            max: float = Candlestick.PREDICTION_DF['h'].max()
+        # Initialize the Normalized DataFrame
+        # Populate the MIN & MAX
+        min: float = Candlestick.PREDICTION_DF['l'].min()
+        max: float = Candlestick.PREDICTION_DF['h'].max()
 
-            # Initialize the normalized df
-            Candlestick.NORMALIZED_PREDICTION_DF = Candlestick.PREDICTION_DF[['o', 'h', 'l', 'c']].apply(lambda x: (x - min) / (max - min))
+        # Initialize the normalized df
+        Candlestick.NORMALIZED_PREDICTION_DF = Candlestick.PREDICTION_DF[['o', 'h', 'l', 'c']].apply(lambda x: (x - min) / (max - min))
 
 
 

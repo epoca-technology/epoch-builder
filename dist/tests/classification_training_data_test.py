@@ -2,10 +2,11 @@ import unittest
 from typing import List
 from copy import deepcopy
 from pandas import Series, DataFrame
+from dist.modules.model.types import IPrediction
 from modules.candlestick import Candlestick
 from modules.utils import Utils
 from modules.classification import ClassificationTrainingData, ITrainingDataConfig, ICompressedTrainingData, \
-    compress_training_data, decompress_training_data
+    ITrainingDataFile, compress_training_data, decompress_training_data
 
 
 
@@ -109,6 +110,9 @@ class TrainingDataTestCase(unittest.TestCase):
         # Validate the integrity of the DF
         self.assertEqual(td.df.shape[0], 0)
         self.assertEqual(td.df.shape[1], len(config['models']) + 2)
+        for i, column_name in enumerate(td.df.columns):
+            if column_name != "up" and column_name != "down":
+                self.assertEqual(column_name, config["models"][i]["id"])
         
 
 
@@ -133,21 +137,173 @@ class TrainingDataTestCase(unittest.TestCase):
 
 
 
-    ## Positions ## 
+
+
+    ## Positions Flow ## 
 
 
  
+    # Can calculate the correct position range
+    def testPositionRange(self):
+        # Init the Training Data Instance
+        config: ITrainingDataConfig = deepcopy(DEFAULT_CONFIG)
+        td: ClassificationTrainingData = ClassificationTrainingData(config, test_mode=True)
+
+        # Retrieve the range for a random open price
+        price: float = 41865.96
+        up_price, down_price = td._get_position_range(price)
+
+        # Validate the up price
+        self.assertEqual(up_price, Utils.alter_number_by_percentage(price, config["up_percent_change"]))
+
+        # Validate the down price
+        self.assertEqual(down_price, Utils.alter_number_by_percentage(price, -config["down_percent_change"]))
 
 
 
 
 
+    # Can convert a prediction result into the proper classification format
+    def testPredictionResult(self):
+        # Init fake predictions
+        long_pred: IPrediction = {"r": 1, "t": 1653055274678, "md": [{"d": "long"}]}
+        short_pred: IPrediction = {"r": -1, "t": 1653055274678, "md": [{"d": "short"}]}
+        neutral_pred: IPrediction = {"r": 0, "t": 1653055274678, "md": [{"d": "neutral"}]}
+
+        # Validate the results
+        self.assertEqual(ClassificationTrainingData.get_prediction_result(long_pred), 2)
+        self.assertEqual(ClassificationTrainingData.get_prediction_result(short_pred), 1)
+        self.assertEqual(ClassificationTrainingData.get_prediction_result(neutral_pred), 0)
 
 
 
 
 
-    ## Results ##
+ 
+    # Can initialize a series of positions and handle them properly
+    def testFullPositionsFlow(self):
+        # Init the Training Data Instance
+        config: ITrainingDataConfig = deepcopy(DEFAULT_CONFIG)
+        td: ClassificationTrainingData = ClassificationTrainingData(config, test_mode=True)
+
+        # Init the candlesticks list
+        candlesticks: List[Series] = [START_CANDLESTICK]
+
+        # There shouldnt be an open position
+        self.assertEqual(td.df.shape[0], 0)
+        self.assertEqual(td.active, None)
+
+        # Open a position
+        td._open_position(candlesticks[-1])
+
+        # Make sure the position was actually opened
+        self.assertEqual(td.df.shape[0], 0)
+        self.assertIsInstance(td.active, dict)
+        self.assertEqual(td.active["up_price"], Utils.alter_number_by_percentage(candlesticks[-1]["o"], config["up_percent_change"]))
+        self.assertEqual(td.active["down_price"], Utils.alter_number_by_percentage(candlesticks[-1]["o"], -config["down_percent_change"]))
+        self.assertIsInstance(td.active["row"], dict)
+
+        # A position check with a change that doesn't meet the up_percent_change does nothing
+        candlesticks.append(_get_next(candlesticks[-1], round(config["up_percent_change"]/2, 2)))
+        td._check_position(candlesticks[-1])
+        self.assertEqual(td.df.shape[0], 0)
+        self.assertIsInstance(td.active, dict)
+
+        # Checking a position with a change that hits the up_percent_change the position will be closed as up
+        candlesticks.append(_get_next(candlesticks[-1], config["up_percent_change"]))
+        td._check_position(candlesticks[-1])
+        self.assertEqual(td.df.shape[0], 1)
+        self.assertEqual(td.active, None)
+        self.assertEqual(td.df.iloc[0]["up"], 1)
+        self.assertEqual(td.df.iloc[0]["down"], 0)
+
+        # Open a new position
+        candlesticks.append(_get_next(candlesticks[-1], 1.5))
+        td._open_position(candlesticks[-1])
+
+        # Make sure the position was actually opened
+        self.assertEqual(td.df.shape[0], 1)
+        self.assertIsInstance(td.active, dict)
+        self.assertEqual(td.active["up_price"], Utils.alter_number_by_percentage(candlesticks[-1]["o"], config["up_percent_change"]))
+        self.assertEqual(td.active["down_price"], Utils.alter_number_by_percentage(candlesticks[-1]["o"], -config["down_percent_change"]))
+        self.assertIsInstance(td.active["row"], dict)
+
+        # A position check with a change that doesn't meet the down_percent_change does nothing
+        candlesticks.append(_get_next(candlesticks[-1], -round(config["down_percent_change"]/2, 2)))
+        td._check_position(candlesticks[-1])
+        self.assertEqual(td.df.shape[0], 1)
+        self.assertIsInstance(td.active, dict)
+
+        # Checking a position with a change that hits the down_percent_change the position will be closed as down
+        candlesticks.append(_get_next(candlesticks[-1], -config["down_percent_change"]))
+        td._check_position(candlesticks[-1])
+        self.assertEqual(td.df.shape[0], 2)
+        self.assertEqual(td.active, None)
+        self.assertEqual(td.df.iloc[1]["up"], 0)
+        self.assertEqual(td.df.iloc[1]["down"], 1)
+
+        # Open a final position
+        candlesticks.append(_get_next(candlesticks[-1], 2.85))
+        td._open_position(candlesticks[-1])
+
+        # Close the position as up and make sure it was closed
+        candlesticks.append(_get_next(candlesticks[-1], round(config["up_percent_change"]*2, 2)))
+        td._check_position(candlesticks[-1])
+        self.assertEqual(td.df.shape[0], 3)
+        self.assertEqual(td.active, None)
+        self.assertEqual(td.df.iloc[2]["up"], 1)
+        self.assertEqual(td.df.iloc[2]["down"], 0)
+
+        # Build the file and validate its integrity
+        file: ITrainingDataFile = td._build_file(Utils.get_time()-60000)
+
+        # Validate basic values
+        self.assertEqual(file["id"], td.id)
+        self.assertEqual(file["description"], config["description"])
+        self.assertEqual(file["up_percent_change"], config["up_percent_change"])
+        self.assertEqual(file["down_percent_change"], config["down_percent_change"])
+
+        # Validate the models
+        self.assertEqual(len(file["models"]), len(config["models"]))
+        for i, model in enumerate(config["models"]):
+            self.assertEqual(model["id"], file["models"][i]["id"])
+
+        # Validate the price action insights
+        self.assertEqual(file["price_actions_insight"]["up"], 66.67)
+        self.assertEqual(file["price_actions_insight"]["down"], 33.33)
+
+        # Validate the predictions insights
+        for model in config["models"]:
+            self.assertIsInstance(file["predictions_insight"][model["id"]], dict)
+            self.assertIsInstance(file["predictions_insight"][model["id"]]["long"], float)
+            self.assertIsInstance(file["predictions_insight"][model["id"]]["short"], float)
+            self.assertIsInstance(file["predictions_insight"][model["id"]]["neutral"], float)
+
+        ## Validate the Training Data ##
+
+        # The compressed training data should be a dict
+        self.assertIsInstance(file["training_data"], dict)
+
+        # The columns list must include all features and labels
+        self.assertIsInstance(file["training_data"]["columns"], list)
+        self.assertEqual(len(file["training_data"]["columns"]), len(config["models"]) + 2)
+        self.assertListEqual(
+            file["training_data"]["columns"],
+            [m["id"] for m in config["models"]] + ["up", "down"]
+        )
+
+        # There should be 3 rows following the positions' outcomes (up, down, up) and predictions
+        self.assertIsInstance(file["training_data"]["rows"], list)
+        self.assertEqual(len(file["training_data"]["rows"]), 3)
+        for row_index, row in enumerate(file["training_data"]["rows"]):
+            for column_index, column in enumerate(td.df.columns):
+                self.assertEqual(row[column_index], td.df.iloc[row_index][column])
+
+        # Finally, decompress the training data and compare it to the original df
+        self.assertTrue(td.df.equals(decompress_training_data(file["training_data"])))
+
+
+
 
 
 

@@ -6,7 +6,7 @@ from modules.database import Database
 Database.TEST_MODE = True
 
 # Initialize the candlesticks
-Candlestick.init(ArimaModel.DEFAULT_LOOKBACK, normalized_df=True)
+Candlestick.init(ArimaModel.DEFAULT_LOOKBACK)
 
 # Notify the user
 print("PREDICTION BACKTESTING UNIT TESTS\n")

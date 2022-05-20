@@ -45,12 +45,7 @@ config: IRegressionTrainingBatch = load(config_file)
 
 # CANDLESTICK INITIALIZATION
 # Initialize the Candlesticks Module based on the highest lookback among the models config.
-Candlestick.init(
-    max([m["lookback"] for m in config["models"]]), 
-    config.get("start"), 
-    config.get("end"), 
-    normalized_df=True
-)
+Candlestick.init(max([m["lookback"] for m in config["models"]]), config.get("start"), config.get("end"))
 
 
 
