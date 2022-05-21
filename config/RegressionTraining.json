@@ -1,11 +1,11 @@
 {
-    "name": "REGRESSION_UNIT_TEST",
+    "name": "DNN_CNN_RNN",
     "start": null,
     "end": null,
     "models": [
         {
-            "id": "R_UNIT_TEST",
-            "description": "This model is to be used for unit testing purposes.",
+            "id": "R_DNN_S2",
+            "description": "This is just a test to see how it goes.",
             "lookback": 50,
             "predictions": 10,
             "learning_rate": 0.001,
@@ -15,9 +15,9 @@
             "batch_size": 32,
             "shuffle_data": false,
             "keras_model": {
-                "name": "R_UNIT_TEST",
-                "units": [64],
-                "activations": ["relu"]
+                "name": "R_DNN_S2",
+                "units": [64, 32],
+                "activations": ["relu", "relu"]
             }
         }
     ]

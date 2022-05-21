@@ -7,7 +7,6 @@ from ..keras_models.types import IKerasModelConfig
 
 def validate(
     config: IKerasModelConfig,
-    model_type: str,
     name: str,
     units: int = 0,
     dropout_rates: int = 0,
@@ -21,8 +20,6 @@ def validate(
     Args:
         config: IKerasModelConfig
             The configuration of the model that will be validated.
-        model_type: str
-            The type of model that will be validated.
         name: str
             The name of the model that will be built.
         units: int
@@ -45,7 +42,7 @@ def validate(
         raise ValueError(f"Model Name Missmatch. {config['name']} != {name}")
 
     # Make sure the lookback and predictions have been provided in case of a regression
-    if model_type == 'regression' and (not isinstance(config['lookback'], int) or not isinstance(config['predictions'], int)):
+    if config["name"][0:2] == "R_" and (not isinstance(config['lookback'], int) or not isinstance(config['predictions'], int)):
         raise ValueError(f"The provided lookback and or predictions are not valid integers. \
             Received: {str(config['lookback'])}, {str(config['predictions'])}")
 

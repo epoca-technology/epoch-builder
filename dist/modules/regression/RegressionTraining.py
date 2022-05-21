@@ -1,4 +1,4 @@
-from typing import Union, Tuple, List, Any
+from typing import Union, Tuple, List
 from os import makedirs
 from os.path import exists
 from random import randint
@@ -75,7 +75,7 @@ class RegressionTraining:
     # Notice that if the number of evals is much smaller than the max it means there could be
     # an irregularity with the model as the predictions percentages aren't changing within
     # the window.
-    MAX_REGRESSION_EVALUATIONS: int = 2000
+    MAX_REGRESSION_EVALUATIONS: int = 3000
 
     # The max number of training epochs that can occur without showing improvements.
     EARLY_STOPPING_PATIENCE: int = 10
@@ -297,7 +297,7 @@ class RegressionTraining:
 
         # Retrieve the Keras Model
         print("    1/7) Initializing Model...")
-        model: Union[Sequential, Any] = KerasModel(model_type='regression', config=self.keras_model)
+        model: Sequential = KerasModel(config=self.keras_model)
 
         # Compile the model
         print("    2/7) Compiling Model...")
@@ -471,11 +471,11 @@ class RegressionTraining:
 
 
 
-    def _save_model(self, model: Union[Sequential, Any]) -> None:
+    def _save_model(self, model: Sequential) -> None:
         """Saves a trained model in the output directory as well as the training certificate.
 
         Args:
-            model: ...
+            model: Sequential
                 The instance of the trained model.
         """
         # Create the model's directory
@@ -498,23 +498,23 @@ class RegressionTraining:
     def _save_certificate(
         self, 
         start_time: int, 
-        model: Union[Sequential, Any], 
+        model: Sequential, 
         training_history: IKerasModelTrainingHistory, 
         test_evaluation: List[float],
-        regression_evaluation: Any
+        regression_evaluation: IRegressionEvaluation
     ) -> IRegressionTrainingCertificate:
         """Saves a trained model in the output directory as well as the training certificate.
 
         Args:
             start_time: int
                 The time in which the training started.
-            model: ...
+            model: Sequential
                 The instance of the trained model.
             training_history: IKerasModelTrainingHistory
                 The dictionary containing the training history.
             test_evaluation: List[float]
                 The results when evaluating the test dataset.
-            regression_evaluation: ...
+            regression_evaluation: IRegressionEvaluation
                 The results of the regression post-training evaluation.
 
         Returns:
@@ -544,17 +544,17 @@ class RegressionTraining:
 
     def _get_certificate(
         self,
-        model: Union[Sequential, Any],
+        model: Sequential,
         start_time: int, 
         training_history: IKerasModelTrainingHistory, 
         test_evaluation: List[float],
-        regression_evaluation: Any
+        regression_evaluation: IRegressionEvaluation
     ) -> IRegressionTrainingCertificate:
         """Builds the certificate that contains all the data regarding the training process
         that will be saved alongside the model.
 
         Args:
-            model: ...
+            model: Sequential
                 The trained model which will provide the summary.
             start_time: int
                 The time in which the training started.
@@ -562,6 +562,8 @@ class RegressionTraining:
                 The model's performance history during training.
             test_evaluation: List[float]
                 The evaluation performed on the test dataset.
+            regression_evaluation: IRegressionEvaluation
+                The results of the regression post-training evaluation.
 
         Returns:
             IRegressionTrainingCertificate

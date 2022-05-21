@@ -51,8 +51,9 @@ class IPrediction(TypedDict):
     # The time in which the prediction was performed (milliseconds)
     t: int
 
-    # Prediction metadata: A SingleModel will always output a single IPredictionMetaData
-    # whereas, MultiModels will output any number of IPredictionMetaData dictionaries
+    # Prediction metadata: An ArimaModel|RegressionModel|ClassificationModel will always output a single 
+    # IPredictionMetaData whereas, MultiClassificationModels will output any number of IPredictionMetaData 
+    # dictionaries according to the number of ClassificationModels within it.
     md: List[IPredictionMetaData]
 
 
@@ -64,7 +65,7 @@ class IPrediction(TypedDict):
 
 
 
-## ArimaModel ##
+## Model Configurations ##
 
 
 
@@ -89,13 +90,6 @@ class IArimaModelConfig(TypedDict):
 
 
 
-
-
-
-
-## Regression Model ##
-
-
 # RegressionModel Configuration
 # The configuration that will be use to generate and interpret predictions.
 class IRegressionModelConfig(TypedDict):
@@ -112,10 +106,6 @@ class IRegressionModelConfig(TypedDict):
 
 
 
-
-
-
-## Classification Model ##
 
 
 # ClassificationModel Configuration
@@ -141,10 +131,15 @@ class IClassificationModelConfig(TypedDict):
 
 
 # Model
-# The final state of an ArimaModel, DecisionModel or MultiDecisionModel once an instance is initialized.
-# ArimaModel: Only takes an id and a single element in the arima_models list. 
+# The final state of an ArimaModel, RegressionModel or ClassificationModel once an 
+# instance is initialized.
+# The type of a model can be determined based on its configuration. Existing models are:
+# 1) ArimaModel: A model with a single ArimaModel.
+# 2) RegressionModel: A model with a single RegressionModel.
+# 3) ClassificationModel: A model with a minimum of 5 ArimaModels|RegressionModels as well as
+# a single ClassificationModel Config.
 class IModel(TypedDict):
-    # Identity of the Model. If it is an Arima Model, it must follow the guidelines.
+    # Identity of the Model. If it is an ArimaModel, it must follow the guidelines.
     id: str
 
     # ArimaModels that will be used to predict accordingly based on the type of model.

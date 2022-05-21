@@ -1,4 +1,3 @@
-from typing import Union
 from keras import Sequential
 from keras.layers import Dense, LSTM, Dropout
 from modules.keras_models import IKerasModelConfig, validate
@@ -23,8 +22,8 @@ from modules.keras_models import IKerasModelConfig, validate
 
 
 # LSTM_HARD_STACK (6 units, 1 dropout rates)
-def LSTM_HARD_STACK(config: IKerasModelConfig) -> Sequential:
-    validate(config, 'classification', 'LSTM_HARD_STACK', required_units=6, required_dropout_rates=1)
+def C_LSTM_S6(config: IKerasModelConfig) -> Sequential:
+    validate(config, 'C_LSTM_S6', required_units=6, required_dropout_rates=1)
     return Sequential([
         LSTM(units=config["units"][0], return_sequences=True, name="LSTM_1"),
         LSTM(units=config["units"][1], return_sequences=True, name="LSTM_2"),

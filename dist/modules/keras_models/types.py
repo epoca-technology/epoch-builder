@@ -55,11 +55,13 @@ class IKerasModelConfig(TypedDict):
     # Lookback used as the model's input. This lookback is not set in the 
     # RegressionTraining.json file. However, it is populated once the RegressionTraining
     # instance is initialized.
+    # Also keep in mind that this property only exists Regressions.
     lookback: Union[int, None]
 
     # Number of predictions the model will output. This prediction is not set in the 
     # RegressionTraining.json file. However, it is populated once the RegressionTraining
     # instance is initialized.
+    # Also keep in mind that this property only exists Regressions.
     predictions: Union[int, None]
 
 
@@ -76,6 +78,7 @@ class IKerasModelConfig(TypedDict):
 # The dictionary built once the training is completed. The properties adapt accordingly 
 # based on the loss and metric functions used.
 class IKerasModelTrainingHistory(TypedDict):
+    # Training and validation loss
     loss: List[float]
     val_loss: List[float]
 
@@ -130,8 +133,8 @@ class IKerasModelLossConfig(TypedDict):
 class IKerasModelLayer(TypedDict):
     name: str
     params: int
-    input_shape: Tuple[int]
-    output_shape: Tuple[int]
+    input_shape: Tuple[Union[int, None]]
+    output_shape: Tuple[Union[int, None]]
     trainable: bool
 
 
@@ -154,8 +157,8 @@ class IKerasModelSummary(TypedDict):
     metrics: List[str]
 
     # Input and output shapes
-    input_shape: Tuple[int]
-    output_shape: Tuple[int]
+    input_shape: Tuple[Union[int, None]]
+    output_shape: Tuple[Union[int, None]]
 
     # Layers
     layers: List[IKerasModelLayer]

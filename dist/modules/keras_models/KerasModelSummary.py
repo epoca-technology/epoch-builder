@@ -1,4 +1,4 @@
-from typing import Union, List, Any
+from typing import List
 from keras import Sequential
 from modules.keras_models import IKerasModelSummary, IKerasModelLayer
 
@@ -6,16 +6,13 @@ from modules.keras_models import IKerasModelSummary, IKerasModelLayer
 
 
 
-def get_summary(model: Union[Sequential, Any]) -> IKerasModelSummary:
+def get_summary(model: Sequential) -> IKerasModelSummary:
     """Based on a given trained model, it will extract all the relevant information and return
     the full summary.
 
     Args:
-        model: ...
+        model: Sequential
             The trained model which the summary will be built based on.
-        include_weights: bool
-            If True it will add the weights attribute to the summary. Keep in mind that this 
-            attribute may be large.
     Returns:
         IKerasModelSummary
     """

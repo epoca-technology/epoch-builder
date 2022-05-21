@@ -28,7 +28,7 @@ class Regression:
             The number of prediction candlesticks that will be used to generate predictions.
         predictions: int
             The number of predictions to be generated.
-        model: ...
+        model: Sequential
             The instance of the trained model.
     """
 
@@ -57,7 +57,7 @@ class Regression:
             self.description: str = model_file.attrs['description']
             self.lookback: int = int(model_file.attrs['lookback'])          # Downcast to int
             self.predictions: int = int(model_file.attrs['predictions'])    # Downcast to int
-            self.model: Union[Sequential, Any] = load_model_from_hdf5(model_file)
+            self.model: Sequential = load_model_from_hdf5(model_file)
 
         # Make sure the IDs are identical
         if self.id != id:
