@@ -1,0 +1,21 @@
+{
+    "name": "C_UNIT_TEST",
+    "training_data_id": "4b3fa4e5-1785-4d0b-b968-8318416ff846",
+    "models": [
+        {
+            "id": "C_UNIT_TEST",
+            "description": "This is the official Classification Model for Unit Tests.",
+            "learning_rate": 0.001,
+            "optimizer": "adam",
+            "loss": "cc",
+            "metric": "ca",
+            "batch_size": 32,
+            "shuffle_data": true,
+            "keras_model": {
+                "name": "C_UNIT_TEST",
+                "units": [512],
+                "activations": ["relu"]
+            }
+        }
+    ]
+}

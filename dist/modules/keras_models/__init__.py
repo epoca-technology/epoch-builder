@@ -21,15 +21,18 @@ KERAS_PATH: IKerasPath = {
     # The path containing all the classification training data files.
     "classification_training_data": "keras_assets/classification_training_data",
 
-
     # Batched Training Certificates
     # Even though individual certificates are stored within the model's directory,
     # a batch is also saved on a different directory so multiple configurations can
     # be evaluated simultaneously.
     "batched_training_certificates": "keras_assets/batched_training_certificates",
 
-    # Model Configurations
-    # Even though this path is not used by the system yet, it is recommended to keep all
-    # the relevant configuration files in this directory.
-    "model_configs": "keras_assets/model_configs"
+    # Regression Training Configurations
+    "regression_training_configs": "keras_assets/regression_training_configs",
+
+    # Classification Training Data Configs
+    "classification_training_data_configs": "keras_assets/classification_training_data_configs",
+
+    # Classification Training Configs
+    "classification_training_configs": "keras_assets/classification_training_configs"
 }

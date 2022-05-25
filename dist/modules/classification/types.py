@@ -1,9 +1,33 @@
 from typing import TypedDict, List, Union, Dict
 from modules.model import IModel
+from modules.keras_models import IKerasModelConfig, IKerasModelTrainingHistory, IKerasModelSummary
+
+
+
 
 
 ## CLASSIFICATION ##
 
+
+
+
+# Classification Configuration
+# The configuration that was used to train and will predict based on.
+class IClassificationConfig(TypedDict):
+    # The identifier of the model
+    id: str
+
+    # Important information regarding the trained model
+    description: str
+
+    # The identifier of the training data used
+    training_data_id: str
+
+    # The list of ArimaModel|RegressionModel attached to the classification
+    models: List[IModel]
+
+    # The summary of the KerasModel
+    summary: IKerasModelSummary
 
 
 
@@ -127,7 +151,130 @@ class ITrainingDataFile(TypedDict):
 
 
 
+
+
+
 ## CLASSIFICATION TRAINING ##
 
 
 
+# Classification Training Configuration
+# The configuration that will be used to initialize, train and save the models.
+class IClassificationTrainingConfig(TypedDict):
+    # The ID of the model. Must be descriptive, compatible with filesystems and preffixed with 'C_'
+    id: str
+
+    # Any relevant data that should be attached to the trained model.
+    description: str
+
+    # The learning rate to be used by the optimizer
+    learning_rate: float
+
+    # The optimizer to be used.
+    optimizer: str # 'adam'|'rmsprop'
+
+    # The loss function to be used
+    loss: str # 'cc' (CategoricalCrossentropy)|'?'
+
+    # The metric to be used for meassuring the val_loss
+    metric: str # 'ca' (CategoricalAccuracy)|'?'
+
+    # Batch Size
+    batch_size: int
+
+    # Train Data Shuffling
+    shuffle_data: bool
+
+    # Keras Model Configuration
+    keras_model: IKerasModelConfig
+
+
+
+
+
+
+
+# Classification Training Batch
+# Keras Models and created and evaluated in batches. Moreover, multiple batches can be combined
+# in the GUI
+class IClassificationTrainingBatch(TypedDict):
+    # Descriptive name to easily identify the batch. Must be compatible with filesystems.
+    name: str
+
+    # ID of the Classification Training Data that will be used to train all the models.
+    training_data_id: str
+
+    # The configurations for the models that will be trained within the batch.
+    models: List[IClassificationTrainingConfig]
+
+
+
+
+
+
+
+# Training Data Summary
+# In order to simplify interactions with the IClassificationTrainingCertificate, the training
+# data is summarized in a dictionary.
+class ITrainingDataSummary(TypedDict):
+    # Identifier
+    id: str
+    description: str
+
+    # Date Range
+    start: int    # Open Time of the first prediction candlestick
+    end: int      # Close Time of the last prediction candlestick
+
+    # Dataset Sizes
+    train_size: int     # Number of rows in the train dataset
+    test_size: int      # Number of rows in the test dataset
+
+    # Percentages that determine if the price moved up or down
+    up_percent_change: float
+    down_percent_change: float
+
+
+
+
+
+
+# Classification Training Certificate
+# Once the training, saving and evaluation completes, a certificate containing all the
+# data is saved and issued for batching.
+class IClassificationTrainingCertificate(TypedDict):
+    ## Identification ##
+    id: str
+    description: str
+
+
+    ## Training Data ##
+    training_data_summary: ITrainingDataSummary
+
+
+
+    ## Training Configuration ##
+    learning_rate: float
+    optimizer: str
+    loss: str
+    metric: str
+    batch_size: int    
+    shuffle_data: bool
+    keras_model_config: IKerasModelConfig
+
+
+
+
+    ## Training ##
+
+    # Date Range
+    training_start: int     # Time in which the training started
+    training_end: int       # Time in which the training ended
+
+    # Training performance by epoch
+    training_history: IKerasModelTrainingHistory
+
+    # Result of the evaluation of the test dataset
+    test_evaluation: List[float] # [loss, metric]
+
+    # The configuration of the Classification
+    classification_config: IClassificationConfig

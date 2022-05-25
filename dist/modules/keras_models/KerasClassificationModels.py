@@ -1,11 +1,33 @@
 from keras import Sequential
-from keras.layers import Dense, LSTM, Dropout
+from keras.layers import Input, Dense, Conv1D, MaxPooling1D, LSTM, Dropout
 from modules.keras_models import IKerasModelConfig, validate
 
 
 
 
-## Dense Neural Network ##
+
+## UNIT TEST MODEL ##
+
+
+# C_UNIT_TEST 
+# 1 units:       Dense_1
+# 1 activations: Dense_1
+def C_UNIT_TEST(m: IKerasModelConfig) -> Sequential:
+    validate(m, 'C_UNIT_TEST', units=1, activations=1)
+    return Sequential([
+        Input(shape=(m["features_num"],), name="Input_1"),
+        Dense(m["units"][0], activation=m["activations"][0], name="Dense_1"),
+        Dense(2, activation="softmax", name="Dense_2"),
+    ])
+
+
+
+
+
+
+
+
+## Deep Neural Network ##
 
 
 
@@ -20,17 +42,3 @@ from modules.keras_models import IKerasModelConfig, validate
 
 
 
-
-# LSTM_HARD_STACK (6 units, 1 dropout rates)
-def C_LSTM_S6(config: IKerasModelConfig) -> Sequential:
-    validate(config, 'C_LSTM_S6', required_units=6, required_dropout_rates=1)
-    return Sequential([
-        LSTM(units=config["units"][0], return_sequences=True, name="LSTM_1"),
-        LSTM(units=config["units"][1], return_sequences=True, name="LSTM_2"),
-        LSTM(units=config["units"][2], return_sequences=True, name="LSTM_3"),
-        Dropout(config["dropout_rates"][0], name="Dropout_1"),
-        LSTM(units=config["units"][3], return_sequences=True, name="LSTM_4"),
-        LSTM(units=config["units"][4], return_sequences=True, name="LSTM_5"),
-        LSTM(units=config["units"][5], return_sequences=False, name="LSTM_6"),
-        Dense(units=2, activation='softmax')
-    ])

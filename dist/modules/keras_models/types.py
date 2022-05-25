@@ -1,4 +1,4 @@
-from typing import TypedDict, Union, List, Any, Tuple
+from typing import TypedDict, Union, List, Tuple
 
 
 
@@ -23,10 +23,21 @@ class IKerasPath(TypedDict):
     # be evaluated simultaneously.
     batched_training_certificates: str
 
-    # Model Configurations
+    # Regression Training Configurations
     # Even though this path is not used by the system yet, it is recommended to keep all
     # the relevant configuration files in this directory.
-    model_configs: str
+    regression_training_configs: str
+
+    # Classification Training Data Configs
+    # Even though this path is not used by the system yet, it is recommended to keep all
+    # the relevant configuration files in this directory.
+    classification_training_data_configs: str
+
+    # Classification Training Configs
+    # Even though this path is not used by the system yet, it is recommended to keep all
+    # the relevant configuration files in this directory.
+    classification_training_configs: str
+
 
 
 
@@ -63,6 +74,11 @@ class IKerasModelConfig(TypedDict):
     # instance is initialized.
     # Also keep in mind that this property only exists Regressions.
     predictions: Union[int, None]
+
+    # Number of features used for the input layer of a Classification Network. This value is 
+    # not set in the ClassificationTraining.json file. Instead, it is populated once the 
+    # ClassificationTraining instance is initialized.
+    features_num: Union[int, None]
 
 
 
@@ -124,6 +140,9 @@ class IKerasModelOptimizerConfig(TypedDict):
 class IKerasModelLossConfig(TypedDict):
     name: str
     reduction: Union[str, None]
+    from_logits: Union[str, None]
+    label_smoothing: Union[str, None]
+    axis: Union[str, None]
 
 
 

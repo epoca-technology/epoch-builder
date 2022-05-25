@@ -68,6 +68,7 @@ class ClassificationTrainingData:
             ValueError:
                 If less than 5 Models are provided.
                 If a duplicate Model ID is found.
+                If a provided model isn't Arima or Regression
         """
         # Make sure that at least 5 Arima Models were provided
         if len(config["models"]) < 5:
@@ -92,6 +93,11 @@ class ClassificationTrainingData:
             # Make sure it isn"t a duplicate
             if m["id"] in ids:
                 raise ValueError(f"Duplicate Model ID provided: {m['id']}")
+
+            # Make sure it is an ArimaModel or a Regression Model
+            if not ArimaModel.is_config(m) and not RegressionModel.is_config(m):
+                raise ValueError("Only ArimaModels and RegressionModels can be used to generate the \
+                    Classification Training Data")
 
             # Add the initialized model to the list
             self.models.append(Model(m))

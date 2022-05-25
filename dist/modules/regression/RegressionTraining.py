@@ -7,10 +7,10 @@ from pandas import DataFrame
 from json import dumps
 from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras import Sequential
+from keras.optimizers import adam_v2, rmsprop_v2
 from keras.losses import MeanSquaredError, MeanAbsoluteError
 from keras.metrics import MeanSquaredError as MeanSquaredErrorMetric, MeanAbsoluteError as MeanAbsoluteErrorMetric
 from keras.callbacks import EarlyStopping, History
-from keras.optimizers import adam_v2, rmsprop_v2
 from h5py import File as h5pyFile
 from modules.candlestick import Candlestick
 from modules.utils import Utils
@@ -24,13 +24,15 @@ from modules.regression import IRegressionTrainingConfig, TrainingWindowGenerato
 class RegressionTraining:
     """RegressionTraining Class
 
-    This class handles the training of a Regression Model.
+    This class handles the training of a RegressionModel.
 
     Class Properties:
         MAX_EPOCHS: int
             The maximum amount of epochs the training process can go through.
         MAX_REGRESSION_EVALUATIONS: int
             The max number of evaluations that will be performed on the trained regression model
+        EARLY_STOPPING_PATIENCE: int
+            The number of epochs it will allow to be executed without showing a performance.
 
     Instance Properties:
         id: str
@@ -88,7 +90,7 @@ class RegressionTraining:
 
 
     def __init__(self, config: IRegressionTrainingConfig, test_mode: bool = False):
-        """Initializes the ForecastingTraining Instance.
+        """Initializes the RegressionTraining Instance.
 
         Args:
             config: IRegressionTrainingConfig
@@ -293,7 +295,7 @@ class RegressionTraining:
         start_time: int = Utils.get_time()
 
         # Initialize the early stopping callback
-        early_stopping = EarlyStopping(monitor='val_loss', patience=RegressionTraining.EARLY_STOPPING_PATIENCE, mode='min')
+        early_stopping = EarlyStopping(monitor='val_loss', mode='min', patience=RegressionTraining.EARLY_STOPPING_PATIENCE)
 
         # Retrieve the Keras Model
         print("    1/7) Initializing Model...")
@@ -301,7 +303,7 @@ class RegressionTraining:
 
         # Compile the model
         print("    2/7) Compiling Model...")
-        model.compile(loss=self.loss, optimizer=self.optimizer, metrics=[self.metric])
+        model.compile(optimizer=self.optimizer, loss=self.loss, metrics=[self.metric])
   
         # Train the model
         print("    3/7) Training Model...")
