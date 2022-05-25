@@ -378,9 +378,13 @@ class ClassificationTrainingData:
         Returns:
             ITrainingDataPriceActionsInsight
         """
+        # Init the value counts
+        up_count: Series = self.df["up"].value_counts()
+        down_count: Series = self.df["down"].value_counts()
+
         return {
-            "up": Utils.get_percentage_out_of_total(self.df["up"].value_counts()[1], self.df.shape[0]),
-            "down": Utils.get_percentage_out_of_total(self.df["down"].value_counts()[1], self.df.shape[0]),
+            "up": int(up_count[1]) if up_count.get(1) is not None else 0,
+            "down": int(down_count[1]) if down_count.get(1) is not None else 0
         }
 
 
@@ -401,16 +405,11 @@ class ClassificationTrainingData:
         # Init the value counts
         counts: Series = self.df[model_id].value_counts()
 
-        # Calculate the totals
-        long_num: int = counts[2] if counts.get(2) is not None else 0
-        short_num: int = counts[1] if counts.get(1) is not None else 0
-        neutral_num: int = counts[0] if counts.get(0) is not None else 0
-
         # Return the insights
         return {
-            "long": Utils.get_percentage_out_of_total(long_num, self.df.shape[0]),
-            "short": Utils.get_percentage_out_of_total(short_num, self.df.shape[0]),
-            "neutral": Utils.get_percentage_out_of_total(neutral_num, self.df.shape[0]),
+            "long": int(counts[2]) if counts.get(2) is not None else 0,
+            "short": int(counts[1]) if counts.get(1) is not None else 0,
+            "neutral": int(counts[0]) if counts.get(0) is not None else 0
         }
 
 
@@ -468,9 +467,9 @@ class ClassificationTrainingData:
                 raise ValueError(f"There is a discrepancy in the models configurations.")
 
         # Validate the insights
-        price_action_insight: ITrainingDataPriceActionsInsight = self._get_price_action_insight()
-        if td["price_action_insight"] != price_action_insight:
-            raise ValueError(f"Price Action Insight Discrepancy: {str(td['price_action_insight'])} != {str(price_action_insight)}")
+        price_actions_insight: ITrainingDataPriceActionsInsight = self._get_price_actions_insight()
+        if td["price_actions_insight"] != price_actions_insight:
+            raise ValueError(f"Price Action Insight Discrepancy: {str(td['price_actions_insight'])} != {str(price_actions_insight)}")
         predictions_insight: ITrainingDataPredictionInsight = {m.id: self._get_prediction_insight_for_model(m.id) for m in self.models}
         if td["predictions_insight"] != predictions_insight:
             raise ValueError(f"Predictions Insight Discrepancy: {str(td['predictions_insight'])} != {str(predictions_insight)}")

@@ -269,15 +269,15 @@ class TrainingDataTestCase(unittest.TestCase):
             self.assertEqual(model["id"], file["models"][i]["id"])
 
         # Validate the price action insights
-        self.assertEqual(file["price_actions_insight"]["up"], 66.67)
-        self.assertEqual(file["price_actions_insight"]["down"], 33.33)
+        self.assertEqual(file["price_actions_insight"]["up"], 2)
+        self.assertEqual(file["price_actions_insight"]["down"], 1)
 
         # Validate the predictions insights
         for model in config["models"]:
             self.assertIsInstance(file["predictions_insight"][model["id"]], dict)
-            self.assertIsInstance(file["predictions_insight"][model["id"]]["long"], float)
-            self.assertIsInstance(file["predictions_insight"][model["id"]]["short"], float)
-            self.assertIsInstance(file["predictions_insight"][model["id"]]["neutral"], float)
+            self.assertIsInstance(file["predictions_insight"][model["id"]]["long"], int)
+            self.assertIsInstance(file["predictions_insight"][model["id"]]["short"], int)
+            self.assertIsInstance(file["predictions_insight"][model["id"]]["neutral"], int)
 
         ## Validate the Training Data ##
 
