@@ -59,13 +59,13 @@ def R_DNN_S1(m: IKerasModelConfig) -> Sequential:
 # R_DNN_S2 
 # 2 units:          Dense_1, Dense_2
 # 2 activations:    Dense_1, Dense_2
-def R_DNN_S2(config: IKerasModelConfig) -> Sequential:
-    validate(config, 'R_DNN_S2', units=2, activations=2)
+def R_DNN_S2(m: IKerasModelConfig) -> Sequential:
+    validate(m, 'R_DNN_S2', units=2, activations=2)
     return Sequential([
         Lambda(lambda x: x[:, -1:, :], name="Lambda_1"),
-        Dense(config["units"][0], activation=config["activations"][0], kernel_initializer="normal", name="Dense_1"),
-        Dense(config["units"][1], activation=config["activations"][1], kernel_initializer="normal", name="Dense_2"),
-        Dense(config['predictions'], kernel_initializer=zeros, name="Dense_3"),
+        Dense(m["units"][0], activation=m["activations"][0], kernel_initializer="normal", name="Dense_1"),
+        Dense(m["units"][1], activation=m["activations"][1], kernel_initializer="normal", name="Dense_2"),
+        Dense(m['predictions'], kernel_initializer=zeros, name="Dense_3"),
         Flatten(name="Flatten_1")
     ])
 
@@ -76,14 +76,14 @@ def R_DNN_S2(config: IKerasModelConfig) -> Sequential:
 # R_DNN_S3
 # 3 units:          Dense_1, Dense_2, Dense_3
 # 3 activations:    Dense_1, Dense_2, Dense_3
-def R_DNN_S3(config: IKerasModelConfig) -> Sequential:
-    validate(config, 'R_DNN_S3', units=3, activations=3)
+def R_DNN_S3(m: IKerasModelConfig) -> Sequential:
+    validate(m, 'R_DNN_S3', units=3, activations=3)
     return Sequential([
         Lambda(lambda x: x[:, -1:, :], name="Lambda_1"),
-        Dense(config["units"][0], activation=config["activations"][0], kernel_initializer="normal", name="Dense_1"),
-        Dense(config["units"][1], activation=config["activations"][1], kernel_initializer="normal", name="Dense_2"),
-        Dense(config["units"][2], activation=config["activations"][2], kernel_initializer="normal", name="Dense_3"),
-        Dense(config['predictions'], kernel_initializer=zeros, name="Dense_4"),
+        Dense(m["units"][0], activation=m["activations"][0], kernel_initializer="normal", name="Dense_1"),
+        Dense(m["units"][1], activation=m["activations"][1], kernel_initializer="normal", name="Dense_2"),
+        Dense(m["units"][2], activation=m["activations"][2], kernel_initializer="normal", name="Dense_3"),
+        Dense(m['predictions'], kernel_initializer=zeros, name="Dense_4"),
         Flatten(name="Flatten_1")
     ])
 
@@ -94,15 +94,15 @@ def R_DNN_S3(config: IKerasModelConfig) -> Sequential:
 # R_DNN_S4
 # 4 units:          Dense_1, Dense_2, Dense_3, Dense_4
 # 4 activations:    Dense_1, Dense_2, Dense_3, Dense_4
-def R_DNN_S4(config: IKerasModelConfig) -> Sequential:
-    validate(config, 'R_DNN_S4', units=4, activations=4)
+def R_DNN_S4(m: IKerasModelConfig) -> Sequential:
+    validate(m, 'R_DNN_S4', units=4, activations=4)
     return Sequential([
         Lambda(lambda x: x[:, -1:, :], name="Lambda_1"),
-        Dense(config["units"][0], activation=config["activations"][0], kernel_initializer="normal", name="Dense_1"),
-        Dense(config["units"][1], activation=config["activations"][1], kernel_initializer="normal", name="Dense_2"),
-        Dense(config["units"][2], activation=config["activations"][2], kernel_initializer="normal", name="Dense_3"),
-        Dense(config["units"][3], activation=config["activations"][3], kernel_initializer="normal", name="Dense_4"),
-        Dense(config['predictions'], kernel_initializer=zeros, name="Dense_5"),
+        Dense(m["units"][0], activation=m["activations"][0], kernel_initializer="normal", name="Dense_1"),
+        Dense(m["units"][1], activation=m["activations"][1], kernel_initializer="normal", name="Dense_2"),
+        Dense(m["units"][2], activation=m["activations"][2], kernel_initializer="normal", name="Dense_3"),
+        Dense(m["units"][3], activation=m["activations"][3], kernel_initializer="normal", name="Dense_4"),
+        Dense(m['predictions'], kernel_initializer=zeros, name="Dense_5"),
         Flatten(name="Flatten_1")
     ])
 
@@ -114,16 +114,16 @@ def R_DNN_S4(config: IKerasModelConfig) -> Sequential:
 # R_DNN_S5
 # 4 units:          Dense_1, Dense_2, Dense_3, Dense_4, Dense_5
 # 4 activations:    Dense_1, Dense_2, Dense_3, Dense_4, Dense_5
-def R_DNN_S5(config: IKerasModelConfig) -> Sequential:
-    validate(config, 'R_DNN_S5', units=5, activations=5)
+def R_DNN_S5(m: IKerasModelConfig) -> Sequential:
+    validate(m, 'R_DNN_S5', units=5, activations=5)
     return Sequential([
         Lambda(lambda x: x[:, -1:, :], name="Lambda_1"),
-        Dense(config["units"][0], activation=config["activations"][0], kernel_initializer="normal", name="Dense_1"),
-        Dense(config["units"][1], activation=config["activations"][1], kernel_initializer="normal", name="Dense_2"),
-        Dense(config["units"][2], activation=config["activations"][2], kernel_initializer="normal", name="Dense_3"),
-        Dense(config["units"][3], activation=config["activations"][3], kernel_initializer="normal", name="Dense_4"),
-        Dense(config["units"][4], activation=config["activations"][4], kernel_initializer="normal", name="Dense_5"),
-        Dense(config['predictions'], kernel_initializer=zeros, name="Dense_6"),
+        Dense(m["units"][0], activation=m["activations"][0], kernel_initializer="normal", name="Dense_1"),
+        Dense(m["units"][1], activation=m["activations"][1], kernel_initializer="normal", name="Dense_2"),
+        Dense(m["units"][2], activation=m["activations"][2], kernel_initializer="normal", name="Dense_3"),
+        Dense(m["units"][3], activation=m["activations"][3], kernel_initializer="normal", name="Dense_4"),
+        Dense(m["units"][4], activation=m["activations"][4], kernel_initializer="normal", name="Dense_5"),
+        Dense(m['predictions'], kernel_initializer=zeros, name="Dense_6"),
         Flatten(name="Flatten_1")
     ])
 
@@ -148,12 +148,12 @@ def R_DNN_S5(config: IKerasModelConfig) -> Sequential:
 # R_CNN_S1
 # 1 filters:     Conv1D_1
 # 1 activations: Conv1D_1
-def R_CNN_S1(config: IKerasModelConfig) -> Sequential:
-    validate(config, 'R_CNN_S1', filters=1, activations=1)
+def R_CNN_S1(m: IKerasModelConfig) -> Sequential:
+    validate(m, 'R_CNN_S1', filters=1, activations=1)
     return Sequential([
-        Lambda(lambda x: x[:, -config["lookback"]:, :], name="Lambda_1"),
-        Conv1D(config["filters"][0], activation=config["activations"][0], kernel_size=(config["lookback"],), name="Conv1D_1"),
-        Dense(config['predictions'], kernel_initializer=zeros, name="Dense_1"),
+        Lambda(lambda x: x[:, -m["lookback"]:, :], name="Lambda_1"),
+        Conv1D(m["filters"][0], activation=m["activations"][0], kernel_size=(m["lookback"],), name="Conv1D_1"),
+        Dense(m['predictions'], kernel_initializer=zeros, name="Dense_1"),
         Flatten(name="Flatten_1")
     ])
 
@@ -166,13 +166,13 @@ def R_CNN_S1(config: IKerasModelConfig) -> Sequential:
 # 1 filters:     Conv1D_1
 # 1 activations: Conv1D_1
 # 1 pool_sizes:  MaxPooling1D_1
-def R_CNN_S1_MP(config: IKerasModelConfig) -> Sequential:
-    validate(config, 'R_CNN_S1_MP', filters=1, activations=1, pool_sizes=1)
+def R_CNN_S1_MP(m: IKerasModelConfig) -> Sequential:
+    validate(m, 'R_CNN_S1_MP', filters=1, activations=1, pool_sizes=1)
     return Sequential([
-        Lambda(lambda x: x[:, -config["lookback"]:, :], name="Lambda_1"),
-        Conv1D(config["filters"][0], activation=config["activations"][0], kernel_size=(config["lookback"],), name="Conv1D_1"),
-        MaxPooling1D(config["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
-        Dense(config['predictions'], kernel_initializer=zeros, name="Dense_1"),
+        Lambda(lambda x: x[:, -m["lookback"]:, :], name="Lambda_1"),
+        Conv1D(m["filters"][0], activation=m["activations"][0], kernel_size=(m["lookback"],), name="Conv1D_1"),
+        MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
+        Dense(m['predictions'], kernel_initializer=zeros, name="Dense_1"),
         Flatten(name="Flatten_1")
     ])
 
@@ -184,13 +184,13 @@ def R_CNN_S1_MP(config: IKerasModelConfig) -> Sequential:
 # R_CNN_S2
 # 2 filters:     Conv1D_1, Conv1D_2
 # 2 activations: Conv1D_1, Conv1D_2
-def R_CNN_S2(config: IKerasModelConfig) -> Sequential:
-    validate(config, 'R_CNN_S2', filters=2, activations=2)
+def R_CNN_S2(m: IKerasModelConfig) -> Sequential:
+    validate(m, 'R_CNN_S2', filters=2, activations=2)
     return Sequential([
-        Lambda(lambda x: x[:, -config["lookback"]:, :], name="Lambda_1"),
-        Conv1D(config["filters"][0], activation=config["activations"][0], kernel_size=(config["lookback"],), name="Conv1D_1"),
-        Conv1D(config["filters"][1], activation=config["activations"][1], padding='same', kernel_size=(int(config["lookback"]/2),), name="Conv1D_2"),
-        Dense(config['predictions'], kernel_initializer=zeros, name="Dense_1"),
+        Lambda(lambda x: x[:, -m["lookback"]:, :], name="Lambda_1"),
+        Conv1D(m["filters"][0], activation=m["activations"][0], kernel_size=(m["lookback"],), name="Conv1D_1"),
+        Conv1D(m["filters"][1], activation=m["activations"][1], padding='same', kernel_size=(int(m["lookback"]/2),), name="Conv1D_2"),
+        Dense(m['predictions'], kernel_initializer=zeros, name="Dense_1"),
         Flatten(name="Flatten_1")
     ])
 
@@ -203,15 +203,15 @@ def R_CNN_S2(config: IKerasModelConfig) -> Sequential:
 # 2 filters:     Conv1D_1, Conv1D_2
 # 2 activations: Conv1D_1, Conv1D_2
 # 2 pool_sizes:  MaxPooling1D_1, MaxPooling1D_2
-def R_CNN_S2_MP(config: IKerasModelConfig) -> Sequential:
-    validate(config, 'R_CNN_S2_MP', filters=2, activations=2, pool_sizes=2)
+def R_CNN_S2_MP(m: IKerasModelConfig) -> Sequential:
+    validate(m, 'R_CNN_S2_MP', filters=2, activations=2, pool_sizes=2)
     return Sequential([
-        Lambda(lambda x: x[:, -config["lookback"]:, :], name="Lambda_1"),
-        Conv1D(config["filters"][0], activation=config["activations"][0], kernel_size=(config["lookback"]), name="Conv1D_1"),
-        MaxPooling1D(config["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
-        Conv1D(config["filters"][1], activation=config["activations"][1], padding='same', kernel_size=(config["lookback"]), name="Conv1D_2"),
-        MaxPooling1D(config["pool_sizes"][1], padding='same', name="MaxPooling1D_2"),
-        Dense(config['predictions'], kernel_initializer=zeros, name="Dense_1"),
+        Lambda(lambda x: x[:, -m["lookback"]:, :], name="Lambda_1"),
+        Conv1D(m["filters"][0], activation=m["activations"][0], kernel_size=(m["lookback"]), name="Conv1D_1"),
+        MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
+        Conv1D(m["filters"][1], activation=m["activations"][1], padding='same', kernel_size=(m["lookback"]), name="Conv1D_2"),
+        MaxPooling1D(m["pool_sizes"][1], padding='same', name="MaxPooling1D_2"),
+        Dense(m['predictions'], kernel_initializer=zeros, name="Dense_1"),
         Flatten(name="Flatten_1")
     ])
 
@@ -225,16 +225,16 @@ def R_CNN_S2_MP(config: IKerasModelConfig) -> Sequential:
 # 2 activations:    Conv1D_1, Conv1D_2
 # 2 pool_sizes:     MaxPooling1D_1, MaxPooling1D_2
 # 2 dropout_rates:  Dropout_1
-def R_CNN_S2_MP_DO(config: IKerasModelConfig) -> Sequential:
-    validate(config, 'R_CNN_S2_MP_DO', filters=2, activations=2, pool_sizes=2, dropout_rates=1)
+def R_CNN_S2_MP_DO(m: IKerasModelConfig) -> Sequential:
+    validate(m, 'R_CNN_S2_MP_DO', filters=2, activations=2, pool_sizes=2, dropout_rates=1)
     return Sequential([
-        Lambda(lambda x: x[:, -config["lookback"]:, :], name="Lambda_1"),
-        Conv1D(config["filters"][0], activation=config["activations"][0], kernel_size=(config["lookback"]), name="Conv1D_1"),
-        MaxPooling1D(config["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
-        Dropout(config["dropout_rates"][0], name="Dropout_1"),
-        Conv1D(config["filters"][1], activation=config["activations"][1], padding='same', kernel_size=(config["lookback"]), name="Conv1D_2"),
-        MaxPooling1D(config["pool_sizes"][1], padding='same', name="MaxPooling1D_2"),
-        Dense(config['predictions'], kernel_initializer=zeros, name="Dense_1"),
+        Lambda(lambda x: x[:, -m["lookback"]:, :], name="Lambda_1"),
+        Conv1D(m["filters"][0], activation=m["activations"][0], kernel_size=(m["lookback"]), name="Conv1D_1"),
+        MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
+        Dropout(m["dropout_rates"][0], name="Dropout_1"),
+        Conv1D(m["filters"][1], activation=m["activations"][1], padding='same', kernel_size=(m["lookback"]), name="Conv1D_2"),
+        MaxPooling1D(m["pool_sizes"][1], padding='same', name="MaxPooling1D_2"),
+        Dense(m['predictions'], kernel_initializer=zeros, name="Dense_1"),
         Flatten(name="Flatten_1")
     ])
 
@@ -257,11 +257,11 @@ def R_CNN_S2_MP_DO(config: IKerasModelConfig) -> Sequential:
 # Regression LSTM Stack 1
 # R_LSTM_S1
 # 1 units: LSTM_1
-def R_LSTM_S1(config: IKerasModelConfig) -> Sequential:
-    validate(config, 'R_LSTM_S1', units=1)
+def R_LSTM_S1(m: IKerasModelConfig) -> Sequential:
+    validate(m, 'R_LSTM_S1', units=1)
     return Sequential([
-        LSTM(config["units"][0], return_sequences=True, name="LSTM_1"),
-        Dense(config['predictions'], kernel_initializer=zeros, name="Dense_1"),
+        LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
+        Dense(m['predictions'], kernel_initializer=zeros, name="Dense_1"),
     ])
 
 
@@ -269,12 +269,12 @@ def R_LSTM_S1(config: IKerasModelConfig) -> Sequential:
 # Regression LSTM Stack 2
 # R_LSTM_S2
 # 2 units: LSTM_1, LSTM_2
-def R_LSTM_S2(config: IKerasModelConfig) -> Sequential:
-    validate(config, 'R_LSTM_S2', units=2)
+def R_LSTM_S2(m: IKerasModelConfig) -> Sequential:
+    validate(m, 'R_LSTM_S2', units=2)
     return Sequential([
-        LSTM(config["units"][0], return_sequences=True, name="LSTM_1"),
-        LSTM(config["units"][1], return_sequences=False, name="LSTM_2"),
-        Dense(config['predictions'], kernel_initializer=zeros, name="Dense_1"),
+        LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
+        LSTM(m["units"][1], return_sequences=False, name="LSTM_2"),
+        Dense(m['predictions'], kernel_initializer=zeros, name="Dense_1"),
     ])
 
 
@@ -284,13 +284,13 @@ def R_LSTM_S2(config: IKerasModelConfig) -> Sequential:
 # R_LSTM_S2_DO
 # 2 units:          LSTM_1, LSTM_2
 # 1 dropout rates:  Dropout_1
-def R_LSTM_S2_DO(config: IKerasModelConfig) -> Sequential:
-    validate(config, 'R_LSTM_S2_DO', units=2, dropout_rates=1)
+def R_LSTM_S2_DO(m: IKerasModelConfig) -> Sequential:
+    validate(m, 'R_LSTM_S2_DO', units=2, dropout_rates=1)
     return Sequential([
-        LSTM(config["units"][0], return_sequences=True, name="LSTM_1"),
-        Dropout(config["dropout_rates"][0], name="Dropout_1"),
-        LSTM(config["units"][1], return_sequences=False, name="LSTM_2"),
-        Dense(config['predictions'], kernel_initializer=zeros, name="Dense_1"),
+        LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
+        Dropout(m["dropout_rates"][0], name="Dropout_1"),
+        LSTM(m["units"][1], return_sequences=False, name="LSTM_2"),
+        Dense(m['predictions'], kernel_initializer=zeros, name="Dense_1"),
     ])
 
 
@@ -298,13 +298,13 @@ def R_LSTM_S2_DO(config: IKerasModelConfig) -> Sequential:
 # Regression LSTM Stack 3
 # R_LSTM_S3
 # 3 units: LSTM_1, LSTM_2, LSTM_3
-def R_LSTM_S3(config: IKerasModelConfig) -> Sequential:
-    validate(config, 'R_LSTM_S3', units=3)
+def R_LSTM_S3(m: IKerasModelConfig) -> Sequential:
+    validate(m, 'R_LSTM_S3', units=3)
     return Sequential([
-        LSTM(config["units"][0], return_sequences=True, name="LSTM_1"),
-        LSTM(config["units"][1], return_sequences=True, name="LSTM_2"),
-        LSTM(config["units"][2], return_sequences=False, name="LSTM_3"),
-        Dense(config['predictions'], kernel_initializer=zeros, name="Dense_1"),
+        LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
+        LSTM(m["units"][1], return_sequences=True, name="LSTM_2"),
+        LSTM(m["units"][2], return_sequences=False, name="LSTM_3"),
+        Dense(m['predictions'], kernel_initializer=zeros, name="Dense_1"),
     ])
 
 
@@ -313,15 +313,15 @@ def R_LSTM_S3(config: IKerasModelConfig) -> Sequential:
 # R_LSTM_S3_DO
 # 3 units: LSTM_1, LSTM_2, LSTM_3
 # 2 dropout rates:  Dropout_1, Dropout_2
-def R_LSTM_S3_DO(config: IKerasModelConfig) -> Sequential:
-    validate(config, 'R_LSTM_S3_DO', units=3, dropout_rates=2)
+def R_LSTM_S3_DO(m: IKerasModelConfig) -> Sequential:
+    validate(m, 'R_LSTM_S3_DO', units=3, dropout_rates=2)
     return Sequential([
-        LSTM(config["units"][0], return_sequences=True, name="LSTM_1"),
-        Dropout(config["dropout_rates"][0], name="Dropout_1"),
-        LSTM(config["units"][1], return_sequences=True, name="LSTM_2"),
-        Dropout(config["dropout_rates"][1], name="Dropout_2"),
-        LSTM(config["units"][2], return_sequences=False, name="LSTM_3"),
-        Dense(config['predictions'], kernel_initializer=zeros, name="Dense_1"),
+        LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
+        Dropout(m["dropout_rates"][0], name="Dropout_1"),
+        LSTM(m["units"][1], return_sequences=True, name="LSTM_2"),
+        Dropout(m["dropout_rates"][1], name="Dropout_2"),
+        LSTM(m["units"][2], return_sequences=False, name="LSTM_3"),
+        Dense(m['predictions'], kernel_initializer=zeros, name="Dense_1"),
     ])
 
 
@@ -330,14 +330,14 @@ def R_LSTM_S3_DO(config: IKerasModelConfig) -> Sequential:
 # Regression LSTM Stack 4
 # R_LSTM_S4
 # 4 units: LSTM_1, LSTM_2, LSTM_3, LSTM_4
-def R_LSTM_S4(config: IKerasModelConfig) -> Sequential:
-    validate(config, 'R_LSTM_S4', units=4)
+def R_LSTM_S4(m: IKerasModelConfig) -> Sequential:
+    validate(m, 'R_LSTM_S4', units=4)
     return Sequential([
-        LSTM(config["units"][0], return_sequences=True, name="LSTM_1"),
-        LSTM(config["units"][1], return_sequences=True, name="LSTM_2"),
-        LSTM(config["units"][2], return_sequences=True, name="LSTM_3"),
-        LSTM(config["units"][3], return_sequences=False, name="LSTM_4"),
-        Dense(config['predictions'], kernel_initializer=zeros, name="Dense_1"),
+        LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
+        LSTM(m["units"][1], return_sequences=True, name="LSTM_2"),
+        LSTM(m["units"][2], return_sequences=True, name="LSTM_3"),
+        LSTM(m["units"][3], return_sequences=False, name="LSTM_4"),
+        Dense(m['predictions'], kernel_initializer=zeros, name="Dense_1"),
     ])
 
 
@@ -346,15 +346,15 @@ def R_LSTM_S4(config: IKerasModelConfig) -> Sequential:
 # R_LSTM_S4_DO
 # 4 units: LSTM_1, LSTM_2, LSTM_3, LSTM_4
 # 1 dropout rates:  Dropout_1
-def R_LSTM_S4_DO(config: IKerasModelConfig) -> Sequential:
-    validate(config, 'R_LSTM_S4_DO', units=4, dropout_rates=1)
+def R_LSTM_S4_DO(m: IKerasModelConfig) -> Sequential:
+    validate(m, 'R_LSTM_S4_DO', units=4, dropout_rates=1)
     return Sequential([
-        LSTM(config["units"][0], return_sequences=True, name="LSTM_1"),
-        LSTM(config["units"][1], return_sequences=True, name="LSTM_2"),
-        Dropout(config["dropout_rates"][0], name="Dropout_1"),
-        LSTM(config["units"][2], return_sequences=True, name="LSTM_3"),
-        LSTM(config["units"][3], return_sequences=False, name="LSTM_4"),
-        Dense(config['predictions'], kernel_initializer=zeros, name="Dense_1"),
+        LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
+        LSTM(m["units"][1], return_sequences=True, name="LSTM_2"),
+        Dropout(m["dropout_rates"][0], name="Dropout_1"),
+        LSTM(m["units"][2], return_sequences=True, name="LSTM_3"),
+        LSTM(m["units"][3], return_sequences=False, name="LSTM_4"),
+        Dense(m['predictions'], kernel_initializer=zeros, name="Dense_1"),
     ])
 
 
@@ -363,15 +363,15 @@ def R_LSTM_S4_DO(config: IKerasModelConfig) -> Sequential:
 # R_LSTM_S4_BDO
 # 4 units: LSTM_1, LSTM_2, LSTM_3, LSTM_4
 # 3 dropout rates:  Dropout_1, Dropout_2, Dropout_3
-def R_LSTM_S4_BDO(config: IKerasModelConfig) -> Sequential:
-    validate(config, 'R_LSTM_S4_BDO', units=4, dropout_rates=1)
+def R_LSTM_S4_BDO(m: IKerasModelConfig) -> Sequential:
+    validate(m, 'R_LSTM_S4_BDO', units=4, dropout_rates=1)
     return Sequential([
-        LSTM(config["units"][0], return_sequences=True, name="LSTM_1"),
-        Dropout(config["dropout_rates"][0], name="Dropout_1"),
-        LSTM(config["units"][1], return_sequences=True, name="LSTM_2"),
-        Dropout(config["dropout_rates"][1], name="Dropout_2"),
-        LSTM(config["units"][2], return_sequences=True, name="LSTM_3"),
-        Dropout(config["dropout_rates"][2], name="Dropout_3"),
-        LSTM(config["units"][3], return_sequences=False, name="LSTM_4"),
-        Dense(config['predictions'], kernel_initializer=zeros, name="Dense_1"),
+        LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
+        Dropout(m["dropout_rates"][0], name="Dropout_1"),
+        LSTM(m["units"][1], return_sequences=True, name="LSTM_2"),
+        Dropout(m["dropout_rates"][1], name="Dropout_2"),
+        LSTM(m["units"][2], return_sequences=True, name="LSTM_3"),
+        Dropout(m["dropout_rates"][2], name="Dropout_3"),
+        LSTM(m["units"][3], return_sequences=False, name="LSTM_4"),
+        Dense(m['predictions'], kernel_initializer=zeros, name="Dense_1"),
     ])

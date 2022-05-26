@@ -51,8 +51,6 @@ class ClassificationTraining:
             The loss function that will be used for training.
         metric: CategoricalAccuracyMetric
             The metric function that will be used for training.
-        batch_size: int
-            The size of the training dataset batches.
         shuffle_data: bool
             If True, it will shuffle the train, val and test datasets prior to training.
         keras_model: IKerasModelConfig
@@ -126,9 +124,6 @@ class ClassificationTraining:
 
         # Initialize the metric function
         self.metric: CategoricalAccuracyMetric = self._get_metric(config['metric'])
-
-        # Initialize the Batch Size
-        self.batch_size: int = config["batch_size"]
 
         # Initialize the Data Shuffling
         self.shuffle_data: bool = config["shuffle_data"]
@@ -230,7 +225,7 @@ class ClassificationTraining:
             ValueError:
                 If the function name does not match any function in the conditionings.
         """
-        if func_name == 'cc':
+        if func_name == 'categorical_crossentropy':
             return CategoricalCrossentropy()
         else:
             raise ValueError(f"The loss function for {func_name} was not found.")
@@ -255,7 +250,7 @@ class ClassificationTraining:
             ValueError:
                 If the function name does not match any function in the conditionings.
         """
-        if func_name == 'ca':
+        if func_name == 'categorical_accuracy':
             return CategoricalAccuracyMetric()
         else:
             raise ValueError(f"The metric function for {func_name} was not found.")
@@ -337,8 +332,8 @@ class ClassificationTraining:
             self.train_x,
             self.train_y,
             validation_split=0.2,
-            batch_size=self.batch_size,
             epochs=ClassificationTraining.MAX_EPOCHS,
+            shuffle=self.shuffle_data,
             callbacks=[ early_stopping ],
             verbose=0
         )
@@ -488,7 +483,7 @@ class ClassificationTraining:
             "optimizer": self.optimizer._name,
             "loss": self.loss.name,
             "metric": self.metric.name,
-            "batch_size": self.batch_size,
+            #"batch_size": self.batch_size,
             "shuffle_data": self.shuffle_data,
             "keras_model_config": self.keras_model,
 

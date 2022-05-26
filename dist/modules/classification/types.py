@@ -174,13 +174,10 @@ class IClassificationTrainingConfig(TypedDict):
     optimizer: str # 'adam'|'rmsprop'
 
     # The loss function to be used
-    loss: str # 'cc' (CategoricalCrossentropy)|'?'
+    loss: str # 'categorical_crossentropy'|'?'
 
     # The metric to be used for meassuring the val_loss
-    metric: str # 'ca' (CategoricalAccuracy)|'?'
-
-    # Batch Size
-    batch_size: int
+    metric: str # 'categorical_accuracy'|'?'
 
     # Train Data Shuffling
     shuffle_data: bool
@@ -257,7 +254,6 @@ class IClassificationTrainingCertificate(TypedDict):
     optimizer: str
     loss: str
     metric: str
-    batch_size: int    
     shuffle_data: bool
     keras_model_config: IKerasModelConfig
 

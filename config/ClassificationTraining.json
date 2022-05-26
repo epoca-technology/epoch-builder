@@ -1,20 +1,243 @@
 {
-    "name": "C_UNIT_TEST",
-    "training_data_id": "4b3fa4e5-1785-4d0b-b968-8318416ff846",
+    "name": "C_CNN_MOCK",
+    "training_data_id": "04502038-96d3-456b-982d-bfbfef13ce23",
     "models": [
         {
-            "id": "C_UNIT_TEST",
-            "description": "This is the official Classification Model for Unit Tests.",
+            "id": "C_CNN_S1_ADAM",
+            "description": "This is a mock to discover training performances.",
             "learning_rate": 0.001,
             "optimizer": "adam",
-            "loss": "cc",
-            "metric": "ca",
-            "batch_size": 32,
+            "loss": "categorical_crossentropy",
+            "metric": "categorical_accuracy",
             "shuffle_data": true,
             "keras_model": {
-                "name": "C_UNIT_TEST",
-                "units": [512],
+                "name": "C_CNN_S1",
+                "filters": [64],
                 "activations": ["relu"]
+            }
+        },
+        {
+            "id": "C_CNN_S1_RMSPROP",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.001,
+            "optimizer": "rmsprop",
+            "loss": "categorical_crossentropy",
+            "metric": "categorical_accuracy",
+            "shuffle_data": true,
+            "keras_model": {
+                "name": "C_CNN_S1",
+                "filters": [64],
+                "activations": ["relu"]
+            }
+        },
+        {
+            "id": "C_CNN_S1_MP_ADAM",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.001,
+            "optimizer": "adam",
+            "loss": "categorical_crossentropy",
+            "metric": "categorical_accuracy",
+            "shuffle_data": true,
+            "keras_model": {
+                "name": "C_CNN_S1_MP",
+                "filters": [64],
+                "activations": ["relu"],
+                "pool_sizes": [2]
+            }
+        },
+        {
+            "id": "C_CNN_S1_MP_RMSPROP",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.001,
+            "optimizer": "rmsprop",
+            "loss": "categorical_crossentropy",
+            "metric": "categorical_accuracy",
+            "shuffle_data": true,
+            "keras_model": {
+                "name": "C_CNN_S1_MP",
+                "filters": [64],
+                "activations": ["relu"],
+                "pool_sizes": [2]
+            }
+        },
+        {
+            "id": "C_CNN_S2_ADAM",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.001,
+            "optimizer": "adam",
+            "loss": "categorical_crossentropy",
+            "metric": "categorical_accuracy",
+            "shuffle_data": true,
+            "keras_model": {
+                "name": "C_CNN_S2",
+                "filters": [64, 32],
+                "activations": ["relu", "relu"]
+            }
+        },
+        {
+            "id": "C_CNN_S2_RMSPROP",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.001,
+            "optimizer": "rmsprop",
+            "loss": "categorical_crossentropy",
+            "metric": "categorical_accuracy",
+            "shuffle_data": true,
+            "keras_model": {
+                "name": "C_CNN_S2",
+                "filters": [64, 32],
+                "activations": ["relu", "relu"]
+            }
+        },
+        {
+            "id": "C_CNN_S2_MP_ADAM",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.001,
+            "optimizer": "adam",
+            "loss": "categorical_crossentropy",
+            "metric": "categorical_accuracy",
+            "shuffle_data": true,
+            "keras_model": {
+                "name": "C_CNN_S2_MP",
+                "filters": [64, 32],
+                "activations": ["relu", "relu"],
+                "pool_sizes": [2, 2]
+            }
+        },
+        {
+            "id": "C_CNN_S2_MP_RMSPROP",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.001,
+            "optimizer": "rmsprop",
+            "loss": "categorical_crossentropy",
+            "metric": "categorical_accuracy",
+            "shuffle_data": true,
+            "keras_model": {
+                "name": "C_CNN_S2_MP",
+                "filters": [64, 32],
+                "activations": ["relu", "relu"],
+                "pool_sizes": [2, 2]
+            }
+        },
+        {
+            "id": "C_CNN_S2_MP_DO_ADAM",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.001,
+            "optimizer": "adam",
+            "loss": "categorical_crossentropy",
+            "metric": "categorical_accuracy",
+            "shuffle_data": true,
+            "keras_model": {
+                "name": "C_CNN_S2_MP_DO",
+                "filters": [64, 32],
+                "activations": ["relu", "relu"],
+                "pool_sizes": [2, 2],
+                "dropout_rates": [0.2]
+            }
+        },
+        {
+            "id": "C_CNN_S2_MP_DO_RMSPROP",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.001,
+            "optimizer": "rmsprop",
+            "loss": "categorical_crossentropy",
+            "metric": "categorical_accuracy",
+            "shuffle_data": true,
+            "keras_model": {
+                "name": "C_CNN_S2_MP_DO",
+                "filters": [64, 32],
+                "activations": ["relu", "relu"],
+                "pool_sizes": [2, 2],
+                "dropout_rates": [0.2]
+            }
+        },
+        {
+            "id": "C_CNN_S3_ADAM",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.001,
+            "optimizer": "adam",
+            "loss": "categorical_crossentropy",
+            "metric": "categorical_accuracy",
+            "shuffle_data": true,
+            "keras_model": {
+                "name": "C_CNN_S3",
+                "filters": [128, 64, 32],
+                "activations": ["relu", "relu", "relu"]
+            }
+        },
+        {
+            "id": "C_CNN_S3_RMSPROP",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.001,
+            "optimizer": "rmsprop",
+            "loss": "categorical_crossentropy",
+            "metric": "categorical_accuracy",
+            "shuffle_data": true,
+            "keras_model": {
+                "name": "C_CNN_S3",
+                "filters": [128, 64, 32],
+                "activations": ["relu", "relu", "relu"]
+            }
+        },
+        {
+            "id": "C_CNN_S3_MP_ADAM",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.001,
+            "optimizer": "adam",
+            "loss": "categorical_crossentropy",
+            "metric": "categorical_accuracy",
+            "shuffle_data": true,
+            "keras_model": {
+                "name": "C_CNN_S3_MP",
+                "filters": [128, 64, 32],
+                "activations": ["relu", "relu", "relu"],
+                "pool_sizes": [2, 2, 2]
+            }
+        },
+        {
+            "id": "C_CNN_S3_MP_RMSPROP",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.001,
+            "optimizer": "rmsprop",
+            "loss": "categorical_crossentropy",
+            "metric": "categorical_accuracy",
+            "shuffle_data": true,
+            "keras_model": {
+                "name": "C_CNN_S3_MP",
+                "filters": [128, 64, 32],
+                "activations": ["relu", "relu", "relu"],
+                "pool_sizes": [2, 2, 2]
+            }
+        },
+        {
+            "id": "C_CNN_S3_MP_DO_ADAM",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.001,
+            "optimizer": "adam",
+            "loss": "categorical_crossentropy",
+            "metric": "categorical_accuracy",
+            "shuffle_data": true,
+            "keras_model": {
+                "name": "C_CNN_S3_MP_DO",
+                "filters": [128, 64, 32],
+                "activations": ["relu", "relu", "relu"],
+                "pool_sizes": [2, 2, 2],
+                "dropout_rates": [0.2, 0.2]
+            }
+        },
+        {
+            "id": "C_CNN_S3_MP_DO_RMSPROP",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.001,
+            "optimizer": "rmsprop",
+            "loss": "categorical_crossentropy",
+            "metric": "categorical_accuracy",
+            "shuffle_data": true,
+            "keras_model": {
+                "name": "C_CNN_S3_MP_DO",
+                "filters": [128, 64, 32],
+                "activations": ["relu", "relu", "relu"],
+                "pool_sizes": [2, 2, 2],
+                "dropout_rates": [0.2, 0.2]
             }
         }
     ]

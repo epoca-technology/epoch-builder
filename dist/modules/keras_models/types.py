@@ -129,6 +129,9 @@ class IKerasModelOptimizerConfig(TypedDict):
     beta_2: Union[str, None]
     epsilon: Union[str, None]
     amsgrad: Union[str, None]
+    rho: Union[str, None]
+    momentum: Union[str, None]
+    centered: Union[str, None]
 
 
 
