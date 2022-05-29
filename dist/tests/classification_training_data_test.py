@@ -2,7 +2,6 @@ import unittest
 from typing import List
 from copy import deepcopy
 from pandas import Series, DataFrame
-from dist.modules.model.types import IPrediction
 from modules.candlestick import Candlestick
 from modules.utils import Utils
 from modules.classification import ClassificationTrainingData, ITrainingDataConfig, ICompressedTrainingData, \
@@ -163,20 +162,6 @@ class TrainingDataTestCase(unittest.TestCase):
 
 
 
-    # Can convert a prediction result into the proper classification format
-    def testPredictionResult(self):
-        # Init fake predictions
-        long_pred: IPrediction = {"r": 1, "t": 1653055274678, "md": [{"d": "long"}]}
-        short_pred: IPrediction = {"r": -1, "t": 1653055274678, "md": [{"d": "short"}]}
-        neutral_pred: IPrediction = {"r": 0, "t": 1653055274678, "md": [{"d": "neutral"}]}
-
-        # Validate the results
-        self.assertEqual(ClassificationTrainingData.get_prediction_result(long_pred), 2)
-        self.assertEqual(ClassificationTrainingData.get_prediction_result(short_pred), 1)
-        self.assertEqual(ClassificationTrainingData.get_prediction_result(neutral_pred), 0)
-
-
-
 
 
  
@@ -323,11 +308,11 @@ class TrainingDataTestCase(unittest.TestCase):
     def testCompressAndDecompressTrainingData(self):
         # Initialize the DataFrame
         df = DataFrame(data={
-            DEFAULT_CONFIG["models"][0]["id"]: [1, 2, 1, 0, 2],
-            DEFAULT_CONFIG["models"][1]["id"]: [2, 1, 0, 0, 1],
-            DEFAULT_CONFIG["models"][2]["id"]: [1, 2, 2, 2, 0],
-            DEFAULT_CONFIG["models"][3]["id"]: [2, 1, 2, 2, 1],
-            DEFAULT_CONFIG["models"][4]["id"]: [0, 0, 1, 2, 1],
+            DEFAULT_CONFIG["models"][0]["id"]: [-1, 1, -1, 0, 1],
+            DEFAULT_CONFIG["models"][1]["id"]: [1, -1, 0, 0, -1],
+            DEFAULT_CONFIG["models"][2]["id"]: [-1, 1, 1, 1, 0],
+            DEFAULT_CONFIG["models"][3]["id"]: [1, -1, 1, 1, -1],
+            DEFAULT_CONFIG["models"][4]["id"]: [0, 0, -1, 1, -1],
             "up":                              [1, 0, 0, 1, 1],
             "down":                            [0, 1, 1, 0, 0],
         })
@@ -341,11 +326,11 @@ class TrainingDataTestCase(unittest.TestCase):
 
         # Validate the rows
         self.assertListEqual(compressed["rows"], [
-            [1, 2, 1, 2, 0, 1, 0],
-            [2, 1, 2, 1, 0, 0, 1],
-            [1, 0, 2, 2, 1, 0, 1],
-            [0, 0, 2, 2 ,2, 1, 0],
-            [2, 1, 0, 1 ,1 ,1, 0]
+            [-1, 1, -1, 1, 0, 1, 0],
+            [1, -1, 1, -1, 0, 0, 1],
+            [-1, 0, 1, 1, -1, 0, 1],
+            [0, 0, 1, 1, 1, 1, 0],
+            [1, -1, 0, -1 ,-1 ,1, 0]
         ])
 
         # Decompress the data and validate its integrity

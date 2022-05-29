@@ -74,7 +74,7 @@ class UtilsTestCase(unittest.TestCase):
     # Can retrieve the current time in milliseconds
     def testGetTime(self):
         current_time: float = time.time()
-        self.assertAlmostEqual(Utils.get_time(), Utils.from_seconds_to_milliseconds(current_time), 5)
+        self.assertAlmostEqual(Utils.get_time(), Utils.from_seconds_to_milliseconds(current_time), 10)
 
 
 

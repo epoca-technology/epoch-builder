@@ -179,9 +179,6 @@ class IClassificationTrainingConfig(TypedDict):
     # The metric to be used for meassuring the val_loss
     metric: str # 'categorical_accuracy'|'?'
 
-    # Train Data Shuffling
-    shuffle_data: bool
-
     # Keras Model Configuration
     keras_model: IKerasModelConfig
 
@@ -254,7 +251,6 @@ class IClassificationTrainingCertificate(TypedDict):
     optimizer: str
     loss: str
     metric: str
-    shuffle_data: bool
     keras_model_config: IKerasModelConfig
 
 

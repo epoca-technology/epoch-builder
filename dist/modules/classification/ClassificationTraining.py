@@ -5,9 +5,9 @@ from pandas import DataFrame, concat
 from json import dumps
 from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras import Sequential
-from keras.optimizers import adam_v2, rmsprop_v2
-from keras.losses import CategoricalCrossentropy
-from keras.metrics import CategoricalAccuracy as CategoricalAccuracyMetric
+from keras.optimizers import adam_v2 as adam, rmsprop_v2 as rmsprop
+from keras.losses import CategoricalCrossentropy, BinaryCrossentropy
+from keras.metrics import CategoricalAccuracy, BinaryAccuracy
 from keras.callbacks import EarlyStopping, History
 from h5py import File as h5pyFile
 from modules.utils import Utils
@@ -45,14 +45,12 @@ class ClassificationTraining:
         learning_rate: float
             The learning rate to be used by the optimizer. If None is provided it uses the default
             one.   
-        optimizer: Union[adam_v2.Adam, rmsprop_v2.RMSProp]
+        optimizer: Union[adam.Adam, rmsprop.RMSProp]                    "adam"|"rmsprop"
             The optimizer that will be used to train the model.
-        loss: CategoricalCrossentropy
+        loss: Union[CategoricalCrossentropy, BinaryCrossentropy]        "categorical_crossentropy"|"binary_crossentropy"
             The loss function that will be used for training.
-        metric: CategoricalAccuracyMetric
+        metric: Union[CategoricalAccuracy, BinaryAccuracy]              "categorical_accuracy"|"binary_accuracy" 
             The metric function that will be used for training.
-        shuffle_data: bool
-            If True, it will shuffle the train, val and test datasets prior to training.
         keras_model: IKerasModelConfig
             The configuration that will be used to build the Keras Model.
         train_x: DataFrame
@@ -75,7 +73,7 @@ class ClassificationTraining:
     MAX_EPOCHS: int = 1000
 
     # The max number of training epochs that can occur without showing improvements.
-    EARLY_STOPPING_PATIENCE: int = 15
+    EARLY_STOPPING_PATIENCE: int = 20
 
 
 
@@ -100,40 +98,37 @@ class ClassificationTraining:
                 If the model's directory already exists.
         """
         # Initialize the id
-        self.id: str = config['id']
-        if self.id[0:2] != 'C_':
+        self.id: str = config["id"]
+        if self.id[0:2] != "C_":
             raise ValueError("The ID of the ClassificationModel must be preffixed with C_")
 
         # Initialize the Model's path
         self.model_path: str = f"{KERAS_PATH['models']}/{self.id}"
 
         # Initialize the description
-        self.description: str = config['description']
+        self.description: str = config["description"]
 
         # Initialize the models
-        self.models: List[IModel] = training_data_file['models']
+        self.models: List[IModel] = training_data_file["models"]
 
         # Initialize the Learning Rate
-        self.learning_rate: float = config['learning_rate']
+        self.learning_rate: float = config["learning_rate"]
 
         # Initialize the optimizer function
-        self.optimizer: Union[adam_v2.Adam, rmsprop_v2.RMSProp] = self._get_optimizer(config["optimizer"])
+        self.optimizer: Union[adam.Adam, rmsprop.RMSProp] = self._get_optimizer(config["optimizer"])
 
         # Initialize the loss function
-        self.loss: CategoricalCrossentropy = self._get_loss(config['loss'])
+        self.loss: Union[CategoricalCrossentropy, BinaryCrossentropy] = self._get_loss(config["loss"])
 
         # Initialize the metric function
-        self.metric: CategoricalAccuracyMetric = self._get_metric(config['metric'])
-
-        # Initialize the Data Shuffling
-        self.shuffle_data: bool = config["shuffle_data"]
+        self.metric: Union[CategoricalAccuracy, BinaryAccuracy] = self._get_metric(config["metric"])
 
         # Initialize the Keras Model's Configuration
         self.keras_model: IKerasModelConfig = config["keras_model"]
         self.keras_model["features_num"] = len(self.models)
 
         # Initialize the Training Data
-        train_x, train_y, test_x, test_y = self._get_data(training_data_file['training_data'])
+        train_x, train_y, test_x, test_y = self._get_data(training_data_file["training_data"])
         self.train_x: DataFrame = train_x
         self.train_y: DataFrame = train_y
         self.test_x: DataFrame = test_x
@@ -174,8 +169,8 @@ class ClassificationTraining:
         test_x: DataFrame = df[int(rows*ClassificationTraining.TRAIN_SPLIT):]
 
         # Initialize the labels dfs
-        train_y: DataFrame = concat([train_x.pop(x) for x in ['up', 'down']], axis=1)
-        test_y: DataFrame = concat([test_x.pop(x) for x in ['up', 'down']], axis=1)
+        train_y: DataFrame = concat([train_x.pop(x) for x in ["up", "down"]], axis=1)
+        test_y: DataFrame = concat([test_x.pop(x) for x in ["up", "down"]], axis=1)
 
         # Return the packed dfs
         return train_x, train_y, test_x, test_y
@@ -185,7 +180,7 @@ class ClassificationTraining:
 
 
 
-    def _get_optimizer(self, func_name: str) -> Union[adam_v2.Adam, rmsprop_v2.RMSProp]:
+    def _get_optimizer(self, func_name: str) -> Union[adam.Adam, rmsprop.RMSProp]:
         """Based on a optimizer function name, it will return the instance ready to be initialized.
 
         Args:
@@ -193,16 +188,16 @@ class ClassificationTraining:
                 The name of the optimizer function to be used.
 
         Returns:
-            Union[adam_v2.Adam, rmsprop_v2.RMSProp]
+            Union[adam.Adam, rmsprop.RMSProp]
 
         Raises:
             ValueError:
                 If the function name does not match any function in the conditionings.
         """
-        if func_name == 'adam':
-            return adam_v2.Adam(learning_rate=self.learning_rate)
-        elif func_name == 'rmsprop':
-            return rmsprop_v2.RMSProp(learning_rate=self.learning_rate)
+        if func_name == "adam":
+            return adam.Adam(learning_rate=self.learning_rate)
+        elif func_name == "rmsprop":
+            return rmsprop.RMSProp(learning_rate=self.learning_rate)
         else:
             raise ValueError(f"The optimizer function for {func_name} was not found.")
 
@@ -211,7 +206,7 @@ class ClassificationTraining:
 
 
 
-    def _get_loss(self, func_name: str) -> CategoricalCrossentropy:
+    def _get_loss(self, func_name: str) -> Union[CategoricalCrossentropy, BinaryCrossentropy]:
         """Based on a loss function name, it will return the instance ready to be initialized.
 
         Args:
@@ -219,14 +214,16 @@ class ClassificationTraining:
                 The name of the loss function to be used.
 
         Returns:
-            CategoricalCrossentropy
+            Union[CategoricalCrossentropy, BinaryCrossentropy]
 
         Raises:
             ValueError:
                 If the function name does not match any function in the conditionings.
         """
-        if func_name == 'categorical_crossentropy':
+        if func_name == "categorical_crossentropy":
             return CategoricalCrossentropy()
+        elif func_name == "binary_crossentropy":
+            return BinaryCrossentropy()
         else:
             raise ValueError(f"The loss function for {func_name} was not found.")
 
@@ -236,7 +233,7 @@ class ClassificationTraining:
 
 
 
-    def _get_metric(self, func_name: str) -> CategoricalAccuracyMetric:
+    def _get_metric(self, func_name: str) -> Union[CategoricalAccuracy, BinaryAccuracy]:
         """Based on a metric function name, it will return the instance ready to be initialized.
 
         Args:
@@ -244,14 +241,16 @@ class ClassificationTraining:
                 The name of the loss function to be used.
 
         Returns:
-            CategoricalAccuracyMetric
+            Union[CategoricalAccuracy, BinaryAccuracy]
 
         Raises:
             ValueError:
                 If the function name does not match any function in the conditionings.
         """
-        if func_name == 'categorical_accuracy':
-            return CategoricalAccuracyMetric()
+        if func_name == "categorical_accuracy":
+            return CategoricalAccuracy()
+        elif func_name == "binary_accuracy":
+            return BinaryAccuracy()
         else:
             raise ValueError(f"The metric function for {func_name} was not found.")
 
@@ -272,14 +271,14 @@ class ClassificationTraining:
             ITrainingDataSummary
         """
         return {
-            "id": file['id'],
-            "description": file['description'],
-            "start": file['start'],
-            "end": file['end'],
+            "id": file["id"],
+            "description": file["description"],
+            "start": file["start"],
+            "end": file["end"],
             "train_size": self.train_x.shape[0],
             "test_size": self.test_x.shape[0],
-            "up_percent_change": file['up_percent_change'],
-            "down_percent_change": file['down_percent_change']
+            "up_percent_change": file["up_percent_change"],
+            "down_percent_change": file["down_percent_change"]
         }
 
 
@@ -306,16 +305,16 @@ class ClassificationTraining:
         Returns:
             IClassificationTrainingCertificate
         """
-        
         # Store the start time
         start_time: int = Utils.get_time()
 
         # Initialize the early stopping callback
         early_stopping = EarlyStopping(
-            monitor='val_categorical_accuracy', 
-            mode='max', 
+            monitor="val_categorical_accuracy" if self.metric.name == "categorical_accuracy" else "val_binary_accuracy", 
+            mode="max", 
             min_delta=0.001, 
-            patience=ClassificationTraining.EARLY_STOPPING_PATIENCE
+            patience=ClassificationTraining.EARLY_STOPPING_PATIENCE,
+            #restore_best_weights=True
         )
 
         # Retrieve the Keras Model
@@ -333,7 +332,7 @@ class ClassificationTraining:
             self.train_y,
             validation_split=0.2,
             epochs=ClassificationTraining.MAX_EPOCHS,
-            shuffle=self.shuffle_data,
+            shuffle=True,
             callbacks=[ early_stopping ],
             verbose=0
         )
@@ -391,12 +390,12 @@ class ClassificationTraining:
         makedirs(self.model_path)
         
         # Save the model with the required metadata
-        with h5pyFile(f"{self.model_path}/model.h5", mode='w') as f:
+        with h5pyFile(f"{self.model_path}/model.h5", mode="w") as f:
             save_model_to_hdf5(model, f)
-            f.attrs['id'] = self.id
-            f.attrs['description'] = self.description
-            f.attrs['training_data_id'] = self.training_data_summary["id"]
-            f.attrs['models'] = dumps(self.models)
+            f.attrs["id"] = self.id
+            f.attrs["description"] = self.description
+            f.attrs["training_data_id"] = self.training_data_summary["id"]
+            f.attrs["models"] = dumps(self.models)
 
 
 
@@ -483,8 +482,6 @@ class ClassificationTraining:
             "optimizer": self.optimizer._name,
             "loss": self.loss.name,
             "metric": self.metric.name,
-            #"batch_size": self.batch_size,
-            "shuffle_data": self.shuffle_data,
             "keras_model_config": self.keras_model,
 
             # Training

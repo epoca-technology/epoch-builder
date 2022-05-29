@@ -195,7 +195,7 @@ class ArimaModel(ModelInterface):
             # Finally, return the prediction results
             return { "r": result, "t": int(current_timestamp), "md": [ metadata ] }
         except Exception as e:
-            print(f"{self.id} Prediction Error: {str(e)}")
+            #print(f"{self.id} Prediction Error: {str(e)}")
             return { "r": 0, "t": int(current_timestamp), "md": [{'d': 'neutral-due-to-error: ' + str(e)}] }
 
 
