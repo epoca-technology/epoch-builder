@@ -6,7 +6,7 @@ from tqdm import tqdm
 from modules.candlestick import Candlestick
 from modules.utils import Utils
 from modules.model import IModel, Model, IPrediction, ArimaModel, RegressionModel, ClassificationModel
-from modules.backtest import IBacktestConfig, Position, IBacktestPerformance, IBacktestResult
+from modules.backtest import BACKTEST_PATH, IBacktestConfig, Position, IBacktestPerformance, IBacktestResult
 
 
 
@@ -18,8 +18,7 @@ class Backtest:
     that can be analyzed in the GUI.
 
     Class Properties:
-        RESULTS_PATH: str
-            The path in which the results must be stored.
+        ...
 
     Instance Properties:
         test_mode: bool
@@ -54,8 +53,6 @@ class Backtest:
                 to a json file.
     """
 
-    # Directory where results will be dumped
-    RESULTS_PATH: str = './backtest_assets/results'
 
 
 
@@ -238,11 +235,11 @@ class Backtest:
         """Saves the backtest results into the system's directory.
         """
         # If the results directory doesn't exist, create it
-        if not exists(Backtest.RESULTS_PATH):
-            makedirs(Backtest.RESULTS_PATH)
+        if not exists(BACKTEST_PATH['results']):
+            makedirs(BACKTEST_PATH['results'])
 
         # Write the results on a JSON File
-        with open(f"{Backtest.RESULTS_PATH}/{self._get_result_file_name()}", "w") as outfile:
+        with open(f"{BACKTEST_PATH['results']}/{self._get_result_file_name()}", "w") as outfile:
             outfile.write(dumps(self.results))
 
 

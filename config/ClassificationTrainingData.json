@@ -1,5 +1,5 @@
 {
-    "description": "Up and Down percentage reduced to 1.5 in order to increase the dataset as well as 10 arima models.",
+    "description": "Experiment 2: Class. Training Data now follows original prediction result format (1, 0, -1). Percentages moved back up to 3% and 3%",
     "start": "1/01/2018",
     "end": "22/04/2022",
     "up_percent_change": 1.5,

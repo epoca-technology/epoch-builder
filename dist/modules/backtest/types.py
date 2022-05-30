@@ -3,6 +3,28 @@ from modules.model import IPrediction, IModel
 
 
 
+# Backtest Path
+# A dictionary containing the path to all directories that will be used by Backtest.
+class IBacktestPath(TypedDict):
+    # Backtest Assets
+    # The root path for the assets
+    assets: str
+
+    # Backtest Results
+    # The path in which all backtest results are stored. These files should be moved 
+    # to final_results once the process completes.
+    results: str
+
+    # Regression Selections
+    # The path in which all regression selection results are stored.
+    regression_selections: str
+
+
+
+
+
+
+
 ## Position ##
 
 

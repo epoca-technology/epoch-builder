@@ -80,5 +80,5 @@ for index, model_config in enumerate(config["models"]):
 if not exists(KERAS_PATH["batched_training_certificates"]):
     makedirs(KERAS_PATH["batched_training_certificates"])
 with open(f"{KERAS_PATH['batched_training_certificates']}/{config['name']}_{Utils.get_time()}.json", "w") as outfile:
-    outfile.write(dumps(certificates, indent=4))
+    outfile.write(dumps(certificates))
 print("\nCLASSIFICATION TRAINING COMPLETED")
