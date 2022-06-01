@@ -1,18 +1,305 @@
 {
-    "name": "C_UNIT_TEST",
-    "training_data_id": "f77cb1b0-11c9-41a3-849b-0991761174cf",
+    "name": "CLSTM_AD_BC_HLR",
+    "training_data_id": "3cb039cb-0b0e-4660-b7c5-8a9ea307e5bd",
     "models": [
         {
-            "id": "C_UNIT_TEST",
+            "id": "C_CLSTM_S1_AD_BC_HLR",
             "description": "This is a mock to discover training performances.",
-            "learning_rate": 0.001,
+            "learning_rate": 0.01,
             "optimizer": "adam",
             "loss": "binary_crossentropy",
             "metric": "binary_accuracy",
             "keras_model": {
-                "name": "C_UNIT_TEST",
-                "units": [64],
-                "activations": ["relu"]
+                "name": "C_CLSTM_S1",
+                "filters": [32],
+                "activations": ["relu"],
+                "units": [16]
+            }
+        },
+        {
+            "id": "C_CLSTM_S1_DO_AD_BC_HLR",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.01,
+            "optimizer": "adam",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
+            "keras_model": {
+                "name": "C_CLSTM_S1_DO",
+                "filters": [32],
+                "activations": ["relu"],
+                "units": [16],
+                "dropout_rates": [0.2]
+            }
+        },
+        {
+            "id": "C_CLSTM_S1_MP_AD_BC_HLR",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.01,
+            "optimizer": "adam",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
+            "keras_model": {
+                "name": "C_CLSTM_S1_MP",
+                "filters": [32],
+                "activations": ["relu"],
+                "pool_sizes": [2],
+                "units": [16]
+            }
+        },
+        {
+            "id": "C_CLSTM_S1_MP_DO_AD_BC_HLR",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.01,
+            "optimizer": "adam",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
+            "keras_model": {
+                "name": "C_CLSTM_S1_MP_DO",
+                "filters": [32],
+                "activations": ["relu"],
+                "pool_sizes": [2],
+                "units": [16],
+                "dropout_rates": [0.2]
+            }
+        },
+        {
+            "id": "C_CLSTM_S2_AD_BC_HLR",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.01,
+            "optimizer": "adam",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
+            "keras_model": {
+                "name": "C_CLSTM_S2",
+                "filters": [64],
+                "activations": ["relu"],
+                "units": [32, 16]
+            }
+        },
+        {
+            "id": "C_CLSTM_S2_DO_AD_BC_HLR",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.01,
+            "optimizer": "adam",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
+            "keras_model": {
+                "name": "C_CLSTM_S2_DO",
+                "filters": [64],
+                "activations": ["relu"],
+                "units": [32, 16],
+                "dropout_rates": [0.2, 0.2]
+            }
+        },
+        {
+            "id": "C_CLSTM_S2_MP_AD_BC_HLR",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.01,
+            "optimizer": "adam",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
+            "keras_model": {
+                "name": "C_CLSTM_S2_MP",
+                "filters": [64],
+                "activations": ["relu"],
+                "pool_sizes": [2],
+                "units": [32, 16]
+            }
+        },
+        {
+            "id": "C_CLSTM_S2_MP_DO_AD_BC_HLR",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.01,
+            "optimizer": "adam",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
+            "keras_model": {
+                "name": "C_CLSTM_S2_MP_DO",
+                "filters": [64],
+                "activations": ["relu"],
+                "pool_sizes": [2],
+                "units": [32, 16],
+                "dropout_rates": [0.2, 0.2]
+            }
+        },
+        {
+            "id": "C_CLSTM_S3_AD_BC_HLR",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.01,
+            "optimizer": "adam",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
+            "keras_model": {
+                "name": "C_CLSTM_S3",
+                "filters": [128],
+                "activations": ["relu"],
+                "units": [64, 32, 16]
+            }
+        },
+        {
+            "id": "C_CLSTM_S3_DO_AD_BC_HLR",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.01,
+            "optimizer": "adam",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
+            "keras_model": {
+                "name": "C_CLSTM_S3_DO",
+                "filters": [128],
+                "activations": ["relu"],
+                "units": [64, 32, 16],
+                "dropout_rates": [0.2, 0.2, 0.2]
+            }
+        },
+        {
+            "id": "C_CLSTM_S3_MP_AD_BC_HLR",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.01,
+            "optimizer": "adam",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
+            "keras_model": {
+                "name": "C_CLSTM_S3_MP",
+                "filters": [128],
+                "activations": ["relu"],
+                "pool_sizes": [2],
+                "units": [64, 32, 16]
+            }
+        },
+        {
+            "id": "C_CLSTM_S3_MP_DO_AD_BC_HLR",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.01,
+            "optimizer": "adam",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
+            "keras_model": {
+                "name": "C_CLSTM_S3_MP_DO",
+                "filters": [128],
+                "activations": ["relu"],
+                "pool_sizes": [2],
+                "units": [64, 32, 16],
+                "dropout_rates": [0.2, 0.2, 0.2]
+            }
+        },
+        {
+            "id": "C_CLSTM_S4_AD_BC_HLR",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.01,
+            "optimizer": "adam",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
+            "keras_model": {
+                "name": "C_CLSTM_S4",
+                "filters": [256],
+                "activations": ["relu"],
+                "units": [128, 64, 32, 16]
+            }
+        },
+        {
+            "id": "C_CLSTM_S4_DO_AD_BC_HLR",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.01,
+            "optimizer": "adam",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
+            "keras_model": {
+                "name": "C_CLSTM_S4_DO",
+                "filters": [256],
+                "activations": ["relu"],
+                "units": [128, 64, 32, 16],
+                "dropout_rates": [0.2, 0.2, 0.2, 0.2]
+            }
+        },
+        {
+            "id": "C_CLSTM_S4_MP_AD_BC_HLR",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.01,
+            "optimizer": "adam",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
+            "keras_model": {
+                "name": "C_CLSTM_S4_MP",
+                "filters": [256],
+                "activations": ["relu"],
+                "pool_sizes": [2],
+                "units": [128, 64, 32, 16]
+            }
+        },
+        {
+            "id": "C_CLSTM_S4_MP_DO_AD_BC_HLR",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.01,
+            "optimizer": "adam",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
+            "keras_model": {
+                "name": "C_CLSTM_S4_MP_DO",
+                "filters": [256],
+                "activations": ["relu"],
+                "pool_sizes": [2],
+                "units": [128, 64, 32, 16],
+                "dropout_rates": [0.2, 0.2, 0.2, 0.2]
+            }
+        },
+        {
+            "id": "C_CLSTM_S5_AD_BC_HLR",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.01,
+            "optimizer": "adam",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
+            "keras_model": {
+                "name": "C_CLSTM_S4",
+                "filters": [256],
+                "activations": ["relu"],
+                "units": [256, 128, 64, 32, 16]
+            }
+        },
+        {
+            "id": "C_CLSTM_S5_DO_AD_BC_HLR",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.01,
+            "optimizer": "adam",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
+            "keras_model": {
+                "name": "C_CLSTM_S5_DO",
+                "filters": [256],
+                "activations": ["relu"],
+                "units": [256, 128, 64, 32, 16],
+                "dropout_rates": [0.2, 0.2, 0.2, 0.2, 0.2]
+            }
+        },
+        {
+            "id": "C_CLSTM_S5_MP_AD_BC_HLR",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.01,
+            "optimizer": "adam",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
+            "keras_model": {
+                "name": "C_CLSTM_S5_MP",
+                "filters": [256],
+                "activations": ["relu"],
+                "pool_sizes": [2],
+                "units": [256, 128, 64, 32, 16]
+            }
+        },
+        {
+            "id": "C_CLSTM_S5_MP_DO_AD_BC_HLR",
+            "description": "This is a mock to discover training performances.",
+            "learning_rate": 0.01,
+            "optimizer": "adam",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
+            "keras_model": {
+                "name": "C_CLSTM_S5_MP_DO",
+                "filters": [256],
+                "activations": ["relu"],
+                "pool_sizes": [2],
+                "units": [256, 128, 64, 32, 16],
+                "dropout_rates": [0.2, 0.2, 0.2, 0.2, 0.2]
             }
         }
     ]

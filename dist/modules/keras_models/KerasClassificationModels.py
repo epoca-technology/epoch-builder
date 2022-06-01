@@ -1,5 +1,5 @@
 from keras import Sequential
-from keras.layers import Input, Dense, Conv1D, MaxPooling1D, LSTM, Dropout, Flatten
+from keras.layers import Input, Reshape, Dense, Conv1D, MaxPooling1D, LSTM, Dropout, Flatten
 from modules.keras_models import IKerasModelConfig, validate
 
 
@@ -287,6 +287,7 @@ def C_CNN_S1(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CNN_S1', filters=1, activations=1)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         Flatten(name="Flatten_1"),
         Dense(2, activation='softmax', name="Dense_1")
@@ -305,6 +306,7 @@ def C_CNN_S1_MP(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CNN_S1_MP', filters=1, activations=1, pool_sizes=1)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         Flatten(name="Flatten_1"),
@@ -325,6 +327,7 @@ def C_CNN_S1_MP_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CNN_S1_MP_DO', filters=1, activations=1, pool_sizes=1, dropout_rates=1)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         Dropout(m["dropout_rates"][0], name="Dropout_1"),
@@ -345,6 +348,7 @@ def C_CNN_S2(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CNN_S2', filters=2, activations=2)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         Conv1D(m["filters"][1], kernel_size=(int(m["features_num"]/2),), activation=m["activations"][1], padding='same', name="Conv1D_2"),
         Flatten(name="Flatten_1"),
@@ -362,6 +366,7 @@ def C_CNN_S2_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CNN_S2_DO', filters=2, activations=2, dropout_rates=2)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         Dropout(m["dropout_rates"][0], name="Dropout_1"),
         Conv1D(m["filters"][1], kernel_size=(int(m["features_num"]/2),), activation=m["activations"][1], padding='same', name="Conv1D_2"),
@@ -383,6 +388,7 @@ def C_CNN_S2_MP(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CNN_S2_MP', filters=2, activations=2, pool_sizes=2)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         Conv1D(m["filters"][1], kernel_size=(int(m["features_num"]/2),), activation=m["activations"][1], padding='same', name="Conv1D_2"),
@@ -405,6 +411,7 @@ def C_CNN_S2_MP_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CNN_S2_MP_DO', filters=2, activations=2, pool_sizes=2, dropout_rates=2)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         Dropout(m["dropout_rates"][0], name="Dropout_1"),
@@ -428,6 +435,7 @@ def C_CNN_S3(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CNN_S3', filters=3, activations=3)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         Conv1D(m["filters"][1], kernel_size=(int(m["features_num"]/2),), activation=m["activations"][1], padding='same', name="Conv1D_2"),
         Conv1D(m["filters"][2], kernel_size=(int(m["features_num"]/3),), activation=m["activations"][2], padding='same', name="Conv1D_3"),
@@ -448,6 +456,7 @@ def C_CNN_S3_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CNN_S3_DO', filters=3, activations=3, dropout_rates=3)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         Dropout(m["dropout_rates"][0], name="Dropout_1"),
         Conv1D(m["filters"][1], kernel_size=(int(m["features_num"]/2),), activation=m["activations"][1], padding='same', name="Conv1D_2"),
@@ -472,6 +481,7 @@ def C_CNN_S3_MP(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CNN_S3_MP', filters=3, activations=3, pool_sizes=3)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         Conv1D(m["filters"][1], kernel_size=(int(m["features_num"]/2),), activation=m["activations"][1], padding='same', name="Conv1D_2"),
@@ -496,6 +506,7 @@ def C_CNN_S3_MP_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CNN_S3_MP_DO', filters=3, activations=3, pool_sizes=3, dropout_rates=3)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         Dropout(m["dropout_rates"][0], name="Dropout_1"),
@@ -523,6 +534,7 @@ def C_CNN_S4(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CNN_S4', filters=4, activations=4)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         Conv1D(m["filters"][1], kernel_size=(int(m["features_num"]/2),), activation=m["activations"][1], padding='same', name="Conv1D_2"),
         Conv1D(m["filters"][2], kernel_size=(int(m["features_num"]/3),), activation=m["activations"][2], padding='same', name="Conv1D_3"),
@@ -544,6 +556,7 @@ def C_CNN_S4_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CNN_S4_DO', filters=4, activations=4, dropout_rates=4)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         Dropout(m["dropout_rates"][0], name="Dropout_1"),
         Conv1D(m["filters"][1], kernel_size=(int(m["features_num"]/2),), activation=m["activations"][1], padding='same', name="Conv1D_2"),
@@ -569,6 +582,7 @@ def C_CNN_S4_MP(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CNN_S4_MP', filters=4, activations=4, pool_sizes=4)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         Conv1D(m["filters"][1], kernel_size=(int(m["features_num"]/2),), activation=m["activations"][1], padding='same', name="Conv1D_2"),
@@ -595,6 +609,7 @@ def C_CNN_S4_MP_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CNN_S4_MP_DO', filters=4, activations=4, pool_sizes=4, dropout_rates=4)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         Dropout(m["dropout_rates"][0], name="Dropout_1"),
@@ -624,6 +639,7 @@ def C_CNN_S5(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CNN_S5', filters=5, activations=5)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         Conv1D(m["filters"][1], kernel_size=(int(m["features_num"]/2),), activation=m["activations"][1], padding='same', name="Conv1D_2"),
         Conv1D(m["filters"][2], kernel_size=(int(m["features_num"]/3),), activation=m["activations"][2], padding='same', name="Conv1D_3"),
@@ -648,6 +664,7 @@ def C_CNN_S5_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CNN_S5_DO', filters=5, activations=5, dropout_rates=5)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         Dropout(m["dropout_rates"][0], name="Dropout_1"),
         Conv1D(m["filters"][1], kernel_size=(int(m["features_num"]/2),), activation=m["activations"][1], padding='same', name="Conv1D_2"),
@@ -676,6 +693,7 @@ def C_CNN_S5_MP(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CNN_S5_MP', filters=5, activations=5, pool_sizes=5)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         Conv1D(m["filters"][1], kernel_size=(int(m["features_num"]/2),), activation=m["activations"][1], padding='same', name="Conv1D_2"),
@@ -706,6 +724,7 @@ def C_CNN_S5_MP_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CNN_S5_MP_DO', filters=5, activations=5, pool_sizes=5, dropout_rates=5)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         Dropout(m["dropout_rates"][0], name="Dropout_1"),
@@ -760,7 +779,8 @@ def C_CNN_S5_MP_DO(m: IKerasModelConfig) -> Sequential:
 def C_LSTM_S1(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_LSTM_S1', units=1)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         LSTM(m["units"][0], return_sequences=False, name="LSTM_1"),
         Dense(2, activation='softmax', name="Dense_1")
     ])
@@ -774,7 +794,8 @@ def C_LSTM_S1(m: IKerasModelConfig) -> Sequential:
 def C_LSTM_S2(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_LSTM_S2', units=2)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
         LSTM(m["units"][1], name="LSTM_2"),
         Dense(2, activation='softmax', name="Dense_1")
@@ -791,7 +812,8 @@ def C_LSTM_S2(m: IKerasModelConfig) -> Sequential:
 def C_LSTM_S2_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_LSTM_S2_DO', units=2, dropout_rates=2)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
         Dropout(m["dropout_rates"][0], name="Dropout_1"),
         LSTM(m["units"][1], name="LSTM_2"),
@@ -809,7 +831,8 @@ def C_LSTM_S2_DO(m: IKerasModelConfig) -> Sequential:
 def C_LSTM_S3(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_LSTM_S3', units=3)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
         LSTM(m["units"][1], return_sequences=True, name="LSTM_2"),
         LSTM(m["units"][2], name="LSTM_3"),
@@ -826,7 +849,8 @@ def C_LSTM_S3(m: IKerasModelConfig) -> Sequential:
 def C_LSTM_S3_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_LSTM_S3_DO', units=3, dropout_rates=3)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
         Dropout(m["dropout_rates"][0], name="Dropout_1"),
         LSTM(m["units"][1], return_sequences=True, name="LSTM_2"),
@@ -846,7 +870,8 @@ def C_LSTM_S3_DO(m: IKerasModelConfig) -> Sequential:
 def C_LSTM_S4(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_LSTM_S4', units=4)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
         LSTM(m["units"][1], return_sequences=True, name="LSTM_2"),
         LSTM(m["units"][2], return_sequences=True, name="LSTM_3"),
@@ -865,7 +890,8 @@ def C_LSTM_S4(m: IKerasModelConfig) -> Sequential:
 def C_LSTM_S4_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_LSTM_S4_DO', units=4, dropout_rates=4)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
         Dropout(m["dropout_rates"][0], name="Dropout_1"),
         LSTM(m["units"][1], return_sequences=True, name="LSTM_2"),
@@ -889,7 +915,8 @@ def C_LSTM_S4_DO(m: IKerasModelConfig) -> Sequential:
 def C_LSTM_S5(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_LSTM_S5', units=5)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
         LSTM(m["units"][1], return_sequences=True, name="LSTM_2"),
         LSTM(m["units"][2], return_sequences=True, name="LSTM_3"),
@@ -909,7 +936,8 @@ def C_LSTM_S5(m: IKerasModelConfig) -> Sequential:
 def C_LSTM_S5_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_LSTM_S5_DO', units=5, dropout_rates=5)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
         Dropout(m["dropout_rates"][0], name="Dropout_1"),
         LSTM(m["units"][1], return_sequences=True, name="LSTM_2"),
@@ -935,7 +963,8 @@ def C_LSTM_S5_DO(m: IKerasModelConfig) -> Sequential:
 def C_LSTM_S6(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_LSTM_S6', units=6)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
         LSTM(m["units"][1], return_sequences=True, name="LSTM_2"),
         LSTM(m["units"][2], return_sequences=True, name="LSTM_3"),
@@ -956,6 +985,7 @@ def C_LSTM_S6_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_LSTM_S6_DO', units=6, dropout_rates=6)
     return Sequential([
         Input(shape=(m["features_num"],1,), name="Input_1"),
+        Reshape((m["features_num"],1), name="Reshape_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
         Dropout(m["dropout_rates"][0], name="Dropout_1"),
         LSTM(m["units"][1], return_sequences=True, name="LSTM_2"),
@@ -996,7 +1026,8 @@ def C_LSTM_S6_DO(m: IKerasModelConfig) -> Sequential:
 def C_CLSTM_S1(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CLSTM_S1', filters=1, activations=1, units=1)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         LSTM(m["units"][0], return_sequences=False, name="LSTM_1"),
         Dense(2, activation='softmax', name="Dense_1")
@@ -1014,7 +1045,8 @@ def C_CLSTM_S1(m: IKerasModelConfig) -> Sequential:
 def C_CLSTM_S1_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CLSTM_S1_DO', filters=1, activations=1, units=1, dropout_rates=1)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         LSTM(m["units"][0], return_sequences=False, name="LSTM_1"),
         Dropout(m["dropout_rates"][0], name="Dropout_1"),
@@ -1034,7 +1066,8 @@ def C_CLSTM_S1_DO(m: IKerasModelConfig) -> Sequential:
 def C_CLSTM_S1_MP(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CLSTM_S1_MP', filters=1, activations=1, pool_sizes=1, units=1)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         LSTM(m["units"][0], return_sequences=False, name="LSTM_1"),
@@ -1055,7 +1088,8 @@ def C_CLSTM_S1_MP(m: IKerasModelConfig) -> Sequential:
 def C_CLSTM_S1_MP_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CLSTM_S1_MP_DO', filters=1, activations=1, pool_sizes=1, units=1, dropout_rates=1)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         LSTM(m["units"][0], return_sequences=False, name="LSTM_1"),
@@ -1078,7 +1112,8 @@ def C_CLSTM_S1_MP_DO(m: IKerasModelConfig) -> Sequential:
 def C_CLSTM_S2(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CLSTM_S2', filters=1, activations=1, units=2)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
         LSTM(m["units"][1], return_sequences=False, name="LSTM_2"),
@@ -1098,7 +1133,8 @@ def C_CLSTM_S2(m: IKerasModelConfig) -> Sequential:
 def C_CLSTM_S2_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CLSTM_S2_DO', filters=1, activations=1, units=2, dropout_rates=2)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
         Dropout(m["dropout_rates"][0], name="Dropout_1"),
@@ -1120,7 +1156,8 @@ def C_CLSTM_S2_DO(m: IKerasModelConfig) -> Sequential:
 def C_CLSTM_S2_MP(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CLSTM_S2_MP', filters=1, activations=1, pool_sizes=1, units=2)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
@@ -1142,7 +1179,8 @@ def C_CLSTM_S2_MP(m: IKerasModelConfig) -> Sequential:
 def C_CLSTM_S2_MP_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CLSTM_S2_MP_DO', filters=1, activations=1, pool_sizes=1, units=2, dropout_rates=2)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
@@ -1165,7 +1203,8 @@ def C_CLSTM_S2_MP_DO(m: IKerasModelConfig) -> Sequential:
 def C_CLSTM_S3(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CLSTM_S3', filters=1, activations=1, units=3)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
         LSTM(m["units"][1], return_sequences=True, name="LSTM_2"),
@@ -1187,7 +1226,8 @@ def C_CLSTM_S3(m: IKerasModelConfig) -> Sequential:
 def C_CLSTM_S3_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CLSTM_S3_DO', filters=1, activations=1, units=3, dropout_rates=3)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
         Dropout(m["dropout_rates"][0], name="Dropout_1"),
@@ -1212,7 +1252,8 @@ def C_CLSTM_S3_DO(m: IKerasModelConfig) -> Sequential:
 def C_CLSTM_S3_MP(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CLSTM_S3_MP', filters=1, activations=1, pool_sizes=1, units=3)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
@@ -1236,7 +1277,8 @@ def C_CLSTM_S3_MP(m: IKerasModelConfig) -> Sequential:
 def C_CLSTM_S3_MP_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CLSTM_S3_MP_DO', filters=1, activations=1, pool_sizes=1, units=3, dropout_rates=3)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
@@ -1261,7 +1303,8 @@ def C_CLSTM_S3_MP_DO(m: IKerasModelConfig) -> Sequential:
 def C_CLSTM_S4(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CLSTM_S4', filters=1, activations=1, units=4)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
         LSTM(m["units"][1], return_sequences=True, name="LSTM_2"),
@@ -1284,7 +1327,8 @@ def C_CLSTM_S4(m: IKerasModelConfig) -> Sequential:
 def C_CLSTM_S4_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CLSTM_S4_DO', filters=1, activations=1, units=4, dropout_rates=4)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
         Dropout(m["dropout_rates"][0], name="Dropout_1"),
@@ -1311,7 +1355,8 @@ def C_CLSTM_S4_DO(m: IKerasModelConfig) -> Sequential:
 def C_CLSTM_S4_MP(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CLSTM_S4_MP', filters=1, activations=1, pool_sizes=1, units=4)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
@@ -1335,7 +1380,8 @@ def C_CLSTM_S4_MP(m: IKerasModelConfig) -> Sequential:
 def C_CLSTM_S4_MP_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CLSTM_S4_MP_DO', filters=1, activations=1, pool_sizes=1, units=4, dropout_rates=4)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
@@ -1363,7 +1409,8 @@ def C_CLSTM_S4_MP_DO(m: IKerasModelConfig) -> Sequential:
 def C_CLSTM_S5(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CLSTM_S5', filters=1, activations=1, units=5)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
         LSTM(m["units"][1], return_sequences=True, name="LSTM_2"),
@@ -1386,7 +1433,8 @@ def C_CLSTM_S5(m: IKerasModelConfig) -> Sequential:
 def C_CLSTM_S5_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CLSTM_S5_DO', filters=1, activations=1, units=5, dropout_rates=5)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
         Dropout(m["dropout_rates"][0], name="Dropout_1"),
@@ -1413,7 +1461,8 @@ def C_CLSTM_S5_DO(m: IKerasModelConfig) -> Sequential:
 def C_CLSTM_S5_MP(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CLSTM_S5_MP', filters=1, activations=1, pool_sizes=1, units=5)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
@@ -1440,7 +1489,8 @@ def C_CLSTM_S5_MP(m: IKerasModelConfig) -> Sequential:
 def C_CLSTM_S5_MP_DO(m: IKerasModelConfig) -> Sequential:
     validate(m, 'C_CLSTM_S5_MP_DO', filters=1, activations=1, pool_sizes=1, units=5, dropout_rates=5)
     return Sequential([
-        Input(shape=(m["features_num"],1,), name="Input_1"),
+        Input(shape=(m["features_num"],1), name="Input_1"),
+        Reshape((m["features_num"],1,), name="Reshape_1"),
         Conv1D(m["filters"][0], kernel_size=(m["features_num"],), activation=m["activations"][0], name="Conv1D_1"),
         MaxPooling1D(m["pool_sizes"][0], padding='same', name="MaxPooling1D_1"),
         LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),

@@ -86,7 +86,7 @@ class ClassificationTraining:
     # The max number of evaluations that will be performed on the trained classification model.
     # Notice that if the number of evals is much smaller than the max it means there could be
     # an irregularity with the model as the probabilities are too close to the 50%.
-    MAX_CLASSIFICATION_EVALUATIONS: int = 1000
+    MAX_CLASSIFICATION_EVALUATIONS: int = 2500
 
 
 
