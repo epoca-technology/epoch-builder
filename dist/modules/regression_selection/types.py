@@ -41,7 +41,7 @@ class ICombinationResult(TypedDict):
     # Combination
     combination_id: str
 
-    # The total number of models within the combination (Not just the selected)
+    # The total number of models within the combination
     models_num: int
 
     # The mean of the selected models' points medians

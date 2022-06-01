@@ -1,20 +1,24 @@
 from typing import Union, List, Tuple
 from os import makedirs
 from os.path import exists
-from pandas import DataFrame, concat
+from random import randint
+from numpy import mean
+from pandas import DataFrame, Series, concat
 from json import dumps
+from h5py import File as h5pyFile
 from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras import Sequential
 from keras.optimizers import adam_v2 as adam, rmsprop_v2 as rmsprop
 from keras.losses import CategoricalCrossentropy, BinaryCrossentropy
 from keras.metrics import CategoricalAccuracy, BinaryAccuracy
 from keras.callbacks import EarlyStopping, History
-from h5py import File as h5pyFile
 from modules.utils import Utils
-from modules.model import IModel
+from modules.candlestick import Candlestick
+from modules.model import IModel, Model, ArimaModel, RegressionModel
 from modules.keras_models import KerasModel, IKerasModelConfig, IKerasModelTrainingHistory, get_summary, KERAS_PATH
 from modules.classification import ITrainingDataFile, ICompressedTrainingData, decompress_training_data, \
-    IClassificationTrainingConfig, ITrainingDataSummary, IClassificationTrainingCertificate
+    IClassificationTrainingConfig, ITrainingDataSummary, Classification, IClassificationEvaluation, \
+        IClassificationTrainingCertificate
 
 
 
@@ -28,12 +32,16 @@ class ClassificationTraining:
         TRAIN_SPLIT: float
             The split that will be used on the complete df in order to generate train and test 
                 features & labels dfs
-        MAX_EPOCHS: int
-            The maximum amount of epochs the training process can go through.
         EARLY_STOPPING_PATIENCE: int
             The number of epochs it will allow to be executed without showing a performance.
+        MAX_EPOCHS: int
+            The maximum amount of epochs the training process can go through.
+        MAX_CLASSIFICATION_EVALUATIONS: int
+            The maximum number of evaluations that will be performed on the trained model.
 
     Instance Properties:
+        test_mode: bool
+            If test_mode is enabled, it won't initialize the candlesticks.
         id: str
             A descriptive identifier compatible with filesystems.
         model_path: str
@@ -42,6 +50,8 @@ class ClassificationTraining:
             Important information regarding the model that will be trained.
         models: List[IModel]
             The list of ArimaModel|RegressionModel used to generate the training data.
+        regressions: List[Union[ArimaModel, RegressionModel]]
+            The list of regression model instances.
         learning_rate: float
             The learning rate to be used by the optimizer. If None is provided it uses the default
             one.   
@@ -64,18 +74,19 @@ class ClassificationTraining:
         training_data_summary: ITrainingDataSummary
             The summary of the training data that will be attached to the training certificate
     """
-
-
     # Train and Test DataFrame Split
     TRAIN_SPLIT: float = 0.8
-
-    # The maximum number of EPOCHs a model can go through during training
-    MAX_EPOCHS: int = 1000
 
     # The max number of training epochs that can occur without showing improvements.
     EARLY_STOPPING_PATIENCE: int = 20
 
+    # The maximum number of EPOCHs a model can go through during training
+    MAX_EPOCHS: int = 1000
 
+    # The max number of evaluations that will be performed on the trained classification model.
+    # Notice that if the number of evals is much smaller than the max it means there could be
+    # an irregularity with the model as the probabilities are too close to the 50%.
+    MAX_CLASSIFICATION_EVALUATIONS: int = 1000
 
 
 
@@ -83,7 +94,7 @@ class ClassificationTraining:
 
 
 
-    def __init__(self, training_data_file: ITrainingDataFile, config: IClassificationTrainingConfig):
+    def __init__(self, training_data_file: ITrainingDataFile, config: IClassificationTrainingConfig, test_mode: bool = False):
         """Initializes the ClassificationTraining Instance.
 
         Args:
@@ -97,6 +108,9 @@ class ClassificationTraining:
                 If the model is not correctly preffixed.
                 If the model's directory already exists.
         """
+        # Initialize the type of execution
+        self.test_mode: bool = test_mode
+        
         # Initialize the id
         self.id: str = config["id"]
         if self.id[0:2] != "C_":
@@ -108,8 +122,10 @@ class ClassificationTraining:
         # Initialize the description
         self.description: str = config["description"]
 
-        # Initialize the models
+        # Initialize the models data as well as the regression instances
         self.models: List[IModel] = training_data_file["models"]
+        self.regressions: List[Union[ArimaModel, RegressionModel]] = [Model(m) for m in self.models]
+        # self.max_lookback: int = max([m.get_lookback() for m in self.regressions])
 
         # Initialize the Learning Rate
         self.learning_rate: float = config["learning_rate"]
@@ -136,6 +152,10 @@ class ClassificationTraining:
 
         # Initialize the Training Data Summary
         self.training_data_summary: ITrainingDataSummary = self._get_training_data_summary(training_data_file)
+
+        # Initialize the candlesticks if not unit testing
+        if not self.test_mode:
+            Candlestick.init(max([m.get_lookback() for m in self.regressions]))
 
         # Initialize the model's directory
         self._init_model_dir()
@@ -318,15 +338,15 @@ class ClassificationTraining:
         )
 
         # Retrieve the Keras Model
-        print("    1/6) Initializing Model...")
+        print("    1/7) Initializing Model...")
         model: Sequential = KerasModel(config=self.keras_model)
 
         # Compile the model
-        print("    2/6) Compiling Model...")
+        print("    2/7) Compiling Model...")
         model.compile(optimizer=self.optimizer, loss=self.loss, metrics=[self.metric])
   
         # Train the model
-        print("    3/6) Training Model...")
+        print("    3/7) Training Model...")
         history_object: History = model.fit(
             self.train_x,
             self.train_y,
@@ -341,24 +361,189 @@ class ClassificationTraining:
         history: IKerasModelTrainingHistory = history_object.history
 
         # Evaluate the test dataset
-        print("    4/6) Evaluating Test Dataset...")
-        test_evaluation: List[float] = model.evaluate(self.test_x, self.test_y, verbose=0) # [loss, metric]
+        print("    4/7) Evaluating Test Dataset...")
+        test_evaluation: List[float] = model.evaluate(self.test_x, self.test_y, verbose=0) # [loss, accuracy]
 
         # Save the model
-        print("    5/6) Saving Model...")
+        print("    5/7) Saving Model...")
         self._save_model(model)
 
+        # Perform the Classification Evaluation
+        print("    6/7) Evaluating Classification...")
+        classification_evaluation: IClassificationEvaluation = self._evaluate_classification()
+
         # Save the certificate
-        print("    6/6) Saving Certificate...")
+        print("    7/7) Saving Certificate...")
         certificate: IClassificationTrainingCertificate = self._save_certificate(
             start_time, 
             model, 
             history, 
-            test_evaluation
+            test_evaluation,
+            classification_evaluation
         )
 
         # Return it so it can be added to the batch
         return certificate
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ## Classification Evaluation ##
+
+
+
+
+    def _evaluate_classification(self) -> IClassificationEvaluation:
+        """Loads the trained model that has just been saved and performs a series
+        of evaluations on random sequences.
+
+        Returns:
+            IClassificationEvaluation
+        """
+        # Initialize the Classification Instance
+        classification: Classification = Classification(self.id)
+
+        # Init the min and max values for the random candlestick indexes
+        min_i: int = 0
+        max_i: int = int(Candlestick.DF.shape[0] * 0.95) # Omit the tail to prevent index errors
+
+        # Init evaluation data
+        evals: int = 0
+        increase: List[float] = []
+        increase_successful: List[float] = []
+        decrease: List[float] = []
+        decrease_successful: List[float] = []
+
+        # Perform the evaluation
+        for i in range(ClassificationTraining.MAX_CLASSIFICATION_EVALUATIONS):
+            # Generate a random index and initialize the random start candlestick
+            random_index: int = randint(min_i, max_i)
+            candlestick: Series = Candlestick.DF.iloc[random_index]
+
+            # Perform the prediction from a series of features
+            pred: List[float] = classification.predict([r.predict(candlestick["ot"], enable_cache=True)["r"] for r in self.regressions])
+
+            # Check if there was a non-neutral probability
+            if pred[0] >= 0.51 or pred[1] >= 0.51:
+                # Retrieve the outcome of the evaluation
+                outcome: int = self._get_evaluation_outcome(random_index, candlestick)
+
+                # Check if the Classification predicted an increase
+                if pred[0] > pred[1]:
+                    # Append the increase prediction to the list
+                    increase.append(pred[0])
+                    
+                    # Check if the prediction was correct
+                    if outcome == 1:
+                        increase_successful.append(pred[0])
+
+                # Otherwise, the Classification predicted a decrease
+                else:
+                    # Append the decrease prediction to the list
+                    decrease.append(pred[1])
+                    
+                    # Check if the prediction was correct
+                    if outcome == -1:
+                        decrease_successful.append(pred[1])
+
+                # Increment the evals performed
+                evals += 1
+
+        # Initialize the lens for performance
+        increase_num: int = len(increase)
+        increase_successful_num: int = len(increase_successful)
+        decrease_num: int = len(decrease)
+        decrease_successful_num: int = len(decrease_successful)
+
+        # Finally, return the results
+        return {
+            # Evaluations
+            "evaluations": evals,
+            "max_evaluations": ClassificationTraining.MAX_CLASSIFICATION_EVALUATIONS,
+
+            # Prediction counts
+            "increase_num": increase_num,
+            "increase_successful_num": increase_successful_num,
+            "decrease_num": decrease_num,
+            "decrease_successful_num": decrease_successful_num,
+
+            # Accuracy
+            "increase_acc": Utils.get_percentage_out_of_total(increase_successful_num, increase_num if increase_num > 0 else 1),
+            "decrease_acc": Utils.get_percentage_out_of_total(decrease_successful_num, decrease_num if decrease_num > 0 else 1),
+            "acc": Utils.get_percentage_out_of_total(increase_successful_num+decrease_successful_num, evals if evals > 0 else 1),
+            
+            # Predictions Overview - Downcast values to floats
+            "increase_max": float(max(increase if increase_num > 0 else [0])),
+            "increase_min": float(min(increase if increase_num > 0 else [0])),
+            "increase_mean": float(mean(increase if increase_num > 0 else [0])),
+            "increase_successful_max": float(max(increase_successful if increase_successful_num > 0 else [0])),
+            "increase_successful_min": float(min(increase_successful if increase_successful_num > 0 else [0])),
+            "increase_successful_mean": float(mean(increase_successful if increase_successful_num > 0 else [0])),
+            "decrease_max": float(max(decrease if decrease_num > 0 else [0])),
+            "decrease_min": float(min(decrease if decrease_num > 0 else [0])),
+            "decrease_mean": float(mean(decrease if decrease_num > 0 else [0])),
+            "decrease_successful_max": float(max(decrease_successful if decrease_successful_num > 0 else [0])),
+            "decrease_successful_min": float(min(decrease_successful if decrease_successful_num > 0 else [0])),
+            "decrease_successful_mean": float(mean(decrease_successful if decrease_successful_num > 0 else [0])),
+        }
+
+
+
+
+
+
+    def _get_evaluation_outcome(self, random_index: int, start_candlestick: Series) -> int:
+        """Simulates a trading position that starts at a random candlestick and iterates 
+        over the next records until an outcome is found.
+
+        Args:
+            random_index: int
+                The random index generated for the evaluation.
+            start_candlestick: Series
+                The candlestick located at the random_index.
+
+        Returns:
+            int
+            1 (Increase) | -1 (Decrease)
+        """
+        # Initialize the outcome
+        outcome: int = 0
+
+        # Initialize the price range
+        increase_price: float = Utils.alter_number_by_percentage(start_candlestick["o"], self.training_data_summary["up_percent_change"])
+        decrease_price: float = Utils.alter_number_by_percentage(start_candlestick["o"], -self.training_data_summary["down_percent_change"])
+
+        # Iterate over the next candlesticks until the outcome is discovered
+        candlestick_index: int = random_index + 1
+        while outcome == 0:
+            # Initialize the candlestick
+            candlestick: Series = Candlestick.DF.iloc[candlestick_index]
+
+            # Check if it is an increase
+            if candlestick["h"] >= increase_price:
+                outcome = 1
+
+            # Check if it is a decrease
+            elif candlestick["l"] <= decrease_price:
+                outcome = -1
+
+            # Increment the index and iterate again
+            candlestick_index += 1
+
+        # Finally, return the outcome
+        return outcome
+
 
 
 
@@ -380,7 +565,7 @@ class ClassificationTraining:
 
 
     def _save_model(self, model: Sequential) -> None:
-        """Saves a trained model in the output directory as well as the training certificate.
+        """Saves a trained model in the output directory.
 
         Args:
             model: Sequential
@@ -408,9 +593,10 @@ class ClassificationTraining:
         start_time: int, 
         model: Sequential, 
         training_history: IKerasModelTrainingHistory, 
-        test_evaluation: List[float]
+        test_evaluation: List[float],
+        classification_evaluation: IClassificationEvaluation
     ) -> IClassificationTrainingCertificate:
-        """Saves a trained model in the output directory as well as the training certificate.
+        """Saves the training certificate in the same directory as the model.
 
         Args:
             start_time: int
@@ -421,6 +607,8 @@ class ClassificationTraining:
                 The dictionary containing the training history.
             test_evaluation: List[float]
                 The results when evaluating the test dataset.
+            classification_evaluation: IClassificationEvaluation
+                The results of the classification evaluation.
 
         Returns:
             IClassificationTrainingCertificate
@@ -430,7 +618,8 @@ class ClassificationTraining:
             model, 
             start_time, 
             training_history, 
-            test_evaluation
+            test_evaluation,
+            classification_evaluation
         )
 
         # Save the file
@@ -451,7 +640,8 @@ class ClassificationTraining:
         model: Sequential,
         start_time: int, 
         training_history: IKerasModelTrainingHistory, 
-        test_evaluation: List[float]
+        test_evaluation: List[float],
+        classification_evaluation: IClassificationEvaluation
     ) -> IClassificationTrainingCertificate:
         """Builds the certificate that contains all the data regarding the training process
         that will be saved alongside the model.
@@ -465,6 +655,8 @@ class ClassificationTraining:
                 The model's performance history during training.
             test_evaluation: List[float]
                 The evaluation performed on the test dataset.
+            classification_evaluation: IClassificationEvaluation
+                The results of the classification evaluation.
 
         Returns:
             IRegressionTrainingCertificate
@@ -489,6 +681,9 @@ class ClassificationTraining:
             "training_end": Utils.get_time(),
             "training_history": training_history,
             "test_evaluation": test_evaluation,
+
+            # Post Training Evaluation
+            "classification_evaluation": classification_evaluation,
 
             # The configuration of the Classification
             "classification_config": {

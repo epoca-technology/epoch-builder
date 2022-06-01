@@ -1,17 +1,17 @@
 from typing import Union, List, Any
 from numpy import ndarray, array, float32
 from pandas import DataFrame
+from h5py import File as h5pyFile
 from tensorflow import data as tfdata
 from tensorflow.python.keras.saving.hdf5_format import load_model_from_hdf5
 from keras import Sequential
 from keras.preprocessing.timeseries import timeseries_dataset_from_array
-from h5py import File as h5pyFile
-from modules.keras_models import KERAS_PATH, get_summary
+from modules.keras_models import KerasModelInterface, KERAS_PATH, get_summary
 from modules.regression import IRegressionConfig
 
 
 
-class Regression:
+class Regression(KerasModelInterface):
     """Regression Class
 
     This class handles the initialization of a Keras Regression Model.

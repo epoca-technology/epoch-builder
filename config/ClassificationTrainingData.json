@@ -1,19 +1,15 @@
 {
-    "description": "Experiment 2: Class. Training Data now follows original prediction result format (1, 0, -1). Percentages moved back up to 3% and 3%",
-    "start": "1/01/2018",
+    "description": "UNIT_TEST: DO NOT DELETE.",
+    "start": "1/10/2021",
     "end": "22/04/2022",
-    "up_percent_change": 1.5,
-    "down_percent_change": 1.5,
+    "up_percent_change": 3,
+    "down_percent_change": 3,
     "models": [
-        { "id": "A805","arima_models": [{"arima": {"p": 8, "d": 0,"q": 5}}] },
-        { "id": "A678","arima_models": [{"arima": {"p": 6, "d": 7,"q": 8}}] },
-        { "id": "A762","arima_models": [{"arima": {"p": 7, "d": 6,"q": 2}}] },
-        { "id": "A452","arima_models": [{"arima": {"p": 4, "d": 5,"q": 2}}] },
-        { "id": "A234","arima_models": [{"arima": {"p": 2, "d": 3,"q": 4}}] },
-        { "id": "A977","arima_models": [{"arima": {"p": 9, "d": 7,"q": 7}}] },
-        { "id": "A456","arima_models": [{"arima": {"p": 4, "d": 5,"q": 6}}] },
-        { "id": "A231","arima_models": [{"arima": {"p": 2, "d": 3,"q": 1}}] },
-        { "id": "A706","arima_models": [{"arima": {"p": 7, "d": 0,"q": 6}}] },
-        { "id": "A894","arima_models": [{"arima": {"p": 8, "d": 9,"q": 4}}] }
+        { "id": "A101","arima_models": [{"arima": {"p": 1, "d": 0,"q": 1}}] },
+        { "id": "A111","arima_models": [{"arima": {"p": 1, "d": 1,"q": 1}}] },
+        { "id": "A112","arima_models": [{"arima": {"p": 1, "d": 1,"q": 2}}] },
+        { "id": "A121","arima_models": [{"arima": {"p": 1, "d": 2,"q": 1}}] },
+        { "id": "A211","arima_models": [{"arima": {"p": 2, "d": 1,"q": 1}}] },
+        { "id": "R_UNIT_TEST","regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": {"long": 1.5, "short": 1.5}}] }
     ]
 }

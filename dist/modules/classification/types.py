@@ -158,6 +158,7 @@ class ITrainingDataFile(TypedDict):
 
 
 
+
 # Classification Training Configuration
 # The configuration that will be used to initialize, train and save the models.
 class IClassificationTrainingConfig(TypedDict):
@@ -232,6 +233,53 @@ class ITrainingDataSummary(TypedDict):
 
 
 
+# Classification Evaluation
+# Evaluation performed right after the model is trained in order to get an overview of the
+# potential accuracy, as well as the prediction type distribution.
+# Each evaluation is performed using a random candlestick open time and is evaluated against
+# the sequence of 1 minute candlesticks that follow. The iteration will continue until the
+# evaluation position is closed.
+class IClassificationEvaluation(TypedDict):
+    # The number of evaluations performed on the Regression
+    evaluations: int
+    max_evaluations: int
+
+    # The number of times the Regression predicted a price increase
+    increase_num: int
+    increase_successful_num: int
+
+    # The number of times the Regression predicted a price decrease
+    decrease_num: int
+    decrease_successful_num: int
+
+    # Accuracy
+    increase_acc: int
+    decrease_acc: int
+    acc: int
+
+    # Increase Predictions Overview
+    increase_max: float
+    increase_min: float
+    increase_mean: float
+    increase_successful_max: float
+    increase_successful_min: float
+    increase_successful_mean: float
+
+    # Decrease Predictions Overview
+    decrease_max: float
+    decrease_min: float
+    decrease_mean: float
+    decrease_successful_max: float
+    decrease_successful_min: float
+    decrease_successful_mean: float
+
+
+
+
+
+
+
+
 # Classification Training Certificate
 # Once the training, saving and evaluation completes, a certificate containing all the
 # data is saved and issued for batching.
@@ -267,6 +315,9 @@ class IClassificationTrainingCertificate(TypedDict):
 
     # Result of the evaluation of the test dataset
     test_evaluation: List[float] # [loss, metric]
+
+    # Classification Post-Training Evaluation
+    classification_evaluation: IClassificationEvaluation
 
     # The configuration of the Classification
     classification_config: IClassificationConfig
