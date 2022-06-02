@@ -1,5 +1,5 @@
 from typing import List, Union
-from pandas import Series
+from pandas import Series, DataFrame
 from modules.candlestick import Candlestick
 from modules.arima import Arima
 from modules.interpreter import PercentageChangeInterpreter, IPercentChangeInterpreterConfig
@@ -101,7 +101,13 @@ class ArimaModel(ModelInterface):
 
 
 
-    def predict(self, current_timestamp: int, enable_cache: bool = False) -> IPrediction:
+
+    def predict(
+        self, 
+        current_timestamp: int, 
+        lookback_df: Union[DataFrame, None] = None, 
+        enable_cache: bool = False
+    ) -> IPrediction:
         """In order to optimize performance, if cache is enabled, it will check the db
         before performing an actual prediction. If the prediction is not found, it will
         perform it and store it afterwards. If cache is not enabled, it will just 
@@ -110,16 +116,28 @@ class ArimaModel(ModelInterface):
         Args:
             current_timestamp: int
                 The current time in milliseconds.
+            lookback_df: Union[DataFrame, None]
+                Classifications can pass the Lookback DataFrame and it will be sliced 
+                accordingly to match the model's lookback.
             enable_cache: bool
                 If true, it will check the db before calling the actual predict method.
         
         Returns:
             IPrediction
         """
+        # Initialize the adjusted lookback_df if provided
+        df: Union[DataFrame, None] = self._get_adjusted_lookback_df(lookback_df)
+
         # Check if the cache is enabled
         if enable_cache:
             # Retrieve the candlestick range
-            first_ot, last_ct = Candlestick.get_lookback_prediction_range(self.lookback, current_timestamp)
+            first_ot: int = 0
+            last_ct: int = 0
+            if isinstance(df, DataFrame):
+                first_ot = int(df.iloc[0]["ot"])
+                last_ct = int(df.iloc[-1]["ct"])
+            else:
+                first_ot, last_ct = Candlestick.get_lookback_prediction_range(self.lookback, current_timestamp)
 
             # Retrieve it from the database
             pred: Union[IPrediction, None] = get_arima_pred(
@@ -134,7 +152,11 @@ class ArimaModel(ModelInterface):
             # Check if the prediction does not exist
             if pred == None:
                 # Generate it
-                pred = self._call_predict(current_timestamp, minimized_metadata=True)
+                pred = self._call_predict(
+                    current_timestamp, 
+                    close_prices=df["c"] if isinstance(df, DataFrame) else None,
+                    minimized_metadata=True
+                )
 
                 # Store it in the database
                 save_arima_pred(
@@ -156,14 +178,23 @@ class ArimaModel(ModelInterface):
 
         # Otherwise, handle a traditional prediction
         else:
-            return self._call_predict(current_timestamp, minimized_metadata=False)
+            return self._call_predict(
+                current_timestamp, 
+                close_prices=df["c"] if isinstance(df, DataFrame) else None,
+                minimized_metadata=False
+            )
 
 
 
 
 
 
-    def _call_predict(self, current_timestamp: int, minimized_metadata: bool) -> IPrediction:
+    def _call_predict(
+        self, 
+        current_timestamp: int, 
+        close_prices: Union[Series, None],
+        minimized_metadata: bool
+    ) -> IPrediction:
         """Given the current time, it will perform a prediction and return it as 
         well as its metadata.
 
@@ -176,13 +207,14 @@ class ArimaModel(ModelInterface):
         Returns:
             IPrediction
         """
-        # Retrieve the close prices series
-        close_prices: Series = Candlestick.get_lookback_close_prices(self.lookback, current_timestamp)
+        # Initialize the close prices
+        close: Series = close_prices if isinstance(close_prices, Series) else \
+             Candlestick.get_lookback_close_prices(self.lookback, current_timestamp)
 
         # Initialize Arima safely
         try:
             # Generate the predictions
-            preds: List[float] = self.arima.predict(close_prices)
+            preds: List[float] = self.arima.predict(close)
 
             # Interpret the predictions
             result, description = self.interpreter.interpret(preds)
@@ -197,6 +229,28 @@ class ArimaModel(ModelInterface):
         except Exception as e:
             #print(f"{self.id} Prediction Error: {str(e)}")
             return { "r": 0, "t": int(current_timestamp), "md": [{'d': 'neutral-due-to-error: ' + str(e)}] }
+
+
+
+
+
+
+
+    def _get_adjusted_lookback_df(self, lookback_df: Union[DataFrame, None]) -> Union[DataFrame, None]:
+        """Classifications can pass the lookback_df to the predict function. If so, the df needs to
+        be adjusted to the Model's Instance Lookback since the Classification uses the Max Lookback
+        from all the models in order to build the lookback_df.
+
+        Args:
+            lookback_df: Union[DataFrame, None]
+                The DataFrame to be adjusted if provided.
+        
+        Returns:
+            Union[DataFrame, None]
+        """
+        return lookback_df.iloc[-self.lookback:] if isinstance(lookback_df, DataFrame) else None
+
+
 
 
 

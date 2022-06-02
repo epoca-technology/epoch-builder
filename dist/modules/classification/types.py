@@ -49,7 +49,7 @@ class IClassificationConfig(TypedDict):
 class ITrainingDataActivePosition(TypedDict):
     up_price: float         # The price in which the position will be closed as up
     down_price: float       # The price in which the position will be closed as down
-    row: Dict[str, int]     # Model's features which will be completed with labels once the position closes
+    row: Dict[str, float]   # Model's features which will be completed with labels once the position closes
 
 
 
@@ -100,7 +100,7 @@ class ITrainingDataConfig(TypedDict):
 # with the rows and columns lists.
 class ICompressedTrainingData(TypedDict):
     columns: List[str]
-    rows: List[List[int]]
+    rows: List[List[float]]
 
 
 
@@ -258,6 +258,7 @@ class IClassificationEvaluation(TypedDict):
     acc: int
 
     # Increase Predictions Overview
+    increase_list: List[float]
     increase_max: float
     increase_min: float
     increase_mean: float
@@ -266,6 +267,7 @@ class IClassificationEvaluation(TypedDict):
     increase_successful_mean: float
 
     # Decrease Predictions Overview
+    decrease_list: List[float]
     decrease_max: float
     decrease_min: float
     decrease_mean: float

@@ -31,6 +31,8 @@ class ClassificationTrainingData:
             Universally Unique Identifier (uuid4)
         description: str
             Summary describing the purpose and expectations of the Training Data Generation.
+        max_lookback: int
+            The maximum lookback among the regressions that will be used to build the data.
         start: int
             The open timestamp of the first 1m candlestick.
         end: int
@@ -107,9 +109,12 @@ class ClassificationTrainingData:
             ids.append(m["id"])
             lookbacks.append(self.models[-1].get_lookback())
 
+        # Initialize the max lookback
+        self.max_lookback: int = max(lookbacks)
+
         # Initialize the candlesticks if not unit testing
         if not self.test_mode:
-            Candlestick.init(max(lookbacks), config.get("start"), config.get("end"))
+            Candlestick.init(self.max_lookback, config.get("start"), config.get("end"))
 
         # Init the start and end
         self.start: int = int(Candlestick.DF.iloc[0]["ot"])
@@ -191,15 +196,43 @@ class ClassificationTrainingData:
         # Calculate the position range
         up_price, down_price = self._get_position_range(candlestick["o"])
 
-        # Generate the Models' predictions
-        preds: Dict[str, int] = {m.id: m.predict(candlestick["ot"], enable_cache=not self.test_mode)["r"] for m in self.models}
+        # Build the features
+        features: Dict[str, Union[int, float]] = self._get_features(candlestick["ot"])
 
         # Finally, populate the active position dict
         self.active = {
             "up_price": up_price,
             "down_price": down_price,
-            "row": preds
+            "row": features
         }
+
+
+
+
+
+    def _get_features(self, open_time: int) -> Dict[str, Union[int, float]]:
+        """
+        """
+        # Init the lookback_df
+        lookback_df: DataFrame = Candlestick.get_lookback_df(self.max_lookback, open_time)
+
+        # Generate the Models' predictions
+        features: Dict[str, Union[int, float]] = {
+            m.id: m.predict(
+                open_time, 
+                lookback_df=lookback_df,
+                enable_cache=not self.test_mode
+            )["r"] for m in self.models
+        }
+
+        # Include the RSI if applies
+        # @TODO
+
+        # Finally, return the features
+        return features
+
+
+
 
 
 
@@ -325,9 +358,6 @@ class ClassificationTrainingData:
         """
         # Initialize the current time
         current_time: int = Utils.get_time()
-
-        # Convert all the values to integers
-        self.df = self.df.astype(int)
 
         # Return the File Data
         return {

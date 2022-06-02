@@ -7,7 +7,7 @@ from modules.model import IPrediction, IModel
 # in order to ensure compatibility across any of the processes.
 class ModelInterface:
     # Performs a prediction based on the current time
-    def predict(self, current_timestamp: int, enable_cache: bool = False) -> IPrediction:
+    def predict(self, *args,**kwargs) -> IPrediction:
         raise NotImplementedError("Model.predict has not been implemented.")
 
     # Retrieves the lookback set on the ArimaModel

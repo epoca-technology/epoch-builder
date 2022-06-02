@@ -1,6 +1,8 @@
 import unittest
 from typing import Union
 from copy import deepcopy
+
+from pandas import DataFrame
 from modules.candlestick import Candlestick
 from modules.prediction_cache import get_arima_pred, delete_arima_pred
 from modules.model import ArimaModel, IModel, IPrediction
@@ -251,6 +253,129 @@ class ArimaModelTestCase(unittest.TestCase):
         delete_arima_pred(m.id, first_ot, last_ct, m.predictions, m.interpreter.long, m.interpreter.short)
         cached_pred = get_arima_pred(m.id, first_ot, last_ct, m.predictions, m.interpreter.long, m.interpreter.short)
         self.assertTrue(cached_pred == None)
+
+
+
+
+    # Can perform predictions with a provided matching lookback_df
+    def testBasicPredictionWithLookbackDF(self):
+        # Init the config
+        config: IModel = deepcopy(BASIC_CONFIG)
+
+        # Initialize the model
+        m = ArimaModel(config)
+
+        # Retrieve the DF
+        df: DataFrame = Candlestick.get_lookback_df(150, CURRENT_TIME)
+        
+        # Perform a prediction
+        pred: IPrediction = m.predict(CURRENT_TIME, lookback_df=df, enable_cache=False)
+
+        # Validate the integrity of the result
+        self.assertIsInstance(pred['r'], int)
+        self.assertTrue(pred['r'] == -1 or pred['r'] == 0 or pred['r'] == 1)
+        self.assertEqual(pred['t'], CURRENT_TIME)
+        self.assertIsInstance(pred['md'], list)
+        self.assertEqual(len(pred['md']), 1)
+        self.assertIsInstance(pred['md'][0], dict)
+        self.assertIsInstance(pred['md'][0]['pl'], list)
+        self.assertEqual(len(pred['md'][0]['pl']), m.predictions)
+        self.assertIsInstance(pred['md'][0]['d'], str)
+        self.assertTrue(len(pred['md'][0]['d']) > 0)
+
+
+
+
+    # Can perform predictions with a provided lookback_df that is bigger than the model's
+    def testBasicPredictionWithDifferentLookbackDF(self):
+        # Init the config
+        config: IModel = deepcopy(BASIC_CONFIG)
+
+        # Initialize the model
+        m = ArimaModel(config)
+
+        # Retrieve the DF
+        df: DataFrame = Candlestick.get_lookback_df(300, CURRENT_TIME)
+        
+        # Perform a prediction
+        pred: IPrediction = m.predict(CURRENT_TIME, lookback_df=df, enable_cache=False)
+
+        # Validate the integrity of the result
+        self.assertIsInstance(pred['r'], int)
+        self.assertTrue(pred['r'] == -1 or pred['r'] == 0 or pred['r'] == 1)
+        self.assertEqual(pred['t'], CURRENT_TIME)
+        self.assertIsInstance(pred['md'], list)
+        self.assertEqual(len(pred['md']), 1)
+        self.assertIsInstance(pred['md'][0], dict)
+        self.assertIsInstance(pred['md'][0]['pl'], list)
+        self.assertEqual(len(pred['md'][0]['pl']), m.predictions)
+        self.assertIsInstance(pred['md'][0]['d'], str)
+        self.assertTrue(len(pred['md'][0]['d']) > 0)
+
+
+
+
+    # Can perform predictions with a provided matching lookback_df and cache
+    def testBasicPredictionWithLookbackDFAndCache(self):
+        # Init the config
+        config: IModel = deepcopy(BASIC_CONFIG)
+
+        # Initialize the model
+        m = ArimaModel(config)
+
+        # Retrieve the DF
+        df: DataFrame = Candlestick.get_lookback_df(150, CURRENT_TIME)
+        first_ot: int = int(df.iloc[0]["ot"])
+        last_ct: int = int(df.iloc[-1]["ct"])
+        
+        # Perform a prediction
+        pred: IPrediction = m.predict(CURRENT_TIME, lookback_df=df, enable_cache=True)
+
+        # Validate the integrity of the result
+        self.assertIsInstance(pred['r'], int)
+        self.assertTrue(pred['r'] == -1 or pred['r'] == 0 or pred['r'] == 1)
+        self.assertEqual(pred['t'], CURRENT_TIME)
+        self.assertIsInstance(pred['md'], list)
+
+        # Clean up the prediction
+        delete_arima_pred(m.id, first_ot, last_ct, m.predictions, m.interpreter.long, m.interpreter.short)
+        cached_pred = get_arima_pred(m.id, first_ot, last_ct, m.predictions, m.interpreter.long, m.interpreter.short)
+        self.assertTrue(cached_pred == None)
+
+
+
+
+
+    # Can perform predictions with a provided different lookback_df and cache
+    def testBasicPredictionWithDifferentLookbackDFAndCache(self):
+        # Init the config
+        config: IModel = deepcopy(BASIC_CONFIG)
+
+        # Initialize the model
+        m = ArimaModel(config)
+
+        # Retrieve the DF
+        df: DataFrame = Candlestick.get_lookback_df(300, CURRENT_TIME)
+        sliced_df: DataFrame = df.iloc[-150:]
+        first_ot: int = int(sliced_df.iloc[0]["ot"])
+        last_ct: int = int(sliced_df.iloc[-1]["ct"])
+        
+        # Perform a prediction
+        pred: IPrediction = m.predict(CURRENT_TIME, lookback_df=df, enable_cache=True)
+
+        # Validate the integrity of the result
+        self.assertIsInstance(pred['r'], int)
+        self.assertTrue(pred['r'] == -1 or pred['r'] == 0 or pred['r'] == 1)
+        self.assertEqual(pred['t'], CURRENT_TIME)
+        self.assertIsInstance(pred['md'], list)
+
+        # Clean up the prediction
+        delete_arima_pred(m.id, first_ot, last_ct, m.predictions, m.interpreter.long, m.interpreter.short)
+        cached_pred = get_arima_pred(m.id, first_ot, last_ct, m.predictions, m.interpreter.long, m.interpreter.short)
+        self.assertTrue(cached_pred == None)
+
+
+
 
 
 

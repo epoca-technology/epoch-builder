@@ -1,6 +1,6 @@
 {
     "name": "CLSTM_AD_BC_HLR",
-    "training_data_id": "3cb039cb-0b0e-4660-b7c5-8a9ea307e5bd",
+    "training_data_id": "71c9ad3a-5a6d-475a-8e13-de928dd7dfa2",
     "models": [
         {
             "id": "C_CLSTM_S1_AD_BC_HLR",

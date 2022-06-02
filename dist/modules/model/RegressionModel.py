@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 from pandas import DataFrame
 from modules.candlestick import Candlestick
 from modules.regression import Regression
@@ -64,7 +64,12 @@ class RegressionModel(ModelInterface):
 
 
 
-    def predict(self, current_timestamp: int, enable_cache: bool = False) -> IPrediction:
+    def predict(
+        self, 
+        current_timestamp: int, 
+        lookback_df: Union[DataFrame, None] = None, 
+        enable_cache: bool = False
+    ) -> IPrediction:
         """In order to optimize performance, if cache is enabled, it will check the db
         before performing an actual prediction. If the prediction is not found, it will
         perform it and store it afterwards. If cache is not enabled, it will just 
@@ -73,12 +78,18 @@ class RegressionModel(ModelInterface):
         Args:
             current_timestamp: int
                 The current time in milliseconds.
+            lookback_df: Union[DataFrame, None]
+                Classifications can pass the Lookback DataFrame and it will be sliced 
+                accordingly to match the model's lookback.
             enable_cache: bool
                 If true, it will check the db before calling the actual predict method.
         
         Returns:
             IPrediction
         """
+        # Initialize the adjusted lookback_df if provided
+        df: Union[DataFrame, None] = self._get_adjusted_lookback_df(lookback_df)
+        
         # Check if the cache is enabled
         if enable_cache:
             """# Retrieve the candlestick range
@@ -158,6 +169,26 @@ class RegressionModel(ModelInterface):
         
         # Finally, return the prediction results
         return { "r": result, "t": int(current_timestamp), "md": [ metadata ] }
+
+
+
+
+
+
+    def _get_adjusted_lookback_df(self, lookback_df: Union[DataFrame, None]) -> Union[DataFrame, None]:
+        """Classifications can pass the lookback_df to the predict function. If so, the df needs to
+        be adjusted to the Model's Instance Lookback since the Classification uses the Max Lookback
+        from all the models in order to build the lookback_df.
+
+        Args:
+            lookback_df: Union[DataFrame, None]
+                The DataFrame to be adjusted if provided.
+        
+        Returns:
+            Union[DataFrame, None]
+        """
+        return lookback_df.iloc[-self.regression.lookback:] if isinstance(lookback_df, DataFrame) else None
+
 
 
 
