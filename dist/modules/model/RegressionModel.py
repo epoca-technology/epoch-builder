@@ -39,7 +39,7 @@ class RegressionModel(ModelInterface):
             config: IModel
                 The configuration to be used to initialize the model's instance
         """
-        # Make sure there is 1 Arima Model
+        # Make sure there is 1 Regression Model
         if len(config['regression_models']) != 1:
             raise ValueError(f"A RegressionModel can only be initialized if 1 configuration item is provided. \
                 Received: {len(config['regression_models'])}")

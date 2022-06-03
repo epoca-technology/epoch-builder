@@ -1,7 +1,8 @@
-from typing import List
+from typing import List, Dict, Union
 from os import makedirs
 from os.path import exists
 from json import load, dumps
+from inquirer import Text, prompt
 from modules.utils import Utils
 from modules.keras_models import KERAS_PATH
 from modules.classification import IClassificationTrainingBatch, ClassificationTraining, IClassificationTrainingCertificate, \
@@ -55,7 +56,12 @@ training_data: ITrainingDataFile = load(training_data_config_file)
 # trained, saves the certificates batch. 
 # Results as saved when the execution has completed. If the execution is interrupted before
 # completion, results will not be saved.
-
+print("CLASSIFICATION TRAINING")
+# Init the max evaluations
+answers: Dict[str, str] = prompt([
+    Text("max_evaluations", "Number of Classification Evaluations (Defaults to 500)")
+])
+max_evaluations: Union[int, None] = int(answers["max_evaluations"]) if answers["max_evaluations"].isdigit() else None
 
 # Init the list of certificates
 certificates: List[IClassificationTrainingCertificate] = []
@@ -63,15 +69,19 @@ certificates: List[IClassificationTrainingCertificate] = []
 # Run the training
 for index, model_config in enumerate(config["models"]):
     # Initialize the instance of the model
-    regression_training: ClassificationTraining = ClassificationTraining(training_data, model_config)
+    classification_training: ClassificationTraining = ClassificationTraining(
+        training_data, 
+        model_config, 
+        max_evaluations=max_evaluations
+    )
 
-    # Print the progress
+    # Log the progress
     if index == 0:
-        print("CLASSIFICATION TRAINING RUNNING")
+        print("\nCLASSIFICATION TRAINING RUNNING")
     print(f"\n{index + 1}/{len(config['models'])}) {model_config['id']}")
 
     # Train the model
-    cert: IClassificationTrainingCertificate = regression_training.train()
+    cert: IClassificationTrainingCertificate = classification_training.train()
 
     # Add the certificate to the list
     certificates.append(cert)

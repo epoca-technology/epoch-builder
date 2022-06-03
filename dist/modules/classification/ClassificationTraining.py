@@ -15,11 +15,11 @@ from keras.metrics import CategoricalAccuracy, BinaryAccuracy
 from keras.callbacks import EarlyStopping, History
 from modules.utils import Utils
 from modules.candlestick import Candlestick
-from modules.model import IModel, Model, ArimaModel, RegressionModel
+from modules.model import IModel, ArimaModel, RegressionModel, ClassificationModel, IPrediction
 from modules.keras_models import KerasModel, IKerasModelConfig, IKerasModelTrainingHistory, get_summary, KERAS_PATH
 from modules.classification import ITrainingDataFile, ICompressedTrainingData, decompress_training_data, \
-    IClassificationTrainingConfig, ITrainingDataSummary, Classification, IClassificationEvaluation, \
-        IClassificationTrainingCertificate
+    IClassificationTrainingConfig, ITrainingDataSummary, IClassificationEvaluation, IClassificationTrainingCertificate
+        
 
 
 
@@ -37,8 +37,8 @@ class ClassificationTraining:
             The number of epochs it will allow to be executed without showing a performance.
         MAX_EPOCHS: int
             The maximum amount of epochs the training process can go through.
-        MAX_CLASSIFICATION_EVALUATIONS: int
-            The maximum number of evaluations that will be performed on the trained model.
+        DEFAULT_MAX_EVALUATIONS: int
+            The default maximum number of evaluations that will be performed on the trained model.
 
     Instance Properties:
         test_mode: bool
@@ -53,8 +53,6 @@ class ClassificationTraining:
             The list of ArimaModel|RegressionModel used to generate the training data.
         regressions: List[Union[ArimaModel, RegressionModel]]
             The list of regression model instances.
-        max_regression_lookback: int
-            The highest lookback among the regressions used to generate features.
         learning_rate: float
             The learning rate to be used by the optimizer. If None is provided it uses the default
             one.   
@@ -76,6 +74,9 @@ class ClassificationTraining:
             The test labels df
         training_data_summary: ITrainingDataSummary
             The summary of the training data that will be attached to the training certificate
+        max_evaluations: int
+            The Maximum number of evaluations that will be performed post-training. If none is provided, 
+            the default value will be used.
     """
     # Train and Test DataFrame Split
     TRAIN_SPLIT: float = 0.8
@@ -89,7 +90,7 @@ class ClassificationTraining:
     # The max number of evaluations that will be performed on the trained classification model.
     # Notice that if the number of evals is much smaller than the max it means there could be
     # an irregularity with the model as the probabilities are too close to the 50%.
-    MAX_CLASSIFICATION_EVALUATIONS: int = 100
+    DEFAULT_MAX_EVALUATIONS: int = 500
 
 
 
@@ -97,7 +98,13 @@ class ClassificationTraining:
 
 
 
-    def __init__(self, training_data_file: ITrainingDataFile, config: IClassificationTrainingConfig, test_mode: bool = False):
+    def __init__(
+        self, 
+        training_data_file: ITrainingDataFile, 
+        config: IClassificationTrainingConfig, 
+        max_evaluations: Union[int, None],
+        test_mode: bool = False
+    ):
         """Initializes the ClassificationTraining Instance.
 
         Args:
@@ -127,8 +134,9 @@ class ClassificationTraining:
 
         # Initialize the models data as well as the regression instances
         self.models: List[IModel] = training_data_file["models"]
-        self.regressions: List[Union[ArimaModel, RegressionModel]] = [Model(m) for m in self.models]
-        self.max_regression_lookback: int = max([m.get_lookback() for m in self.regressions])
+        self.regressions: List[Union[ArimaModel, RegressionModel]] = [
+            ArimaModel(m) if ArimaModel.is_config(m) else RegressionModel(m) for m in self.models
+        ]
 
         # Initialize the Learning Rate
         self.learning_rate: float = config["learning_rate"]
@@ -159,6 +167,9 @@ class ClassificationTraining:
         # Initialize the candlesticks if not unit testing
         if not self.test_mode:
             Candlestick.init(max([m.get_lookback() for m in self.regressions]))
+
+        # Initialize the max evaluations
+        self.max_evaluations: int = max_evaluations if isinstance(max_evaluations, int) else ClassificationTraining.DEFAULT_MAX_EVALUATIONS
 
         # Initialize the model's directory
         self._init_model_dir()
@@ -413,8 +424,14 @@ class ClassificationTraining:
         Returns:
             IClassificationEvaluation
         """
-        # Initialize the Classification Instance
-        classification: Classification = Classification(self.id)
+        # Initialize the ClassificationModel Instance
+        classification: ClassificationModel = ClassificationModel({
+            "id": self.id,
+            "classification_models": [{
+                "classification_id": self.id,
+                "interpreter": { "min_probability": 0.51 }
+            }]
+        })
 
         # Init the min and max values for the random candlestick indexes
         min_i: int = 0
@@ -426,42 +443,50 @@ class ClassificationTraining:
         increase_successful: List[float] = []
         decrease: List[float] = []
         decrease_successful: List[float] = []
+        increase_outcomes: int = 0
+        decrease_outcomes: int = 0
 
         # Init the progress bar
-        progress_bar = tqdm( bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}", total=ClassificationTraining.MAX_CLASSIFICATION_EVALUATIONS)
+        progress_bar = tqdm( bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}", total=self.max_evaluations)
         progress_bar.set_description("    6/7) Evaluating Classification")
 
         # Perform the evaluation
-        for i in range(ClassificationTraining.MAX_CLASSIFICATION_EVALUATIONS):
+        for i in range(self.max_evaluations):
             # Generate a random index and initialize the random start candlestick
             random_index: int = randint(min_i, max_i)
             candlestick: Series = Candlestick.DF.iloc[random_index]
 
-            # Perform the prediction from a series of features
-            pred: List[float] = classification.predict(self._get_evaluation_features(candlestick))
+            # Generate a perdiction
+            pred: IPrediction = classification.predict(candlestick["ot"], enable_cache=False)
 
-            # Check if there was a non-neutral probability
-            if pred[0] >= 0.51 or pred[1] >= 0.51:
+            # Check if it is a non-neutral prediction
+            if pred["r"] != 0:
                 # Retrieve the outcome of the evaluation
                 outcome: int = self._get_evaluation_outcome(random_index, candlestick)
 
                 # Check if the Classification predicted an increase
-                if pred[0] > pred[1]:
+                if pred["r"] == 1:
                     # Append the increase prediction to the list
-                    increase.append(float(pred[0]))
+                    increase.append(float(pred["md"][0]["up"]))
                     
                     # Check if the prediction was correct
                     if outcome == 1:
-                        increase_successful.append(float(pred[0]))
+                        increase_successful.append(float(pred["md"][0]["up"]))
+                        increase_outcomes += 1
+                    else:
+                        decrease_outcomes += 1
 
                 # Otherwise, the Classification predicted a decrease
                 else:
                     # Append the decrease prediction to the list
-                    decrease.append(float(pred[1]))
+                    decrease.append(float(pred["md"][0]["dp"]))
                     
                     # Check if the prediction was correct
                     if outcome == -1:
-                        decrease_successful.append(float(pred[1]))
+                        decrease_successful.append(float(pred["md"][0]["dp"]))
+                        decrease_outcomes += 1
+                    else:
+                        increase_outcomes += 1
 
                 # Increment the evals performed
                 evals += 1
@@ -479,7 +504,7 @@ class ClassificationTraining:
         return {
             # Evaluations
             "evaluations": evals,
-            "max_evaluations": ClassificationTraining.MAX_CLASSIFICATION_EVALUATIONS,
+            "max_evaluations": self.max_evaluations,
 
             # Prediction counts
             "increase_num": increase_num,
@@ -509,40 +534,16 @@ class ClassificationTraining:
             "decrease_successful_max": max(decrease_successful if decrease_successful_num > 0 else [0]),
             "decrease_successful_min": min(decrease_successful if decrease_successful_num > 0 else [0]),
             "decrease_successful_mean": mean(decrease_successful if decrease_successful_num > 0 else [0]),
+
+            # Outcomes
+            "increase_outcomes": increase_outcomes,
+            "decrease_outcomes": decrease_outcomes,
         }
 
 
 
 
 
-
-
-
-    def _get_evaluation_features(self, current_candlestick: Series) -> List[Union[int, float]]:
-        """Builds a list of features required to perform a Classification Prediction.
-
-        Args:
-            current_candlestick: Series
-                The current candlestick located at the randomly generated index.
-
-        Returns:
-            List[Union[int, float]]
-        """
-        # Init the lookback_df
-        lookback_df: DataFrame = Candlestick.get_lookback_df(self.max_regression_lookback, current_candlestick["ot"])
-
-        # Generate predictions with all the regression models within the classification
-        preds: List[float] = [
-            r.predict(
-                current_candlestick["ot"], 
-                lookback_df=lookback_df,
-                enable_cache=True
-            )["r"] for r in self.regressions
-        ]
-
-        # Finally, return all the features
-        return preds
-        
 
 
 

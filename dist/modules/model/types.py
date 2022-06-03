@@ -1,7 +1,12 @@
-from typing import TypedDict, List, Union, Any
+from typing import TypedDict, List, Union, Dict
 from modules.arima import IArimaConfig
 from modules.interpreter import IPercentChangeInterpreterConfig, IProbabilityInterpreterConfig
-from modules.regression import IRegressionConfig
+from modules.keras_models import IKerasModelSummary
+
+
+
+
+
 
 
 
@@ -55,6 +60,61 @@ class IPrediction(TypedDict):
     # IPredictionMetaData whereas, MultiClassificationModels will output any number of IPredictionMetaData 
     # dictionaries according to the number of ClassificationModels within it.
     md: List[IPredictionMetaData]
+
+
+
+
+
+
+
+
+
+
+## Keras Models Configurations ##
+
+
+
+# Regresion Configuration
+# The configuration that was used to train and will predict based on.
+class IRegressionConfig(TypedDict):
+    # The identifier of the model
+    id: str
+
+    # Important information regarding the trained model
+    description: str
+
+    # The number of candlesticks it will lookback to make a prediction
+    lookback: int
+
+    # The number of predictions it will generate
+    predictions: int
+
+    # The summary of the KerasModel
+    summary: IKerasModelSummary
+
+
+
+
+# Classification Configuration
+# The configuration that was used to train and will predict based on.
+class IClassificationConfig(TypedDict):
+    # The identifier of the model
+    id: str
+
+    # Important information regarding the trained model
+    description: str
+
+    # The identifier of the training data used
+    training_data_id: str
+
+    # The list of ArimaModel|RegressionModel attached to the classification
+    models: List[Dict] # IModel does not exist yet
+
+    # The summary of the KerasModel
+    summary: IKerasModelSummary
+
+
+
 
 
 
@@ -119,7 +179,7 @@ class IClassificationModelConfig(TypedDict):
 
     # The entire configuration used by the classification. This value is only present
     # when the function get_model is used.
-    classification: Union[Any, None]
+    classification: Union[IClassificationConfig, None]
 
 
 
@@ -150,6 +210,23 @@ class IModel(TypedDict):
 
     # ClassificationModels that will be used to predict accordingly based on the type of model.
     classification_models: Union[List[IClassificationModelConfig], None]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

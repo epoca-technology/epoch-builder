@@ -1,33 +1,10 @@
 from typing import TypedDict, List, Union, Dict
-from modules.model import IModel
-from modules.keras_models import IKerasModelConfig, IKerasModelTrainingHistory, IKerasModelSummary
+from modules.keras_models import IKerasModelConfig, IKerasModelTrainingHistory
+from modules.model import IModel, IClassificationConfig
 
 
 
 
-
-## CLASSIFICATION ##
-
-
-
-
-# Classification Configuration
-# The configuration that was used to train and will predict based on.
-class IClassificationConfig(TypedDict):
-    # The identifier of the model
-    id: str
-
-    # Important information regarding the trained model
-    description: str
-
-    # The identifier of the training data used
-    training_data_id: str
-
-    # The list of ArimaModel|RegressionModel attached to the classification
-    models: List[IModel]
-
-    # The summary of the KerasModel
-    summary: IKerasModelSummary
 
 
 
@@ -89,7 +66,7 @@ class ITrainingDataConfig(TypedDict):
     down_percent_change: float
 
     # The list of ArimaModels|RegressionModels that will be used to predict
-    models: List[IModel]
+    models: List[IModel] # IModel does not exist yet
 
 
 
@@ -130,7 +107,7 @@ class ITrainingDataFile(TypedDict):
     down_percent_change: float
 
     # List of ArimaModels|RegressionModels
-    models: List[IModel]
+    models: List[IModel] # IModel does not exist yet
 
     # Price Actions Insight - The up and down total count
     price_actions_insight: ITrainingDataPriceActionsInsight
@@ -274,6 +251,10 @@ class IClassificationEvaluation(TypedDict):
     decrease_successful_max: float
     decrease_successful_min: float
     decrease_successful_mean: float
+
+    # Outcomes
+    increase_outcomes: int
+    decrease_outcomes: int
 
 
 

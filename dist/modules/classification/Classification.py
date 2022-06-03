@@ -3,9 +3,8 @@ from json import loads
 from h5py import File as h5pyFile
 from tensorflow.python.keras.saving.hdf5_format import load_model_from_hdf5
 from keras import Sequential
+from modules.model import IModel, IClassificationConfig
 from modules.keras_models import KerasModelInterface, KERAS_PATH, get_summary
-from modules.classification import IClassificationConfig
-from modules.model import IModel
 
 
 

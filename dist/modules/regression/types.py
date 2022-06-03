@@ -1,33 +1,7 @@
 from typing import TypedDict, List, Dict, Union
 from pandas import DataFrame
-from modules.keras_models import IKerasModelConfig, IKerasModelSummary, IKerasModelTrainingHistory
-
-
-
-## Regression ##
-
-
-
-
-# Regresion Configuration
-# The configuration that was used to train and will predict based on.
-class IRegressionConfig(TypedDict):
-    # The identifier of the model
-    id: str
-
-    # Important information regarding the trained model
-    description: str
-
-    # The number of candlesticks it will lookback to make a prediction
-    lookback: int
-
-    # The number of predictions it will generate
-    predictions: int
-
-    # The summary of the KerasModel
-    summary: IKerasModelSummary
-
-
+from modules.keras_models import IKerasModelConfig, IKerasModelTrainingHistory
+from modules.model import IRegressionConfig
 
 
 

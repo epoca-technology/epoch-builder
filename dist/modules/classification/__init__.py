@@ -1,4 +1,4 @@
-from ..classification.types import IClassificationConfig, ITrainingDataConfig, ITrainingDataActivePosition, ITrainingDataFile, \
+from ..classification.types import ITrainingDataConfig, ITrainingDataActivePosition, ITrainingDataFile, \
     ITrainingDataPriceActionsInsight, ITrainingDataPredictionInsight, ICompressedTrainingData, \
         IClassificationTrainingConfig, IClassificationTrainingBatch, ITrainingDataSummary, IClassificationEvaluation, \
             IClassificationTrainingCertificate

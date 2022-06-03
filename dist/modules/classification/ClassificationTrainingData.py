@@ -6,7 +6,7 @@ from pandas import DataFrame, Series
 from tqdm import tqdm
 from modules.candlestick import Candlestick
 from modules.utils import Utils
-from modules.model import Model, ArimaModel, RegressionModel, IModel
+from modules.model import ArimaModel, RegressionModel, IModel
 from modules.keras_models import KERAS_PATH
 from modules.classification import ITrainingDataConfig, ITrainingDataActivePosition, \
     ITrainingDataFile, ITrainingDataPriceActionsInsight, ITrainingDataPredictionInsight, \
@@ -102,7 +102,7 @@ class ClassificationTrainingData:
                     Classification Training Data")
 
             # Add the initialized model to the list
-            self.models.append(Model(m))
+            self.models.append(ArimaModel(m) if ArimaModel.is_config(m) else RegressionModel(m))
             
             # Populate helpers
             df_data[m["id"]] = []
@@ -211,7 +211,14 @@ class ClassificationTrainingData:
 
 
     def _get_features(self, open_time: int) -> Dict[str, Union[int, float]]:
-        """
+        """Retrieves the features that will be used by the model to predict.
+
+        Args:
+            open_time: int
+        
+        Returns:
+            Dict[str, Union[int, float]]
+            {[feature_name: str]: float}
         """
         # Init the lookback_df
         lookback_df: DataFrame = Candlestick.get_lookback_df(self.max_lookback, open_time)
