@@ -15,7 +15,7 @@ from keras.metrics import CategoricalAccuracy, BinaryAccuracy
 from keras.callbacks import EarlyStopping, History
 from modules.utils import Utils
 from modules.candlestick import Candlestick
-from modules.model import IModel, ArimaModel, RegressionModel, ClassificationModel, IPrediction
+from modules.model import IModel, RegressionModelFactory, ArimaModel, RegressionModel, ClassificationModel, IPrediction
 from modules.keras_models import KerasModel, IKerasModelConfig, IKerasModelTrainingHistory, get_summary, KERAS_PATH
 from modules.classification import ITrainingDataFile, ICompressedTrainingData, decompress_training_data, \
     IClassificationTrainingConfig, ITrainingDataSummary, IClassificationEvaluation, IClassificationTrainingCertificate
@@ -134,9 +134,7 @@ class ClassificationTraining:
 
         # Initialize the models data as well as the regression instances
         self.models: List[IModel] = training_data_file["models"]
-        self.regressions: List[Union[ArimaModel, RegressionModel]] = [
-            ArimaModel(m) if ArimaModel.is_config(m) else RegressionModel(m) for m in self.models
-        ]
+        self.regressions: List[Union[ArimaModel, RegressionModel]] = [ RegressionModelFactory(m) for m in self.models ]
 
         # Initialize the Learning Rate
         self.learning_rate: float = config["learning_rate"]

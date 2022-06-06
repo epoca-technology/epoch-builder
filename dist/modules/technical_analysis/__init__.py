@@ -1,1 +1,1 @@
-from ..technical_analysis import TechnicalAnalysis, ITechnicalAnalysis
+from ..technical_analysis.TechnicalAnalysis import TechnicalAnalysis, ITechnicalAnalysis

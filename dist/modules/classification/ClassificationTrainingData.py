@@ -6,7 +6,7 @@ from pandas import DataFrame, Series
 from tqdm import tqdm
 from modules.candlestick import Candlestick
 from modules.utils import Utils
-from modules.model import ArimaModel, RegressionModel, IModel
+from modules.model import RegressionModelFactory, ArimaModel, RegressionModel, IModel
 from modules.keras_models import KERAS_PATH
 from modules.classification import ITrainingDataConfig, ITrainingDataActivePosition, \
     ITrainingDataFile, ITrainingDataPriceActionsInsight, ITrainingDataPredictionInsight, \
@@ -102,7 +102,7 @@ class ClassificationTrainingData:
                     Classification Training Data")
 
             # Add the initialized model to the list
-            self.models.append(ArimaModel(m) if ArimaModel.is_config(m) else RegressionModel(m))
+            self.models.append(RegressionModelFactory(m))
             
             # Populate helpers
             df_data[m["id"]] = []

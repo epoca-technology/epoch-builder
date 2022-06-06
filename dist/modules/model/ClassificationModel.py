@@ -2,8 +2,8 @@ from typing import List, Union
 from pandas import DataFrame
 from modules.candlestick import Candlestick
 from modules.interpreter import ProbabilityInterpreter
-from modules.model import ModelInterface, IModel, IPrediction, IPredictionMetaData, IClassificationModelConfig, \
-    IArimaModelConfig, ArimaModel, RegressionModel
+from modules.model import ModelInterface, IModel, RegressionModelFactory, IPrediction, \
+    IPredictionMetaData, IClassificationModelConfig, IArimaModelConfig, ArimaModel, RegressionModel
 from modules.classification.Classification import Classification
 
 
@@ -59,7 +59,7 @@ class ClassificationModel(ModelInterface):
 
         # Initialize the Regression Instances
         self.regressions: List[Union[ArimaModel, RegressionModel]] = [
-            ArimaModel(m) if ArimaModel.is_config(m) else RegressionModel(m) for m in self.classification.regressions
+            RegressionModelFactory(m) for m in self.classification.regressions
         ]
 
         # Initialize the max lookback
@@ -129,8 +129,11 @@ class ClassificationModel(ModelInterface):
         Returns:
             IPrediction
         """
+        # Build the features
+        features: List[float] = self._get_features(current_timestamp)
+
         # Generate a prediction based on the features
-        pred: List[float] = self.classification.predict(self._get_features(current_timestamp))
+        pred: List[float] = self.classification.predict(features)
 
         # Interpret the prediction
         result, description = self.interpreter.interpret(pred)
@@ -138,6 +141,7 @@ class ClassificationModel(ModelInterface):
         # Build the metadata
         metadata: IPredictionMetaData = { "d": description }
         if not minimized_metadata:
+            metadata["f"] = features
             metadata["up"] = pred[0]
             metadata["dp"] = pred[1]
         

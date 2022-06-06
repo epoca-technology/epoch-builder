@@ -222,7 +222,6 @@ class Database:
             else:
                 table_union += f"{table['name']}, test_{table['name']}, "
 
-
         # Delete them from the db
         Database.write_query(f"DROP TABLE IF EXISTS {table_union}")
 

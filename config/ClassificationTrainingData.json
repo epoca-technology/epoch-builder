@@ -1,9 +1,9 @@
 {
     "description": "Experiment 1: RegressionSelection_20 e5a03686-7bb9-4e2f-ab2f-3058281f589f, Training Data Percentages set at 3%/3%. The original experiment number 1 treated features as ints where as this experiment treats them as floats.",
     "start": "1/01/2018",
-    "end": "22/04/2022",
-    "up_percent_change": 3,
-    "down_percent_change": 3,
+    "end": "01/03/2018",
+    "up_percent_change": 0.1,
+    "down_percent_change": 0.1,
     "models": [
         { "id": "A678","arima_models": [{"arima": {"p": 6, "d": 7,"q": 8}}] },
         { "id": "A894","arima_models": [{"arima": {"p": 8, "d": 9,"q": 4}}] },

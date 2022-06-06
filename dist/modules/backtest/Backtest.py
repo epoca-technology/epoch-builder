@@ -5,7 +5,7 @@ from json import dumps
 from tqdm import tqdm
 from modules.candlestick import Candlestick
 from modules.utils import Utils
-from modules.model import IModel, Model, IPrediction, ArimaModel, RegressionModel, ClassificationModel
+from modules.model import IModel, ModelFactory, IPrediction, ArimaModel, RegressionModel, ClassificationModel
 from modules.backtest import BACKTEST_PATH, IBacktestConfig, Position, IBacktestPerformance, IBacktestResult
 
 
@@ -80,7 +80,7 @@ class Backtest:
         self.description: str = config['description']
 
         # Initialize the models to be tested
-        self.models: List[Union[ArimaModel, RegressionModel, ClassificationModel]] = [Model(m) for m in config['models']]
+        self.models: List[Union[ArimaModel, RegressionModel, ClassificationModel]] = [ModelFactory(m) for m in config['models']]
         self.results: List[IBacktestResult] = []
 
         # Initialize the candlesticks based on the models' lookback and the provided start and end dates

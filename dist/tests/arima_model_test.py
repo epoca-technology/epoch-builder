@@ -1,7 +1,6 @@
 import unittest
 from typing import Union
 from copy import deepcopy
-
 from pandas import DataFrame
 from modules.candlestick import Candlestick
 from modules.prediction_cache import get_arima_pred, delete_arima_pred

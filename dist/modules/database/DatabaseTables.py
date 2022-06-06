@@ -109,6 +109,37 @@ def REGRESSION_PREDICTIONS_TABLE_SQL(table_name: str) -> str:
 
 
 
+# Technical Analysis Table
+# The table in which the Technical Analysis data is stored.
+# Column Descriptions:
+# id: The identifier of the range that is being covered. F.e: FIRSTOT_LASTCT
+# ta: The technical analysis dictionary
+def TECHNICAL_ANALYSIS_TABLE_SQL(table_name: str) -> str:
+    """Returns the Technical Analysis Table's SQL based on the provided table name.
+
+    Args:
+        table_name: str
+            When initializing the table, make sure to also initialize it with
+            the test_ preffix.
+    
+    Returns: 
+        str
+    """
+    return f"\
+            CREATE TABLE IF NOT EXISTS {table_name}(\
+                id  VARCHAR(150) NOT NULL PRIMARY KEY,\
+                ta  JSONB NOT NULL\
+            );\
+        "
+
+
+
+
+
+
+
+
+
 
 
 ## Tables List ##
@@ -121,6 +152,10 @@ TABLES: List[IDatabaseTable] = [
     {
         "name": "regression_predictions",
         "sql": REGRESSION_PREDICTIONS_TABLE_SQL
+    },
+    {
+        "name": "technical_analysis",
+        "sql": TECHNICAL_ANALYSIS_TABLE_SQL
     }
 ]
 

@@ -5,7 +5,7 @@ from modules.model import IModel, ArimaModel, RegressionModel, ClassificationMod
 
 # Model Factory
 # Based on given configuration, it returns the appropiate Model Instance
-def Model(config: IModel) -> Union[ArimaModel, RegressionModel, ClassificationModel]:
+def ModelFactory(config: IModel) -> Union[ArimaModel, RegressionModel, ClassificationModel]:
     """Returns the instance of an ArimaModel, RegressionModel or ClassificationModel based on the 
     provided configuration.
 

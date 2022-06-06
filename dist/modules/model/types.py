@@ -30,9 +30,9 @@ class IPredictionMetaData(TypedDict):
     # RegressionModel Predictions.
     npl: Union[List[float], None]
 
-    # ArimaModel|RegressionModel prediction results. Only present in ClassificationModel
-    # Predictions.
-    pr: Union[List[int], None]
+    # Features: ArimaModel|RegressionModel prediction results and/or technical analysis data. 
+    # Only present in ClassificationModel Predictions.
+    f: Union[List[int], None]
 
     # Up Probability. Only present in ClassificationModel Predictions.
     up: Union[float, None]

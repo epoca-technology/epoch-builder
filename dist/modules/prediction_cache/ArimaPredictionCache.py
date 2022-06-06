@@ -116,9 +116,9 @@ def delete_arima_pred(
             The short arg set on the model's interpreter.
     """
     Database.write_query(
-            f"\
-                DELETE FROM {Database.tn('arima_predictions')} WHERE \
-                id = %s AND fot = %s AND lct = %s AND pn = %s AND l = real %s AND s = real %s\
-            ",
-            (model_id, first_ot, last_ct, predictions, str(interpreter_long), str(interpreter_short))
-        )
+        f"\
+            DELETE FROM {Database.tn('arima_predictions')} WHERE \
+            id = %s AND fot = %s AND lct = %s AND pn = %s AND l = real %s AND s = real %s\
+        ",
+        (model_id, first_ot, last_ct, predictions, str(interpreter_long), str(interpreter_short))
+    )
