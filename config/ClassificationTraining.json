@@ -1,14 +1,14 @@
 {
-    "name": "DNN_AD_CC_MLR",
-    "training_data_id": "71c9ad3a-5a6d-475a-8e13-de928dd7dfa2",
+    "name": "DNN_AD_BC_HLR",
+    "training_data_id": "5fd72ab3-45dd-452f-bada-e9255962ef45",
     "models": [
         {
-            "id": "C_DNN_S1_AD_CC_MLR",
+            "id": "C_DNN_S1_AD_BC_HLR",
             "description": "This is a mock to discover training performances.",
-            "learning_rate": 0.001,
+            "learning_rate": 0.01,
             "optimizer": "adam",
-            "loss": "categorical_crossentropy",
-            "metric": "categorical_accuracy",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
             "keras_model": {
                 "name": "C_DNN_S1",
                 "units": [32],
@@ -16,12 +16,12 @@
             }
         },
         {
-            "id": "C_DNN_S2_AD_CC_MLR",
+            "id": "C_DNN_S2_AD_BC_HLR",
             "description": "This is a mock to discover training performances.",
-            "learning_rate": 0.001,
+            "learning_rate": 0.01,
             "optimizer": "adam",
-            "loss": "categorical_crossentropy",
-            "metric": "categorical_accuracy",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
             "keras_model": {
                 "name": "C_DNN_S2",
                 "units": [64, 32],
@@ -29,12 +29,12 @@
             }
         },
         {
-            "id": "C_DNN_S2_DO_AD_CC_MLR",
+            "id": "C_DNN_S2_DO_AD_BC_HLR",
             "description": "This is a mock to discover training performances.",
-            "learning_rate": 0.001,
+            "learning_rate": 0.01,
             "optimizer": "adam",
-            "loss": "categorical_crossentropy",
-            "metric": "categorical_accuracy",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
             "keras_model": {
                 "name": "C_DNN_S2_DO",
                 "units": [64, 32],
@@ -43,12 +43,12 @@
             }
         },
         {
-            "id": "C_DNN_S3_AD_CC_MLR",
+            "id": "C_DNN_S3_AD_BC_HLR",
             "description": "This is a mock to discover training performances.",
-            "learning_rate": 0.001,
+            "learning_rate": 0.01,
             "optimizer": "adam",
-            "loss": "categorical_crossentropy",
-            "metric": "categorical_accuracy",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
             "keras_model": {
                 "name": "C_DNN_S3",
                 "units": [128, 64, 32],
@@ -56,12 +56,12 @@
             }
         },
         {
-            "id": "C_DNN_S3_DO_AD_CC_MLR",
+            "id": "C_DNN_S3_DO_AD_BC_HLR",
             "description": "This is a mock to discover training performances.",
-            "learning_rate": 0.001,
+            "learning_rate": 0.01,
             "optimizer": "adam",
-            "loss": "categorical_crossentropy",
-            "metric": "categorical_accuracy",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
             "keras_model": {
                 "name": "C_DNN_S3_DO",
                 "units": [128, 64, 32],
@@ -70,12 +70,12 @@
             }
         },
         {
-            "id": "C_DNN_S4_AD_CC_MLR",
+            "id": "C_DNN_S4_AD_BC_HLR",
             "description": "This is a mock to discover training performances.",
-            "learning_rate": 0.001,
+            "learning_rate": 0.01,
             "optimizer": "adam",
-            "loss": "categorical_crossentropy",
-            "metric": "categorical_accuracy",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
             "keras_model": {
                 "name": "C_DNN_S4",
                 "units": [256, 128, 64, 32],
@@ -83,12 +83,12 @@
             }
         },
         {
-            "id": "C_DNN_S4_DO_AD_CC_MLR",
+            "id": "C_DNN_S4_DO_AD_BC_HLR",
             "description": "This is a mock to discover training performances.",
-            "learning_rate": 0.001,
+            "learning_rate": 0.01,
             "optimizer": "adam",
-            "loss": "categorical_crossentropy",
-            "metric": "categorical_accuracy",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
             "keras_model": {
                 "name": "C_DNN_S4_DO",
                 "units": [256, 128, 64, 32],
@@ -97,12 +97,12 @@
             }
         },
         {
-            "id": "C_DNN_S5_AD_CC_MLR",
+            "id": "C_DNN_S5_AD_BC_HLR",
             "description": "This is a mock to discover training performances.",
-            "learning_rate": 0.001,
+            "learning_rate": 0.01,
             "optimizer": "adam",
-            "loss": "categorical_crossentropy",
-            "metric": "categorical_accuracy",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
             "keras_model": {
                 "name": "C_DNN_S5",
                 "units": [512, 256, 128, 64, 32],
@@ -110,12 +110,12 @@
             }
         },
         {
-            "id": "C_DNN_S5_DO_AD_CC_MLR",
+            "id": "C_DNN_S5_DO_AD_BC_HLR",
             "description": "This is a mock to discover training performances.",
-            "learning_rate": 0.001,
+            "learning_rate": 0.01,
             "optimizer": "adam",
-            "loss": "categorical_crossentropy",
-            "metric": "categorical_accuracy",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
             "keras_model": {
                 "name": "C_DNN_S5_DO",
                 "units": [512, 256, 128, 64, 32],
@@ -124,12 +124,12 @@
             }
         },
         {
-            "id": "C_DNN_S6_AD_CC_MLR",
+            "id": "C_DNN_S6_AD_BC_HLR",
             "description": "This is a mock to discover training performances.",
-            "learning_rate": 0.001,
+            "learning_rate": 0.01,
             "optimizer": "adam",
-            "loss": "categorical_crossentropy",
-            "metric": "categorical_accuracy",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
             "keras_model": {
                 "name": "C_DNN_S6",
                 "units": [512, 256, 128, 64, 32, 16],
@@ -137,12 +137,12 @@
             }
         },
         {
-            "id": "C_DNN_S6_DO_AD_CC_MLR",
+            "id": "C_DNN_S6_DO_AD_BC_HLR",
             "description": "This is a mock to discover training performances.",
-            "learning_rate": 0.001,
+            "learning_rate": 0.01,
             "optimizer": "adam",
-            "loss": "categorical_crossentropy",
-            "metric": "categorical_accuracy",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
             "keras_model": {
                 "name": "C_DNN_S6_DO",
                 "units": [512, 256, 128, 64, 32, 16],

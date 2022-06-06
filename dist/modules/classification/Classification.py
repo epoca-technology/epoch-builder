@@ -13,9 +13,6 @@ class Classification(KerasModelInterface):
 
     This class handles the initialization of a Keras Classification Model.
 
-    Class Properties:
-        ...
-
     Instance Properties:
         id: str
             The ID of the model that was set when training.
@@ -25,6 +22,12 @@ class Classification(KerasModelInterface):
             The ID of the training data that was used to train the model.
         regressions: List[IModel]
             The list of regression models that will output the features.
+        include_rsi: bool
+            Optional Technical Analysis Feature
+        include_aroon: bool
+            Optional Technical Analysis Feature
+        features_num: int
+            The total number of features that will be used by the model to predict
         model: Sequential
             The instance of the trained model.
     """
@@ -48,9 +51,12 @@ class Classification(KerasModelInterface):
         # Load the model
         with h5pyFile(f"{KERAS_PATH['models']}/{id}/model.h5", mode='r') as model_file:
             self.id: str = model_file.attrs['id']
-            self.description: str = model_file.attrs['description']
-            self.training_data_id: str = model_file.attrs['training_data_id']
-            self.regressions: List[IModel] = loads(model_file.attrs['models'])
+            self.description: str = model_file.attrs["description"]
+            self.training_data_id: str = model_file.attrs["training_data_id"]
+            self.include_rsi: bool = model_file.attrs.get("include_rsi") == True
+            self.include_aroon: bool = model_file.attrs.get("include_aroon") == True
+            self.features_num: int = int(model_file.attrs["features_num"]) # Downcast to int
+            self.regressions: List[IModel] = loads(model_file.attrs["models"])
             self.model: Sequential = load_model_from_hdf5(model_file)
 
         # Make sure the IDs are identical
@@ -64,6 +70,10 @@ class Classification(KerasModelInterface):
         # Make sure the training_data_id was extracted
         if not isinstance(self.training_data_id, str):
             raise ValueError(f"ClassificationModel Training Data ID is invalid: {self.training_data_id}")
+        
+        # Make sure the features_num was extracted
+        if not isinstance(self.features_num, int):
+            raise ValueError(f"ClassificationModel Training Data features_num is invalid: {self.features_num}")
 
         # Make sure the regressions were extracted and initialized
         if not isinstance(self.regressions, list) or len(self.regressions) < 5:
@@ -111,5 +121,8 @@ class Classification(KerasModelInterface):
             "description": self.description,
             "training_data_id": self.training_data_id,
             "models": self.regressions,
+            "include_rsi": self.include_rsi,
+            "include_aroon": self.include_aroon,
+            "features_num": self.features_num,
             "summary": get_summary(self.model),
         }

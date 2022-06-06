@@ -148,10 +148,6 @@ class ClassificationTraining:
         # Initialize the metric function
         self.metric: Union[CategoricalAccuracy, BinaryAccuracy] = self._get_metric(config["metric"])
 
-        # Initialize the Keras Model's Configuration
-        self.keras_model: IKerasModelConfig = config["keras_model"]
-        self.keras_model["features_num"] = len(self.models)
-
         # Initialize the Training Data
         train_x, train_y, test_x, test_y = self._get_data(training_data_file["training_data"])
         self.train_x: DataFrame = train_x
@@ -161,6 +157,10 @@ class ClassificationTraining:
 
         # Initialize the Training Data Summary
         self.training_data_summary: ITrainingDataSummary = self._get_training_data_summary(training_data_file)
+
+        # Initialize the Keras Model's Configuration
+        self.keras_model: IKerasModelConfig = config["keras_model"]
+        self.keras_model["features_num"] = self.training_data_summary["features_num"]
 
         # Initialize the candlesticks if not unit testing
         if not self.test_mode:
@@ -303,14 +303,19 @@ class ClassificationTraining:
             ITrainingDataSummary
         """
         return {
+            "regression_selection_id": file["regression_selection_id"],
             "id": file["id"],
             "description": file["description"],
             "start": file["start"],
             "end": file["end"],
             "train_size": self.train_x.shape[0],
             "test_size": self.test_x.shape[0],
+            "steps": file["steps"],
             "up_percent_change": file["up_percent_change"],
-            "down_percent_change": file["down_percent_change"]
+            "down_percent_change": file["down_percent_change"],
+            "include_rsi": file["include_rsi"],
+            "include_aroon": file["include_aroon"],
+            "features_num": file["features_num"]
         }
 
 
@@ -627,6 +632,9 @@ class ClassificationTraining:
             f.attrs["description"] = self.description
             f.attrs["training_data_id"] = self.training_data_summary["id"]
             f.attrs["models"] = dumps(self.models)
+            f.attrs["include_rsi"] = self.training_data_summary["include_rsi"]
+            f.attrs["include_aroon"] = self.training_data_summary["include_aroon"]
+            f.attrs["features_num"] = self.training_data_summary["features_num"]
 
 
 

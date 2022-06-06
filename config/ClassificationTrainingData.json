@@ -1,9 +1,11 @@
 {
-    "description": "Experiment 1: RegressionSelection_20 e5a03686-7bb9-4e2f-ab2f-3058281f589f, Training Data Percentages set at 3%/3%. The original experiment number 1 treated features as ints where as this experiment treats them as floats.",
+    "regression_selection_id": "e5a03686-7bb9-4e2f-ab2f-3058281f589f",
+    "description": "Experiment 1: RegressionSelection_20 e5a03686-7bb9-4e2f-ab2f-3058281f589f, Training Data has been upgraded to support features other than regression model predictions.",
     "start": "1/01/2018",
-    "end": "01/03/2018",
-    "up_percent_change": 0.1,
-    "down_percent_change": 0.1,
+    "end": "22/04/2022",
+    "steps": 0,
+    "up_percent_change": 3,
+    "down_percent_change": 3,
     "models": [
         { "id": "A678","arima_models": [{"arima": {"p": 6, "d": 7,"q": 8}}] },
         { "id": "A894","arima_models": [{"arima": {"p": 8, "d": 9,"q": 4}}] },
@@ -25,5 +27,7 @@
         { "id": "A881","arima_models": [{"arima": {"p": 8, "d": 8,"q": 1}}] },
         { "id": "A878","arima_models": [{"arima": {"p": 8, "d": 7,"q": 8}}] },
         { "id": "A399","arima_models": [{"arima": {"p": 3, "d": 9,"q": 9}}] }
-    ]
+    ],
+    "include_rsi": true,
+    "include_aroon": true
 }

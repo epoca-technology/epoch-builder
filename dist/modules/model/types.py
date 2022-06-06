@@ -110,6 +110,13 @@ class IClassificationConfig(TypedDict):
     # The list of ArimaModel|RegressionModel attached to the classification
     models: List[Dict] # IModel does not exist yet
 
+    # Optional Technical Analysis Features
+    include_rsi: bool   # Momentum
+    include_aroon: bool # Trend
+
+    # The total number of features that will be used by the model to predict
+    features_num: int
+
     # The summary of the KerasModel
     summary: IKerasModelSummary
 

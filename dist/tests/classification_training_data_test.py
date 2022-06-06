@@ -12,11 +12,13 @@ from modules.classification import ClassificationTrainingData, ITrainingDataConf
 
 ## Test Helpers
 
-# Config
+# Default Configuration
 DEFAULT_CONFIG: ITrainingDataConfig = {
-    "description": "Unit Test",
+    "regression_selection_id": "e5a03686-7bb9-4e2f-ab2f-3058281f589f",
+    "description": "UNIT_TEST: DO NOT DELETE.",
     "start": "22/03/2022", 
     "end": "22/04/2022", 
+    "steps": 0,
     'up_percent_change': 2, 
     'down_percent_change': 2, 
     'models': [
@@ -25,8 +27,14 @@ DEFAULT_CONFIG: ITrainingDataConfig = {
         { "id": "A112","arima_models": [{"arima": {"p": 1, "d": 1,"q": 2}}] },
         { "id": "A121","arima_models": [{"arima": {"p": 1, "d": 2,"q": 1}}] },
         { "id": "R_UNIT_TEST","regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": {"long": 1.5, "short": 1.5}}] }
-    ]
+    ],
+    "include_rsi": False,
+    "include_aroon": False
 }
+
+
+
+
 
 
 
@@ -96,15 +104,26 @@ class TrainingDataTestCase(unittest.TestCase):
 
         # Make sure the ID and the description were initialized
         self.assertTrue(Utils.is_uuid4(td.id))
+        self.assertEqual(td.regression_selection_id, config['regression_selection_id'])
         self.assertEqual(td.description, config['description'])
 
         # Make sure the dates have been set correctly
         self.assertEqual(td.start, int(Candlestick.DF.iloc[0]['ot']))
         self.assertEqual(td.end, int(Candlestick.DF.iloc[-1]['ct']))
 
+        # Make sure the steps have been set correctly
+        self.assertEqual(config['steps'], td.steps)
+
         # Make sure the position percentages have been set correctly
         self.assertEqual(config['up_percent_change'], td.up_percent_change)
         self.assertEqual(config['down_percent_change'], td.down_percent_change)
+
+        # Make sure the TA has been set correctly
+        self.assertEqual(config['include_rsi'], td.include_rsi)
+        self.assertEqual(config['include_aroon'], td.include_aroon)
+
+        # Make sure the Features number has been set correctly
+        self.assertEqual(len(config['models']), td.features_num)
 
         # Validate the integrity of the DF
         self.assertEqual(td.df.shape[0], 0)
@@ -112,6 +131,131 @@ class TrainingDataTestCase(unittest.TestCase):
         for i, column_name in enumerate(td.df.columns):
             if column_name != "up" and column_name != "down":
                 self.assertEqual(column_name, config["models"][i]["id"])
+        
+
+
+
+
+
+    # Initialize an instance with valid data (Including the RSI) and validate the integrity
+    def testInitializeWithRSI(self):
+        # Init the config
+        config: ITrainingDataConfig = deepcopy(DEFAULT_CONFIG)
+
+        # Set the RSI value
+        config["include_rsi"] = True
+
+        # Init the instance
+        td: ClassificationTrainingData = ClassificationTrainingData(config, test_mode=True)
+
+        # Make sure the models have been initialized correctly
+        self.assertEqual(len(td.models), len(config['models']))
+        for i, m in enumerate(config['models']):
+            if m['id'] != td.models[i].id:
+                self.fail(f"Model ID Missmatch: {m['id']} != {td.models[i].id}")
+
+        # Make sure the ID and the description were initialized
+        self.assertTrue(Utils.is_uuid4(td.id))
+        self.assertEqual(td.regression_selection_id, config['regression_selection_id'])
+        self.assertEqual(td.description, config['description'])
+
+        # Make sure the dates have been set correctly
+        self.assertEqual(td.start, int(Candlestick.DF.iloc[0]['ot']))
+        self.assertEqual(td.end, int(Candlestick.DF.iloc[-1]['ct']))
+
+        # Make sure the steps have been set correctly
+        self.assertEqual(config['steps'], td.steps)
+
+        # Make sure the position percentages have been set correctly
+        self.assertEqual(config['up_percent_change'], td.up_percent_change)
+        self.assertEqual(config['down_percent_change'], td.down_percent_change)
+
+        # Make sure the TA has been set correctly
+        self.assertEqual(config['include_rsi'], td.include_rsi)
+        self.assertEqual(config['include_aroon'], td.include_aroon)
+
+        # Make sure the Features number has been set correctly
+        self.assertEqual(len(config['models']) + 1, td.features_num)
+
+        # Validate the integrity of the DF
+        self.assertEqual(td.df.shape[0], 0)
+        self.assertEqual(td.df.shape[1], len(config['models']) + 1 + 2)
+        rsi_column_exists: bool = False
+        for i, column_name in enumerate(td.df.columns):
+            if column_name == "RSI":
+                rsi_column_exists = True
+            if  column_name != "RSI" and column_name != "up" and column_name != "down":
+                self.assertEqual(column_name, config["models"][i]["id"])
+        self.assertTrue(rsi_column_exists)
+
+
+
+
+    # Initialize an instance with valid data (Including Multiple TA Indicators) and validate the integrity
+    def testInitializeWithMultipleIndicators(self):
+        # Init the config
+        config: ITrainingDataConfig = deepcopy(DEFAULT_CONFIG)
+
+        # Set the RSI value
+        config["include_rsi"] = True
+        config["include_aroon"] = True
+
+        # Init the instance
+        td: ClassificationTrainingData = ClassificationTrainingData(config, test_mode=True)
+
+        # Make sure the models have been initialized correctly
+        self.assertEqual(len(td.models), len(config['models']))
+        for i, m in enumerate(config['models']):
+            if m['id'] != td.models[i].id:
+                self.fail(f"Model ID Missmatch: {m['id']} != {td.models[i].id}")
+
+        # Make sure the ID and the description were initialized
+        self.assertTrue(Utils.is_uuid4(td.id))
+        self.assertEqual(td.regression_selection_id, config['regression_selection_id'])
+        self.assertEqual(td.description, config['description'])
+
+        # Make sure the dates have been set correctly
+        self.assertEqual(td.start, int(Candlestick.DF.iloc[0]['ot']))
+        self.assertEqual(td.end, int(Candlestick.DF.iloc[-1]['ct']))
+
+        # Make sure the steps have been set correctly
+        self.assertEqual(config['steps'], td.steps)
+
+        # Make sure the position percentages have been set correctly
+        self.assertEqual(config['up_percent_change'], td.up_percent_change)
+        self.assertEqual(config['down_percent_change'], td.down_percent_change)
+
+        # Make sure the TA has been set correctly
+        self.assertEqual(config['include_rsi'], td.include_rsi)
+        self.assertEqual(config['include_aroon'], td.include_aroon)
+
+        # Make sure the Features number has been set correctly
+        self.assertEqual(len(config['models']) + 3, td.features_num)
+
+        # Validate the integrity of the DF
+        self.assertEqual(td.df.shape[0], 0)
+        self.assertEqual(td.df.shape[1], len(config['models']) + 3 + 2)
+        rsi_column_exists: bool = False
+        aroon_up_column_exists: bool = False
+        aroon_down_column_exists: bool = False
+        for i, column_name in enumerate(td.df.columns):
+            if column_name == "RSI":
+                rsi_column_exists = True
+            if column_name == "AROON_UP":
+                aroon_up_column_exists = True
+            if column_name == "AROON_DOWN":
+                aroon_down_column_exists = True
+            if  column_name != "RSI" and column_name != "AROON_UP" and column_name != "AROON_DOWN" \
+                and column_name != "up" and column_name != "down":
+                self.assertEqual(column_name, config["models"][i]["id"])
+        self.assertTrue(rsi_column_exists)
+        self.assertTrue(aroon_up_column_exists)
+        self.assertTrue(aroon_down_column_exists)
+
+
+
+
+
         
 
 
@@ -286,6 +430,10 @@ class TrainingDataTestCase(unittest.TestCase):
 
         # Finally, decompress the training data and compare it to the original df
         self.assertTrue(td.df.equals(decompress_training_data(file["training_data"])))
+
+
+
+
 
 
 

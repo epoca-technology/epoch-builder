@@ -4,6 +4,7 @@ from modules.candlestick import Candlestick
 from modules.interpreter import ProbabilityInterpreter
 from modules.model import ModelInterface, IModel, RegressionModelFactory, IPrediction, \
     IPredictionMetaData, IClassificationModelConfig, IArimaModelConfig, ArimaModel, RegressionModel
+from modules.technical_analysis import TechnicalAnalysis, ITechnicalAnalysis
 from modules.classification.Classification import Classification
 
 
@@ -12,9 +13,6 @@ class ClassificationModel(ModelInterface):
     """ClassificationModel Class
     
     This class is responsible of handling interactions with Keras Classification Models.
-
-    Class Properties:
-        ...
 
     Instance Properties:
         id: str
@@ -178,8 +176,23 @@ class ClassificationModel(ModelInterface):
             )["r"] for r in self.regressions
         ]
 
-        # Check if TA Features need to be added
-        # @TODO
+        # Check if any Technical Anlysis feature needs to be added
+        if self.classification.include_rsi or self.classification.include_aroon:
+            # Retrieve the technical analysis
+            ta: ITechnicalAnalysis = TechnicalAnalysis.get_technical_analysis(
+                lookback_df,
+                include_rsi=self.classification.include_rsi,
+                include_aroon=self.classification.include_aroon
+            )
+
+            # Populate the RSI feature if enabled
+            if self.classification.include_rsi:
+                features.append(ta["rsi"])
+
+            # Populate the Aroon features if enabled
+            if self.classification.include_aroon:
+                features.append(ta["aroon_up"])
+                features.append(ta["aroon_down"])
 
         # Finally, return all the features
         return features

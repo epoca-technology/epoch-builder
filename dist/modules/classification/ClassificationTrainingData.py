@@ -8,6 +8,7 @@ from modules.candlestick import Candlestick
 from modules.utils import Utils
 from modules.model import RegressionModelFactory, ArimaModel, RegressionModel, IModel
 from modules.keras_models import KERAS_PATH
+from modules.technical_analysis import TechnicalAnalysis, ITechnicalAnalysis
 from modules.classification import ITrainingDataConfig, ITrainingDataActivePosition, \
     ITrainingDataFile, ITrainingDataPriceActionsInsight, ITrainingDataPredictionInsight, \
         compress_training_data, decompress_training_data
@@ -20,13 +21,12 @@ class ClassificationTrainingData:
 
     Generates the data to be used to train Classification Models based on the provided configuration.
 
-    Class Properties:
-        ...
-
     Instance Properties:
         test_mode: bool
             If test_mode is enabled, it won't initialize the candlesticks and will perform predictions
             with cache disabled
+        regression_selection_id: str
+            The ID of the Regression Selection that was used to pick the Regression Models
         id: str
             Universally Unique Identifier (uuid4)
         description: str
@@ -37,12 +37,20 @@ class ClassificationTrainingData:
             The open timestamp of the first 1m candlestick.
         end: int
             The close timestamp of the last 1m candlestick.
+        steps: int
+            The number of prediction candlestick steps that will be used in order to generate the data.
         up_percent_change: float
             The percentage that needs to go up to close an up position
         down_percent_change: float
             The percentage that needs to go down to close a down position
         models: List[Union[ArimaModel, RegressionModel]]
             The list of ArimaModels that will be used to generate the training data.
+        include_rsi: bool
+            If enabled, the RSI will be added as a feature with the column name "RSI".
+        include_aroon: bool
+            If enabled, "AROON_UP" and "AROON_DOWN" will be added as features.
+        features_num: int
+            The total number of features that will be used by the model to predict.
         df: DataFrame
             Pandas Dataframe containing all the features and labels populated every time a position
             is closed. This DF will be dumped as a csv once the process completes.
@@ -55,7 +63,9 @@ class ClassificationTrainingData:
 
 
 
-    ## Init ##
+    ## Initialization ##
+
+
 
     def __init__(self, config: ITrainingDataConfig, test_mode: bool = False):
         """Initializes the Training Data Instance as well as the candlesticks.
@@ -79,6 +89,9 @@ class ClassificationTrainingData:
 
         # Initialize the type of execution
         self.test_mode: bool = test_mode
+
+        # Initialize the Regression Selection
+        self.regression_selection_id: str = config["regression_selection_id"]
 
         # Initialize the description
         self.description: str = config["description"]
@@ -120,11 +133,26 @@ class ClassificationTrainingData:
         self.start: int = int(Candlestick.DF.iloc[0]["ot"])
         self.end: int = int(Candlestick.DF.iloc[-1]["ct"])
 
+        # Init the steps
+        self.steps: int = config["steps"]
+
         # Postitions Up & Down percent change requirements
         self.up_percent_change: float = config["up_percent_change"]
         self.down_percent_change: float = config["down_percent_change"]
 
+        # Init the Technical Analysis
+        self.include_rsi: bool = config["include_rsi"]
+        self.include_aroon: bool = config["include_aroon"]
+
+        # Init the number of features
+        self.features_num: int = self._get_features_num()
+
         # Initialize the DF
+        if self.include_rsi:
+            df_data["RSI"] = []
+        if self.include_aroon:
+            df_data["AROON_UP"] = []
+            df_data["AROON_DOWN"] = []
         df_data["up"] = []
         df_data["down"] = []
         self.df: DataFrame = DataFrame(data=df_data)
@@ -136,12 +164,76 @@ class ClassificationTrainingData:
 
 
 
+
+    def _get_features_num(self) -> int:
+        """Calculates the total number of features that will be used by the
+        models trained with the data that will be generated.
+
+        Returns:
+            int
+        """
+        # Init the base number of features
+        features_num: int = len(self.models)
+
+        # Check if the RSI is enabled
+        if self.include_rsi:
+            features_num += 1
+
+        # Check if Aroon is enabled
+        if self.include_aroon:
+            features_num += 2
+
+        # Finally, return the final number
+        return features_num
+
+
+
+
+
+
+
+
+
     ## Execution ##
 
 
 
 
     def run(self) -> None:
+        """Runs the training data execution based on the mode provided in the
+        configuration.
+        """
+        # Check if it is a stepped execution
+        if self.steps > 0:
+            self.run_stepped()
+
+        # Otherwise, run the traditional execution
+        else:
+            self.run_traditional()
+
+
+
+
+    # Stepped
+
+
+    def run_stepped(self) -> None:
+        """
+        """
+        pass
+
+
+
+
+
+
+
+
+
+    # Traditional
+
+
+    def run_traditional(self) -> None:
         """Runs the Training Data Process and stores the results once it completes.
         """
         # Init the progress bar
@@ -173,6 +265,9 @@ class ClassificationTrainingData:
 
         # Validate the integrity of the saved training data
         self._validate_integrity()
+
+
+
 
 
 
@@ -232,8 +327,23 @@ class ClassificationTrainingData:
             )["r"] for m in self.models
         }
 
-        # Include the RSI if applies
-        # @TODO
+        # Check if any Technical Anlysis feature needs to be added
+        if self.include_rsi or self.include_aroon:
+            # Retrieve the technical analysis
+            ta: ITechnicalAnalysis = TechnicalAnalysis.get_technical_analysis(
+                lookback_df,
+                include_rsi=self.include_rsi,
+                include_aroon=self.include_aroon
+            )
+
+            # Populate the RSI feature if enabled
+            if self.include_rsi:
+                features["RSI"] = ta["rsi"]
+
+            # Populate the Aroon features if enabled
+            if self.include_aroon:
+                features["AROON_UP"] = ta["aroon_up"]
+                features["AROON_DOWN"] = ta["aroon_down"]
 
         # Finally, return the features
         return features
@@ -368,14 +478,19 @@ class ClassificationTrainingData:
 
         # Return the File Data
         return {
+            "regression_selection_id": self.regression_selection_id,
             "id": self.id,
             "description": self.description,
             "creation": current_time,
             "start": self.start,
             "end": self.end,
+            "steps": self.steps,
             "up_percent_change": self.up_percent_change,
             "down_percent_change": self.down_percent_change,
             "models": [m.get_model() for m in self.models],
+            "include_rsi": self.include_rsi,
+            "include_aroon": self.include_aroon,
+            "features_num": self.features_num,
             "duration_minutes": Utils.from_milliseconds_to_minutes(current_time - execution_start),
             "price_actions_insight": self._get_price_actions_insight(),
             "predictions_insight": {m.id: self._get_prediction_insight_for_model(m.id) for m in self.models},
@@ -457,6 +572,8 @@ class ClassificationTrainingData:
         td: ITrainingDataFile = load(td_file)
 
         # Validate general values
+        if td["regression_selection_id"] != self.regression_selection_id:
+            raise ValueError(f"Regr. Selection ID Discrepancy: {str(td['regression_selection_id'])} != {str(self.regression_selection_id)}")
         if td["id"] != self.id:
             raise ValueError(f"ID Discrepancy: {str(td['id'])} != {str(self.id)}")
         if td["description"] != self.description:
@@ -469,10 +586,18 @@ class ClassificationTrainingData:
             raise ValueError(f"The end timestamp is invalid: {str(td['end'])}")
         if not isinstance(td["duration_minutes"], int):
             raise ValueError(f"The duration_minutes is invalid: {str(td['duration_minutes'])}")
+        if td["steps"] != self.steps:
+            raise ValueError(f"Steps Discrepancy: {str(td['steps'])} != {str(self.steps)}")
         if td["up_percent_change"] != self.up_percent_change:
             raise ValueError(f"Up Percent Change Discrepancy: {str(td['up_percent_change'])} != {str(self.up_percent_change)}")
         if td["down_percent_change"] != self.down_percent_change:
             raise ValueError(f"Down Percent Change Discrepancy: {str(td['down_percent_change'])} != {str(self.down_percent_change)}")
+        if td["include_rsi"] != self.include_rsi:
+            raise ValueError(f"Include RSI Discrepancy: {str(td['include_rsi'])} != {str(self.include_rsi)}")
+        if td["include_aroon"] != self.include_aroon:
+            raise ValueError(f"Include Aroon Discrepancy: {str(td['include_aroon'])} != {str(self.include_aroon)}")
+        if td["features_num"] != self.features_num:
+            raise ValueError(f"Features Num Discrepancy: {str(td['features_num'])} != {str(self.features_num)}")
 
         # Validate the models
         models: List[IModel] = [m.get_model() for m in self.models]

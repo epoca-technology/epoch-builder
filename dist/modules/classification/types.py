@@ -54,6 +54,9 @@ class ITrainingDataPredictionInsight(TypedDict):
 # The Training configuration that resides in the configuration file and it is used to initialize
 # the training data generator.
 class ITrainingDataConfig(TypedDict):
+    # The ID of the Regression Selection that was used to pick the Regression Models
+    regression_selection_id: str
+
     # The description of the Training Data that will be generated.
     description: str
 
@@ -61,12 +64,22 @@ class ITrainingDataConfig(TypedDict):
     start: Union[str, int, None]
     end: Union[str, int, None]
 
+    # The Prediction Candlestick steps that will be used to generate the data. If 0 is provided
+    # the training data will be generated the traditional way.
+    # The purpose of this mode is to increase the size of the Training Dataset and cover more 
+    # cases.
+    steps: int
+
     # Percentages that will determine if the price moved up or down after a position is opened
     up_percent_change: float
     down_percent_change: float
 
     # The list of ArimaModels|RegressionModels that will be used to predict
-    models: List[IModel] # IModel does not exist yet
+    models: List[IModel]
+
+    # Optional Technical Analysis Features
+    include_rsi: bool   # Momentum
+    include_aroon: bool # Trend
 
 
 
@@ -89,6 +102,9 @@ class ITrainingDataFile(TypedDict):
     # Universally Unique Identifier (uuid4)
     id: str
 
+    # The ID of the Regression Selection that was used to pick the Regression Models
+    regression_selection_id: str
+
     # The description of the Training Data that will be generated.
     description: str
 
@@ -102,12 +118,25 @@ class ITrainingDataFile(TypedDict):
     # The number of minutes that took to generate the training data
     duration_minutes: int
 
+    # The Prediction Candlestick steps that will be used to generate the data. If 0 is provided
+    # the training data will be generated the traditional way.
+    # The purpose of this mode is to increase the size of the Training Dataset and cover more 
+    # cases.
+    steps: int
+
     # Percentages that will determine if the price moved up or down after a position is opened
     up_percent_change: float
     down_percent_change: float
 
     # List of ArimaModels|RegressionModels
-    models: List[IModel] # IModel does not exist yet
+    models: List[IModel]
+
+    # Optional Technical Analysis Features
+    include_rsi: bool   # Momentum
+    include_aroon: bool # Trend
+
+    # The total number of features that will be used by the model to predict
+    features_num: int
 
     # Price Actions Insight - The up and down total count
     price_actions_insight: ITrainingDataPriceActionsInsight
@@ -189,6 +218,9 @@ class IClassificationTrainingBatch(TypedDict):
 # In order to simplify interactions with the IClassificationTrainingCertificate, the training
 # data is summarized in a dictionary.
 class ITrainingDataSummary(TypedDict):
+    # The ID of the Regression Selection that was used to pick the Regression Models
+    regression_selection_id: str
+
     # Identifier
     id: str
     description: str
@@ -201,9 +233,22 @@ class ITrainingDataSummary(TypedDict):
     train_size: int     # Number of rows in the train dataset
     test_size: int      # Number of rows in the test dataset
 
+    # The Prediction Candlestick steps that will be used to generate the data. If 0 is provided
+    # the training data will be generated the traditional way.
+    # The purpose of this mode is to increase the size of the Training Dataset and cover more 
+    # cases.
+    steps: int
+
     # Percentages that determine if the price moved up or down
     up_percent_change: float
     down_percent_change: float
+
+    # Optional Technical Analysis Features
+    include_rsi: bool   # Momentum
+    include_aroon: bool # Trend
+
+    # The total number of features that will be used by the model to predict
+    features_num: int
 
 
 
