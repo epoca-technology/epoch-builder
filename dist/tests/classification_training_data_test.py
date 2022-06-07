@@ -74,7 +74,7 @@ START_CANDLESTICK['c'] = 40052.18
 
 
 ## Test Class ##
-class TrainingDataTestCase(unittest.TestCase):
+class ClassificationTrainingDataTestCase(unittest.TestCase):
     # Before Tests
     def setUp(self):
         pass

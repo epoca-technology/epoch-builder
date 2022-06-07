@@ -30,4 +30,5 @@ def ModelFactory(config: IModel) -> Union[ArimaModel, RegressionModel, Classific
 
     # Otherwise, the provided configuration is invalid
     else:
+        print(config)
         raise ValueError("Couldnt find an instance for the provided model configuration.")

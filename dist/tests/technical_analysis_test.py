@@ -205,14 +205,6 @@ class TechnicalAnalysisTestCase(unittest.TestCase):
 
 
 
-    # Can normalize a technical analysis value
-    def testNormalizeValue(self):
-        self.assertEqual(TechnicalAnalysis._normalize_value(14.285714), 0.142857)
-        self.assertEqual(TechnicalAnalysis._normalize_value(42.857143), 0.428571)
-        self.assertEqual(TechnicalAnalysis._normalize_value(71.428571), 0.714286)
-        self.assertEqual(TechnicalAnalysis._normalize_value(100), 1)
-        self.assertEqual(TechnicalAnalysis._normalize_value(0), 0)
-
 
 
 

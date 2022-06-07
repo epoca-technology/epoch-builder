@@ -181,10 +181,10 @@ class IClassificationTrainingConfig(TypedDict):
     optimizer: str # 'adam'|'rmsprop'
 
     # The loss function to be used
-    loss: str # 'categorical_crossentropy'|'?'
+    loss: str # 'categorical_crossentropy'|'binary_crossentropy'
 
-    # The metric to be used for meassuring the val_loss
-    metric: str # 'categorical_accuracy'|'?'
+    # The metric to be used for meassuring the val_acc
+    metric: str # 'categorical_accuracy'|'binary_accuracy'
 
     # Keras Model Configuration
     keras_model: IKerasModelConfig

@@ -214,13 +214,50 @@ class ClassificationTrainingData:
 
 
 
-    # Stepped
+
+
+    # Stepped Training Data
+    # Iterates over stepped 1 minute candlesticks based on the prediction candlesticks' interval
+    # minutes. The candlesticks between position open and close are not ignored. Instead, when
+    # a position is closed, it goes back to where it left off.
+    # The purpose of this type of training data is to generate a larger dataset for models to 
+    # understand the relationship between features better.
 
 
     def run_stepped(self) -> None:
+        """Runs the Stepped Training Data Process and stores the results once it completes.
         """
-        """
-        pass
+        # Calculate the number of 1 minute candlesticks that will be stepped
+        real_steps: int = self.steps * Candlestick.PREDICTION_CANDLESTICK_CONFIG["interval_minutes"]
+
+        # Init the progress bar
+        progress_bar = tqdm(bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}", total=int(Candlestick.DF.shape[0]/real_steps))
+
+        # Init the time in which the execution started
+        execution_start: int = Utils.get_time()
+
+        # Iterate over the candlesticks based on the real steps
+        for index in range(0, Candlestick.DF.shape[0], real_steps):
+            # Open a position
+            self._open_position(Candlestick.DF.iloc[index])
+
+            # Iterate until the position's outcome has been determined
+            outcome_index: int = index + 1
+            while self.active != None and outcome_index < Candlestick.DF.shape[0]:
+                # Check the position
+                self._check_position(Candlestick.DF.iloc[outcome_index])
+
+                # Increment the index
+                outcome_index += 1
+
+            # Update the progress bar
+            progress_bar.update()
+
+        # Save the results
+        self._save_training_data(execution_start)
+
+        # Validate the integrity of the saved training data
+        self._validate_integrity()
 
 
 
@@ -230,14 +267,19 @@ class ClassificationTrainingData:
 
 
 
-    # Traditional
+
+
+    # Traditional Training Data
+    # Iterates over the 1 minute candlesticks one by one opening positions whenever possible.
+    # The candlesticks between a position open and close are ignored, similar to what real life
+    # trading would be like.
 
 
     def run_traditional(self) -> None:
         """Runs the Training Data Process and stores the results once it completes.
         """
         # Init the progress bar
-        progress_bar = tqdm( bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}", total=Candlestick.DF.shape[0])
+        progress_bar = tqdm(bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}", total=Candlestick.DF.shape[0])
 
         # Init the time in which the execution started
         execution_start: int = Utils.get_time()

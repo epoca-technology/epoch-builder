@@ -3,7 +3,7 @@ from pandas import DataFrame
 from modules.candlestick import Candlestick
 from modules.interpreter import ProbabilityInterpreter
 from modules.model import ModelInterface, IModel, RegressionModelFactory, IPrediction, \
-    IPredictionMetaData, IClassificationModelConfig, IArimaModelConfig, ArimaModel, RegressionModel
+    IPredictionMetaData, IClassificationModelConfig, ArimaModel, RegressionModel
 from modules.technical_analysis import TechnicalAnalysis, ITechnicalAnalysis
 from modules.classification.Classification import Classification
 
@@ -268,13 +268,5 @@ class ClassificationModel(ModelInterface):
         Returns:
             bool
         """
-        # Initialize the regression models lists. Handling potential None values
-        arima: List[IArimaModelConfig] = model['arima_models'] \
-            if model.get('arima_models') is not None else []
-        regression: List[IArimaModelConfig] = model['regression_models'] \
-            if model.get('regression_models') is not None else []
-
-        # Check if the provided model configuration matches
         return isinstance(model.get('classification_models'), list) \
-                and len(model['classification_models']) == 1 \
-                    and (len(arima) + len(regression)) >= 5
+                and len(model['classification_models']) == 1

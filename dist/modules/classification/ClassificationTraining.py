@@ -169,8 +169,9 @@ class ClassificationTraining:
         # Initialize the max evaluations
         self.max_evaluations: int = max_evaluations if isinstance(max_evaluations, int) else ClassificationTraining.DEFAULT_MAX_EVALUATIONS
 
-        # Initialize the model's directory
-        self._init_model_dir()
+        # Initialize the model's directory if not unit testing
+        if not self.test_mode:
+            self._init_model_dir()
 
 
 
@@ -430,15 +431,12 @@ class ClassificationTraining:
         # Initialize the ClassificationModel Instance
         classification: ClassificationModel = ClassificationModel({
             "id": self.id,
-            "classification_models": [{
-                "classification_id": self.id,
-                "interpreter": { "min_probability": 0.51 }
-            }]
+            "classification_models": [{ "classification_id": self.id, "interpreter": { "min_probability": 0.51 }}]
         })
 
         # Init the min and max values for the random candlestick indexes
         min_i: int = 0
-        max_i: int = int(Candlestick.DF.shape[0] * 0.95) # Omit the tail to prevent index errors
+        max_i: int = int(Candlestick.DF.shape[0] * 0.99) # Omit the tail to prevent index errors
 
         # Init evaluation data
         evals: int = 0
@@ -467,32 +465,34 @@ class ClassificationTraining:
                 # Retrieve the outcome of the evaluation
                 outcome: int = self._get_evaluation_outcome(random_index, candlestick)
 
-                # Check if the Classification predicted an increase
-                if pred["r"] == 1:
-                    # Append the increase prediction to the list
-                    increase.append(float(pred["md"][0]["up"]))
-                    
-                    # Check if the prediction was correct
-                    if outcome == 1:
-                        increase_successful.append(float(pred["md"][0]["up"]))
-                        increase_outcomes += 1
-                    else:
-                        decrease_outcomes += 1
+                # Only process the evaluation if the outcome was determined
+                if outcome != 0:
+                    # Check if the Classification predicted an increase
+                    if pred["r"] == 1:
+                        # Append the increase prediction to the list
+                        increase.append(float(pred["md"][0]["up"]))
+                        
+                        # Check if the prediction was correct
+                        if outcome == 1:
+                            increase_successful.append(float(pred["md"][0]["up"]))
+                            increase_outcomes += 1
+                        else:
+                            decrease_outcomes += 1
 
-                # Otherwise, the Classification predicted a decrease
-                else:
-                    # Append the decrease prediction to the list
-                    decrease.append(float(pred["md"][0]["dp"]))
-                    
-                    # Check if the prediction was correct
-                    if outcome == -1:
-                        decrease_successful.append(float(pred["md"][0]["dp"]))
-                        decrease_outcomes += 1
+                    # Otherwise, the Classification predicted a decrease
                     else:
-                        increase_outcomes += 1
+                        # Append the decrease prediction to the list
+                        decrease.append(float(pred["md"][0]["dp"]))
+                        
+                        # Check if the prediction was correct
+                        if outcome == -1:
+                            decrease_successful.append(float(pred["md"][0]["dp"]))
+                            decrease_outcomes += 1
+                        else:
+                            increase_outcomes += 1
 
-                # Increment the evals performed
-                evals += 1
+                    # Increment the evals performed
+                    evals += 1
 
             # Update the progress bar
             progress_bar.update()
@@ -577,7 +577,7 @@ class ClassificationTraining:
 
         # Iterate over the next candlesticks until the outcome is discovered
         candlestick_index: int = random_index + 1
-        while outcome == 0:
+        while outcome == 0 and candlestick_index < int(Candlestick.DF.shape[0]*0.99):
             # Initialize the candlestick
             candlestick: Series = Candlestick.DF.iloc[candlestick_index]
 
@@ -677,7 +677,7 @@ class ClassificationTraining:
         )
 
         # Save the file
-        with open(f"{self.model_path}/certificate.json", "w") as outfile:
+        with open(f"{self.model_path}/{self.id}.json", "w") as outfile:
             outfile.write(dumps(certificate))
 
         # Finally, return it so it can be added to the batch

@@ -217,9 +217,13 @@ class TechnicalAnalysis:
         """
         # Calculate the RSI Series
         rsi_result: Series = rsi(close_prices, window=TechnicalAnalysis.SHORT_WINDOW)
+
+        # Normalizer
+        def _normalize(val: float) -> float:
+            return round(((val / 100) - 0.5)*2, 6)
         
         # Return the current item in a normalized format
-        return TechnicalAnalysis._normalize_value(rsi_result.iloc[-1])
+        return _normalize(rsi_result.iloc[-1])
 
 
 
@@ -242,8 +246,14 @@ class TechnicalAnalysis:
         up: Series = aroon_up(close_prices, window=TechnicalAnalysis.SHORT_WINDOW)
         down: Series = aroon_down(close_prices, window=TechnicalAnalysis.SHORT_WINDOW)
 
+        # Normalizers
+        def _normalize_up(val: float) -> float:
+            return round((val / 100), 6)
+        def _normalize_down(val: float) -> float:
+            return round((val / 100)*-1, 6)
+
         # Pack the current values and return them
-        return TechnicalAnalysis._normalize_value(up.iloc[-1]), TechnicalAnalysis._normalize_value(down.iloc[-1])
+        return _normalize_up(up.iloc[-1]), _normalize_down(down.iloc[-1])
 
 
 
@@ -283,17 +293,3 @@ class TechnicalAnalysis:
 
 
 
-
-
-    @staticmethod
-    def _normalize_value(value: float) -> float:
-        """Normalizes given value by dividing it by 100.
-
-        Args:
-            value: float
-                The value to be normalized
-
-        Returns:
-            float
-        """
-        return round(value / 100, TechnicalAnalysis.DECIMALS)

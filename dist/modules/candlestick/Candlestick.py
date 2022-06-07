@@ -10,6 +10,7 @@ from modules.utils import Utils
 class ICandlestickConfig(TypedDict):
     columns: Tuple[str]
     csv_file_name: str
+    interval_minutes: int
 
 
 
@@ -41,13 +42,15 @@ class Candlestick:
     # Default Candlesticks Configuration
     DEFAULT_CANDLESTICK_CONFIG: ICandlestickConfig = {
         "columns": ("ot", "ct", "o", "h", "l", "c"),
-        "csv_file": "candlesticks/candlesticks.csv"
+        "csv_file": "candlesticks/candlesticks.csv",
+        "interval_minutes": 1
     }
 
     # Prediction Candlesticks Configuration
     PREDICTION_CANDLESTICK_CONFIG: ICandlestickConfig = {
         "columns": ("ot", "ct", "o", "h", "l", "c"),
-        "csv_file": "candlesticks/prediction_candlesticks.csv"
+        "csv_file": "candlesticks/prediction_candlesticks.csv",
+        "interval_minutes": 30
     }
 
 
