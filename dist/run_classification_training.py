@@ -1,5 +1,5 @@
 from typing import List, Dict, Union
-from os import makedirs
+from os import makedirs, remove
 from os.path import exists
 from json import load, dumps
 from inquirer import Text, prompt
@@ -85,6 +85,10 @@ for index, model_config in enumerate(config["models"]):
 
     # Add the certificate to the list
     certificates.append(cert)
+
+    # Perform the post evaluation cleanup if applies
+    if config["post_evaluation_cleanup"]:
+        remove(f"{KERAS_PATH['models']}/{classification_training.id}/model.h5")
 
 # Save the certificates
 if not exists(KERAS_PATH["batched_training_certificates"]):

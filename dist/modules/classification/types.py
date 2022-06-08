@@ -205,6 +205,9 @@ class IClassificationTrainingBatch(TypedDict):
     # ID of the Classification Training Data that will be used to train all the models.
     training_data_id: str
 
+    # If enabled, it will delete the model files once the evaluation is complete
+    post_evaluation_cleanup: bool
+
     # The configurations for the models that will be trained within the batch.
     models: List[IClassificationTrainingConfig]
 

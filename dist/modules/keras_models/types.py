@@ -63,6 +63,12 @@ class IKerasModelConfig(TypedDict):
     # Activations
     activations: Union[List[str], None]
 
+    # Filters
+    filters: Union[List[int], None]
+
+    # Pool Sizes
+    pool_sizes: Union[List[int], None]
+
     # Lookback used as the model's input. This lookback is not set in the 
     # RegressionTraining.json file. However, it is populated once the RegressionTraining
     # instance is initialized.
