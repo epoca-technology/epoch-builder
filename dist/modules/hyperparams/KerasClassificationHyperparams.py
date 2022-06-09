@@ -50,7 +50,7 @@ class KerasClassificationHyperparams:
 
 
     # Activations
-    ACTIVATIONS: List[str] = ["relu", "tahn"]
+    ACTIVATIONS: List[str] = ["relu", "tanh"]
 
 
     # Dropout Rates
