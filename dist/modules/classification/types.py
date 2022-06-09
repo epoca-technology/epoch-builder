@@ -206,7 +206,7 @@ class IClassificationTrainingBatch(TypedDict):
     training_data_id: str
 
     # If enabled, it will delete the model files once the evaluation is complete
-    post_evaluation_cleanup: bool
+    hyperparams_mode: bool
 
     # The configurations for the models that will be trained within the batch.
     models: List[IClassificationTrainingConfig]

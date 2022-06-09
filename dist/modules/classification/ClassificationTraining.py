@@ -43,6 +43,9 @@ class ClassificationTraining:
     Instance Properties:
         test_mode: bool
             If test_mode is enabled, it won't initialize the candlesticks.
+        hyperparams_mode: bool
+            If enabled, it means that the purpose of the training is to identify the best hyperparams
+            and therefore, a large amount of models will be trained.
         id: str
             A descriptive identifier compatible with filesystems.
         model_path: str
@@ -103,6 +106,7 @@ class ClassificationTraining:
         training_data_file: ITrainingDataFile, 
         config: IClassificationTrainingConfig, 
         max_evaluations: Union[int, None],
+        hyperparams_mode: bool=False,
         test_mode: bool = False
     ):
         """Initializes the ClassificationTraining Instance.
@@ -120,6 +124,9 @@ class ClassificationTraining:
         """
         # Initialize the type of execution
         self.test_mode: bool = test_mode
+
+        # Initialize the mode
+        self.hyperparams_mode: bool = hyperparams_mode
         
         # Initialize the id
         self.id: str = config["id"]
@@ -356,15 +363,18 @@ class ClassificationTraining:
         )
 
         # Retrieve the Keras Model
-        print("    1/7) Initializing Model...")
+        if not self.hyperparams_mode:
+            print("    1/7) Initializing Model...")
         model: Sequential = KerasModel(config=self.keras_model)
 
         # Compile the model
-        print("    2/7) Compiling Model...")
+        if not self.hyperparams_mode:
+            print("    2/7) Compiling Model...")
         model.compile(optimizer=self.optimizer, loss=self.loss, metrics=[self.metric])
   
         # Train the model
-        print("    3/7) Training Model...")
+        if not self.hyperparams_mode:
+            print("    3/7) Training Model...")
         history_object: History = model.fit(
             self.train_x,
             self.train_y,
@@ -379,18 +389,21 @@ class ClassificationTraining:
         history: IKerasModelTrainingHistory = history_object.history
 
         # Evaluate the test dataset
-        print("    4/7) Evaluating Test Dataset...")
+        if not self.hyperparams_mode:
+            print("    4/7) Evaluating Test Dataset...")
         test_evaluation: List[float] = model.evaluate(self.test_x, self.test_y, verbose=0) # [loss, accuracy]
 
         # Save the model
-        print("    5/7) Saving Model...")
+        if not self.hyperparams_mode:
+            print("    5/7) Saving Model...")
         self._save_model(model)
 
         # Perform the Classification Evaluation
         classification_evaluation: IClassificationEvaluation = self._evaluate_classification()
 
         # Save the certificate
-        print("    7/7) Saving Certificate...")
+        if not self.hyperparams_mode:
+            print("    7/7) Saving Certificate...")
         certificate: IClassificationTrainingCertificate = self._save_certificate(
             start_time, 
             model, 
@@ -448,8 +461,9 @@ class ClassificationTraining:
         decrease_outcomes: int = 0
 
         # Init the progress bar
-        progress_bar = tqdm( bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}", total=self.max_evaluations)
-        progress_bar.set_description("    6/7) Evaluating Classification")
+        if not self.hyperparams_mode:
+            progress_bar = tqdm( bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}", total=self.max_evaluations)
+            progress_bar.set_description("    6/7) Evaluating Classification")
 
         # Perform the evaluation
         for i in range(self.max_evaluations):
@@ -495,7 +509,8 @@ class ClassificationTraining:
                     evals += 1
 
             # Update the progress bar
-            progress_bar.update()
+            if not self.hyperparams_mode:
+                progress_bar.update()
 
         # Initialize the lens for performance
         increase_num: int = len(increase)

@@ -3,6 +3,7 @@ from os import makedirs, remove
 from os.path import exists
 from json import load, dumps
 from inquirer import Text, prompt
+from tqdm import tqdm
 from modules.utils import Utils
 from modules.keras_models import KERAS_PATH
 from modules.classification import IClassificationTrainingBatch, ClassificationTraining, IClassificationTrainingCertificate, \
@@ -58,9 +59,7 @@ training_data: ITrainingDataFile = load(training_data_config_file)
 # completion, results will not be saved.
 print("CLASSIFICATION TRAINING")
 # Init the max evaluations
-answers: Dict[str, str] = prompt([
-    Text("max_evaluations", "Number of Classification Evaluations (Defaults to 500)")
-])
+answers: Dict[str, str] = prompt([Text("max_evaluations", "Number of Classification Evaluations (Defaults to 500)")])
 max_evaluations: Union[int, None] = int(answers["max_evaluations"]) if answers["max_evaluations"].isdigit() else None
 
 # Init the list of certificates
@@ -72,13 +71,19 @@ for index, model_config in enumerate(config["models"]):
     classification_training: ClassificationTraining = ClassificationTraining(
         training_data, 
         model_config, 
-        max_evaluations=max_evaluations
+        max_evaluations=max_evaluations,
+        hyperparams_mode=config["hyperparams_mode"]
     )
 
     # Log the progress
     if index == 0:
         print("\nCLASSIFICATION TRAINING RUNNING")
-    print(f"\n{index + 1}/{len(config['models'])}) {model_config['id']}")
+        if config["hyperparams_mode"]:
+            print("\n")
+            progress_bar = tqdm( bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}", total=len(config["models"]))
+
+    if not config["hyperparams_mode"]:    
+        print(f"\n{index + 1}/{len(config['models'])}) {model_config['id']}")
 
     # Train the model
     cert: IClassificationTrainingCertificate = classification_training.train()
@@ -87,8 +92,9 @@ for index, model_config in enumerate(config["models"]):
     certificates.append(cert)
 
     # Perform the post evaluation cleanup if applies
-    if config["post_evaluation_cleanup"]:
+    if config["hyperparams_mode"]:
         remove(f"{KERAS_PATH['models']}/{classification_training.id}/model.h5")
+        progress_bar.update()
 
 # Save the certificates
 if not exists(KERAS_PATH["batched_training_certificates"]):

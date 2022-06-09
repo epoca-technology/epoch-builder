@@ -58,7 +58,7 @@ class KerasClassificationHyperparams:
 
 
     # Pool Sizes
-    POOL_SIZES: List[int] = [2, 4]
+    POOL_SIZES: List[int] = [2] # Changed from [2, 4] in order to lower the number of tests
 
 
 
@@ -106,7 +106,7 @@ class KerasClassificationHyperparams:
         KerasClassificationHyperparams._save(network_type, {
             "name": f"{network_type}_VARIATIONS",
             "training_data_id": training_data_id,
-            "post_evaluation_cleanup": True,
+            "hyperparams_mode": True,
             "models": configs
         })
 
@@ -328,6 +328,12 @@ class KerasClassificationHyperparams:
         """
         if network_type == "DNN":
             return source.DNN
+        elif network_type == "CNN":
+            return source.CNN
+        elif network_type == "LSTM":
+            return source.LSTM
+        elif network_type == "CLSTM":
+            return source.CLSTM
         else:
             raise ValueError(f"The provided network type ({str(network_type)}) is invalid.")
 

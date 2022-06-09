@@ -1,18 +1,22 @@
 {
     "regression_selection_id": "e5a03686-7bb9-4e2f-ab2f-3058281f589f",
-    "description": "UNIT_TEST: DO NOT DELETE.",
-    "start": "1/10/2021",
+    "description": "Experiment 3: Date range reduced to ~2 years.",
+    "start": "1/01/2020",
     "end": "22/04/2022",
     "steps": 5,
     "up_percent_change": 3,
     "down_percent_change": 3,
     "models": [
-        { "id": "A101","arima_models": [{"arima": {"p": 1, "d": 0,"q": 1}}] },
-        { "id": "A111","arima_models": [{"arima": {"p": 1, "d": 1,"q": 1}}] },
-        { "id": "A112","arima_models": [{"arima": {"p": 1, "d": 1,"q": 2}}] },
-        { "id": "A121","arima_models": [{"arima": {"p": 1, "d": 2,"q": 1}}] },
-        { "id": "A211","arima_models": [{"arima": {"p": 2, "d": 1,"q": 1}}] },
-        { "id": "R_UNIT_TEST","regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": {"long": 1.5, "short": 1.5}}] }
+        { "id": "A678","arima_models": [{"arima": {"p": 6, "d": 7,"q": 8}}] },
+        { "id": "A894","arima_models": [{"arima": {"p": 8, "d": 9,"q": 4}}] },
+        { "id": "A578","arima_models": [{"arima": {"p": 5, "d": 7,"q": 8}}] },
+        { "id": "A482","arima_models": [{"arima": {"p": 4, "d": 8,"q": 2}}] },
+        { "id": "A456","arima_models": [{"arima": {"p": 4, "d": 5,"q": 6}}] },
+        { "id": "A393","arima_models": [{"arima": {"p": 3, "d": 9,"q": 3}}] },
+        { "id": "A272","arima_models": [{"arima": {"p": 2, "d": 7,"q": 2}}] },
+        { "id": "A777","arima_models": [{"arima": {"p": 7, "d": 7,"q": 7}}] },
+        { "id": "A699","arima_models": [{"arima": {"p": 6, "d": 9,"q": 9}}] },
+        { "id": "A781","arima_models": [{"arima": {"p": 7, "d": 8,"q": 1}}] }
     ],
     "include_rsi": true,
     "include_aroon": true
