@@ -1,4 +1,4 @@
-from typing import Union, List, Dict, Any
+from typing import Union, List, Dict
 from random import choice
 from string import ascii_uppercase, digits
 from os import makedirs
@@ -20,22 +20,22 @@ class KerasClassificationHyperparams:
 
     Class Properties:
         LEARNING_RATES: List[float]
-            ...
+            The list of learning rates that will be used when compiling models.
         OPTIMIZERS: List[str]
-            ...
+            The list of optimizers that will be used when compiling models.
         LOSS: List[IKerasLoss]
-            ...
+            The list of loss and metric combinations that will be used when compiling models.
         ACTIVATIONS: List[str]
-            ...
+            The list of different activations that will be used to structure models.
         DROPOUT_RATES: List[float]
-            ...
+            The list of different dropout rates that will be used to structure models.
         POOL_SIZES: List[int]
-            ...
+            The list of different pool sizes that will be used to structure CNN models.
     """
 
 
     # Learning Rates
-    LEARNING_RATES: List[float] = [ 0.01, 0.001, 0.0001 ]
+    LEARNING_RATES: List[float] = [ 0.01, 0.001 ]  # Changed from [ 0.01, 0.001, 0.0001 ] in order to lower the number of tests
 
 
     # Optimizers
@@ -50,15 +50,15 @@ class KerasClassificationHyperparams:
 
 
     # Activations
-    ACTIVATIONS: List[str] = ["relu", "tanh"]
+    ACTIVATIONS: List[str] = [ "relu", "tanh" ]
 
 
     # Dropout Rates
-    DROPOUT_RATES: List[float] = [0.25, 0.5]
+    DROPOUT_RATES: List[float] = [ 0.25 ] # Changed from [0.25, 0.5] in order to lower the number of tests
 
 
     # Pool Sizes
-    POOL_SIZES: List[int] = [2] # Changed from [2, 4] in order to lower the number of tests
+    POOL_SIZES: List[int] = [ 2 ] # Changed from [2, 4] in order to lower the number of tests
 
 
 
@@ -316,7 +316,7 @@ class KerasClassificationHyperparams:
 
 
     @staticmethod
-    def _get_network_models(network_type: str) -> Union[source.IDNN, Any]:
+    def _get_network_models(network_type: str) -> Union[source.IDNN, source.ICNN, source.ILSTM, source.ICLSTM]:
         """Returns the appropiate network models
 
         Args:
@@ -324,7 +324,7 @@ class KerasClassificationHyperparams:
                 The network to retrieve the models and variations for.
 
         Returns:
-            Union[source.IDNN, Any]
+            Union[source.IDNN, source.ICNN, source.ILSTM, source.ICLSTM]
         """
         if network_type == "DNN":
             return source.DNN

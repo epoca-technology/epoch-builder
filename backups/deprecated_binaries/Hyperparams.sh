@@ -1,3 +1,3 @@
 #!/bin/bash
 export PYTHONPATH=$(pwd)/dist
-python3 dist/run_regression_training.py
+python3 dist/cli/run_hyperparams.py

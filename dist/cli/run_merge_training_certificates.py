@@ -1,5 +1,5 @@
 from typing import List, Dict
-from os import walk
+from os import walk, makedirs
 from os.path import exists, isfile
 from json import load, dumps
 from inquirer import List as InquirerList, prompt
@@ -36,6 +36,8 @@ if len(ids) == 0:
 certificates: List[IClassificationTrainingCertificate] = [load(open(f"{KERAS_PATH['models']}/{id}/{id}.json")) for id in ids]
 
 # Finally, dump the merged file in the configs directory
+if not exists(KERAS_PATH["batched_training_certificates"]):
+    makedirs(KERAS_PATH["batched_training_certificates"])
 path: str = f"{KERAS_PATH['batched_training_certificates']}/{answers['prefix']}MERGE_{Utils.get_time()}.json"
 with open(path, "w") as outfile:
     outfile.write(dumps(certificates))

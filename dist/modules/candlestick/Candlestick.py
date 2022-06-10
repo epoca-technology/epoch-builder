@@ -1,4 +1,6 @@
-from typing import Tuple, Union, TypedDict
+from typing import Tuple, Union, TypedDict, Dict, List
+from os.path import isfile
+from json import load
 from pandas import DataFrame, Series, read_csv
 from modules.utils import Utils
 
@@ -25,6 +27,8 @@ class Candlestick:
 
 
     Class Properties:
+        BASE_PATH: str
+            Candlesticks Assets Path.
         DEFAULT_CANDLESTICK_CONFIG: ICandlestickConfig
             The settings to be used for managing the default candlesticks.
         PREDICTION_CANDLESTICK_CONFIG: ICandlestickConfig
@@ -36,20 +40,27 @@ class Candlestick:
         NORMALIZED_PREDICTION_DF: Union[DataFrame, None] 
             Prediction Candlesticks DataFrame with the following columns normalized: o, h, l, c.
             Only initialized when normalized is set to True
-        
+        PREDICTION_RANGE_INDEXER: Dict[str, List[int]]
+            The dict that stores the already initialized indexed prediction ranges as well as the
+            new ranges that are generated as the process goes. Notice that new ranges are only
+            stored temporarily in RAM and not saved into the json indexer.
     """
+    # Candlesticks Path
+    BASE_PATH: str = "candlesticks"
+
 
     # Default Candlesticks Configuration
     DEFAULT_CANDLESTICK_CONFIG: ICandlestickConfig = {
         "columns": ("ot", "ct", "o", "h", "l", "c"),
-        "csv_file": "candlesticks/candlesticks.csv",
+        "csv_file": f"{BASE_PATH}/candlesticks.csv",
         "interval_minutes": 1
     }
+
 
     # Prediction Candlesticks Configuration
     PREDICTION_CANDLESTICK_CONFIG: ICandlestickConfig = {
         "columns": ("ot", "ct", "o", "h", "l", "c"),
-        "csv_file": "candlesticks/prediction_candlesticks.csv",
+        "csv_file": f"{BASE_PATH}/prediction_candlesticks.csv",
         "interval_minutes": 30
     }
 
@@ -59,7 +70,18 @@ class Candlestick:
     PREDICTION_DF: DataFrame = DataFrame()
     NORMALIZED_PREDICTION_DF: DataFrame = DataFrame()
 
-    
+
+
+    # Lookback Prediction Range Indexer
+    INDEXER_NAME: str = "lookback_prediction_range_indexer"
+    PREDICTION_RANGE_INDEXER: Dict[str, List[int]] = {}
+
+
+
+
+
+
+
 
 
     ## Initialization ##
@@ -115,6 +137,9 @@ class Candlestick:
 
         # Initialize the normalized df
         Candlestick.NORMALIZED_PREDICTION_DF = Candlestick.PREDICTION_DF[['o', 'h', 'l', 'c']].apply(lambda x: (x - min) / (max - min))
+
+        # Build the prediction range indexer
+        Candlestick._init_lookback_prediction_range_indexer()
 
 
 
@@ -283,10 +308,89 @@ class Candlestick:
 
 
 
+
+
+
+
+
+    ## Lookback Prediction Range ##
+
+
+
+
+
     @staticmethod
     def get_lookback_prediction_range(lookback: int, current_time: int) -> Tuple[int, int]:
+        """Checks if the range has already been stored in the indexer. If not, it calculates
+        it and stores it.
+
+        Args:
+            lookback: int
+                The number of candlesticks the model looks into the past to make a prediction.
+            current_time: int
+                The ot of the current 1m candlestick.
+
+        Returns:
+            Tuple[int, int] (first_ot, last_ct)
+        """
+        # Initialize the ID
+        id: str = Candlestick._get_lookback_prediction_range_id(lookback, current_time)
+
+        # Initialize the range index state
+        indexed: Union[List[int], None] = Candlestick.PREDICTION_RANGE_INDEXER.get(id)
+
+        # If the range has not been indexed, do so
+        if indexed == None:
+            # Calculate the range
+            first_ot, last_ct = Candlestick._calculate_lookback_prediction_range(lookback, current_time)
+
+            # Calculate the value and store it
+            Candlestick.PREDICTION_RANGE_INDEXER[id] = [first_ot, last_ct]
+
+            # Finally, return it
+            return first_ot, last_ct
+
+        # Otherwise, just return it
+        else:
+            return indexed[0], indexed[1]
+
+
+
+
+
+
+
+
+
+    @staticmethod
+    def _init_lookback_prediction_range_indexer() -> None:
+        """Checks if the indexer's file exists. If so, it loads it. 
+        Otherwise, prints a warning.
+        """
+        # Init the file's path
+        path: str = f"{Candlestick.BASE_PATH}/{Candlestick.INDEXER_NAME}.json"
+
+        # Check if the file exists
+        if isfile(path):
+            Candlestick.PREDICTION_RANGE_INDEXER = load(open(path))
+        else:
+            print("CandlesticksWarning: the lookback prediction range indexer file could not be found. Making use of the indexer\
+                improves performance significantly.")
+
+    
+
+
+
+
+
+
+
+
+    @staticmethod
+    def _calculate_lookback_prediction_range(lookback: int, current_time: int) -> Tuple[int, int]:
         """Based on the model's lookback and the current time, it will retrieve the open time
-        and the close time of the first and the last candlestick used to generate the prediction.
+        and the close time of the first and the last candlestick used to generate the prediction 
+        straight from the prediction candlestick's DataFrame.
 
         Args:
             lookback: int
@@ -302,3 +406,26 @@ class Candlestick:
 
         # Return the first ot and the last ct
         return int(df.iloc[0]['ot']), int(df.iloc[-1]['ct'])
+
+
+
+
+
+
+
+
+
+    @staticmethod
+    def _get_lookback_prediction_range_id(lookback: int, current_candlestick_ot: int) -> str:
+        """Builds the range identifier based on provided params.
+
+        Args:
+            lookback: int
+                The lookback used by the model.
+            current_candlestick_ot: int
+                The current 1 minute candlestick's open time
+        
+        Returns:
+            str
+        """
+        return f"{str(lookback)}_{str(int(current_candlestick_ot))}"

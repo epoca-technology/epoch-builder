@@ -41,24 +41,13 @@ C_LSTM_S2: List[IKerasModelConfig] = [
     {"units": [16, 16]},
 
     {"units": [32, 16]},
-    {"units": [16, 32]},
     {"units": [32, 32]},
 
     {"units": [64, 32]},
-    {"units": [32, 64]},
     {"units": [64, 64]},
-    
-    {"units": [16, 64]},
-    {"units": [64, 16]},
 
-    {"units": [64, 128]},
     {"units": [128, 64]},
-    {"units": [128, 128]},
-
-    {"units": [16, 128]},
-    {"units": [128, 16]},
-    {"units": [32, 128]},
-    {"units": [128, 32]},
+    {"units": [128, 128]}
 ]
 
 
@@ -71,24 +60,17 @@ C_LSTM_S2: List[IKerasModelConfig] = [
 # 2 activations:    Dense_1, Dense_2
 # 2 dropout_rates:  Dropout_1, Dropout_2
 C_LSTM_S2_DO: List[IKerasModelConfig] = [
-        {"units": [16, 16], "dropout_rates": [0, 0]},
+    {"units": [16, 16], "dropout_rates": [0, 0]},
 
-        {"units": [32, 16], "dropout_rates": [0, 0]},
-        {"units": [16, 32], "dropout_rates": [0, 0]},
-        {"units": [32, 32], "dropout_rates": [0, 0]},
+    {"units": [32, 16], "dropout_rates": [0, 0]},
+    {"units": [32, 32], "dropout_rates": [0, 0]},
 
-        {"units": [64, 32], "dropout_rates": [0, 0]},
-        {"units": [32, 64], "dropout_rates": [0, 0]},
-        {"units": [64, 64], "dropout_rates": [0, 0]},
-        
-        {"units": [64, 16], "dropout_rates": [0, 0]},
+    {"units": [64, 32], "dropout_rates": [0, 0]},
+    {"units": [64, 64], "dropout_rates": [0, 0]},
 
-        {"units": [64, 128], "dropout_rates": [0, 0]},
-        {"units": [128, 64], "dropout_rates": [0, 0]},
-        {"units": [128, 128], "dropout_rates": [0, 0]},
-
-        {"units": [128, 16], "dropout_rates": [0, 0]},
-    ]
+    {"units": [128, 64], "dropout_rates": [0, 0]},
+    {"units": [128, 128], "dropout_rates": [0, 0]}
+]
 
 
 
@@ -100,26 +82,14 @@ C_LSTM_S3: List[IKerasModelConfig] = [
     {"units": [16, 16, 16]},
 
     {"units": [32, 16, 16]},
-    {"units": [16, 32, 16]},
-    {"units": [16, 16, 32]},
-    {"units": [32, 32, 16]},
-    {"units": [16, 32, 32]},
     {"units": [32, 32, 32]},
 
     {"units": [64, 32, 32]},
-    {"units": [32, 64, 32]},
-    {"units": [32, 32, 64]},
-    {"units": [64, 64, 32]},
-    {"units": [32, 64, 64]},
     {"units": [64, 64, 64]},
 
     {"units": [64, 32, 16]},
 
     {"units": [128, 64, 64]},
-    {"units": [64, 128, 64]},
-    {"units": [64, 64, 128]},
-    {"units": [128, 128, 64]},
-    {"units": [64, 128, 128]},
     {"units": [128, 128, 128]},
 
     {"units": [128, 32, 16]}
@@ -136,26 +106,14 @@ C_LSTM_S3_DO: List[IKerasModelConfig] = [
     {"units": [16, 16, 16], "dropout_rates": [0, 0, 0]},
 
     {"units": [32, 16, 16], "dropout_rates": [0, 0, 0]},
-    {"units": [16, 32, 16], "dropout_rates": [0, 0, 0]},
-    {"units": [16, 16, 32], "dropout_rates": [0, 0, 0]},
-    {"units": [32, 32, 16], "dropout_rates": [0, 0, 0]},
-    {"units": [16, 32, 32], "dropout_rates": [0, 0, 0]},
     {"units": [32, 32, 32], "dropout_rates": [0, 0, 0]},
 
     {"units": [64, 32, 32], "dropout_rates": [0, 0, 0]},
-    {"units": [32, 64, 32], "dropout_rates": [0, 0, 0]},
-    {"units": [32, 32, 64], "dropout_rates": [0, 0, 0]},
-    {"units": [64, 64, 32], "dropout_rates": [0, 0, 0]},
-    {"units": [32, 64, 64], "dropout_rates": [0, 0, 0]},
     {"units": [64, 64, 64], "dropout_rates": [0, 0, 0]},
 
     {"units": [64, 32, 16], "dropout_rates": [0, 0, 0]},
 
     {"units": [128, 64, 64], "dropout_rates": [0, 0, 0]},
-    {"units": [64, 128, 64], "dropout_rates": [0, 0, 0]},
-    {"units": [64, 64, 128], "dropout_rates": [0, 0, 0]},
-    {"units": [128, 128, 64], "dropout_rates": [0, 0, 0]},
-    {"units": [64, 128, 128], "dropout_rates": [0, 0, 0]},
     {"units": [128, 128, 128], "dropout_rates": [0, 0, 0]},
 
     {"units": [128, 32, 16], "dropout_rates": [0, 0, 0]}
@@ -172,35 +130,14 @@ C_LSTM_S4: List[IKerasModelConfig] = [
     {"units": [16, 16, 16, 16]},
 
     {"units": [32, 16, 16, 16]},
-    {"units": [16, 32, 16, 16]},
-    {"units": [16, 16, 32, 16]},
-    {"units": [16, 16, 16, 32]},
-    {"units": [32, 32, 16, 16]},
-    {"units": [16, 16, 32, 32]},
-    {"units": [32, 32, 32, 16]},
-    {"units": [16, 32, 32, 32]},
     {"units": [32, 32, 32, 32]},
 
     {"units": [64, 32, 32, 32]},
-    {"units": [32, 64, 32, 32]},
-    {"units": [32, 32, 64, 32]},
-    {"units": [32, 32, 32, 64]},
-    {"units": [64, 64, 32, 32]},
-    {"units": [32, 32, 64, 64]},
-    {"units": [64, 64, 64, 32]},
-    {"units": [32, 64, 64, 64]},
     {"units": [64, 64, 64, 64]},
 
     {"units": [64, 32, 16, 16]},
 
     {"units": [128, 64, 64, 64]},
-    {"units": [64, 128, 64, 64]},
-    {"units": [64, 64, 128, 64]},
-    {"units": [64, 64, 64, 128]},
-    {"units": [128, 128, 64, 64]},
-    {"units": [64, 64, 128, 128]},
-    {"units": [128, 128, 128, 64]},
-    {"units": [64, 128, 128, 128]},
     {"units": [128, 128, 128, 128]},
 
     {"units": [128, 64, 32, 16]}
@@ -220,35 +157,14 @@ C_LSTM_S4_DO: List[IKerasModelConfig] = [
     {"units": [16, 16, 16, 16], "dropout_rates": [0, 0, 0, 0]},
 
     {"units": [32, 16, 16, 16], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [16, 32, 16, 16], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [16, 16, 32, 16], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [16, 16, 16, 32], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [32, 32, 16, 16], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [16, 16, 32, 32], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [32, 32, 32, 16], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [16, 32, 32, 32], "dropout_rates": [0, 0, 0, 0]},
     {"units": [32, 32, 32, 32], "dropout_rates": [0, 0, 0, 0]},
 
     {"units": [64, 32, 32, 32], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [32, 64, 32, 32], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [32, 32, 64, 32], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [32, 32, 32, 64], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [64, 64, 32, 32], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [32, 32, 64, 64], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [64, 64, 64, 32], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [32, 64, 64, 64], "dropout_rates": [0, 0, 0, 0]},
     {"units": [64, 64, 64, 64], "dropout_rates": [0, 0, 0, 0]},
 
     {"units": [64, 32, 16, 16], "dropout_rates": [0, 0, 0, 0]},
 
     {"units": [128, 64, 64, 64], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [64, 128, 64, 64], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [64, 64, 128, 64], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [64, 64, 64, 128], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [128, 128, 64, 64], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [64, 64, 128, 128], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [128, 128, 128, 64], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [64, 128, 128, 128], "dropout_rates": [0, 0, 0, 0]},
     {"units": [128, 128, 128, 128], "dropout_rates": [0, 0, 0, 0]},
 
     {"units": [128, 64, 32, 16], "dropout_rates": [0, 0, 0, 0]}
