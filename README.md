@@ -89,15 +89,7 @@ prediction-backtesting
     │         ├──certificate.json
     │         └──model.h5
     │
-    ArimaCombinations.sh
-    │
-    Backtest.sh
-    │
-    ClassificationTrainingData.sh
-    │
-    DatabaseManagement.sh
-    │
-    RegressionTraining.sh
+    CLI.sh
     │
     UnitTests.sh
 ```

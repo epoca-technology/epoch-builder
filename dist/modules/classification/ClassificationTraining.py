@@ -93,7 +93,7 @@ class ClassificationTraining:
     # The max number of evaluations that will be performed on the trained classification model.
     # Notice that if the number of evals is much smaller than the max it means there could be
     # an irregularity with the model as the probabilities are too close to the 50%.
-    DEFAULT_MAX_EVALUATIONS: int = 500
+    DEFAULT_MAX_EVALUATIONS: int = 250
 
 
 
@@ -444,7 +444,7 @@ class ClassificationTraining:
         # Initialize the ClassificationModel Instance
         classification: ClassificationModel = ClassificationModel({
             "id": self.id,
-            "classification_models": [{ "classification_id": self.id, "interpreter": { "min_probability": 0.55 }}]
+            "classification_models": [{ "classification_id": self.id, "interpreter": { "min_probability": 0.51 }}]
         })
 
         # Init the min and max values for the random candlestick indexes

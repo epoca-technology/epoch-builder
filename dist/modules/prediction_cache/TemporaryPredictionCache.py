@@ -17,7 +17,6 @@ class TemporaryPredictionCache:
     """
 
 
-    ## Initialization ##
     def __init__(self):
         """Initializes the temporary cache instance.
         """
@@ -25,11 +24,6 @@ class TemporaryPredictionCache:
 
 
 
-
-
-
-
-    ## Management ##
 
 
 
@@ -67,8 +61,6 @@ class TemporaryPredictionCache:
 
 
 
-
-    ## Helpers ##
 
 
     def _get_id(self, first_ot: int, last_ct: int) -> str:
