@@ -25,9 +25,8 @@ class IDNN(TypedDict):
 # 1 activations: Dense_1
 C_DNN_S1: List[IKerasModelConfig] = [
     {"units": [16], "activations": [""]},
-    {"units": [32], "activations": [""]},
     {"units": [64], "activations": [""]},
-    {"units": [128], "activations": [""]}
+    {"units": [256], "activations": [""]}
 ]
 
 
@@ -40,14 +39,11 @@ C_DNN_S1: List[IKerasModelConfig] = [
 C_DNN_S2: List[IKerasModelConfig] = [
     {"units": [16, 16], "activations": ["", ""]},
 
-    {"units": [32, 16], "activations": ["", ""]},
-    {"units": [32, 32], "activations": ["", ""]},
-
-    {"units": [64, 32], "activations": ["", ""]},
+    {"units": [64, 16], "activations": ["", ""]},
     {"units": [64, 64], "activations": ["", ""]},
 
-    {"units": [128, 64], "activations": ["", ""]},
-    {"units": [128, 128], "activations": ["", ""]}
+    {"units": [256, 64], "activations": ["", ""]},
+    {"units": [256, 256], "activations": ["", ""]}
 ]
 
 
@@ -62,14 +58,11 @@ C_DNN_S2: List[IKerasModelConfig] = [
 C_DNN_S2_DO: List[IKerasModelConfig] = [
         {"units": [16, 16], "dropout_rates": [0, 0], "activations": ["", ""]},
 
-        {"units": [32, 16], "dropout_rates": [0, 0], "activations": ["", ""]},
-        {"units": [32, 32], "dropout_rates": [0, 0], "activations": ["", ""]},
-
-        {"units": [64, 32], "dropout_rates": [0, 0], "activations": ["", ""]},
+        {"units": [64, 16], "dropout_rates": [0, 0], "activations": ["", ""]},
         {"units": [64, 64], "dropout_rates": [0, 0], "activations": ["", ""]},
 
-        {"units": [128, 64], "dropout_rates": [0, 0], "activations": ["", ""]},
-        {"units": [128, 128], "dropout_rates": [0, 0], "activations": ["", ""]}
+        {"units": [256, 64], "dropout_rates": [0, 0], "activations": ["", ""]},
+        {"units": [256, 256], "dropout_rates": [0, 0], "activations": ["", ""]}
     ]
 
 
@@ -81,16 +74,13 @@ C_DNN_S2_DO: List[IKerasModelConfig] = [
 C_DNN_S3: List[IKerasModelConfig] = [
     {"units": [16, 16, 16], "activations": ["", "", ""]},
 
-    {"units": [32, 16, 16], "activations": ["", "", ""]},
-    {"units": [32, 32, 32], "activations": ["", "", ""]},
-
-    {"units": [64, 32, 32], "activations": ["", "", ""]},
+    {"units": [64, 16, 16], "activations": ["", "", ""]},
     {"units": [64, 64, 64], "activations": ["", "", ""]},
 
-    {"units": [128, 64, 32], "activations": ["", "", ""]},
+    {"units": [256, 64, 64], "activations": ["", "", ""]},
+    {"units": [256, 256, 256], "activations": ["", "", ""]},
 
-    {"units": [128, 64, 64], "activations": ["", "", ""]},
-    {"units": [128, 128, 128], "activations": ["", "", ""]},
+    {"units": [256, 64, 16], "activations": ["", "", ""]},
 ]
 
 
@@ -103,16 +93,13 @@ C_DNN_S3: List[IKerasModelConfig] = [
 C_DNN_S3_DO: List[IKerasModelConfig] = [
     {"units": [16, 16, 16], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
 
-    {"units": [32, 16, 16], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
-    {"units": [32, 32, 32], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
-
-    {"units": [64, 32, 32], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
+    {"units": [64, 16, 16], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
     {"units": [64, 64, 64], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
 
-    {"units": [64, 32, 16], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
+    {"units": [256, 64, 64], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
+    {"units": [256, 256, 256], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
 
-    {"units": [128, 64, 64], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
-    {"units": [128, 128, 128], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]}
+    {"units": [256, 64, 16], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]}
 ]
 
 
@@ -125,18 +112,13 @@ C_DNN_S3_DO: List[IKerasModelConfig] = [
 C_DNN_S4: List[IKerasModelConfig] = [
     {"units": [16, 16, 16, 16], "activations": ["", "", "", ""]},
 
-    {"units": [32, 16, 16, 16], "activations": ["", "", "", ""]},
-    {"units": [32, 32, 32, 32], "activations": ["", "", "", ""]},
-
-    {"units": [64, 32, 32, 32], "activations": ["", "", "", ""]},
+    {"units": [64, 16, 16, 16], "activations": ["", "", "", ""]},
     {"units": [64, 64, 64, 64], "activations": ["", "", "", ""]},
 
-    {"units": [64, 32, 16, 16], "activations": ["", "", "", ""]},
+    {"units": [256, 64, 64, 64], "activations": ["", "", "", ""]},
+    {"units": [256, 256, 256, 256], "activations": ["", "", "", ""]},
 
-    {"units": [128, 64, 64, 64], "activations": ["", "", "", ""]},
-    {"units": [128, 128, 128, 128], "activations": ["", "", "", ""]},
-
-    {"units": [128, 64, 32, 16], "activations": ["", "", "", ""]}
+    {"units": [256, 64, 32, 16], "activations": ["", "", "", ""]}
 ]
 
 
@@ -152,18 +134,13 @@ C_DNN_S4: List[IKerasModelConfig] = [
 C_DNN_S4_DO: List[IKerasModelConfig] = [
     {"units": [16, 16, 16, 16], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
 
-    {"units": [32, 16, 16, 16], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
-    {"units": [32, 32, 32, 32], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
-
     {"units": [64, 32, 32, 32], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
     {"units": [64, 64, 64, 64], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
 
-    {"units": [64, 32, 16, 16], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
+    {"units": [256, 64, 64, 64], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
+    {"units": [256, 256, 256, 256], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
 
-    {"units": [128, 64, 64, 64], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
-    {"units": [128, 128, 128, 128], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
-
-    {"units": [128, 64, 32, 16], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]}
+    {"units": [256, 64, 32, 16], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]}
 ]
 
 

@@ -40,6 +40,8 @@ class Candlestick:
         NORMALIZED_PREDICTION_DF: Union[DataFrame, None] 
             Prediction Candlesticks DataFrame with the following columns normalized: o, h, l, c.
             Only initialized when normalized is set to True
+        INDEXER_NAME: str
+            The name of the indexer's file located within the candlesticks directory.
         PREDICTION_RANGE_INDEXER: Dict[str, List[int]]
             The dict that stores the already initialized indexed prediction ranges as well as the
             new ranges that are generated as the process goes. Notice that new ranges are only

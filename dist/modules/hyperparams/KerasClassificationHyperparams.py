@@ -35,7 +35,7 @@ class KerasClassificationHyperparams:
 
 
     # Learning Rates
-    LEARNING_RATES: List[float] = [ 0.01, 0.001 ]  # Changed from [ 0.01, 0.001, 0.0001 ] in order to lower the number of tests
+    LEARNING_RATES: List[float] = [ 0.01, 0.001, 0.0001 ]
 
 
     # Optimizers

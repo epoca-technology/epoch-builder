@@ -26,9 +26,9 @@ class ICLSTM(TypedDict):
 # 1 activations:    Conv1D_1
 # 1 units:          LSTM_1
 C_CLSTM_S1: List[IKerasModelConfig] = [
-    {"filters": [32], "units": [32], "activations": [""]},
+    {"filters": [16], "units": [16], "activations": [""]},
     {"filters": [64], "units": [64], "activations": [""]},
-    {"filters": [128], "units": [128], "activations": [""]},
+    {"filters": [256], "units": [256], "activations": [""]},
 ]
 
 
@@ -44,9 +44,9 @@ C_CLSTM_S1: List[IKerasModelConfig] = [
 # 1 units:          LSTM_1
 # 1 dropout_rates:  Dropout_1
 C_CLSTM_S1_MP_DO: List[IKerasModelConfig] = [
-    {"filters": [32], "units": [32], "dropout_rates": [0], "pool_sizes": [0], "activations": [""]},
+    {"filters": [16], "units": [16], "dropout_rates": [0], "pool_sizes": [0], "activations": [""]},
     {"filters": [64], "units": [64], "dropout_rates": [0], "pool_sizes": [0], "activations": [""]},
-    {"filters": [128], "units": [128], "dropout_rates": [0], "pool_sizes": [0], "activations": [""]},
+    {"filters": [256], "units": [256], "dropout_rates": [0], "pool_sizes": [0], "activations": [""]},
 ]
 
 
@@ -61,14 +61,11 @@ C_CLSTM_S1_MP_DO: List[IKerasModelConfig] = [
 C_CLSTM_S2: List[IKerasModelConfig] = [
     {"filters": [16], "units": [16, 16], "activations": [""]},
 
-    {"filters": [32], "units": [16, 16], "activations": [""]},
-    {"filters": [32], "units": [32, 32], "activations": [""]},
-
-    {"filters": [64], "units": [32, 32], "activations": [""]},
+    {"filters": [64], "units": [16, 16], "activations": [""]},
     {"filters": [64], "units": [64, 64], "activations": [""]},
     
-    {"filters": [128], "units": [64, 64], "activations": [""]},
-    {"filters": [128], "units": [128, 128], "activations": [""]}
+    {"filters": [256], "units": [64, 64], "activations": [""]},
+    {"filters": [256], "units": [256, 256], "activations": [""]}
 ]
 
 
@@ -88,14 +85,11 @@ C_CLSTM_S2: List[IKerasModelConfig] = [
 C_CLSTM_S2_MP_DO: List[IKerasModelConfig] = [
     {"filters": [16], "units": [16, 16], "pool_sizes": [0], "dropout_rates": [0, 0], "activations": [""]},
 
-    {"filters": [32], "units": [16, 16], "pool_sizes": [0], "dropout_rates": [0, 0], "activations": [""]},
-    {"filters": [32], "units": [32, 32], "pool_sizes": [0], "dropout_rates": [0, 0], "activations": [""]},
-
-    {"filters": [64], "units": [32, 32], "pool_sizes": [0], "dropout_rates": [0, 0], "activations": [""]},
+    {"filters": [64], "units": [16, 16], "pool_sizes": [0], "dropout_rates": [0, 0], "activations": [""]},
     {"filters": [64], "units": [64, 64], "pool_sizes": [0], "dropout_rates": [0, 0], "activations": [""]},
 
-    {"filters": [128], "units": [64, 64], "pool_sizes": [0], "dropout_rates": [0, 0], "activations": [""]},
-    {"filters": [128], "units": [128, 128], "pool_sizes": [0], "dropout_rates": [0, 0], "activations": [""]}
+    {"filters": [256], "units": [64, 64], "pool_sizes": [0], "dropout_rates": [0, 0], "activations": [""]},
+    {"filters": [256], "units": [256, 256], "pool_sizes": [0], "dropout_rates": [0, 0], "activations": [""]}
 ]
 
 
@@ -112,14 +106,11 @@ C_CLSTM_S2_MP_DO: List[IKerasModelConfig] = [
 C_CLSTM_S3: List[IKerasModelConfig] = [
     {"filters": [16], "units": [16, 16, 16], "activations": [""]},
 
-    {"filters": [32], "units": [16, 16, 16], "activations": [""]},
-    {"filters": [32], "units": [32, 32, 32], "activations": [""]},
-
-    {"filters": [64], "units": [32, 32, 32], "activations": [""]},
+    {"filters": [64], "units": [16, 16, 16], "activations": [""]},
     {"filters": [64], "units": [64, 64, 64], "activations": [""]},
 
-    {"filters": [128], "units": [64, 64, 64], "activations": [""]},
-    {"filters": [128], "units": [128, 128, 128], "activations": [""]},
+    {"filters": [256], "units": [64, 64, 64], "activations": [""]},
+    {"filters": [256], "units": [256, 256, 256], "activations": [""]},
 ]
 
 
@@ -138,14 +129,11 @@ C_CLSTM_S3: List[IKerasModelConfig] = [
 C_CLSTM_S3_MP_DO: List[IKerasModelConfig] = [
     {"filters": [16], "units": [16, 16, 16], "activations": [""]},
 
-    {"filters": [32], "pool_sizes": [0], "units": [16, 16, 16], "dropout_rates": [0, 0, 0], "activations": [""]},
-    {"filters": [32], "pool_sizes": [0], "units": [32, 32, 32], "dropout_rates": [0, 0, 0], "activations": [""]},
+    {"filters": [64], "units": [16, 16, 16], "pool_sizes": [0], "dropout_rates": [0, 0, 0], "activations": [""]},
+    {"filters": [64], "units": [64, 64, 64], "pool_sizes": [0], "dropout_rates": [0, 0, 0], "activations": [""]},
 
-    {"filters": [64], "pool_sizes": [0], "units": [32, 32, 32], "dropout_rates": [0, 0, 0], "activations": [""]},
-    {"filters": [64], "pool_sizes": [0], "units": [64, 64, 64], "dropout_rates": [0, 0, 0], "activations": [""]},
-
-    {"filters": [128], "pool_sizes": [0], "units": [64, 64, 64], "dropout_rates": [0, 0, 0], "activations": [""]},
-    {"filters": [128], "pool_sizes": [0], "units": [128, 128, 128], "dropout_rates": [0, 0, 0], "activations": [""]},
+    {"filters": [256], "units": [64, 64, 64], "pool_sizes": [0], "dropout_rates": [0, 0, 0], "activations": [""]},
+    {"filters": [256], "units": [256, 256, 256], "pool_sizes": [0], "dropout_rates": [0, 0, 0], "activations": [""]},
 ]
 
 
@@ -162,14 +150,11 @@ C_CLSTM_S3_MP_DO: List[IKerasModelConfig] = [
 C_CLSTM_S4: List[IKerasModelConfig] = [
     {"filters": [16], "units": [16, 16, 16, 16], "activations": [""]},
 
-    {"filters": [32], "units": [16, 16, 16, 16], "activations": [""]},
-    {"filters": [32], "units": [32, 32, 32, 32], "activations": [""]},
-
-    {"filters": [64], "units": [32, 32, 32, 32], "activations": [""]},
+    {"filters": [64], "units": [16, 16, 16, 16], "activations": [""]},
     {"filters": [64], "units": [64, 64, 64, 64], "activations": [""]},
 
-    {"filters": [128], "units": [64, 64, 64, 64], "activations": [""]},
-    {"filters": [128], "units": [128, 128, 128, 128], "activations": [""]}
+    {"filters": [256], "units": [64, 64, 64, 64], "activations": [""]},
+    {"filters": [256], "units": [256, 256, 256, 256], "activations": [""]}
 ]
 
 
@@ -188,14 +173,11 @@ C_CLSTM_S4: List[IKerasModelConfig] = [
 C_CLSTM_S4_MP_DO: List[IKerasModelConfig] = [
     {"filters": [16], "units": [16, 16, 16, 16], "activations": [""]},
 
-    {"filters": [32], "pool_sizes": [0], "units": [16, 16, 16, 16], "dropout_rates": [0, 0, 0, 0], "activations": [""]},
-    {"filters": [32], "pool_sizes": [0], "units": [32, 32, 32, 32], "dropout_rates": [0, 0, 0, 0], "activations": [""]},
+    {"filters": [64], "units": [16, 16, 16, 16], "pool_sizes": [0], "dropout_rates": [0, 0, 0, 0], "activations": [""]},
+    {"filters": [64], "units": [64, 64, 64, 64], "pool_sizes": [0], "dropout_rates": [0, 0, 0, 0], "activations": [""]},
 
-    {"filters": [64], "pool_sizes": [0], "units": [32, 32, 32, 32], "dropout_rates": [0, 0, 0, 0], "activations": [""]},
-    {"filters": [64], "pool_sizes": [0], "units": [64, 64, 64, 64], "dropout_rates": [0, 0, 0, 0], "activations": [""]},
-
-    {"filters": [128], "pool_sizes": [0], "units": [64, 64, 64, 64], "dropout_rates": [0, 0, 0, 0], "activations": [""]},
-    {"filters": [128], "pool_sizes": [0], "units": [128, 128, 128, 128], "dropout_rates": [0, 0, 0, 0], "activations": [""]}
+    {"filters": [256], "units": [64, 64, 64, 64], "pool_sizes": [0], "dropout_rates": [0, 0, 0, 0], "activations": [""]},
+    {"filters": [256], "units": [256, 256, 256, 256], "pool_sizes": [0], "dropout_rates": [0, 0, 0, 0], "activations": [""]}
 ]
 
 

@@ -1,6 +1,6 @@
 {
     "regression_selection_id": "e5a03686-7bb9-4e2f-ab2f-3058281f589f",
-    "description": "Experiment 5: 20 ArimaModels with RSI only.",
+    "description": "Experiment 6: 20 ArimaModels only. Going back to the beginning.",
     "start": "1/01/2018",
     "end": "22/04/2022",
     "steps": 5,
@@ -28,6 +28,6 @@
         { "id": "A878","arima_models": [{"arima": {"p": 8, "d": 7,"q": 8}}] },
         { "id": "A399","arima_models": [{"arima": {"p": 3, "d": 9,"q": 9}}] }
     ],
-    "include_rsi": true,
+    "include_rsi": false,
     "include_aroon": false
 }

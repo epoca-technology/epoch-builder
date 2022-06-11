@@ -25,9 +25,8 @@ class ILSTM(TypedDict):
 # 1 activations: Dense_1
 C_LSTM_S1: List[IKerasModelConfig] = [
     {"units": [16]},
-    {"units": [32]},
     {"units": [64]},
-    {"units": [128]}
+    {"units": [256]}
 ]
 
 
@@ -40,14 +39,11 @@ C_LSTM_S1: List[IKerasModelConfig] = [
 C_LSTM_S2: List[IKerasModelConfig] = [
     {"units": [16, 16]},
 
-    {"units": [32, 16]},
-    {"units": [32, 32]},
-
-    {"units": [64, 32]},
+    {"units": [64, 16]},
     {"units": [64, 64]},
 
-    {"units": [128, 64]},
-    {"units": [128, 128]}
+    {"units": [256, 64]},
+    {"units": [256, 256]}
 ]
 
 
@@ -62,14 +58,11 @@ C_LSTM_S2: List[IKerasModelConfig] = [
 C_LSTM_S2_DO: List[IKerasModelConfig] = [
     {"units": [16, 16], "dropout_rates": [0, 0]},
 
-    {"units": [32, 16], "dropout_rates": [0, 0]},
-    {"units": [32, 32], "dropout_rates": [0, 0]},
-
-    {"units": [64, 32], "dropout_rates": [0, 0]},
+    {"units": [64, 16], "dropout_rates": [0, 0]},
     {"units": [64, 64], "dropout_rates": [0, 0]},
 
-    {"units": [128, 64], "dropout_rates": [0, 0]},
-    {"units": [128, 128], "dropout_rates": [0, 0]}
+    {"units": [256, 64], "dropout_rates": [0, 0]},
+    {"units": [256, 256], "dropout_rates": [0, 0]}
 ]
 
 
@@ -81,18 +74,13 @@ C_LSTM_S2_DO: List[IKerasModelConfig] = [
 C_LSTM_S3: List[IKerasModelConfig] = [
     {"units": [16, 16, 16]},
 
-    {"units": [32, 16, 16]},
-    {"units": [32, 32, 32]},
-
     {"units": [64, 32, 32]},
     {"units": [64, 64, 64]},
 
-    {"units": [64, 32, 16]},
+    {"units": [256, 64, 64]},
+    {"units": [256, 256, 256]},
 
-    {"units": [128, 64, 64]},
-    {"units": [128, 128, 128]},
-
-    {"units": [128, 32, 16]}
+    {"units": [256, 64, 16]}
 ]
 
 
@@ -105,18 +93,13 @@ C_LSTM_S3: List[IKerasModelConfig] = [
 C_LSTM_S3_DO: List[IKerasModelConfig] = [
     {"units": [16, 16, 16], "dropout_rates": [0, 0, 0]},
 
-    {"units": [32, 16, 16], "dropout_rates": [0, 0, 0]},
-    {"units": [32, 32, 32], "dropout_rates": [0, 0, 0]},
-
     {"units": [64, 32, 32], "dropout_rates": [0, 0, 0]},
     {"units": [64, 64, 64], "dropout_rates": [0, 0, 0]},
 
-    {"units": [64, 32, 16], "dropout_rates": [0, 0, 0]},
+    {"units": [256, 64, 64], "dropout_rates": [0, 0, 0]},
+    {"units": [256, 256, 256], "dropout_rates": [0, 0, 0]},
 
-    {"units": [128, 64, 64], "dropout_rates": [0, 0, 0]},
-    {"units": [128, 128, 128], "dropout_rates": [0, 0, 0]},
-
-    {"units": [128, 32, 16], "dropout_rates": [0, 0, 0]}
+    {"units": [256, 64, 16], "dropout_rates": [0, 0, 0]}
 ]
 
 
@@ -129,18 +112,13 @@ C_LSTM_S3_DO: List[IKerasModelConfig] = [
 C_LSTM_S4: List[IKerasModelConfig] = [
     {"units": [16, 16, 16, 16]},
 
-    {"units": [32, 16, 16, 16]},
-    {"units": [32, 32, 32, 32]},
-
     {"units": [64, 32, 32, 32]},
     {"units": [64, 64, 64, 64]},
 
-    {"units": [64, 32, 16, 16]},
+    {"units": [256, 64, 64, 64]},
+    {"units": [256, 256, 256, 256]},
 
-    {"units": [128, 64, 64, 64]},
-    {"units": [128, 128, 128, 128]},
-
-    {"units": [128, 64, 32, 16]}
+    {"units": [256, 64, 32, 16]}
 ]
 
 
@@ -156,18 +134,13 @@ C_LSTM_S4: List[IKerasModelConfig] = [
 C_LSTM_S4_DO: List[IKerasModelConfig] = [
     {"units": [16, 16, 16, 16], "dropout_rates": [0, 0, 0, 0]},
 
-    {"units": [32, 16, 16, 16], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [32, 32, 32, 32], "dropout_rates": [0, 0, 0, 0]},
-
     {"units": [64, 32, 32, 32], "dropout_rates": [0, 0, 0, 0]},
     {"units": [64, 64, 64, 64], "dropout_rates": [0, 0, 0, 0]},
 
-    {"units": [64, 32, 16, 16], "dropout_rates": [0, 0, 0, 0]},
+    {"units": [256, 64, 64, 64], "dropout_rates": [0, 0, 0, 0]},
+    {"units": [256, 256, 256, 256], "dropout_rates": [0, 0, 0, 0]},
 
-    {"units": [128, 64, 64, 64], "dropout_rates": [0, 0, 0, 0]},
-    {"units": [128, 128, 128, 128], "dropout_rates": [0, 0, 0, 0]},
-
-    {"units": [128, 64, 32, 16], "dropout_rates": [0, 0, 0, 0]}
+    {"units": [256, 64, 32, 16], "dropout_rates": [0, 0, 0, 0]}
 ]
 
 

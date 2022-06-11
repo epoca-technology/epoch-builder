@@ -85,7 +85,7 @@ class ClassificationTraining:
     TRAIN_SPLIT: float = 0.8
 
     # The max number of training epochs that can occur without showing improvements.
-    EARLY_STOPPING_PATIENCE: int = 20
+    EARLY_STOPPING_PATIENCE: int = 50
 
     # The maximum number of EPOCHs a model can go through during training
     MAX_EPOCHS: int = 1000
@@ -359,7 +359,7 @@ class ClassificationTraining:
             mode="max", 
             min_delta=0.001, 
             patience=ClassificationTraining.EARLY_STOPPING_PATIENCE,
-            #restore_best_weights=True
+            restore_best_weights=True
         )
 
         # Retrieve the Keras Model
@@ -444,7 +444,7 @@ class ClassificationTraining:
         # Initialize the ClassificationModel Instance
         classification: ClassificationModel = ClassificationModel({
             "id": self.id,
-            "classification_models": [{ "classification_id": self.id, "interpreter": { "min_probability": 0.51 }}]
+            "classification_models": [{ "classification_id": self.id, "interpreter": { "min_probability": 0.55 }}]
         })
 
         # Init the min and max values for the random candlestick indexes
