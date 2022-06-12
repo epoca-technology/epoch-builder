@@ -8,7 +8,7 @@ from modules.classification import ITrainingDataFile, Classification
 
 
 # TRAINING DATA FILE
-FILE_ID: str = "d5f0f65e-66e7-4f6e-ab9d-b6dd6ad31267"
+FILE_ID: str = "ff6ae9e2-7f89-4043-b674-1e03b20ddcad"
 TRAINING_DATA: ITrainingDataFile = load(open(f"{KERAS_PATH['classification_training_data']}/{FILE_ID}.json"))
 MODEL_ID: str = "C_UNIT_TEST"
 

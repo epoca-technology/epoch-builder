@@ -111,8 +111,11 @@ class IClassificationConfig(TypedDict):
     models: List[Dict] # IModel does not exist yet
 
     # Optional Technical Analysis Features
-    include_rsi: bool   # Momentum
-    include_aroon: bool # Trend
+    include_rsi: bool       # Momentum
+    include_stoch: bool     # Momentum
+    include_aroon: bool     # Trend
+    include_stc: bool       # Trend
+    include_mfi: bool       # Volume
 
     # The total number of features that will be used by the model to predict
     features_num: int

@@ -44,7 +44,7 @@ class ClassificationModelTestCase(unittest.TestCase):
         self.assertIsInstance(pred["t"], int)
         self.assertIsInstance(pred["md"], list)
         self.assertEqual(len(pred["md"]), 1)
-        self.assertEqual(pred["md"][0]["up"]+pred["md"][0]["dp"], 1)
+        self.assertAlmostEqual(pred["md"][0]["up"]+pred["md"][0]["dp"], 1, delta=0.00001)
         
 
 

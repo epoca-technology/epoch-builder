@@ -127,7 +127,7 @@ C_CLSTM_S3: List[IKerasModelConfig] = [
 # 3 units:          LSTM_1, LSTM_2, LSTM_3
 # 3 dropout_rates:  Dropout_1, Dropout_2, Dropout_3
 C_CLSTM_S3_MP_DO: List[IKerasModelConfig] = [
-    {"filters": [16], "units": [16, 16, 16], "activations": [""]},
+    {"filters": [16], "units": [16, 16, 16], "pool_sizes": [0], "dropout_rates": [0, 0, 0], "activations": [""]},
 
     {"filters": [64], "units": [64, 16, 16], "pool_sizes": [0], "dropout_rates": [0, 0, 0], "activations": [""]},
     {"filters": [64], "units": [64, 64, 64], "pool_sizes": [0], "dropout_rates": [0, 0, 0], "activations": [""]},
@@ -171,7 +171,7 @@ C_CLSTM_S4: List[IKerasModelConfig] = [
 # 4 units:          LSTM_1, LSTM_2, LSTM_3, LSTM_4
 # 4 dropout_rates:  Dropout_1, Dropout_2, Dropout_3, Dropout_4
 C_CLSTM_S4_MP_DO: List[IKerasModelConfig] = [
-    {"filters": [16], "units": [16, 16, 16, 16], "activations": [""]},
+    {"filters": [16], "units": [16, 16, 16, 16], "pool_sizes": [0], "dropout_rates": [0, 0, 0, 0], "activations": [""]},
 
     {"filters": [64], "units": [64, 16, 16, 16], "pool_sizes": [0], "dropout_rates": [0, 0, 0, 0], "activations": [""]},
     {"filters": [64], "units": [64, 64, 64, 64], "pool_sizes": [0], "dropout_rates": [0, 0, 0, 0], "activations": [""]},

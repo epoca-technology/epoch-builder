@@ -177,22 +177,37 @@ class ClassificationModel(ModelInterface):
         ]
 
         # Check if any Technical Anlysis feature needs to be added
-        if self.classification.include_rsi or self.classification.include_aroon:
+        if self.classification.include_rsi or self.classification.include_stoch or self.classification.include_aroon\
+             or self.classification.include_stc  or self.classification.include_mfi:
             # Retrieve the technical analysis
             ta: ITechnicalAnalysis = TechnicalAnalysis.get_technical_analysis(
                 lookback_df,
                 include_rsi=self.classification.include_rsi,
-                include_aroon=self.classification.include_aroon
+                include_stoch=self.classification.include_stoch,
+                include_aroon=self.classification.include_aroon,
+                include_stc=self.classification.include_stc,
+                include_mfi=self.classification.include_mfi
             )
 
             # Populate the RSI feature if enabled
             if self.classification.include_rsi:
                 features.append(ta["rsi"])
 
-            # Populate the Aroon features if enabled
+            # Populate the STOCH feature if enabled
+            if self.classification.include_stoch:
+                features.append(ta["stoch"])
+
+            # Populate the Aroon feature if enabled
             if self.classification.include_aroon:
-                features.append(ta["aroon_up"])
-                features.append(ta["aroon_down"])
+                features.append(ta["aroon"])
+
+            # Populate the STC feature if enabled
+            if self.classification.include_stc:
+                features.append(ta["stc"])
+
+            # Populate the MFI feature if enabled
+            if self.classification.include_mfi:
+                features.append(ta["mfi"])
 
         # Finally, return all the features
         return features

@@ -23,9 +23,11 @@ class Classification(KerasModelInterface):
         regressions: List[IModel]
             The list of regression models that will output the features.
         include_rsi: bool
-            Optional Technical Analysis Feature
+        include_stoch: bool
         include_aroon: bool
-            Optional Technical Analysis Feature
+        include_stc: bool
+        include_mfi: bool
+            Optional Technical Analysis Features
         features_num: int
             The total number of features that will be used by the model to predict
         model: Sequential
@@ -54,7 +56,10 @@ class Classification(KerasModelInterface):
             self.description: str = model_file.attrs["description"]
             self.training_data_id: str = model_file.attrs["training_data_id"]
             self.include_rsi: bool = model_file.attrs.get("include_rsi") == True
+            self.include_stoch: bool = model_file.attrs.get("include_stoch") == True
             self.include_aroon: bool = model_file.attrs.get("include_aroon") == True
+            self.include_stc: bool = model_file.attrs.get("include_stc") == True
+            self.include_mfi: bool = model_file.attrs.get("include_mfi") == True
             self.features_num: int = int(model_file.attrs["features_num"]) # Downcast to int
             self.regressions: List[IModel] = loads(model_file.attrs["models"])
             self.model: Sequential = load_model_from_hdf5(model_file)
@@ -122,7 +127,10 @@ class Classification(KerasModelInterface):
             "training_data_id": self.training_data_id,
             "models": self.regressions,
             "include_rsi": self.include_rsi,
+            "include_stoch": self.include_stoch,
             "include_aroon": self.include_aroon,
+            "include_stc": self.include_stc,
+            "include_mfi": self.include_mfi,
             "features_num": self.features_num,
             "summary": get_summary(self.model),
         }

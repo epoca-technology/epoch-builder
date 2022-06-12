@@ -47,8 +47,14 @@ class ClassificationTrainingData:
             The list of ArimaModels that will be used to generate the training data.
         include_rsi: bool
             If enabled, the RSI will be added as a feature with the column name "RSI".
+        include_stoch: bool
+            If enabled, the Stoch will be added as a feature with the column name "STOCH".
         include_aroon: bool
-            If enabled, "AROON_UP" and "AROON_DOWN" will be added as features.
+            If enabled, the Aroon will be added as a feature with the column name "AROON".
+        include_stc: bool
+            If enabled, the STC will be added as a feature with the column name "STC".
+        include_mfi: bool
+            If enabled, the MFI will be added as a feature with the column name "MFI".
         features_num: int
             The total number of features that will be used by the model to predict.
         df: DataFrame
@@ -99,7 +105,7 @@ class ClassificationTrainingData:
         # Initialize the data that will be populated
         self.id: str = Utils.generate_uuid4()
         self.models: List[Union[ArimaModel, RegressionModel]] = []
-        df_data: Dict = {}
+        df_data: Dict[str, List[float]] = {}
         ids: List[str] = []
         lookbacks: List[int] = []
 
@@ -142,20 +148,16 @@ class ClassificationTrainingData:
 
         # Init the Technical Analysis
         self.include_rsi: bool = config["include_rsi"]
+        self.include_stoch: bool = config["include_stoch"]
         self.include_aroon: bool = config["include_aroon"]
+        self.include_stc: bool = config["include_stc"]
+        self.include_mfi: bool = config["include_mfi"]
 
         # Init the number of features
         self.features_num: int = self._get_features_num()
 
-        # Initialize the DF
-        if self.include_rsi:
-            df_data["RSI"] = []
-        if self.include_aroon:
-            df_data["AROON_UP"] = []
-            df_data["AROON_DOWN"] = []
-        df_data["up"] = []
-        df_data["down"] = []
-        self.df: DataFrame = DataFrame(data=df_data)
+        # Complete the initial df
+        self.df: DataFrame = self._complete_initial_df(df_data)
 
         # Initialize the active position
         self.active: Union[ITrainingDataActivePosition, None] = None
@@ -179,12 +181,60 @@ class ClassificationTrainingData:
         if self.include_rsi:
             features_num += 1
 
+        # Check if the Stoch is enabled
+        if self.include_stoch:
+            features_num += 1
+
         # Check if Aroon is enabled
         if self.include_aroon:
-            features_num += 2
+            features_num += 1
+
+        # Check if STC is enabled
+        if self.include_stc:
+            features_num += 1
+
+        # Check if MFI is enabled
+        if self.include_mfi:
+            features_num += 1
 
         # Finally, return the final number
         return features_num
+
+
+
+
+
+
+    def _complete_initial_df(self, df_data: Dict[str, List[float]]) -> DataFrame:
+        """Given a dict containing regression features, it will add any extra features
+        as well as the labels and return the df.
+
+        Args:
+            df_data: Dict[str, List[float]]
+                The dict containing regression ids as keys.
+
+        Returns:
+            DataFrame
+        """
+        # Add the TA Features if any
+        if self.include_rsi:
+            df_data["RSI"] = []
+        if self.include_stoch:
+            df_data["STOCH"] = []
+        if self.include_aroon:
+            df_data["AROON"] = []
+        if self.include_stc:
+            df_data["STC"] = []
+        if self.include_mfi:
+            df_data["MFI"] = []
+
+        # Add the labels
+        df_data["up"] = []
+        df_data["down"] = []
+
+        # Finally, return the DataFrame
+        return DataFrame(data=df_data)
+
 
 
 
@@ -370,22 +420,36 @@ class ClassificationTrainingData:
         }
 
         # Check if any Technical Anlysis feature needs to be added
-        if self.include_rsi or self.include_aroon:
+        if self.include_rsi or self.include_stoch or self.include_aroon or self.include_stc or self.include_mfi:
             # Retrieve the technical analysis
             ta: ITechnicalAnalysis = TechnicalAnalysis.get_technical_analysis(
                 lookback_df,
                 include_rsi=self.include_rsi,
-                include_aroon=self.include_aroon
+                include_stoch=self.include_stoch,
+                include_aroon=self.include_aroon,
+                include_stc=self.include_stc,
+                include_mfi=self.include_mfi,
             )
 
             # Populate the RSI feature if enabled
             if self.include_rsi:
                 features["RSI"] = ta["rsi"]
 
-            # Populate the Aroon features if enabled
+            # Populate the STOCH feature if enabled
+            if self.include_stoch:
+                features["STOCH"] = ta["stoch"]
+
+            # Populate the Aroon feature if enabled
             if self.include_aroon:
-                features["AROON_UP"] = ta["aroon_up"]
-                features["AROON_DOWN"] = ta["aroon_down"]
+                features["AROON"] = ta["aroon"]
+
+            # Populate the STC feature if enabled
+            if self.include_stc:
+                features["STC"] = ta["stc"]
+
+            # Populate the MFI feature if enabled
+            if self.include_mfi:
+                features["MFI"] = ta["mfi"]
 
         # Finally, return the features
         return features
@@ -531,7 +595,10 @@ class ClassificationTrainingData:
             "down_percent_change": self.down_percent_change,
             "models": [m.get_model() for m in self.models],
             "include_rsi": self.include_rsi,
+            "include_stoch": self.include_stoch,
             "include_aroon": self.include_aroon,
+            "include_stc": self.include_stc,
+            "include_mfi": self.include_mfi,
             "features_num": self.features_num,
             "duration_minutes": Utils.from_milliseconds_to_minutes(current_time - execution_start),
             "price_actions_insight": self._get_price_actions_insight(),
@@ -636,8 +703,14 @@ class ClassificationTrainingData:
             raise ValueError(f"Down Percent Change Discrepancy: {str(td['down_percent_change'])} != {str(self.down_percent_change)}")
         if td["include_rsi"] != self.include_rsi:
             raise ValueError(f"Include RSI Discrepancy: {str(td['include_rsi'])} != {str(self.include_rsi)}")
+        if td["include_stoch"] != self.include_stoch:
+            raise ValueError(f"Include STOCH Discrepancy: {str(td['include_stoch'])} != {str(self.include_stoch)}")
         if td["include_aroon"] != self.include_aroon:
             raise ValueError(f"Include Aroon Discrepancy: {str(td['include_aroon'])} != {str(self.include_aroon)}")
+        if td["include_stc"] != self.include_stc:
+            raise ValueError(f"Include STC Discrepancy: {str(td['include_stc'])} != {str(self.include_stc)}")
+        if td["include_mfi"] != self.include_mfi:
+            raise ValueError(f"Include MFI Discrepancy: {str(td['include_mfi'])} != {str(self.include_mfi)}")
         if td["features_num"] != self.features_num:
             raise ValueError(f"Features Num Discrepancy: {str(td['features_num'])} != {str(self.features_num)}")
 

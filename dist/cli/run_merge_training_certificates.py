@@ -23,7 +23,7 @@ def _get_model_ids(prefix: str) -> List[str]:
 
     # Return the filtered list
     def _is_certificate(id: str) -> bool:
-        return len(id) > 0 and id[0:2] == prefix and "UNIT_TEST" not in id and isfile(f"{KERAS_PATH['models']}/{id}/{id}.json")
+        return len(id) > 0 and id[0:2] == prefix and "UNIT_TEST" not in id and isfile(f"{KERAS_PATH['models']}/{id}/certificate.json")
     return list(filter(lambda d: _is_certificate(d), dirs))
 
 
@@ -33,7 +33,7 @@ if len(ids) == 0:
     raise RuntimeError("No model ids could be extracted.")
 
 # Extract the certificates json and place them in a list
-certificates: List[IClassificationTrainingCertificate] = [load(open(f"{KERAS_PATH['models']}/{id}/{id}.json")) for id in ids]
+certificates: List[IClassificationTrainingCertificate] = [load(open(f"{KERAS_PATH['models']}/{id}/certificate.json")) for id in ids]
 
 # Finally, dump the merged file in the configs directory
 if not exists(KERAS_PATH["batched_training_certificates"]):

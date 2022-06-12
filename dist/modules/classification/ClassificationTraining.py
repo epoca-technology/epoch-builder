@@ -93,7 +93,7 @@ class ClassificationTraining:
     # The max number of evaluations that will be performed on the trained classification model.
     # Notice that if the number of evals is much smaller than the max it means there could be
     # an irregularity with the model as the probabilities are too close to the 50%.
-    DEFAULT_MAX_EVALUATIONS: int = 250
+    DEFAULT_MAX_EVALUATIONS: int = 350
 
 
 
@@ -322,7 +322,10 @@ class ClassificationTraining:
             "up_percent_change": file["up_percent_change"],
             "down_percent_change": file["down_percent_change"],
             "include_rsi": file["include_rsi"],
+            "include_stoch": file["include_stoch"],
             "include_aroon": file["include_aroon"],
+            "include_stc": file["include_stc"],
+            "include_mfi": file["include_mfi"],
             "features_num": file["features_num"]
         }
 
@@ -648,7 +651,10 @@ class ClassificationTraining:
             f.attrs["training_data_id"] = self.training_data_summary["id"]
             f.attrs["models"] = dumps(self.models)
             f.attrs["include_rsi"] = self.training_data_summary["include_rsi"]
+            f.attrs["include_stoch"] = self.training_data_summary["include_stoch"]
             f.attrs["include_aroon"] = self.training_data_summary["include_aroon"]
+            f.attrs["include_stc"] = self.training_data_summary["include_stc"]
+            f.attrs["include_mfi"] = self.training_data_summary["include_mfi"]
             f.attrs["features_num"] = self.training_data_summary["features_num"]
 
 
@@ -692,7 +698,7 @@ class ClassificationTraining:
         )
 
         # Save the file
-        with open(f"{self.model_path}/{self.id}.json", "w") as outfile:
+        with open(f"{self.model_path}/certificate.json", "w") as outfile:
             outfile.write(dumps(certificate))
 
         # Finally, return it so it can be added to the batch
@@ -760,6 +766,12 @@ class ClassificationTraining:
                 "description": self.description,
                 "training_data_id": self.training_data_summary["id"],
                 "models": self.models,
+                "include_rsi": self.training_data_summary["include_rsi"],
+                "include_stoch": self.training_data_summary["include_stoch"],
+                "include_aroon": self.training_data_summary["include_aroon"],
+                "include_stc": self.training_data_summary["include_stc"],
+                "include_mfi": self.training_data_summary["include_mfi"],
+                "features_num": self.training_data_summary["features_num"],
                 "summary": get_summary(model)
             }
         }

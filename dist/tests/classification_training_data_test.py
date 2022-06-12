@@ -29,7 +29,10 @@ DEFAULT_CONFIG: ITrainingDataConfig = {
         { "id": "R_UNIT_TEST","regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": {"long": 1.5, "short": 1.5}}] }
     ],
     "include_rsi": False,
-    "include_aroon": False
+    "include_stoch": False,
+    "include_aroon": False,
+    "include_stc": False,
+    "include_mfi": False
 }
 
 
@@ -230,27 +233,22 @@ class ClassificationTrainingDataTestCase(unittest.TestCase):
         self.assertEqual(config['include_aroon'], td.include_aroon)
 
         # Make sure the Features number has been set correctly
-        self.assertEqual(len(config['models']) + 3, td.features_num)
+        self.assertEqual(len(config['models']) + 2, td.features_num)
 
         # Validate the integrity of the DF
         self.assertEqual(td.df.shape[0], 0)
-        self.assertEqual(td.df.shape[1], len(config['models']) + 3 + 2)
+        self.assertEqual(td.df.shape[1], len(config['models']) + 2 + 2)
         rsi_column_exists: bool = False
-        aroon_up_column_exists: bool = False
-        aroon_down_column_exists: bool = False
+        aroon_column_exists: bool = False
         for i, column_name in enumerate(td.df.columns):
             if column_name == "RSI":
                 rsi_column_exists = True
-            if column_name == "AROON_UP":
-                aroon_up_column_exists = True
-            if column_name == "AROON_DOWN":
-                aroon_down_column_exists = True
-            if  column_name != "RSI" and column_name != "AROON_UP" and column_name != "AROON_DOWN" \
-                and column_name != "up" and column_name != "down":
+            if column_name == "AROON":
+                aroon_column_exists = True
+            if  column_name != "RSI" and column_name != "AROON" and column_name != "up" and column_name != "down":
                 self.assertEqual(column_name, config["models"][i]["id"])
         self.assertTrue(rsi_column_exists)
-        self.assertTrue(aroon_up_column_exists)
-        self.assertTrue(aroon_down_column_exists)
+        self.assertTrue(aroon_column_exists)
 
 
 

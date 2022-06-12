@@ -36,7 +36,7 @@ class Candlestick:
         DF: DataFrame
             One Minute Candlesticks DataFrame with the following columns: ot, ct, o, h, l, c
         PREDICTION_DF: DataFrame 
-            Prediction Candlesticks DataFrame with the following columns: ot, ct, o, h, l, c
+            Prediction Candlesticks DataFrame with the following columns: ot, ct, o, h, l, c, v
         NORMALIZED_PREDICTION_DF: Union[DataFrame, None] 
             Prediction Candlesticks DataFrame with the following columns normalized: o, h, l, c.
             Only initialized when normalized is set to True
@@ -61,7 +61,7 @@ class Candlestick:
 
     # Prediction Candlesticks Configuration
     PREDICTION_CANDLESTICK_CONFIG: ICandlestickConfig = {
-        "columns": ("ot", "ct", "o", "h", "l", "c"),
+        "columns": ("ot", "ct", "o", "h", "l", "c", "v"),
         "csv_file": f"{BASE_PATH}/prediction_candlesticks.csv",
         "interval_minutes": 30
     }

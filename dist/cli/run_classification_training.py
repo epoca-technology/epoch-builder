@@ -59,7 +59,7 @@ training_data: ITrainingDataFile = load(training_data_config_file)
 # completion, results will not be saved.
 print("CLASSIFICATION TRAINING")
 # Init the max evaluations
-answers: Dict[str, str] = prompt([Text("max_evaluations", "Number of Classification Evaluations (Defaults to 250)")])
+answers: Dict[str, str] = prompt([Text("max_evaluations", f"Number of Classification Evaluations (Defaults to {ClassificationTraining.DEFAULT_MAX_EVALUATIONS})")])
 max_evaluations: Union[int, None] = int(answers["max_evaluations"]) if answers["max_evaluations"].isdigit() else None
 
 # Init the list of certificates

@@ -1,7 +1,8 @@
-from typing import Tuple, TypedDict, Union, List
+from typing import TypedDict, Union, List
 from pandas import DataFrame, Series
-from ta.momentum import rsi
-from ta.trend import aroon_up, aroon_down
+from ta.momentum import rsi, stoch
+from ta.trend import AroonIndicator, stc
+from ta.volume import money_flow_index
 from modules.database import Database
 
 
@@ -11,8 +12,10 @@ from modules.database import Database
 # Type
 class ITechnicalAnalysis(TypedDict):
     rsi: Union[float, None]
-    aroon_up: Union[float, None]
-    aroon_down: Union[float, None]
+    stoch: Union[float, None]
+    aroon: Union[float, None]
+    stc: Union[float, None]
+    mfi: Union[float, None]
 
 
 
@@ -24,23 +27,9 @@ class TechnicalAnalysis:
 
     This singleton manages the technical analysis indicators for Classifications.
 
-
-    Class Properties:
-        SHORT_WINDOW: int 
-        MEDIUM_WINDOW: int 
-        LONG_WINDOW: int 
-            The windows that will be use for indicators.
-        DECIMALS: int
-            The number of decimals that will be used in the normalization.
-        
+    The docs for the ta library can be found here:
+    https://technical-analysis-library-in-python.readthedocs.io/
     """
-    # Windows
-    SHORT_WINDOW: int = 7
-    MEDIUM_WINDOW: int = 25
-    LONG_WINDOW: int = 50
-
-    # Normalization Decimals
-    DECIMALS: int = 6
 
 
 
@@ -51,7 +40,10 @@ class TechnicalAnalysis:
     def get_technical_analysis(
         lookback_df: DataFrame, 
         include_rsi: bool=False, 
-        include_aroon: bool=False
+        include_stoch: bool=False, 
+        include_aroon: bool=False,
+        include_stc: bool=False,
+        include_mfi: bool=False
     ) -> ITechnicalAnalysis:
         """Builds the Technical Analysis Dictionary. The process checks for the results
         in the Database first. If any of the indicators are not found, they will be 
@@ -61,9 +53,15 @@ class TechnicalAnalysis:
             lookback_df: DataFrame
                 The candlestick lookback that will be used to calculate the indicators.
             include_rsi: bool
-                If enabled, the RSI result will be included in the response.
+                If enabled, the normalized 'rsi' result will be included in the response.
+            include_stoch: bool
+                If enabled, the normalized 'stoch' result will be included in the response.
             include_aroon: bool
-                If enabled, The AROON_UP and AROON_DOWN results will be included in the response.
+                If enabled, the normalized 'aroon' result will be included in the response.
+            include_stc: bool
+                If enabled, the normalized 'stc' result will be included in the response.
+            include_mfi: bool
+                If enabled, the normalized 'mfi' result will be included in the response.
 
         Returns:
             ITechnicalAnalysis
@@ -88,11 +86,24 @@ class TechnicalAnalysis:
             ta["rsi"] = TechnicalAnalysis._calculate_rsi(lookback_df["c"])
             update = True if not create else False
 
+        # Handle the Stoch Indicator if it has to be included
+        if include_stoch and not isinstance(ta.get("stoch"), float):
+            ta["stoch"] = TechnicalAnalysis._calculate_stoch(lookback_df["h"], lookback_df["l"], lookback_df["c"])
+            update = True if not create else False
+
         # Handle the Aroon Indicator if it has to be included
-        if include_aroon and (not isinstance(ta.get("aroon_up"), float) or not isinstance(ta.get("aroon_down"), float)):
-            up, down = TechnicalAnalysis._calculate_aroon(lookback_df["c"]) 
-            ta["aroon_up"] = up
-            ta["aroon_down"] = down
+        if include_aroon and not isinstance(ta.get("aroon"), float):
+            ta["aroon"] = TechnicalAnalysis._calculate_aroon(lookback_df["c"])
+            update = True if not create else False
+
+        # Handle the STC Indicator if it has to be included
+        if include_stc and not isinstance(ta.get("stc"), float):
+            ta["stc"] = TechnicalAnalysis._calculate_stc(lookback_df["c"])
+            update = True if not create else False
+
+        # Handle the MFI Indicator if it has to be included
+        if include_mfi and not isinstance(ta.get("mfi"), float):
+            ta["mfi"] = TechnicalAnalysis._calculate_mfi(lookback_df["h"], lookback_df["l"], lookback_df["c"], lookback_df["v"])
             update = True if not create else False
 
         # Check if the TA needs to be saved
@@ -205,25 +216,21 @@ class TechnicalAnalysis:
 
 
     @staticmethod
-    def _calculate_rsi(close_prices: Series) -> float:
+    def _calculate_rsi(close: Series) -> float:
         """Returns the current RSI value for a given series.
 
         Args:
-            close_prices: Series
+            close: Series
                 The close price series that will be used by the indicator.
         
         Returns:
             float
         """
         # Calculate the RSI Series
-        rsi_result: Series = rsi(close_prices, window=TechnicalAnalysis.SHORT_WINDOW)
-
-        # Normalizer
-        def _normalize(val: float) -> float:
-            return round(((val / 100) - 0.5)*2, 6)
+        result: Series = rsi(close, window=14)
         
         # Return the current item in a normalized format
-        return _normalize(rsi_result.iloc[-1])
+        return TechnicalAnalysis._normalize(result.iloc[-1], 0, 100)
 
 
 
@@ -231,31 +238,100 @@ class TechnicalAnalysis:
 
 
     @staticmethod
-    def _calculate_aroon(close_prices: Series) -> Tuple[float, float]:
-        """Returns the current Aroon up and down values for a given series.
+    def _calculate_stoch(high: Series, low: Series, close: Series) -> float:
+        """Returns the current Stoch value for a given series.
 
         Args:
-            close_prices: Series
+            high: Series
+                The high price series that will be used by the indicator.
+            low: Series
+                The low price series that will be used by the indicator.
+            close: Series
                 The close price series that will be used by the indicator.
         
         Returns:
-            Tuple(float, float)
-            (aroon_up, aroon_down)
+            float
+        """
+        # Calculate the Stoch Series
+        result: Series = stoch(high, low, close, window=14, smooth_window=3)
+        
+        # Return the current item in a normalized format
+        return TechnicalAnalysis._normalize(result.iloc[-1], 0, 100)
+
+
+
+
+
+
+
+    @staticmethod
+    def _calculate_aroon(close: Series) -> float:
+        """Returns the current Aroon value for a given series.
+
+        Args:
+            close: Series
+                The close price series that will be used by the indicator.
+        
+        Returns:
+            float
         """
         # Calculate the Aroon Series
-        up: Series = aroon_up(close_prices, window=TechnicalAnalysis.SHORT_WINDOW)
-        down: Series = aroon_down(close_prices, window=TechnicalAnalysis.SHORT_WINDOW)
+        result: Series = AroonIndicator(close, window=25).aroon_indicator()
 
-        # Normalizers
-        def _normalize_up(val: float) -> float:
-            return round((val / 100), 6)
-        def _normalize_down(val: float) -> float:
-            return round((val / 100)*-1, 6)
-
-        # Pack the current values and return them
-        return _normalize_up(up.iloc[-1]), _normalize_down(down.iloc[-1])
+        # Return the current item in a normalized format
+        return TechnicalAnalysis._normalize(result.iloc[-1], -100, 100)
 
 
+
+
+
+
+    @staticmethod
+    def _calculate_stc(close: Series) -> float:
+        """Returns the current STC value for a given series.
+
+        Args:
+            close: Series
+                The close price series that will be used by the indicator.
+        
+        Returns:
+            float
+        """
+        # Calculate the STC Series
+        result: Series = stc(close, window_slow=50, window_fast=23, cycle=10, smooth1=3, smooth2=3)
+        
+        # Return the current item in a normalized format
+        return TechnicalAnalysis._normalize(result.iloc[-1], 0, 100)
+
+
+
+
+
+
+
+
+    @staticmethod
+    def _calculate_mfi(high: Series, low: Series, close: Series, volume: Series) -> float:
+        """Returns the current Stoch value for a given series.
+
+        Args:
+            high: Series
+                The high price series that will be used by the indicator.
+            low: Series
+                The low price series that will be used by the indicator.
+            close: Series
+                The close price series that will be used by the indicator.
+            volume: Series
+                The volume series that will be used by the indicator.
+        
+        Returns:
+            float
+        """
+        # Calculate the MFI Series
+        result: Series = money_flow_index(high, low, close, volume, window=14)
+        
+        # Return the current item in a normalized format
+        return TechnicalAnalysis._normalize(result.iloc[-1], 0, 100)
 
 
 
@@ -292,4 +368,36 @@ class TechnicalAnalysis:
 
 
 
+    @staticmethod
+    def _normalize(value: float, minimum: float, maximum: float) -> float:
+        """Normalizes a value to a -1 / 1 range based on its min and max
+        possible values.
+
+        Args:
+            value: float
+                The value to be normalized.
+            minimum: float
+                The minimum value that can be generated by the indicator.
+            maximum: float
+                The maximum value that can be generated by the indicator.
+        """
+        # Handle a case in which the value does not need to be normalized
+        if minimum == -1 and maximum == 1:
+            return round(value, 6)
+        
+        # Handle a case in which the value just needs to be divider by 100
+        elif minimum == -100 and maximum == 100:
+            return round((value / 100), 6)
+
+        # Handle a case in which the value needs to be divider by 100 and scaled tu support negative values
+        elif minimum == 0 and maximum == 100:
+            return round(((value / 100) - 0.5)*2, 6)
+
+        # Handle a case in which the value needs to be scaled tu support negative values
+        elif minimum == 0 and maximum == 1:
+            return round((value - 0.5)*2, 6)
+        
+        # Otherwise, throw an error
+        else:
+            raise ValueError("The technical analysis min and/or max args are invalid.")
 

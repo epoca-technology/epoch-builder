@@ -70,8 +70,8 @@ class TechnicalAnalysisTestCase(unittest.TestCase):
         ta = TechnicalAnalysis.get_technical_analysis(LOOKBACK_DF, include_aroon=True)
 
         # Make sure the dict has the correct Aroon value
-        up, down = TechnicalAnalysis._calculate_aroon(LOOKBACK_DF["c"])
-        self.assertDictEqual(ta, {"aroon_up": up, "aroon_down": down})
+        aroon = TechnicalAnalysis._calculate_aroon(LOOKBACK_DF["c"])
+        self.assertDictEqual(ta, {"aroon": aroon})
 
         # Make sure the TA has been stored in the db and that it is exactly the same
         # as the one retrieved previously
@@ -96,14 +96,14 @@ class TechnicalAnalysisTestCase(unittest.TestCase):
 
         # Now generate Aroon as well
         ta = TechnicalAnalysis.get_technical_analysis(LOOKBACK_DF, include_aroon=True)
-        up, down = TechnicalAnalysis._calculate_aroon(LOOKBACK_DF["c"])
-        self.assertDictEqual(ta, {"rsi": rsi_calc, "aroon_up": up, "aroon_down": down})
+        aroon = TechnicalAnalysis._calculate_aroon(LOOKBACK_DF["c"])
+        self.assertDictEqual(ta, {"rsi": rsi_calc, "aroon": aroon})
         ta_snap: Union[TechnicalAnalysis, None] = TechnicalAnalysis._read(ID)
-        self.assertDictEqual(ta_snap, {"rsi": rsi_calc, "aroon_up": up, "aroon_down": down})
+        self.assertDictEqual(ta_snap, {"rsi": rsi_calc, "aroon": aroon})
 
         # Can retrieve the full dict including both indicators
         ta = TechnicalAnalysis.get_technical_analysis(LOOKBACK_DF, include_rsi=True, include_aroon=True)
-        self.assertDictEqual(ta, {"rsi": rsi_calc, "aroon_up": up, "aroon_down": down})
+        self.assertDictEqual(ta, {"rsi": rsi_calc, "aroon": aroon})
 
 
 
@@ -111,21 +111,21 @@ class TechnicalAnalysisTestCase(unittest.TestCase):
     def testGenerateAroonAndCompleteWithRSI(self):
         # Generate Aroon
         ta = TechnicalAnalysis.get_technical_analysis(LOOKBACK_DF, include_aroon=True)
-        up, down = TechnicalAnalysis._calculate_aroon(LOOKBACK_DF["c"])
-        self.assertDictEqual(ta, {"aroon_up": up, "aroon_down": down})
+        aroon = TechnicalAnalysis._calculate_aroon(LOOKBACK_DF["c"])
+        self.assertDictEqual(ta, {"aroon": aroon})
         ta_snap: Union[TechnicalAnalysis, None] = TechnicalAnalysis._read(ID)
-        self.assertDictEqual(ta_snap, {"aroon_up": up, "aroon_down": down})
+        self.assertDictEqual(ta_snap, {"aroon": aroon})
 
         # Generate the RSI
         ta = TechnicalAnalysis.get_technical_analysis(LOOKBACK_DF, include_rsi=True)
         rsi_calc: float = TechnicalAnalysis._calculate_rsi(LOOKBACK_DF["c"])
-        self.assertDictEqual(ta, {"rsi": rsi_calc, "aroon_up": up, "aroon_down": down})
+        self.assertDictEqual(ta, {"rsi": rsi_calc, "aroon": aroon})
         ta_snap: Union[TechnicalAnalysis, None] = TechnicalAnalysis._read(ID)
-        self.assertDictEqual(ta_snap, {"rsi": rsi_calc, "aroon_up": up, "aroon_down": down})
+        self.assertDictEqual(ta_snap, {"rsi": rsi_calc, "aroon": aroon})
 
         # Can retrieve the full dict including both indicators
         ta = TechnicalAnalysis.get_technical_analysis(LOOKBACK_DF, include_rsi=True, include_aroon=True)
-        self.assertDictEqual(ta, {"rsi": rsi_calc, "aroon_up": up, "aroon_down": down})
+        self.assertDictEqual(ta, {"rsi": rsi_calc, "aroon": aroon})
 
 
 
@@ -137,8 +137,8 @@ class TechnicalAnalysisTestCase(unittest.TestCase):
 
         # Calculate the results
         rsi_calc: float = TechnicalAnalysis._calculate_rsi(LOOKBACK_DF["c"])
-        up, down = TechnicalAnalysis._calculate_aroon(LOOKBACK_DF["c"])
-        expected_ta: ITechnicalAnalysis = {"rsi": rsi_calc, "aroon_up": up, "aroon_down": down}
+        aroon = TechnicalAnalysis._calculate_aroon(LOOKBACK_DF["c"])
+        expected_ta: ITechnicalAnalysis = {"rsi": rsi_calc, "aroon": aroon}
 
         # Validate the ta
         self.assertDictEqual(ta, expected_ta)
@@ -162,27 +162,49 @@ class TechnicalAnalysisTestCase(unittest.TestCase):
 
     # Can calculate the RSI Indicator for a given series
     def testCalculateRSI(self):
-        # Calculate the RSI and make sure it is a valid float
         rsi: float = TechnicalAnalysis._calculate_rsi(LOOKBACK_DF["c"])
         self.assertIsInstance(rsi, float)
         self.assertLessEqual(rsi, 1)
 
 
 
+    # Can calculate the Stoch Indicator for a given series
+    def testCalculateStoch(self):
+        result: float = TechnicalAnalysis._calculate_stoch(LOOKBACK_DF["h"], LOOKBACK_DF["l"], LOOKBACK_DF["c"])
+        self.assertIsInstance(result, float)
+        self.assertLessEqual(result, 1)
+
+
+
 
     # Can calculate the Aroon Indicator for a given series
     def testCalculateAroon(self):
-        # Calculate the Aroons and make sure it is a valid float
-        aroon_up, aroon_down = TechnicalAnalysis._calculate_aroon(LOOKBACK_DF["c"])
-        self.assertIsInstance(aroon_up, float)
-        self.assertLessEqual(aroon_up, 1)
-        self.assertIsInstance(aroon_down, float)
-        self.assertLessEqual(aroon_down, 1)
-        self.assertNotEqual(aroon_up, aroon_down)
+        aroon = TechnicalAnalysis._calculate_aroon(LOOKBACK_DF["c"])
+        self.assertIsInstance(aroon, float)
+        self.assertLessEqual(aroon, 1)
+        self.assertGreaterEqual(aroon, -1)
 
 
 
 
+    # Can calculate the STC Indicator for a given series
+    def testCalculateSTC(self):
+        result = TechnicalAnalysis._calculate_stc(LOOKBACK_DF["c"])
+        self.assertIsInstance(result, float)
+        self.assertLessEqual(result, 1)
+        self.assertGreaterEqual(result, -1)
+
+
+
+
+
+
+    # Can calculate the MFI Indicator for a given series
+    def testCalculateMFI(self):
+        result = TechnicalAnalysis._calculate_mfi(LOOKBACK_DF["h"], LOOKBACK_DF["l"], LOOKBACK_DF["c"], LOOKBACK_DF["v"])
+        self.assertIsInstance(result, float)
+        self.assertLessEqual(result, 1)
+        self.assertGreaterEqual(result, -1)
 
 
 

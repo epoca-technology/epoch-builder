@@ -78,8 +78,11 @@ class ITrainingDataConfig(TypedDict):
     models: List[IModel]
 
     # Optional Technical Analysis Features
-    include_rsi: bool   # Momentum
-    include_aroon: bool # Trend
+    include_rsi: bool       # Momentum
+    include_stoch: bool     # Momentum
+    include_aroon: bool     # Trend
+    include_stc: bool       # Trend
+    include_mfi: bool       # Volume
 
 
 
@@ -132,8 +135,11 @@ class ITrainingDataFile(TypedDict):
     models: List[IModel]
 
     # Optional Technical Analysis Features
-    include_rsi: bool   # Momentum
-    include_aroon: bool # Trend
+    include_rsi: bool       # Momentum
+    include_stoch: bool     # Momentum
+    include_aroon: bool     # Trend
+    include_stc: bool       # Trend
+    include_mfi: bool       # Volume
 
     # The total number of features that will be used by the model to predict
     features_num: int
@@ -247,8 +253,11 @@ class ITrainingDataSummary(TypedDict):
     down_percent_change: float
 
     # Optional Technical Analysis Features
-    include_rsi: bool   # Momentum
-    include_aroon: bool # Trend
+    include_rsi: bool       # Momentum
+    include_stoch: bool     # Momentum
+    include_aroon: bool     # Trend
+    include_stc: bool       # Trend
+    include_mfi: bool       # Volume
 
     # The total number of features that will be used by the model to predict
     features_num: int
