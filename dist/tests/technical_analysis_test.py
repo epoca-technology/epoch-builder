@@ -133,12 +133,24 @@ class TechnicalAnalysisTestCase(unittest.TestCase):
     # Can generate any number of indicators in one go
     def testGenerateSeveralInidicators(self):
         # Generate the indicators
-        ta = TechnicalAnalysis.get_technical_analysis(LOOKBACK_DF, include_rsi=True, include_aroon=True)
+        ta = TechnicalAnalysis.get_technical_analysis(
+            LOOKBACK_DF, 
+            include_rsi=True, 
+            include_stoch=True, 
+            include_aroon=True,
+            include_stc=True,
+            include_mfi=True
+        )
 
         # Calculate the results
-        rsi_calc: float = TechnicalAnalysis._calculate_rsi(LOOKBACK_DF["c"])
+        rsi: float = TechnicalAnalysis._calculate_rsi(LOOKBACK_DF["c"])
+        stoch: float = TechnicalAnalysis._calculate_stoch(LOOKBACK_DF["h"], LOOKBACK_DF["l"], LOOKBACK_DF["c"])
         aroon = TechnicalAnalysis._calculate_aroon(LOOKBACK_DF["c"])
-        expected_ta: ITechnicalAnalysis = {"rsi": rsi_calc, "aroon": aroon}
+        stc = TechnicalAnalysis._calculate_stc(LOOKBACK_DF["c"])
+        mfi = TechnicalAnalysis._calculate_mfi(LOOKBACK_DF["h"], LOOKBACK_DF["l"], LOOKBACK_DF["c"], LOOKBACK_DF["v"])
+
+        # Initialize the expected TA
+        expected_ta: ITechnicalAnalysis = {"rsi": rsi, "stoch": stoch, "aroon": aroon, "stc": stc, "mfi": mfi}
 
         # Validate the ta
         self.assertDictEqual(ta, expected_ta)
