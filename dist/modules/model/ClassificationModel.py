@@ -2,6 +2,7 @@ from typing import List, Union
 from pandas import DataFrame
 from modules.candlestick import Candlestick
 from modules.interpreter import ProbabilityInterpreter
+from modules.prediction_cache import TemporaryPredictionCache
 from modules.model import ModelInterface, IModel, RegressionModelFactory, IPrediction, \
     IPredictionMetaData, IClassificationModelConfig, ArimaModel, RegressionModel
 from modules.technical_analysis import TechnicalAnalysis, ITechnicalAnalysis
@@ -25,6 +26,8 @@ class ClassificationModel(ModelInterface):
             The highest lookback among the regressions within.
         interpreter: ProbabilityInterpreter
             The Interpreter instance that will be used to interpret Classification Predictions.
+        cache: TemporaryPredictionCache
+            The instance of the prediction temporary cache.
     """
 
 
@@ -66,6 +69,9 @@ class ClassificationModel(ModelInterface):
         # Initialize the Interpreter Instance
         self.interpreter: ProbabilityInterpreter = ProbabilityInterpreter(model_config['interpreter'])
 
+        # Initialize the prediction cache instance
+        self.cache: TemporaryPredictionCache = TemporaryPredictionCache()
+
 
 
 
@@ -84,8 +90,8 @@ class ClassificationModel(ModelInterface):
         enable_cache: bool = False
     ) -> IPrediction:
         """In order to optimize performance, if cache is enabled, it will check the db
-        before performing an actual prediction. If the prediction is not found, it will
-        perform it and store it afterwards. If cache is not enabled, it will just 
+        or the temp cachebefore performing an actual prediction. If the prediction is not found, 
+        it will perform it and store it afterwards. If cache is not enabled, it will just 
         perform a traditional prediction without storing the results.
 
         Args:
@@ -102,8 +108,26 @@ class ClassificationModel(ModelInterface):
         """
         # Check if the cache is enabled
         if enable_cache:
-            # @TODO
-            return self._call_predict(current_timestamp, minimized_metadata=True)
+            # Retrieve the candlestick prediction range
+            first_ot, last_ct = Candlestick.get_lookback_prediction_range(self.max_lookback, current_timestamp)
+
+            # Check if the prediction has already been cached
+            pred: Union[IPrediction, None] = self.cache.get(first_ot, last_ct)
+
+            # Check if the prediction exists
+            if pred == None:
+                # Generate the prediction
+                pred = self._call_predict(current_timestamp, minimized_metadata=True)
+
+                # Store it in cache
+                self.cache.save(first_ot, last_ct, pred)
+
+                # Finally, return it
+                return pred
+
+            # If the prediction exists, return it
+            else:
+                return pred
         else:
             return self._call_predict(current_timestamp, minimized_metadata=False)
             

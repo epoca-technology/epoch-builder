@@ -3,6 +3,7 @@ from pandas import DataFrame
 from modules.candlestick import Candlestick
 from modules.regression import Regression
 from modules.interpreter import PercentageChangeInterpreter
+from modules.prediction_cache import TemporaryPredictionCache
 from modules.model import ModelInterface, IModel, IPrediction, IPredictionMetaData, IRegressionModelConfig
 
 
@@ -15,9 +16,6 @@ class RegressionModel(ModelInterface):
     
     This class is responsible of handling interactions with Keras Regression Models.
 
-    Class Properties:
-        ...
-
     Instance Properties:
         id: str
             The identifier of the saved keras model.
@@ -25,6 +23,8 @@ class RegressionModel(ModelInterface):
             The instance of the Keras Regression Model.
         interpreter: PercentageChangeInterpreter
             The Interpreter instance that will be used to interpret Regression Predictions.
+        cache: TemporaryPredictionCache
+            The instance of the prediction temporary cache.
 
     """
 
@@ -55,6 +55,9 @@ class RegressionModel(ModelInterface):
 
         # Initialize the Interpreter Instance
         self.interpreter: PercentageChangeInterpreter = PercentageChangeInterpreter(model_config['interpreter'])
+
+        # Initialize the prediction cache instance
+        self.cache: TemporaryPredictionCache = TemporaryPredictionCache()
 
 
 
@@ -92,42 +95,32 @@ class RegressionModel(ModelInterface):
         
         # Check if the cache is enabled
         if enable_cache:
-            """# Retrieve the candlestick range
-            first_ot, last_ct = Candlestick.get_lookback_prediction_range(self.lookback, current_timestamp)
+            # Retrieve the candlestick range
+            first_ot: int = 0
+            last_ct: int = 0
+            if isinstance(df, DataFrame):
+                first_ot = int(df.iloc[0]["ot"])
+                last_ct = int(df.iloc[-1]["ct"])
+            else:
+                first_ot, last_ct = Candlestick.get_lookback_prediction_range(self.regression.lookback, current_timestamp)
 
-            # Retrieve it from the database
-            pred: Union[IPrediction, None] = get_arima_pred(
-                self.id, 
-                first_ot, 
-                last_ct, 
-                self.predictions, 
-                self.interpreter.long,
-                self.interpreter.short
-            )
+            # Check if the prediction has already been cached
+            pred: Union[IPrediction, None] = self.cache.get(first_ot, last_ct)
 
-            # Check if the prediction does not exist
+            # Check if the prediction exists
             if pred == None:
-                # Generate it
+                # Generate the prediction
                 pred = self._call_predict(current_timestamp, minimized_metadata=True)
 
-                # Store it in the database
-                save_arima_pred(
-                    self.id, 
-                    first_ot, 
-                    last_ct, 
-                    self.predictions, 
-                    self.interpreter.long,
-                    self.interpreter.short,
-                    pred
-                )
+                # Store it in cache
+                self.cache.save(first_ot, last_ct, pred)
 
                 # Finally, return it
                 return pred
 
-            # Otherwise, return it
+            # If the prediction exists, return it
             else:
-                return pred"""
-            return self._call_predict(current_timestamp, minimized_metadata=True)
+                return pred
 
         # Otherwise, handle a traditional prediction
         else:
