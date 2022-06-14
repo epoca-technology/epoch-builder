@@ -5,6 +5,7 @@ from json import load, dumps
 from inquirer import Text, prompt
 from tqdm import tqdm
 from modules.utils import Utils
+from modules.candlestick import Candlestick
 from modules.keras_models import KERAS_PATH
 from modules.classification import IClassificationTrainingBatch, ClassificationTraining, IClassificationTrainingCertificate, \
     ITrainingDataFile
@@ -62,8 +63,15 @@ print("CLASSIFICATION TRAINING")
 answers: Dict[str, str] = prompt([Text("max_evaluations", f"Number of Classification Evaluations (Defaults to {ClassificationTraining.DEFAULT_MAX_EVALUATIONS})")])
 max_evaluations: Union[int, None] = int(answers["max_evaluations"]) if answers["max_evaluations"].isdigit() else None
 
+
+# CANDLESTICK INITIALIZATION
+# Initialize the Candlesticks Module based on the highest lookback among the models config.
+Candlestick.init(300)
+
+
 # Init the list of certificates
 certificates: List[IClassificationTrainingCertificate] = []
+
 
 # Run the training
 for index, model_config in enumerate(config["models"]):

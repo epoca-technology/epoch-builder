@@ -16,9 +16,6 @@ class Regression(KerasModelInterface):
 
     This class handles the initialization of a Keras Regression Model.
 
-    Class Properties:
-        ...
-
     Instance Properties:
         id: str
             The ID of the model that was set when training.

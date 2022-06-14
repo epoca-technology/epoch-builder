@@ -42,9 +42,8 @@ def validate(
         raise ValueError(f"Model Name Missmatch. {config['name']} != {name}")
 
     # Make sure the lookback and predictions have been provided in case of a regression
-    if config["name"][0:2] == "R_" and (not isinstance(config.get("lookback"), int) or not isinstance(config.get("predictions"), int)):
-        raise ValueError(f"The provided lookback and or predictions are not valid integers. \
-            Received: {str(config.get('lookback'))}, {str(config.get('predictions'))}")
+    if config["name"][0:2] == "R_" and not isinstance(config.get("lookback"), int):
+        raise ValueError(f"The provided lookback is not a valid integer. Received: {str(config.get('lookback'))}")
 
     # Make sure the number of features has been provided in case of a classification
     if config["name"][0:2] == "C_" and not isinstance(config.get("features_num"), int):

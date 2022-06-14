@@ -134,11 +134,11 @@ class Candlestick:
 
         # Initialize the Normalized DataFrame
         # Populate the MIN & MAX
-        min: float = Candlestick.PREDICTION_DF['l'].min()
-        max: float = Candlestick.PREDICTION_DF['h'].max()
+        min: float = Candlestick.PREDICTION_DF['c'].min()
+        max: float = Candlestick.PREDICTION_DF['c'].max()
 
         # Initialize the normalized df
-        Candlestick.NORMALIZED_PREDICTION_DF = Candlestick.PREDICTION_DF[['o', 'h', 'l', 'c']].apply(lambda x: (x - min) / (max - min))
+        Candlestick.NORMALIZED_PREDICTION_DF = Candlestick.PREDICTION_DF[['c']].apply(lambda x: (x - min) / (max - min))
 
         # Build the prediction range indexer
         Candlestick._init_lookback_prediction_range_indexer()

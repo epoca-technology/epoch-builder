@@ -1,7 +1,9 @@
-from typing import List
-from os import makedirs
+from typing import List, Dict, Union
+from os import makedirs, remove
 from os.path import exists
 from json import load, dumps
+from inquirer import Text, prompt
+from tqdm import tqdm
 from modules.utils import Utils
 from modules.candlestick import Candlestick
 from modules.keras_models import KERAS_PATH
@@ -43,10 +45,6 @@ config: IRegressionTrainingBatch = load(config_file)
 
 
 
-# CANDLESTICK INITIALIZATION
-# Initialize the Candlesticks Module based on the highest lookback among the models config.
-Candlestick.init(max([m["lookback"] for m in config["models"]]), config.get("start"), config.get("end"))
-
 
 
 
@@ -56,25 +54,52 @@ Candlestick.init(max([m["lookback"] for m in config["models"]]), config.get("sta
 # Results as saved when the execution has completed. If the execution is interrupted before
 # completion, results will not be saved.
 
+# Init the max evaluations
+answers: Dict[str, str] = prompt([Text("max_evaluations", f"Number of Classification Evaluations (Defaults to {RegressionTraining.DEFAULT_MAX_EVALUATIONS})")])
+max_evaluations: Union[int, None] = int(answers["max_evaluations"]) if answers["max_evaluations"].isdigit() else None
+
+
+
+
+# CANDLESTICK INITIALIZATION
+# Initialize the Candlesticks Module based on the highest lookback among the models config.
+Candlestick.init(max([m["lookback"] for m in config["models"]]), config.get("start"), config.get("end"))
+
+
 
 # Init the list of certificates
 certificates: List[IRegressionTrainingCertificate] = []
 
+
 # Run the training
 for index, model_config in enumerate(config["models"]):
     # Initialize the instance of the model
-    regression_training: RegressionTraining = RegressionTraining(model_config)
+    regression_training: RegressionTraining = RegressionTraining(
+        model_config, 
+        max_evaluations=max_evaluations,
+        hyperparams_mode=config["hyperparams_mode"]
+    )
 
     # Print the progress
     if index == 0:
         print("REGRESSION TRAINING RUNNING")
-    print(f"\n{index + 1}/{len(config['models'])}) {model_config['id']}")
+        if config["hyperparams_mode"]:
+            print("\n")
+            progress_bar = tqdm( bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}", total=len(config["models"]))
+
+    if not config["hyperparams_mode"]:    
+        print(f"\n{index + 1}/{len(config['models'])}) {model_config['id']}")
 
     # Train the model
     cert: IRegressionTrainingCertificate = regression_training.train()
 
     # Add the certificate to the list
     certificates.append(cert)
+
+    # Perform the post evaluation cleanup if applies
+    if config["hyperparams_mode"]:
+        remove(f"{KERAS_PATH['models']}/{regression_training.id}/model.h5")
+        progress_bar.update()
 
 # Save the certificates
 if not exists(KERAS_PATH["batched_training_certificates"]):

@@ -1,23 +1,22 @@
 {
-    "name": "DNN_CNN_RNN",
+    "name": "R_MOCK",
     "start": null,
     "end": null,
+    "hyperparams_mode": false,
     "models": [
         {
-            "id": "R_DNN_S2",
+            "id": "R_MOCK",
             "description": "This is just a test to see how it goes.",
             "lookback": 50,
             "predictions": 10,
             "learning_rate": 0.001,
             "optimizer": "adam",
-            "loss": "mae",
-            "metric": "mse",
-            "batch_size": 32,
-            "shuffle_data": false,
+            "loss": "mean_absolute_error",
+            "metric": "mean_squared_error",
             "keras_model": {
-                "name": "R_DNN_S2",
-                "units": [64, 32],
-                "activations": ["relu", "relu"]
+                "name": "R_UNIT_TEST",
+                "units": [64],
+                "activations": ["relu"]
             }
         }
     ]

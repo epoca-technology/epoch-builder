@@ -14,9 +14,6 @@ class TrainingWindowGenerator:
 
     This class manages the data windowing for the train, validation and test data.
 
-    Class Properties:
-        ...
-
     Instance Properties:
         train_df: DataFrame
             The Train DataFrame
@@ -29,7 +26,7 @@ class TrainingWindowGenerator:
         label_columns_indices: Dict[str, int]
             A dictionary holding the label column names as well as the indices ({'c': 0})
         column_indices: Dict[str, int]
-            A dictionary holding the feature and label column names as well as the indices ({'o': 0, 'h': 1, 'l': 2, 'c': 3})
+            A dictionary holding the feature and label column names as well as the indices ({'c': 0})
         input_width: int
             The number of sequences that will be used to predict future values.
         label_width: int
@@ -48,10 +45,6 @@ class TrainingWindowGenerator:
         label_indices: ndarray
             An array holding the label indices in the window. If a lookback of 50 and predictions of 5 is provided, the 
             label_indices will be [50, 51, 52, 53, 54]
-        batch_size: int
-            The size of the batch that will be used to build the train datasets.
-        shuffle_data: bool
-            If True, it will shuffle the train, val and test datasets prior to training.
     """
 
 
@@ -87,12 +80,6 @@ class TrainingWindowGenerator:
         self.label_start: int = self.total_window_size - self.label_width
         self.labels_slice: slice = slice(self.label_start, None)
         self.label_indices: ndarray = arange(self.total_window_size)[self.labels_slice]
-
-        # Initialize the batch size
-        self.batch_size: int = config['batch_size']
-
-        # Initialize the data shuffling
-        self.shuffle_data: bool = config['shuffle_data']
 
 
 
@@ -171,8 +158,8 @@ class TrainingWindowGenerator:
             targets=None,
             sequence_length=self.total_window_size,
             sequence_stride=1,
-            shuffle=self.shuffle_data,
-            batch_size=self.batch_size
+            shuffle=False,
+            batch_size=1
         )
 
         # Split the Dataset into windows

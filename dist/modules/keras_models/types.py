@@ -75,11 +75,12 @@ class IKerasModelConfig(TypedDict):
     # Also keep in mind that this property only exists Regressions.
     lookback: Union[int, None]
 
+    # DEPRECATED IN AUTOREGRESSIVE REGRESSIONS
     # Number of predictions the model will output. This prediction is not set in the 
     # RegressionTraining.json file. However, it is populated once the RegressionTraining
     # instance is initialized.
     # Also keep in mind that this property only exists Regressions.
-    predictions: Union[int, None]
+    #predictions: Union[int, None]
 
     # Number of features used for the input layer of a Classification Network. This value is 
     # not set in the ClassificationTraining.json file. Instead, it is populated once the 

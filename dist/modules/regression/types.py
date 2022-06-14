@@ -38,16 +38,10 @@ class IRegressionTrainingConfig(TypedDict):
     optimizer: str # 'adam'|'rmsprop'
 
     # The loss function to be used
-    loss: str # 'mse'|'mae'
+    loss: str # 'mean_squared_error'|'mean_absolute_error'
 
     # The metric to be used for meassuring the val_loss
-    metric: str # 'mse'|'mae'
-
-    # Batch Size
-    batch_size: int
-
-    # Train Data Shuffling
-    shuffle_data: bool
+    metric: str # 'mean_squared_error'|'mean_absolute_error'
 
     # Keras Model Configuration
     keras_model: IKerasModelConfig
@@ -66,6 +60,9 @@ class IRegressionTrainingBatch(TypedDict):
     # Start and end time - If none provided, will use all the available data
     start: Union[str, int, None]
     end: Union[str, int, None]
+
+    # If enabled, it will delete the model files once the evaluation is complete
+    hyperparams_mode: bool
 
     # The configurations for the models that will be trained within the batch.
     models: List[IRegressionTrainingConfig]
@@ -95,12 +92,6 @@ class ITrainingWindowGeneratorConfig(TypedDict):
 
     # List of label column names
     label_columns: List[str]
-
-    # Batch Size
-    batch_size: int
-
-    # Train Data Shuffling
-    shuffle_data: bool
 
 
 
@@ -132,6 +123,7 @@ class IRegressionEvaluation(TypedDict):
     acc: int
 
     # Increase Predictions Overview
+    increase_list: List[float]
     increase_max: float
     increase_min: float
     increase_mean: float
@@ -140,12 +132,17 @@ class IRegressionEvaluation(TypedDict):
     increase_successful_mean: float
 
     # Decrease Predictions Overview
+    decrease_list: List[float]
     decrease_max: float
     decrease_min: float
     decrease_mean: float
     decrease_successful_max: float
     decrease_successful_min: float
     decrease_successful_mean: float
+
+    # Outcomes
+    increase_outcomes: int
+    decrease_outcomes: int
 
 
 
@@ -186,8 +183,6 @@ class IRegressionTrainingCertificate(TypedDict):
     optimizer: str
     loss: str
     metric: str
-    batch_size: int    
-    shuffle_data: bool
     keras_model_config: IKerasModelConfig
 
 

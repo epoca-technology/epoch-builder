@@ -5,13 +5,14 @@ from random import randint
 from numpy import mean
 from pandas import DataFrame
 from json import dumps
+from tqdm import tqdm
+from h5py import File as h5pyFile
 from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras import Sequential
-from keras.optimizers import adam_v2, rmsprop_v2
+from keras.optimizers import adam_v2 as adam, rmsprop_v2 as rmsprop
 from keras.losses import MeanSquaredError, MeanAbsoluteError
 from keras.metrics import MeanSquaredError as MeanSquaredErrorMetric, MeanAbsoluteError as MeanAbsoluteErrorMetric
 from keras.callbacks import EarlyStopping, History
-from h5py import File as h5pyFile
 from modules.candlestick import Candlestick
 from modules.utils import Utils
 from modules.keras_models import KerasModel, IKerasModelConfig, IKerasModelTrainingHistory, get_summary, KERAS_PATH
@@ -27,14 +28,19 @@ class RegressionTraining:
     This class handles the training of a RegressionModel.
 
     Class Properties:
+        EARLY_STOPPING_PATIENCE: int
+            The number of epochs it will allow to be executed without showing an improvement.
         MAX_EPOCHS: int
             The maximum amount of epochs the training process can go through.
-        MAX_REGRESSION_EVALUATIONS: int
-            The max number of evaluations that will be performed on the trained regression model
-        EARLY_STOPPING_PATIENCE: int
-            The number of epochs it will allow to be executed without showing a performance.
+        DEFAULT_MAX_EVALUATIONS: int
+            The default maximum number of evaluations that will be performed on the trained model.
 
     Instance Properties:
+        test_mode: bool
+             If running from unit tests, it won't check the model's directory.
+        hyperparams_mode: bool
+            If enabled, it means that the purpose of the training is to identify the best hyperparams
+            and therefore, a large amount of models will be trained.
         id: str
             A descriptive identifier compatible with filesystems
         model_path: str
@@ -46,18 +52,13 @@ class RegressionTraining:
         predictions: int
             The number of predictions to be generated.
         learning_rate: float
-            The learning rate to be used by the optimizer. If None is provided it uses the default
-            one.   
-        optimizer: Union[adam_v2.Adam, rmsprop_v2.RMSProp]
+            The learning rate to be used by the optimizer.
+        optimizer: Union[adam.Adam, rmsprop.RMSProp]                    "adam"|"rmsprop"
             The optimizer that will be used to train the model.
-        loss: Union[MeanSquaredError, MeanAbsoluteError]
+        loss: Union[MeanSquaredError, MeanAbsoluteError]                "mean_squared_error"|"mean_absolute_error"
             The loss function that will be used for training.
-        metric: Union[MeanSquaredErrorMetric, MeanAbsoluteErrorMetric]
+        metric: Union[MeanSquaredErrorMetric, MeanAbsoluteErrorMetric]  "mean_squared_error"|"mean_absolute_error"
             The metric function that will be used for training.
-        batch_size: int
-            The size of the training dataset batches.
-        shuffle_data: bool
-            If True, it will shuffle the train, val and test datasets prior to training.
         keras_model: IKerasModelConfig
             The configuration that will be used to build the Keras Model.
         window: ForecastingTrainingWindowGenerator
@@ -69,18 +70,16 @@ class RegressionTraining:
         test_size: int
             The number of rows included in the test dataset.
     """
+    # The max number of training epochs that can occur without showing improvements.
+    EARLY_STOPPING_PATIENCE: int = 5
 
     # The maximum number of EPOCHs a model can go through during training
-    MAX_EPOCHS: int = 1000
+    MAX_EPOCHS: int = 10
 
     # The max number of evaluations that will be performed on the trained regression model.
     # Notice that if the number of evals is much smaller than the max it means there could be
-    # an irregularity with the model as the predictions percentages aren't changing within
-    # the window.
-    MAX_REGRESSION_EVALUATIONS: int = 3000
-
-    # The max number of training epochs that can occur without showing improvements.
-    EARLY_STOPPING_PATIENCE: int = 10
+    # an irregularity with the model as the predicted changes are under 0.05%
+    DEFAULT_MAX_EVALUATIONS: int = 20
 
 
 
@@ -89,18 +88,36 @@ class RegressionTraining:
 
 
 
-    def __init__(self, config: IRegressionTrainingConfig, test_mode: bool = False):
+    def __init__(
+        self, 
+        config: IRegressionTrainingConfig, 
+        max_evaluations: Union[int, None],
+        hyperparams_mode: bool=False,
+        test_mode: bool = False
+    ):
         """Initializes the RegressionTraining Instance.
 
         Args:
             config: IRegressionTrainingConfig
                 The configuration that will be used to train the model.
+            max_evaluations: Union[int, None]
+                The maximum number of evaluations that can be performed
+            hyperparams_mode: bool
+                If enabled, there will be no verbosity during training and eval.
+            test_mode: bool
+                If running from unit tests, it won't check the model's directory.
 
         Raises:
             ValueError:
                 If the model is not correctly preffixed.
                 If the model's directory already exists.
         """
+        # Initialize the type of execution
+        self.test_mode: bool = test_mode
+
+        # Initialize the mode
+        self.hyperparams_mode: bool = hyperparams_mode
+
         # Initialize the id
         self.id: str = config['id']
         if self.id[0:2] != 'R_':
@@ -122,7 +139,7 @@ class RegressionTraining:
         self.learning_rate: float = config['learning_rate']
 
         # Initialize the optimizer function
-        self.optimizer: Union[adam_v2.Adam, rmsprop_v2.RMSProp] = self._get_optimizer(config["optimizer"])
+        self.optimizer: Union[adam.Adam, rmsprop.RMSProp] = self._get_optimizer(config["optimizer"])
 
         # Initialize the loss function
         self.loss: Union[MeanSquaredError, MeanAbsoluteError] = self._get_loss(config['loss'])
@@ -130,16 +147,9 @@ class RegressionTraining:
         # Initialize the metric function
         self.metric: Union[MeanSquaredErrorMetric, MeanAbsoluteErrorMetric] = self._get_metric(config['metric'])
 
-        # Initialize the Batch Size
-        self.batch_size: int = config["batch_size"]
-
-        # Initialize the Data Shuffling
-        self.shuffle_data: bool = config["shuffle_data"]
-
-        # Initialize the Keras Model's Configuration and populate the lookback and the # of predictions
+        # Initialize the Keras Model's Configuration and populate the lookback
         self.keras_model: IKerasModelConfig = config["keras_model"]
         self.keras_model["lookback"] = self.lookback
-        self.keras_model["predictions"] = self.predictions
 
         # Split the candlesticks into train, val and test
         train_df, val_df, test_df = self._get_data()
@@ -147,14 +157,11 @@ class RegressionTraining:
         # Initialize the Window Instance
         self.window: TrainingWindowGenerator = TrainingWindowGenerator({
             "input_width": self.lookback,
-            "label_width": self.predictions,
-            "shift": self.predictions,
+            "label_width": 1,
             "train_df": train_df,
             "val_df": val_df,
             "test_df": test_df,
-            "label_columns": ["c"],
-            "batch_size": self.batch_size,
-            "shuffle_data": self.shuffle_data
+            "label_columns": ["c"]
         })
 
         # Initialize the Dataset Sizes
@@ -162,8 +169,12 @@ class RegressionTraining:
         self.val_size: int = val_df.shape[0]
         self.test_size: int = test_df.shape[0]
 
-        # Initialize the model's directory
-        self._init_model_dir()
+        # Initialize the max evaluations
+        self.max_evaluations: int = max_evaluations if isinstance(max_evaluations, int) else RegressionTraining.DEFAULT_MAX_EVALUATIONS
+
+        # Initialize the model's directory if not unit testing
+        if not self.test_mode:
+            self._init_model_dir()
 
 
 
@@ -194,7 +205,7 @@ class RegressionTraining:
 
 
 
-    def _get_optimizer(self, func_name: str) -> Union[adam_v2.Adam, rmsprop_v2.RMSProp]:
+    def _get_optimizer(self, func_name: str) -> Union[adam.Adam, rmsprop.RMSProp]:
         """Based on a optimizer function name, it will return the instance ready to be initialized.
 
         Args:
@@ -209,9 +220,9 @@ class RegressionTraining:
                 If the function name does not match any function in the conditionings.
         """
         if func_name == 'adam':
-            return adam_v2.Adam(learning_rate=self.learning_rate)
+            return adam.Adam(learning_rate=self.learning_rate)
         elif func_name == 'rmsprop':
-            return rmsprop_v2.RMSProp(learning_rate=self.learning_rate)
+            return rmsprop.RMSProp(learning_rate=self.learning_rate)
         else:
             raise ValueError(f"The optimizer function for {func_name} was not found.")
 
@@ -234,9 +245,9 @@ class RegressionTraining:
             ValueError:
                 If the function name does not match any function in the conditionings.
         """
-        if func_name == 'mse':
+        if func_name == 'mean_squared_error':
             return MeanSquaredError()
-        elif func_name == 'mae':
+        elif func_name == 'mean_absolute_error':
             return MeanAbsoluteError()
         else:
             raise ValueError(f"The loss function for {func_name} was not found.")
@@ -261,9 +272,9 @@ class RegressionTraining:
             ValueError:
                 If the function name does not match any function in the conditionings.
         """
-        if func_name == 'mse':
+        if func_name == 'mean_squared_error':
             return MeanSquaredErrorMetric()
-        elif func_name == 'mae':
+        elif func_name == 'mean_absolute_error':
             return MeanAbsoluteErrorMetric()
         else:
             raise ValueError(f"The metric function for {func_name} was not found.")
@@ -290,28 +301,36 @@ class RegressionTraining:
         Returns:
             IRegressionTrainingCertificate
         """
-        
         # Store the start time
         start_time: int = Utils.get_time()
 
         # Initialize the early stopping callback
-        early_stopping = EarlyStopping(monitor='val_loss', mode='min', patience=RegressionTraining.EARLY_STOPPING_PATIENCE)
+        early_stopping = EarlyStopping(
+            monitor='val_loss', 
+            mode='min', 
+            patience=RegressionTraining.EARLY_STOPPING_PATIENCE,
+            restore_best_weights=True
+        )
 
         # Retrieve the Keras Model
-        print("    1/7) Initializing Model...")
+        if not self.hyperparams_mode:
+            print("    1/7) Initializing Model...")
         model: Sequential = KerasModel(config=self.keras_model)
 
         # Compile the model
-        print("    2/7) Compiling Model...")
+        if not self.hyperparams_mode:
+            print("    2/7) Compiling Model...")
         model.compile(optimizer=self.optimizer, loss=self.loss, metrics=[self.metric])
   
         # Train the model
-        print("    3/7) Training Model...")
+        if not self.hyperparams_mode:
+            print("    3/7) Training Model...")
         history_object: History = model.fit(
             self.window.train, 
-            epochs=RegressionTraining.MAX_EPOCHS,
             validation_data=self.window.val,
+            epochs=RegressionTraining.MAX_EPOCHS,
             callbacks=[ early_stopping ],
+            shuffle=False,
             verbose=0
         )
 
@@ -319,19 +338,21 @@ class RegressionTraining:
         history: IKerasModelTrainingHistory = history_object.history
 
         # Evaluate the test dataset
-        print("    4/7) Evaluating Test Dataset...")
+        if not self.hyperparams_mode:
+            print("    4/7) Evaluating Test Dataset...")
         test_evaluation: List[float] = model.evaluate(self.window.test, verbose=0) # [loss, metric]
 
         # Save the model
-        print("    5/7) Saving Model...")
+        if not self.hyperparams_mode:
+            print("    5/7) Saving Model...")
         self._save_model(model)
 
         # Perform the regression evaluation
-        print("    6/7) Evaluating Regression...")
         regression_evaluation: IRegressionEvaluation = self._evaluate_regression()
 
         # Save the certificate
-        print("    7/7) Saving Certificate...")
+        if not self.hyperparams_mode:
+            print("    7/7) Saving Certificate...")
         certificate: IRegressionTrainingCertificate = self._save_certificate(
             start_time, 
             model, 
@@ -380,9 +401,16 @@ class RegressionTraining:
         increase_successful: List[float] = []
         decrease: List[float] = []
         decrease_successful: List[float] = []
+        increase_outcomes: int = 0
+        decrease_outcomes: int = 0
+
+        # Init the progress bar
+        if not self.hyperparams_mode:
+            progress_bar = tqdm( bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}", total=self.max_evaluations)
+            progress_bar.set_description("    6/7) Evaluating Regression")
 
         # Perform the evaluation
-        for i in range(RegressionTraining.MAX_REGRESSION_EVALUATIONS):
+        for i in range(self.max_evaluations):
             # Generate a random candlestick ot
             random_ot: float = Candlestick.DF.iloc[randint(min_i, max_i)]['ot']
 
@@ -394,7 +422,7 @@ class RegressionTraining:
             preds_change: float = Utils.get_percentage_change(preds[0], preds[-1])
 
             # Check if there was a non-neutral change
-            if preds_change > 0 or preds_change < 0:
+            if preds_change >= 0.05 or preds_change <= -0.05:
                 # Retrieve the close price of the last candlestick in the window. This is the last candlestick
                 # in the lookback_df[-1] + self.predictions subset.
                 window_cp: float = \
@@ -406,21 +434,31 @@ class RegressionTraining:
                 # actual window close price
                 real_change: float = Utils.get_percentage_change(lookback_df.iloc[-1]['c'], window_cp)
 
-                # Increment the evals performed
-                evals += 1
-
                 # Check if an increase was predicted and evaluate the outcome
                 if preds_change > 0:
                     increase.append(preds_change)
                     if real_change > 0:
                         increase_successful.append(preds_change)
+                        increase_outcomes += 1
+                    else:
+                        decrease_outcomes += 1
 
                 # Check if a decrease was predicted and evaluate the outcome
                 elif preds_change < 0:
                     decrease.append(preds_change)
                     if real_change < 0:
                         decrease_successful.append(preds_change)
+                        decrease_outcomes += 1
+                    else:
+                        increase_outcomes += 1
+
+                # Increment the evals performed
+                evals += 1
             
+            # Update the progress bar
+            if not self.hyperparams_mode:
+                progress_bar.update()
+
         # Initialize the lens for performance
         increase_num: int = len(increase)
         increase_successful_num: int = len(increase_successful)
@@ -431,7 +469,7 @@ class RegressionTraining:
         return {
             # Evaluations
             "evaluations": evals,
-            "max_evaluations": RegressionTraining.MAX_REGRESSION_EVALUATIONS,
+            "max_evaluations": self.max_evaluations,
 
             # Prediction counts
             "increase_num": increase_num,
@@ -445,18 +483,26 @@ class RegressionTraining:
             "acc": Utils.get_percentage_out_of_total(increase_successful_num+decrease_successful_num, evals if evals > 0 else 1),
             
             # Predictions Overview
+            "increase_list": increase,
             "increase_max": max(increase if increase_num > 0 else [0]),
             "increase_min": min(increase if increase_num > 0 else [0]),
             "increase_mean": mean(increase if increase_num > 0 else [0]),
+            "increase_successful_list": increase_successful,
             "increase_successful_max": max(increase_successful if increase_successful_num > 0 else [0]),
             "increase_successful_min": min(increase_successful if increase_successful_num > 0 else [0]),
             "increase_successful_mean": mean(increase_successful if increase_successful_num > 0 else [0]),
+            "decrease_list": decrease,
             "decrease_max": max(decrease if decrease_num > 0 else [0]),
             "decrease_min": min(decrease if decrease_num > 0 else [0]),
             "decrease_mean": mean(decrease if decrease_num > 0 else [0]),
+            "decrease_successful_list": decrease_successful,
             "decrease_successful_max": max(decrease_successful if decrease_successful_num > 0 else [0]),
             "decrease_successful_min": min(decrease_successful if decrease_successful_num > 0 else [0]),
             "decrease_successful_mean": mean(decrease_successful if decrease_successful_num > 0 else [0]),
+
+            # Outcomes
+            "increase_outcomes": increase_outcomes,
+            "decrease_outcomes": decrease_outcomes,
         }
 
 
@@ -581,7 +627,7 @@ class RegressionTraining:
             "train_size": self.train_size,
             "val_size": self.val_size,
             "test_size": self.test_size,
-            "training_data_summary": Candlestick.NORMALIZED_PREDICTION_DF.describe().to_dict(),
+            "training_data_summary": Candlestick.NORMALIZED_PREDICTION_DF["c"].describe().to_dict(),
 
             # Training Configuration
             "lookback": self.lookback,
@@ -590,8 +636,6 @@ class RegressionTraining:
             "optimizer": self.optimizer._name,
             "loss": self.loss.name,
             "metric": self.metric.name,
-            "batch_size": self.batch_size,
-            "shuffle_data": self.shuffle_data,
             "keras_model_config": self.keras_model,
 
             # Training

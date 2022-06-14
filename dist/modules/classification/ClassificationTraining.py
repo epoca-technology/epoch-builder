@@ -34,7 +34,7 @@ class ClassificationTraining:
             The split that will be used on the complete df in order to generate train and test 
                 features & labels dfs
         EARLY_STOPPING_PATIENCE: int
-            The number of epochs it will allow to be executed without showing a performance.
+            The number of epochs it will allow to be executed without showing an improvement.
         MAX_EPOCHS: int
             The maximum amount of epochs the training process can go through.
         DEFAULT_MAX_EVALUATIONS: int
@@ -42,7 +42,7 @@ class ClassificationTraining:
 
     Instance Properties:
         test_mode: bool
-            If test_mode is enabled, it won't initialize the candlesticks.
+            If running from unit tests, it won't check the model's directory.
         hyperparams_mode: bool
             If enabled, it means that the purpose of the training is to identify the best hyperparams
             and therefore, a large amount of models will be trained.
@@ -57,8 +57,7 @@ class ClassificationTraining:
         regressions: List[Union[ArimaModel, RegressionModel]]
             The list of regression model instances.
         learning_rate: float
-            The learning rate to be used by the optimizer. If None is provided it uses the default
-            one.   
+            The learning rate to be used by the optimizer.
         optimizer: Union[adam.Adam, rmsprop.RMSProp]                    "adam"|"rmsprop"
             The optimizer that will be used to train the model.
         loss: Union[CategoricalCrossentropy, BinaryCrossentropy]        "categorical_crossentropy"|"binary_crossentropy"
@@ -116,6 +115,12 @@ class ClassificationTraining:
                 The training data file that will be used to train and evaluate the model.
             config: IClassificationTrainingConfig
                 The configuration that will be used to train the model.
+            max_evaluations: Union[int, None]
+                The maximum number of evaluations that can be performed
+            hyperparams_mode: bool
+                If enabled, there will be no verbosity during training and eval.
+            test_mode: bool
+                If running from unit tests, it won't check the model's directory.
 
         Raises:
             ValueError:
@@ -168,10 +173,6 @@ class ClassificationTraining:
         # Initialize the Keras Model's Configuration
         self.keras_model: IKerasModelConfig = config["keras_model"]
         self.keras_model["features_num"] = self.training_data_summary["features_num"]
-
-        # Initialize the candlesticks if not unit testing
-        if not self.test_mode:
-            Candlestick.init(max([m.get_lookback() for m in self.regressions]))
 
         # Initialize the max evaluations
         self.max_evaluations: int = max_evaluations if isinstance(max_evaluations, int) else ClassificationTraining.DEFAULT_MAX_EVALUATIONS
