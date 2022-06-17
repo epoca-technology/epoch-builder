@@ -8,7 +8,7 @@ from modules.classification import ITrainingDataFile, Classification
 
 
 # TRAINING DATA FILE
-FILE_ID: str = "ff6ae9e2-7f89-4043-b674-1e03b20ddcad"
+FILE_ID: str = "21cd7b6d-e3df-45cc-af2e-0352905d6b57"
 TRAINING_DATA: ITrainingDataFile = load(open(f"{KERAS_PATH['classification_training_data']}/{FILE_ID}.json"))
 MODEL_ID: str = "C_UNIT_TEST"
 
@@ -46,7 +46,10 @@ class ClassificationTestCase(unittest.TestCase):
         self.assertEqual(c.id, MODEL_ID)
         self.assertEqual(c.training_data_id, TRAINING_DATA["id"])
         self.assertEqual(c.include_rsi, TRAINING_DATA["include_rsi"])
+        self.assertEqual(c.include_stoch, TRAINING_DATA["include_stoch"])
         self.assertEqual(c.include_aroon, TRAINING_DATA["include_aroon"])
+        self.assertEqual(c.include_stc, TRAINING_DATA["include_stc"])
+        self.assertEqual(c.include_mfi, TRAINING_DATA["include_mfi"])
         self.assertEqual(c.features_num, TRAINING_DATA["features_num"])
         for index, model in enumerate(c.regressions):
             self.assertDictEqual(model, TRAINING_DATA["models"][index])

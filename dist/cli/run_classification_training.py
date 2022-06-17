@@ -66,7 +66,7 @@ max_evaluations: Union[int, None] = int(answers["max_evaluations"]) if answers["
 
 # CANDLESTICK INITIALIZATION
 # Initialize the Candlesticks Module based on the highest lookback among the models config.
-Candlestick.init(300)
+Candlestick.init(300, start=training_data["start"], end=training_data["end"])
 
 
 # Init the list of certificates

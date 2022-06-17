@@ -9,7 +9,7 @@ from modules.classification import IClassificationTrainingConfig, ITrainingDataF
 
 
 # TRAINING DATA FILE
-FILE_ID: str = "ff6ae9e2-7f89-4043-b674-1e03b20ddcad"
+FILE_ID: str = "21cd7b6d-e3df-45cc-af2e-0352905d6b57"
 TRAINING_DATA: ITrainingDataFile = load(open(f"{KERAS_PATH['classification_training_data']}/{FILE_ID}.json"))
 
 
@@ -61,6 +61,7 @@ class ClassificationTrainingTestCase(unittest.TestCase):
             training_data_file=TRAINING_DATA,
             config=config,
             max_evaluations=1000,
+            hyperparams_mode=False,
             test_mode=True
         )
 
