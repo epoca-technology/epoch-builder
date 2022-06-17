@@ -66,8 +66,16 @@ class IKerasModelConfig(TypedDict):
     # Filters
     filters: Union[List[int], None]
 
+    # Kernel Sizes
+    kernel_sizes: Union[List[int], None]
+
     # Pool Sizes
     pool_sizes: Union[List[int], None]
+
+    # Regression Model Type
+    # Default: will generate all predictions in one go.
+    # Autoregressive: will generate 1 prediction at a time and feed it to itself as an input 
+    autoregressive: Union[bool, None]
 
     # Lookback used as the model's input. This lookback is not set in the 
     # RegressionTraining.json file. However, it is populated once the RegressionTraining
@@ -75,12 +83,12 @@ class IKerasModelConfig(TypedDict):
     # Also keep in mind that this property only exists Regressions.
     lookback: Union[int, None]
 
-    # DEPRECATED IN AUTOREGRESSIVE REGRESSIONS
+    # Only used for not autoregressive regressions
     # Number of predictions the model will output. This prediction is not set in the 
     # RegressionTraining.json file. However, it is populated once the RegressionTraining
     # instance is initialized.
     # Also keep in mind that this property only exists Regressions.
-    #predictions: Union[int, None]
+    predictions: Union[int, None]
 
     # Number of features used for the input layer of a Classification Network. This value is 
     # not set in the ClassificationTraining.json file. Instead, it is populated once the 

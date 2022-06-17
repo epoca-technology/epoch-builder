@@ -1,18 +1,17 @@
 {
-    "name": "R_MOCK",
-    "start": null,
+    "name": "R_UNIT_TEST",
+    "start": "01/01/2020",
     "end": null,
     "hyperparams_mode": false,
     "models": [
         {
-            "id": "R_MOCK",
-            "description": "This is just a test to see how it goes.",
-            "lookback": 50,
-            "predictions": 10,
-            "learning_rate": 0.001,
+            "id": "R_UNIT_TEST",
+            "description": "Official Unit Test Regression Model.",
+            "autoregressive": true,
+            "lookback": 100,
+            "predictions": 30,
             "optimizer": "adam",
-            "loss": "mean_absolute_error",
-            "metric": "mean_squared_error",
+            "loss": "mean_squared_error",
             "keras_model": {
                 "name": "R_UNIT_TEST",
                 "units": [64],

@@ -1,10 +1,10 @@
 from typing import List, Union
 from pandas import DataFrame
 from modules.candlestick import Candlestick
-from modules.regression import Regression
 from modules.interpreter import PercentageChangeInterpreter
 from modules.prediction_cache import TemporaryPredictionCache
 from modules.model import ModelInterface, IModel, IPrediction, IPredictionMetaData, IRegressionModelConfig
+from modules.regression.Regression import Regression
 
 
 
@@ -25,8 +25,8 @@ class RegressionModel(ModelInterface):
             The Interpreter instance that will be used to interpret Regression Predictions.
         cache: TemporaryPredictionCache
             The instance of the prediction temporary cache.
-
     """
+
 
 
     ## Initialization ## 
@@ -150,7 +150,7 @@ class RegressionModel(ModelInterface):
         norm_df: DataFrame = Candlestick.get_lookback_df(self.regression.lookback, current_timestamp, normalized=True)
 
         # Generate the predictions
-        preds: List[float] = self.regression.predict(norm_df)
+        preds: List[float] = self.regression.predict(norm_df["c"])
 
         # Interpret the predictions
         result, description = self.interpreter.interpret(preds)

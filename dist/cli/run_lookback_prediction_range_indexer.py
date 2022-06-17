@@ -15,7 +15,7 @@ if isfile(f"{Candlestick.BASE_PATH}/{Candlestick.INDEXER_NAME}.json"):
     raise RuntimeError("The indexer file already exists in the candlesticks directory.")
 
 # Initialize the list of lookbacks ordered by size
-lookbacks: List[int] = [ 300 ]
+lookbacks: List[int] = [ 100, 300 ]
 
 # Initialize the candlesticks with the max lookback
 Candlestick.init(lookbacks[-1])

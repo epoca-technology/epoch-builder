@@ -46,13 +46,13 @@ class CandlestickTestCase(unittest.TestCase):
         default_candlestick = Candlestick.DF.iloc[185255]
 
         # Retrieve the lookback df
-        df = Candlestick.get_lookback_df(300, default_candlestick['ot'], normalized=True)
-        self.assertEqual(df.shape[0], 300)
-        self.assertEqual(df.shape[1], 4) # o, h, l, c
+        df = Candlestick.get_lookback_df(100, default_candlestick['ot'], normalized=True)
+        self.assertEqual(df.shape[0], 100)
+        self.assertEqual(df.shape[1], 1) # c
         
         # The values should be normalized
-        norm_df = df[(df['o'] <= 1) | (df['h'] <= 1) | (df['l'] <= 1) | (df['c'] <= 1)]
-        self.assertEqual(norm_df.shape[0], 300)
+        norm_df = df[(df['c'] >= 0) & (df['c'] <= 1)]
+        self.assertEqual(norm_df.shape[0], 100)
 
 
 

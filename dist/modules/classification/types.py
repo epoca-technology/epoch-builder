@@ -42,7 +42,7 @@ class ITrainingDataPriceActionsInsight(TypedDict):
 class ITrainingDataPredictionInsight(TypedDict):
     long: float
     short: float
-    neutral: float
+    neutral: float    
 
 
 
@@ -94,7 +94,6 @@ class ITrainingDataConfig(TypedDict):
 class ICompressedTrainingData(TypedDict):
     columns: List[str]
     rows: List[List[float]]
-
 
 
 
@@ -151,6 +150,11 @@ class ITrainingDataFile(TypedDict):
     # Position type count for each ArimaModel|RegressionModel in this format:
     # {[modelID: str]: ITrainingDataPredictionInsight}
     predictions_insight: Dict[str, Dict[str, float]]
+
+    # Technical Analysis Summary
+    # If none of the technical analysis features are enabled, this value will be None.
+    # {[taName: str]: df.describe().to_dict()}|null
+    technical_analysis_insight: Union[Dict[str, Dict[str, float]], None]
 
     # Training Data
     # The training data generated in a compressed format.

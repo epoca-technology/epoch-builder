@@ -67,7 +67,7 @@ class Utils:
 
     @staticmethod
     def get_percentage_change(old_value: float, new_value: float) -> float:
-        """Retrieves the current time in milliseconds. Equivalent of Javascript's Date.now().
+        """Calculates the percentage change a value has experienced.
 
         Args:
             old_value: float
@@ -92,7 +92,7 @@ class Utils:
             change = -((decrease / old_value) * 100)
 
         # Return the change
-        return round(change, 2)
+        return round(change if change >=-100 else -100, 2)
 
 
 

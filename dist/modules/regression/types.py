@@ -1,5 +1,4 @@
 from typing import TypedDict, List, Dict, Union
-from pandas import DataFrame
 from modules.keras_models import IKerasModelConfig, IKerasModelTrainingHistory
 from modules.model import IRegressionConfig
 
@@ -25,14 +24,16 @@ class IRegressionTrainingConfig(TypedDict):
     # Any relevant data that should be attached to the trained model.
     description: str
 
+    # Regression Model Type
+    # Default: will generate all predictions in one go.
+    # Autoregressive: will generate 1 prediction at a time and feed it to itself as an input 
+    autoregressive: bool
+
     # The number of prediction candlesticks that will look into the past in order to make a prediction.
     lookback: int
 
     # The number of predictions to be generated
     predictions: int
-
-    # The learning rate to be used by the optimizer
-    learning_rate: float
 
     # The optimizer to be used.
     optimizer: str # 'adam'|'rmsprop'
@@ -40,11 +41,11 @@ class IRegressionTrainingConfig(TypedDict):
     # The loss function to be used
     loss: str # 'mean_squared_error'|'mean_absolute_error'
 
-    # The metric to be used for meassuring the val_loss
-    metric: str # 'mean_squared_error'|'mean_absolute_error'
-
     # Keras Model Configuration
     keras_model: IKerasModelConfig
+
+
+
 
 
 
@@ -72,27 +73,24 @@ class IRegressionTrainingBatch(TypedDict):
 
 
 
-# Training Window Generator Configuration
-# The configuration to initialize the data windowing for training.
-class ITrainingWindowGeneratorConfig(TypedDict):
-    # The number of consecutive inputs 
-    input_width: int
+# Regression Training Type Configuration
+# Based on the type of training (hyperparams|shortlist), different training settings will be used.
+# For more information regarding these args, view the KerasTraining.ipynb notebook.
+class IRegressionTrainingTypeConfig(TypedDict):
+    # A scalar float32 or float64 Tensor or a Python number. The initial learning rate.
+    initial_lr: float
 
-    # The number of predictions to be generated (output)
-    label_width: int
+    # How often to apply decay.
+    decay_steps: float
 
-    # Normalized Train DF Subset
-    train_df: DataFrame
+    # A Python number. The decay rate for the learning rate per step.
+    decay_rate: float
 
-    # Normalized Train DF Subset
-    val_df: DataFrame
+    # The maximum number of epochs the training process will go through
+    epochs: int
 
-    # Normalized Test DF Subset
-    test_df: DataFrame
-
-    # List of label column names
-    label_columns: List[str]
-
+    # Number of epochs with no improvement after which training will be stopped.
+    patience: int
 
 
 
@@ -127,6 +125,7 @@ class IRegressionEvaluation(TypedDict):
     increase_max: float
     increase_min: float
     increase_mean: float
+    increase_successful_list: List[float]
     increase_successful_max: float
     increase_successful_min: float
     increase_successful_mean: float
@@ -136,6 +135,7 @@ class IRegressionEvaluation(TypedDict):
     decrease_max: float
     decrease_min: float
     decrease_mean: float
+    decrease_successful_list: List[float]
     decrease_successful_max: float
     decrease_successful_min: float
     decrease_successful_mean: float
@@ -169,20 +169,18 @@ class IRegressionTrainingCertificate(TypedDict):
 
     # Dataset Sizes
     train_size: int     # Number of rows in the train dataset
-    val_size: int       # Number of rows in the val dataset
     test_size: int      # Number of rows in the test dataset
 
     # Data Summary - Description extracted directly from the normalized dataframe
-    training_data_summary: Dict[str, Dict[str, float]]
+    training_data_summary: Dict[str, float]
 
 
     ## Training Configuration ##
+    autoregressive: bool
     lookback: int
     predictions: int
-    learning_rate: float
     optimizer: str
     loss: str
-    metric: str
     keras_model_config: IKerasModelConfig
 
 
@@ -196,7 +194,7 @@ class IRegressionTrainingCertificate(TypedDict):
     training_history: IKerasModelTrainingHistory
 
     # Result of the evaluation of the test dataset
-    test_evaluation: List[float] # [loss, metric]
+    test_evaluation: float # loss
 
     # Regression Post-Training Evaluation
     regression_evaluation: IRegressionEvaluation

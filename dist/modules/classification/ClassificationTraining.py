@@ -585,7 +585,7 @@ class ClassificationTraining:
 
         Returns:
             int
-            1 (Increase) | -1 (Decrease)
+            1 (Increase) | -1 (Decrease) | 0 (Unknown - Ran out of candlesticks)
         """
         # Initialize the outcome
         outcome: int = 0

@@ -350,4 +350,4 @@ class KerasClassificationHyperparams:
         Returns:
             str
         """
-        return ''.join(choice(ascii_uppercase + digits) for _ in range(10))
+        return ''.join(choice(ascii_uppercase + digits) for _ in range(20))

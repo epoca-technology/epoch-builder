@@ -603,6 +603,7 @@ class ClassificationTrainingData:
             "duration_minutes": Utils.from_milliseconds_to_minutes(current_time - execution_start),
             "price_actions_insight": self._get_price_actions_insight(),
             "predictions_insight": {m.id: self._get_prediction_insight_for_model(m.id) for m in self.models},
+            "technical_analysis_insight": self._get_technical_analysis_insight(),
             "training_data": compress_training_data(self.df)
         }
 
@@ -656,10 +657,52 @@ class ClassificationTrainingData:
 
 
 
+    def _get_technical_analysis_insight(self) -> Union[Dict[str, Dict[str, float]], None]:
+        """Retrieves the summary for each of the technical analysis features that are enabled.
+        In case none is enabled, returns None.
+
+        Returns:
+            Union[Dict[str, Dict[str, float]], None]
+        """
+        # Make sure at least 1 ta feature is enabled
+        if self.include_rsi or self.include_stoch or self.include_aroon or self.include_stc or self.include_mfi:
+            # Initialize the insight dict
+            insight: Dict[str, Dict[str, float]] = {}
+
+            # Check if the RSI is enabled
+            if self.include_rsi:
+                insight["RSI"] = self.df["RSI"].describe().to_dict()
+
+            # Check if the STOCH is enabled
+            if self.include_stoch:
+                insight["STOCH"] = self.df["STOCH"].describe().to_dict()
+
+            # Check if AROON is enabled
+            if self.include_aroon:
+                insight["AROON"] = self.df["AROON"].describe().to_dict()
+
+            # Check if the STC is enabled
+            if self.include_stc:
+                insight["STC"] = self.df["STC"].describe().to_dict()
+
+            # Check if the MFI is enabled
+            if self.include_mfi:
+                insight["MFI"] = self.df["MFI"].describe().to_dict()
+
+            # Finally, return the insight
+            return insight
+        else:
+            return None
+
+
+
 
 
 
     
+
+
+
 
 
     ## Training Data Integrity Validation ##

@@ -55,15 +55,15 @@ class Classification(KerasModelInterface):
             self.id: str = model_file.attrs['id']
             self.description: str = model_file.attrs["description"]
             self.training_data_id: str = model_file.attrs["training_data_id"]
-            self.include_rsi: bool = model_file.attrs.get("include_rsi") == True
-            self.include_stoch: bool = model_file.attrs.get("include_stoch") == True
-            self.include_aroon: bool = model_file.attrs.get("include_aroon") == True
-            self.include_stc: bool = model_file.attrs.get("include_stc") == True
-            self.include_mfi: bool = model_file.attrs.get("include_mfi") == True
+            self.include_rsi: bool = bool(model_file.attrs.get("include_rsi") == True)
+            self.include_stoch: bool = bool(model_file.attrs.get("include_stoch") == True)
+            self.include_aroon: bool = bool(model_file.attrs.get("include_aroon") == True)
+            self.include_stc: bool = bool(model_file.attrs.get("include_stc") == True)
+            self.include_mfi: bool = bool(model_file.attrs.get("include_mfi") == True)
             self.features_num: int = int(model_file.attrs["features_num"]) # Downcast to int
             self.regressions: List[IModel] = loads(model_file.attrs["models"])
             self.model: Sequential = load_model_from_hdf5(model_file)
-
+        
         # Make sure the IDs are identical
         if self.id != id:
             raise ValueError(f"ClassificationModel ID Missmatch: {self.id} != {id}")

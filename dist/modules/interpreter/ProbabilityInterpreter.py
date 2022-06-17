@@ -49,7 +49,7 @@ class ProbabilityInterpreter(InterpreterInterface):
                 Received: {str(config['min_probability'])}")
 
         # Initialize the instance properties
-        self.min_probability: float = config['min_probability']
+        self.min_probability: float = config["min_probability"]
 
 
 
@@ -87,11 +87,11 @@ class ProbabilityInterpreter(InterpreterInterface):
         
         # Return the packed results accordingly
         if probabilities[0] >= self.min_probability:
-            return 1, 'long'
+            return 1, "long"
         elif probabilities[1] >= self.min_probability:
-            return -1, 'short'
+            return -1, "short"
         else:
-            return 0, 'neutral'
+            return 0, "neutral"
 
 
 
@@ -112,4 +112,4 @@ class ProbabilityInterpreter(InterpreterInterface):
         Returns:
             IProbabilityInterpreterConfig
         """
-        return { 'min_probability': self.min_probability }
+        return { "min_probability": self.min_probability }

@@ -1,11 +1,9 @@
 from typing import List
-from numpy import ndarray, array, float32
-from pandas import DataFrame
+from numpy import ndarray, append
+from pandas import Series
 from h5py import File as h5pyFile
-from tensorflow import data as tfdata
 from tensorflow.python.keras.saving.hdf5_format import load_model_from_hdf5
 from keras import Sequential
-from keras.preprocessing.timeseries import timeseries_dataset_from_array
 from modules.keras_models import KerasModelInterface, KERAS_PATH, get_summary
 from modules.model import IRegressionConfig
 
@@ -21,6 +19,8 @@ class Regression(KerasModelInterface):
             The ID of the model that was set when training.
         description: str
             Important information regarding the trained model.
+        autoregressive: bool
+            The type of regression.
         lookback: int
             The number of prediction candlesticks that will be used to generate predictions.
         predictions: int
@@ -30,8 +30,6 @@ class Regression(KerasModelInterface):
     """
 
 
-
-    ## Initialization ##
 
 
 
@@ -50,8 +48,9 @@ class Regression(KerasModelInterface):
         """
         # Load the model
         with h5pyFile(f"{KERAS_PATH['models']}/{id}/model.h5", mode='r') as model_file:
-            self.id: str = model_file.attrs['id']
-            self.description: str = model_file.attrs['description']
+            self.id: str = model_file.attrs["id"]
+            self.description: str = model_file.attrs["description"]
+            self.autoregressive: bool = bool(model_file.attrs["autoregressive"]) # Downcast to bool
             self.lookback: int = int(model_file.attrs['lookback'])          # Downcast to int
             self.predictions: int = int(model_file.attrs['predictions'])    # Downcast to int
             self.model: Sequential = load_model_from_hdf5(model_file)
@@ -63,6 +62,10 @@ class Regression(KerasModelInterface):
         # Make sure the description was extracted
         if not isinstance(self.description, str):
             raise ValueError(f"RegressionModel Description is invalid: {str(self.description)}")
+        
+        # Make sure the type of regression was extracted
+        if not isinstance(self.autoregressive, bool):
+            raise ValueError(f"RegressionModel Autoregressive Arg is invalid: {str(self.autoregressive)}-{type(self.autoregressive)}")
         
         # Make sure the lookback was extracted
         if not isinstance(self.lookback, int):
@@ -77,59 +80,37 @@ class Regression(KerasModelInterface):
 
 
 
-    ## Predictions ##
 
 
 
 
-    def predict(self, normalized_lookback_df: DataFrame) -> List[float]:
-        """Given a Lookback DataFrame, it will turn it into a Dataset and predict 
-        future values.
+
+    def predict(self, close_prices: Series) -> List[float]:
+        """Generates predictions based on a close price series.
 
         Args:
-            normalized_lookback_df: DataFrame
-                The input df that will be used to generate predictions.
+            close_prices: Series
+                Lookback normalized close prices.
 
         Returns:
             List[float]
         """
-        # Make the input ds
-        input_ds: tfdata.Dataset = self._make_input_dataset(normalized_lookback_df)
+        # Create a ndarray of the close prices
+        close: ndarray = close_prices.to_numpy()
 
-        # Return the predictions
-        return self.model.predict(input_ds)[0]
+        # If the regression is autoregressive, generate 1 prediction at a time and re-use it for the next
+        if self.autoregressive:
+            # Iterate over the predictions range
+            for i in range(self.predictions):
+                pred: float = self.model.predict(close[-self.lookback:].reshape((1, self.lookback)))[0]
+                close = append(close, pred)
 
+            # Finally, return the predictions
+            return list(close[-self.predictions:])
 
-
-
-
-
-
-    def _make_input_dataset(self, normalized_lookback_df: DataFrame) -> tfdata.Dataset:
-        """Converts an Input DataFrame into a Dataset that is ready to be used to predict.
-
-        Args:
-            data: DataFrame
-                The data to be converted into a TF Dataset
-        
-        Returns:
-            tfdata.Dataset
-        """
-        # Convert the DataFrame into a numpy array
-        data: ndarray = array(normalized_lookback_df, dtype=float32)
-
-        # Initialize the Dataset
-        ds: tfdata.Dataset = timeseries_dataset_from_array(
-            data=data,
-            targets=None,
-            sequence_length=self.lookback,
-            sequence_stride=1,
-            shuffle=False,
-            batch_size=1
-        )
-
-        # Finally, return the features dataset
-        return ds
+        # If it is not autoregressive, generate all the predictions in one go
+        else:
+            return list(self.model.predict(close.reshape((1, self.lookback)))[0])
 
 
 
@@ -139,8 +120,6 @@ class Regression(KerasModelInterface):
 
 
 
-
-    ## Regression Configuration ##
 
 
 
@@ -154,6 +133,7 @@ class Regression(KerasModelInterface):
         return {
             "id": self.id,
             "description": self.description,
+            "autoregressive": self.autoregressive,
             "lookback": self.lookback,
             "predictions": self.predictions,
             "summary": get_summary(self.model),

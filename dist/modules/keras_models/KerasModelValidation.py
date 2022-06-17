@@ -12,6 +12,7 @@ def validate(
     dropout_rates: int = 0,
     activations: int = 0,
     filters: int = 0,
+    kernel_sizes: int = 0,
     pool_sizes: int = 0,
 ) -> None:
     """Given a configuration dict and a series of requirements, it will validate the 
@@ -30,20 +31,29 @@ def validate(
             The number of activation items that should have been provided in the config.
         filters: int
             The number of filter items  that should have been provided in the config.
+        kernel_sizes: int
+            The number of kernel_size items  that should have been provided in the config.
         pool_sizes: int
             The number of pool_size items  that should have been provided in the config.
 
     Raises:
         ValueError:
+            If it is a regression and did not receive correct autoregressive, lookback or
+                prediction args.
+            If it is a classification and did not receive correct features_num
             If the provided configuration doesnt match the model's requirements in any way.
     """
     # Make sure the name matches
     if config['name'] != name:
         raise ValueError(f"Model Name Missmatch. {config['name']} != {name}")
 
-    # Make sure the lookback and predictions have been provided in case of a regression
-    if config["name"][0:2] == "R_" and not isinstance(config.get("lookback"), int):
-        raise ValueError(f"The provided lookback is not a valid integer. Received: {str(config.get('lookback'))}")
+    # Make sure the autoregressive, lookback and predictions have been provided in case of a regression
+    if config["name"][0:2] == "R_" and (not isinstance(config.get("autoregressive"), bool) \
+        or not isinstance(config.get("lookback"), int) or not isinstance(config.get("predictions"), int)):
+        print(config.get("autoregressive"))
+        print(config.get("lookback"))
+        print(config.get("predictions"))
+        raise ValueError(f"The provided regression config (autoregressive, lookback and/or predictions) are invalid.")
 
     # Make sure the number of features has been provided in case of a classification
     if config["name"][0:2] == "C_" and not isinstance(config.get("features_num"), int):
@@ -60,6 +70,9 @@ def validate(
 
     # Validate the required filters
     _validate_config_param(filters, 'filters', config.get('filters'))
+
+    # Validate the required kernel_sizes
+    _validate_config_param(kernel_sizes, 'kernel_sizes', config.get('kernel_sizes'))
 
     # Validate the required pool_sizes
     _validate_config_param(pool_sizes, 'pool_sizes', config.get('pool_sizes'))
