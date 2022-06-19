@@ -90,7 +90,9 @@ for index, model_config in enumerate(config["models"]):
             print("\n")
             progress_bar = tqdm( bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}", total=len(config["models"]))
 
-    if not config["hyperparams_mode"]:    
+    if config["hyperparams_mode"]:
+        progress_bar.set_description(f"{model_config['id'][0:20]}...")
+    else:    
         print(f"\n{index + 1}/{len(config['models'])}) {model_config['id']}")
 
     # Train the model

@@ -1,4 +1,4 @@
-# PREDICTION BACKTESTING v0.0.4
+# PREDICTION BACKTESTING v0.0.5
 
 Plutus' Prediction Backtesting is a project designed to experiment with different Prediction Models in order to optimize profits.
 

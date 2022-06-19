@@ -275,12 +275,12 @@ class KerasHyperparams:
 
         # Save the configurations in batches
         slice_start: int = 0
-        for batch_number in range(1, batches):
+        for batch_number in range(1, batches+1):
             # Include the name
-            training_config["name"] = f"{self.prefix}{network_type}_{batch_number}"
+            training_config["name"] = f"{self.prefix}{network_type}_{batch_number}_{batches}"
 
             # Include the sliced configs
-            slice_end: int = batch_number*self.batch_size
+            slice_end: int = slice_start + self.batch_size
             training_config["models"] = configs[slice_start:slice_end]
 
             # Save the batch

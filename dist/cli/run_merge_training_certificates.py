@@ -9,7 +9,14 @@ from modules.classification import IClassificationTrainingCertificate
 
 # Configuration Input
 print("MERGE TRAINING CERTIFICATES")
-answers: List[Dict[str, str]] = prompt([InquirerList("prefix", message="Select the certificates type", choices=["R_", "C_"])])
+answers: Dict[str, str] = prompt([
+    InquirerList(
+        "model_type", 
+        message="Select the type of model", 
+        choices=["KerasRegression", "KerasClassification"])
+])
+model_type: str = answers["model_type"]
+prefix: str = "R_" if model_type == "KerasRegression" else "C_"
 
 
 # Model IDs Extractor
@@ -28,7 +35,7 @@ def _get_model_ids(prefix: str) -> List[str]:
 
 
 # Build the list of model id's
-ids: List[str] = _get_model_ids(answers["prefix"])
+ids: List[str] = _get_model_ids(prefix)
 if len(ids) == 0:
     raise RuntimeError("No model ids could be extracted.")
 
@@ -38,7 +45,7 @@ certificates: List[IClassificationTrainingCertificate] = [load(open(f"{KERAS_PAT
 # Finally, dump the merged file in the configs directory
 if not exists(KERAS_PATH["batched_training_certificates"]):
     makedirs(KERAS_PATH["batched_training_certificates"])
-path: str = f"{KERAS_PATH['batched_training_certificates']}/{answers['prefix']}MERGE_{Utils.get_time()}.json"
+path: str = f"{KERAS_PATH['batched_training_certificates']}/{model_type}_MERGE_{Utils.get_time()}.json"
 with open(path, "w") as outfile:
     outfile.write(dumps(certificates))
 print("\nMERGE TRAINING CERTIFICATES COMPLETED")

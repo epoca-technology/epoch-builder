@@ -29,10 +29,8 @@ class RegressionTraining:
     This class handles the training of a RegressionModel.
 
     Class Properties:
-        TRAIN_SPLIT: float
-            The split that will be applied to the entire dataset.
-        HYPERPARAMS_TRAINING_CONFIG: IRegressionTrainingTypeConfig
-        SHORTLISTED_TRAINING_CONFIG: IRegressionTrainingTypeConfig
+        HYPERPARAMS_TRAINING_CONFIG: IKerasTrainingTypeConfig
+        SHORTLISTED_TRAINING_CONFIG: IKerasTrainingTypeConfig
             The configurations to be used based on the type of training.
         DEFAULT_MAX_EVALUATIONS: int
             The default maximum number of evaluations that will be performed on the trained model.
@@ -73,11 +71,9 @@ class RegressionTraining:
         test_size: int
             The number of rows included in the test dataset.
     """
-    # Train and Test DataFrame Split
-    TRAIN_SPLIT: float = 0.8
-
     # Hyperparams Training Configuration
     HYPERPARAMS_TRAINING_CONFIG: IKerasTrainingTypeConfig = {
+        "train_split": 0.8,
         "initial_lr": 0.01,
         "decay_steps": 1.5,
         "decay_rate": 0.55,
@@ -87,6 +83,7 @@ class RegressionTraining:
 
     # Shortlisted Training Configuration
     SHORTLISTED_TRAINING_CONFIG: IKerasTrainingTypeConfig = {
+        "train_split": 0.8,
         "initial_lr": 0.01,
         "decay_steps": 2,
         "decay_rate": 0.065,
@@ -299,8 +296,8 @@ class RegressionTraining:
         labels = array(labels_raw)
 
         # Finally, return the split datasets
-        return features[:int(rows*RegressionTraining.TRAIN_SPLIT)], labels[:int(rows*RegressionTraining.TRAIN_SPLIT)], \
-            features[int(rows*RegressionTraining.TRAIN_SPLIT):], labels[int(rows*RegressionTraining.TRAIN_SPLIT):]
+        return features[:int(rows*self.training_config["train_split"])], labels[:int(rows*self.training_config["train_split"])], \
+            features[int(rows*self.training_config["train_split"]):], labels[int(rows*self.training_config["train_split"]):]
 
 
 

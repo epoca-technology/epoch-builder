@@ -5,8 +5,7 @@
     "models": [
         {
             "id": "C_UNIT_TEST",
-            "description": "This is a mock to discover training performances.",
-            "learning_rate": 0.001,
+            "description": "This is the official ClassificationModel for Unit Tests.",
             "optimizer": "adam",
             "loss": "binary_crossentropy",
             "metric": "binary_accuracy",

@@ -55,7 +55,7 @@ config: IRegressionTrainingBatch = load(config_file)
 # completion, results will not be saved.
 
 # Init the max evaluations
-answers: Dict[str, str] = prompt([Text("max_evaluations", f"Number of Classification Evaluations (Defaults to {RegressionTraining.DEFAULT_MAX_EVALUATIONS})")])
+answers: Dict[str, str] = prompt([Text("max_evaluations", f"Number of Regression Evaluations (Defaults to {RegressionTraining.DEFAULT_MAX_EVALUATIONS})")])
 max_evaluations: Union[int, None] = int(answers["max_evaluations"]) if answers["max_evaluations"].isdigit() else None
 
 
@@ -87,14 +87,19 @@ for index, model_config in enumerate(config["models"]):
             print("\n")
             progress_bar = tqdm( bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}", total=len(config["models"]))
 
-    if not config["hyperparams_mode"]:    
+    if config["hyperparams_mode"]:
+        progress_bar.set_description(f"{model_config['id'][0:20]}...")
+    else:    
         print(f"\n{index + 1}/{len(config['models'])}) {model_config['id']}")
+
 
     # Train the model
     cert: IRegressionTrainingCertificate = regression_training.train()
 
+
     # Add the certificate to the list
     certificates.append(cert)
+
 
     # Perform the post evaluation cleanup if applies
     if config["hyperparams_mode"]:

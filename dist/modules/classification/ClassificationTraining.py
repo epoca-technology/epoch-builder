@@ -10,13 +10,15 @@ from h5py import File as h5pyFile
 from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras import Sequential
 from keras.optimizers import adam_v2 as adam, rmsprop_v2 as rmsprop
+from keras.optimizer_v2.learning_rate_schedule import InverseTimeDecay
 from keras.losses import CategoricalCrossentropy, BinaryCrossentropy
 from keras.metrics import CategoricalAccuracy, BinaryAccuracy
 from keras.callbacks import EarlyStopping, History
 from modules.utils import Utils
 from modules.candlestick import Candlestick
 from modules.model import IModel, RegressionModelFactory, ArimaModel, RegressionModel, ClassificationModel, IPrediction
-from modules.keras_models import KerasModel, IKerasModelConfig, IKerasModelTrainingHistory, get_summary, KERAS_PATH
+from modules.keras_models import IKerasTrainingTypeConfig, KerasModel, IKerasModelConfig, IKerasModelTrainingHistory, \
+    get_summary, KERAS_PATH, LearningRateSchedule
 from modules.classification import ITrainingDataFile, ICompressedTrainingData, decompress_training_data, \
     IClassificationTrainingConfig, ITrainingDataSummary, IClassificationEvaluation, IClassificationTrainingCertificate
         
@@ -30,13 +32,9 @@ class ClassificationTraining:
     This class handles the training of a Classification Model.
 
     Class Properties:
-        TRAIN_SPLIT: float
-            The split that will be used on the complete df in order to generate train and test 
-                features & labels dfs
-        EARLY_STOPPING_PATIENCE: int
-            The number of epochs it will allow to be executed without showing an improvement.
-        MAX_EPOCHS: int
-            The maximum amount of epochs the training process can go through.
+        HYPERPARAMS_TRAINING_CONFIG: IKerasTrainingTypeConfig
+        SHORTLISTED_TRAINING_CONFIG: IKerasTrainingTypeConfig
+            The configurations to be used based on the type of training.
         DEFAULT_MAX_EVALUATIONS: int
             The default maximum number of evaluations that will be performed on the trained model.
 
@@ -46,6 +44,8 @@ class ClassificationTraining:
         hyperparams_mode: bool
             If enabled, it means that the purpose of the training is to identify the best hyperparams
             and therefore, a large amount of models will be trained.
+        training_config: IRegressionTrainingTypeConfig
+            The config of the type of training that will be performed (Hyperparams|Shortlisted).
         id: str
             A descriptive identifier compatible with filesystems.
         model_path: str
@@ -56,8 +56,6 @@ class ClassificationTraining:
             The list of ArimaModel|RegressionModel used to generate the training data.
         regressions: List[Union[ArimaModel, RegressionModel]]
             The list of regression model instances.
-        learning_rate: float
-            The learning rate to be used by the optimizer.
         optimizer: Union[adam.Adam, rmsprop.RMSProp]                    "adam"|"rmsprop"
             The optimizer that will be used to train the model.
         loss: Union[CategoricalCrossentropy, BinaryCrossentropy]        "categorical_crossentropy"|"binary_crossentropy"
@@ -80,14 +78,25 @@ class ClassificationTraining:
             The Maximum number of evaluations that will be performed post-training. If none is provided, 
             the default value will be used.
     """
-    # Train and Test DataFrame Split
-    TRAIN_SPLIT: float = 0.8
+    # Hyperparams Training Configuration
+    HYPERPARAMS_TRAINING_CONFIG: IKerasTrainingTypeConfig = {
+        "train_split": 0.8,
+        "initial_lr": 0.01,
+        "decay_steps": 1.5,
+        "decay_rate": 0.28,
+        "epochs": 100,
+        "patience": 20
+    }
 
-    # The max number of training epochs that can occur without showing improvements.
-    EARLY_STOPPING_PATIENCE: int = 50
-
-    # The maximum number of EPOCHs a model can go through during training
-    MAX_EPOCHS: int = 1000
+    # Shortlisted Training Configuration
+    SHORTLISTED_TRAINING_CONFIG: IKerasTrainingTypeConfig = {
+        "train_split": 0.8,
+        "initial_lr": 0.01,
+        "decay_steps": 2,
+        "decay_rate": 0.065,
+        "epochs": 500,
+        "patience": 50
+    }
 
     # The max number of evaluations that will be performed on the trained classification model.
     # Notice that if the number of evals is much smaller than the max it means there could be
@@ -132,6 +141,11 @@ class ClassificationTraining:
 
         # Initialize the mode
         self.hyperparams_mode: bool = hyperparams_mode
+
+        # Set the type of training that will be performed
+        self.training_config: IKerasTrainingTypeConfig = \
+            ClassificationTraining.HYPERPARAMS_TRAINING_CONFIG if self.hyperparams_mode \
+                else ClassificationTraining.SHORTLISTED_TRAINING_CONFIG
         
         # Initialize the id
         self.id: str = config["id"]
@@ -147,9 +161,6 @@ class ClassificationTraining:
         # Initialize the models data as well as the regression instances
         self.models: List[IModel] = training_data_file["models"]
         self.regressions: List[Union[ArimaModel, RegressionModel]] = [ RegressionModelFactory(m) for m in self.models ]
-
-        # Initialize the Learning Rate
-        self.learning_rate: float = config["learning_rate"]
 
         # Initialize the optimizer function
         self.optimizer: Union[adam.Adam, rmsprop.RMSProp] = self._get_optimizer(config["optimizer"])
@@ -206,8 +217,8 @@ class ClassificationTraining:
         rows: int = df.shape[0]
 
         # Initialize the features dfs
-        train_x: DataFrame = df[:int(rows*ClassificationTraining.TRAIN_SPLIT)]
-        test_x: DataFrame = df[int(rows*ClassificationTraining.TRAIN_SPLIT):]
+        train_x: DataFrame = df[:int(rows*self.training_config["train_split"])]
+        test_x: DataFrame = df[int(rows*self.training_config["train_split"]):]
 
         # Initialize the labels dfs
         train_y: DataFrame = concat([train_x.pop(x) for x in ["up", "down"]], axis=1)
@@ -235,10 +246,18 @@ class ClassificationTraining:
             ValueError:
                 If the function name does not match any function in the conditionings.
         """
+        # Initialize the Learning Rate Schedule
+        lr_schedule: InverseTimeDecay = LearningRateSchedule(
+            initial_learning_rate=self.training_config["initial_lr"],
+            decay_steps=self.training_config["decay_steps"],
+            decay_rate=self.training_config["decay_rate"]
+        )
+
+        # Return the Optimizer Instance
         if func_name == "adam":
-            return adam.Adam(learning_rate=self.learning_rate)
+            return adam.Adam(lr_schedule)
         elif func_name == "rmsprop":
-            return rmsprop.RMSProp(learning_rate=self.learning_rate)
+            return rmsprop.RMSProp(lr_schedule)
         else:
             raise ValueError(f"The optimizer function for {func_name} was not found.")
 
@@ -362,7 +381,7 @@ class ClassificationTraining:
             monitor="val_categorical_accuracy" if self.metric.name == "categorical_accuracy" else "val_binary_accuracy", 
             mode="max", 
             min_delta=0.001, 
-            patience=ClassificationTraining.EARLY_STOPPING_PATIENCE,
+            patience=self.training_config["patience"],
             restore_best_weights=True
         )
 
@@ -383,7 +402,7 @@ class ClassificationTraining:
             self.train_x,
             self.train_y,
             validation_split=0.2,
-            epochs=ClassificationTraining.MAX_EPOCHS,
+            epochs=self.training_config["epochs"],
             shuffle=True,
             callbacks=[ early_stopping ],
             verbose=0
@@ -746,7 +765,6 @@ class ClassificationTraining:
             "training_data_summary": self.training_data_summary,
 
             # Training Configuration
-            "learning_rate": self.learning_rate,
             "optimizer": self.optimizer._name,
             "loss": self.loss.name,
             "metric": self.metric.name,

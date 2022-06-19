@@ -336,7 +336,6 @@ class IClassificationTrainingCertificate(TypedDict):
 
 
     ## Training Configuration ##
-    learning_rate: float
     optimizer: str
     loss: str
     metric: str
