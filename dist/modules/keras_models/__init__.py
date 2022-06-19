@@ -1,8 +1,8 @@
-from ..keras_models.types import IKerasPath, IKerasModelConfig, IKerasModelTrainingHistory, IKerasModelOptimizerConfig, \
-    IKerasModelLossConfig, IKerasModelLayer, IKerasModelSummary
+from ..keras_models.types import IKerasPath, IKerasModelConfig, IKerasTrainingTypeConfig, IKerasModelTrainingHistory, \
+IKerasModelOptimizerConfig, IKerasModelLossConfig, IKerasModelLayer, IKerasModelSummary
 from ..keras_models.Interface import KerasModelInterface
-from ..keras_models.KerasModelValidation import validate
 from ..keras_models.KerasModelSummary import get_summary
+from ..keras_models.LearningRateSchedule import LearningRateSchedule
 from ..keras_models.KerasModel import KerasModel
 
 

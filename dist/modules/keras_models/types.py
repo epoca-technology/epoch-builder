@@ -101,6 +101,38 @@ class IKerasModelConfig(TypedDict):
 
 
 
+## Training Configuration ##
+
+
+
+# Keras Model Training Type Configuration
+# Based on the type of training (hyperparams|shortlist), different training settings will be used.
+# For more information regarding these args, view the KerasTraining.ipynb notebook.
+class IKerasTrainingTypeConfig(TypedDict):
+    # A scalar float32 or float64 Tensor or a Python number. The initial learning rate.
+    initial_lr: float
+
+    # How often to apply decay.
+    decay_steps: float
+
+    # A Python number. The decay rate for the learning rate per step.
+    decay_rate: float
+
+    # The maximum number of epochs the training process will go through
+    epochs: int
+
+    # Number of epochs with no improvement after which training will be stopped.
+    patience: int
+
+
+
+
+
+
+
+
+
+
 ## Training History ##
 
 

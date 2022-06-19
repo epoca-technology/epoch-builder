@@ -184,9 +184,6 @@ class IClassificationTrainingConfig(TypedDict):
     # Any relevant data that should be attached to the trained model.
     description: str
 
-    # The learning rate to be used by the optimizer
-    learning_rate: float
-
     # The optimizer to be used.
     optimizer: str # 'adam'|'rmsprop'
 

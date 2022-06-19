@@ -15,10 +15,10 @@ from keras.losses import MeanSquaredError, MeanAbsoluteError
 from keras.callbacks import EarlyStopping, History
 from modules.utils import Utils
 from modules.candlestick import Candlestick
-from modules.keras_models import KerasModel, IKerasModelConfig, IKerasModelTrainingHistory, get_summary, KERAS_PATH
+from modules.keras_models import IKerasTrainingTypeConfig, KerasModel, IKerasModelConfig, IKerasModelTrainingHistory,\
+    get_summary, KERAS_PATH, LearningRateSchedule
 from modules.model import RegressionModel, IPrediction
-from modules.regression import IRegressionTrainingConfig, IRegressionTrainingTypeConfig, IRegressionTrainingCertificate,\
-     IRegressionEvaluation
+from modules.regression import IRegressionTrainingConfig, IRegressionTrainingCertificate, IRegressionEvaluation
 
 
 
@@ -77,7 +77,7 @@ class RegressionTraining:
     TRAIN_SPLIT: float = 0.8
 
     # Hyperparams Training Configuration
-    HYPERPARAMS_TRAINING_CONFIG: IRegressionTrainingTypeConfig = {
+    HYPERPARAMS_TRAINING_CONFIG: IKerasTrainingTypeConfig = {
         "initial_lr": 0.01,
         "decay_steps": 1.5,
         "decay_rate": 0.55,
@@ -86,7 +86,7 @@ class RegressionTraining:
     }
 
     # Shortlisted Training Configuration
-    SHORTLISTED_TRAINING_CONFIG: IRegressionTrainingTypeConfig = {
+    SHORTLISTED_TRAINING_CONFIG: IKerasTrainingTypeConfig = {
         "initial_lr": 0.01,
         "decay_steps": 2,
         "decay_rate": 0.065,
@@ -140,7 +140,7 @@ class RegressionTraining:
         self.hyperparams_mode: bool = hyperparams_mode
 
         # Set the type of training that will be performed
-        self.training_config: IRegressionTrainingTypeConfig = \
+        self.training_config: IKerasTrainingTypeConfig = \
             RegressionTraining.HYPERPARAMS_TRAINING_CONFIG if self.hyperparams_mode \
                 else RegressionTraining.SHORTLISTED_TRAINING_CONFIG
 
@@ -216,12 +216,10 @@ class RegressionTraining:
                 If the function name does not match any function in the conditionings.
         """
         # Initialize the Learning Rate Schedule
-        lr_schedule: InverseTimeDecay = InverseTimeDecay(
-            self.training_config["initial_lr"],
+        lr_schedule: InverseTimeDecay = LearningRateSchedule(
+            initial_learning_rate=self.training_config["initial_lr"],
             decay_steps=self.training_config["decay_steps"],
-            decay_rate=self.training_config["decay_rate"],
-            staircase=False,
-            name="LearningRateInverseTimeDecay"
+            decay_rate=self.training_config["decay_rate"]
         )
 
         # Return the Optimizer Instance

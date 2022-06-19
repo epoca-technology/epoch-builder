@@ -1,2 +1,2 @@
-from ..hyperparams.types import IKerasLoss
-from ..hyperparams.KerasClassificationHyperparams import KerasClassificationHyperparams
+from ..hyperparams.types import IKerasLoss, IKerasHyperparamsNetworkReceipt, IKerasHyperparamsReceipt
+from ..hyperparams.KerasHyperparams import KerasHyperparams
