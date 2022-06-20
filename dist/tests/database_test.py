@@ -1,6 +1,12 @@
 import unittest
-from modules.database import Database
+from modules.database.Database import Database
 
+
+## ONLY RUN WHEN THE DATABASE TEST MODE IS ENABLED ##
+if not Database.TEST_MODE:
+    raise RuntimeError("Unit tests can only be performed when the Database is in test mode.")
+
+    
 
 # Test Class
 class DatabaseTestCase(unittest.TestCase):

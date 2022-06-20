@@ -1,4 +1,4 @@
-from ..backtest.types import IBacktestPath
+from modules.types import IBacktestPath
 
 
 

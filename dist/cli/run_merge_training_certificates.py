@@ -1,11 +1,14 @@
-from typing import List, Dict
+from typing import List, Dict, Union
 from os import walk, makedirs
 from os.path import exists, isfile
 from json import load, dumps
 from inquirer import List as InquirerList, prompt
-from modules.utils import Utils
-from modules.keras_models import KERAS_PATH
-from modules.classification import IClassificationTrainingCertificate
+from modules.types import IRegressionTrainingCertificate, IClassificationTrainingCertificate
+from modules.utils.Utils import Utils
+from modules.keras_models.KerasPath import KERAS_PATH
+
+
+
 
 # Configuration Input
 print("MERGE TRAINING CERTIFICATES")
@@ -17,6 +20,8 @@ answers: Dict[str, str] = prompt([
 ])
 model_type: str = answers["model_type"]
 prefix: str = "R_" if model_type == "KerasRegression" else "C_"
+
+
 
 
 # Model IDs Extractor
@@ -40,7 +45,8 @@ if len(ids) == 0:
     raise RuntimeError("No model ids could be extracted.")
 
 # Extract the certificates json and place them in a list
-certificates: List[IClassificationTrainingCertificate] = [load(open(f"{KERAS_PATH['models']}/{id}/certificate.json")) for id in ids]
+certificates: Union[List[IRegressionTrainingCertificate], List[IClassificationTrainingCertificate]] = \
+    [load(open(f"{KERAS_PATH['models']}/{id}/certificate.json")) for id in ids]
 
 # Finally, dump the merged file in the configs directory
 if not exists(KERAS_PATH["batched_training_certificates"]):

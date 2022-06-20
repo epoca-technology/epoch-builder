@@ -1,5 +1,5 @@
 from typing import Tuple, Union
-from modules.interpreter import IPercentChangeInterpreterConfig, IProbabilityInterpreterConfig
+from modules.types import IPercentChangeInterpreterConfig, IProbabilityInterpreterConfig
 
 
 

@@ -1,21 +1,16 @@
-from typing import TypedDict, Union, List
+from typing import Union, List
 from pandas import DataFrame, Series
 from ta.momentum import rsi, stoch
 from ta.trend import AroonIndicator, stc
 from ta.volume import money_flow_index
-from modules.database import Database
+from modules.types import ITechnicalAnalysis
+from modules.database.Database import Database
 
 
 
 
 
-# Type
-class ITechnicalAnalysis(TypedDict):
-    rsi: Union[float, None]
-    stoch: Union[float, None]
-    aroon: Union[float, None]
-    stc: Union[float, None]
-    mfi: Union[float, None]
+
 
 
 

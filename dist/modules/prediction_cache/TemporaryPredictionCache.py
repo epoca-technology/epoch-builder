@@ -1,5 +1,5 @@
 from typing import Dict, Union
-from modules.model import IPrediction
+from modules.types import IPrediction
 
 
 

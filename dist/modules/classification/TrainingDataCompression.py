@@ -1,5 +1,5 @@
 from pandas import DataFrame
-from modules.classification import ICompressedTrainingData
+from modules.types import ICompressedTrainingData
 
 
 

@@ -1,9 +1,17 @@
 import unittest
 from typing import List
-from pandas import Series, set_option
-from modules.candlestick import Candlestick
-from modules.utils import Utils
-from modules.backtest import Position
+from pandas import Series
+from modules.database.Database import Database
+from modules.utils.Utils import Utils
+from modules.candlestick.Candlestick import Candlestick
+from modules.backtest.Position import Position
+
+
+
+## ONLY RUN WHEN THE DATABASE TEST MODE IS ENABLED ##
+if not Database.TEST_MODE:
+    raise RuntimeError("Unit tests can only be performed when the Database is in test mode.")
+
 
 
 # Make Panda's floats more readable

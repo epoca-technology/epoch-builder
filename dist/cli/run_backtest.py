@@ -1,5 +1,6 @@
 from json import load
-from modules.backtest import Backtest, IBacktestConfig
+from modules.types import IBacktestConfig
+from modules.backtest.Backtest import Backtest
 
 
 # BACKTEST CONFIGURATION FILE

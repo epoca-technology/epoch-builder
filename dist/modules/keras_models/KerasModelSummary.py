@@ -1,6 +1,6 @@
 from typing import List
 from keras import Sequential
-from modules.keras_models import IKerasModelSummary, IKerasModelLayer
+from modules.types import IKerasModelSummary, IKerasModelLayer
 
 
 

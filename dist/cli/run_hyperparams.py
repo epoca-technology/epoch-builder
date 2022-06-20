@@ -1,7 +1,7 @@
-from typing import List, Dict, Union
+from typing import Dict, Union
 from inquirer import Text, List as InquirerList, prompt
-from modules.utils import Utils
-from modules.hyperparams import KerasHyperparams
+from modules.utils.Utils import Utils
+from modules.hyperparams.KerasHyperparams import KerasHyperparams
 
 # Configuration Input
 print("HYPERPARAMS\n")

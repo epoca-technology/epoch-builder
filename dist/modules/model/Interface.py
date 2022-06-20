@@ -1,6 +1,6 @@
 from typing import Union
 from pandas import DataFrame
-from modules.model import IPrediction, IModel
+from modules.types import IPrediction, IModel
 
 
 

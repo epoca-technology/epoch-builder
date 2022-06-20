@@ -2,10 +2,18 @@ import unittest
 from typing import List
 from copy import deepcopy
 from pandas import Series, DataFrame
-from modules.candlestick import Candlestick
-from modules.utils import Utils
-from modules.classification import ClassificationTrainingData, ITrainingDataConfig, ICompressedTrainingData, \
-    ITrainingDataFile, compress_training_data, decompress_training_data
+from modules.types import ITrainingDataConfig, ICompressedTrainingData, ITrainingDataFile
+from modules.database.Database import Database
+from modules.utils.Utils import Utils
+from modules.candlestick.Candlestick import Candlestick
+from modules.classification.ClassificationTrainingData import ClassificationTrainingData
+from modules.classification.TrainingDataCompression import compress_training_data, decompress_training_data
+
+
+
+## ONLY RUN WHEN THE DATABASE TEST MODE IS ENABLED ##
+if not Database.TEST_MODE:
+    raise RuntimeError("Unit tests can only be performed when the Database is in test mode.")
 
 
 

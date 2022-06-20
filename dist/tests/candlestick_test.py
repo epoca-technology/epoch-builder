@@ -1,13 +1,19 @@
 import unittest
 from pandas import Series
-from modules.model import ArimaModel
-from modules.candlestick import Candlestick
-from modules.utils import Utils
+from modules.database.Database import Database
+from modules.candlestick.Candlestick import Candlestick
+from modules.utils.Utils import Utils
 
 
+
+## ONLY RUN WHEN THE DATABASE TEST MODE IS ENABLED ##
+if not Database.TEST_MODE:
+    raise RuntimeError("Unit tests can only be performed when the Database is in test mode.")
+
+    
 
 # Initialize the candlesticks
-LOOKBACK = ArimaModel.DEFAULT_LOOKBACK
+LOOKBACK = 300
 
 
 

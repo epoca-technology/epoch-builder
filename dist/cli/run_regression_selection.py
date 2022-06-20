@@ -1,6 +1,6 @@
 from typing import List, Dict
 from inquirer import Text, List as InquirerList, prompt
-from modules.regression_selection import RegressionSelection
+from modules.regression_selection.RegressionSelection import RegressionSelection
 
 # Configuration Input
 print("REGRESSION SELECTION")

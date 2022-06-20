@@ -1,10 +1,11 @@
 from typing import List, Union
 from pandas import Series, DataFrame
-from modules.candlestick import Candlestick
-from modules.arima import Arima
-from modules.interpreter import PercentageChangeInterpreter, IPercentChangeInterpreterConfig
-from modules.prediction_cache import save_arima_pred, get_arima_pred
-from modules.model import ModelInterface, IModel, IArimaModelConfig, IPrediction, IPredictionMetaData
+from modules.types import IPercentChangeInterpreterConfig, IModel, IArimaModelConfig, IPrediction, IPredictionMetaData
+from modules.candlestick.Candlestick import Candlestick
+from modules.arima.Arima import Arima
+from modules.interpreter.PercentageChangeInterpreter import PercentageChangeInterpreter
+from modules.prediction_cache.ArimaPredictionCache import save_arima_pred, get_arima_pred
+from modules.model.Interface import ModelInterface
 
 
 

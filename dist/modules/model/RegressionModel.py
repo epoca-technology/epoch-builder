@@ -1,9 +1,10 @@
 from typing import List, Union
 from pandas import DataFrame
-from modules.candlestick import Candlestick
-from modules.interpreter import PercentageChangeInterpreter
-from modules.prediction_cache import TemporaryPredictionCache
-from modules.model import ModelInterface, IModel, IPrediction, IPredictionMetaData, IRegressionModelConfig
+from modules.types import IModel, IPrediction, IPredictionMetaData, IRegressionModelConfig
+from modules.candlestick.Candlestick import Candlestick
+from modules.interpreter.PercentageChangeInterpreter import PercentageChangeInterpreter
+from modules.prediction_cache.TemporaryPredictionCache import TemporaryPredictionCache
+from modules.model.Interface import ModelInterface
 from modules.regression.Regression import Regression
 
 

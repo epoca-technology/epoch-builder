@@ -3,9 +3,9 @@ from os import makedirs, listdir, remove
 from os.path import exists, isfile, join
 from json import load, dumps
 from numpy import median, mean, arange
-from modules.utils import Utils
-from modules.backtest import BACKTEST_PATH, IBacktestResult
-from modules.regression_selection import IModelResult, ICombinationResult, IRegressionSelectionFile
+from modules.types import IBacktestResult, IModelResult, ICombinationResult, IRegressionSelectionFile
+from modules.utils.Utils import Utils
+from modules.backtest.BacktestPath import BACKTEST_PATH
 
 
 

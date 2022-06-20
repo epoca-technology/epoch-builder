@@ -1,5 +1,5 @@
 from keras import Sequential
-from modules.keras_models import IKerasModelConfig
+from modules.types import IKerasModelConfig
 import modules.keras_models.NeuralNetworks.RegressionNeuralNetworks as KerasRegressionModels
 import modules.keras_models.NeuralNetworks.ClassificationNeuralNetworks as KerasClassificationModels
 

@@ -1,6 +1,7 @@
 from typing import List
 from json import load
-from modules.arima_combinations import ArimaCombinations, IArimaCombinationsConfig
+from modules.types import IArimaCombinationsConfig
+from modules.arima_combinations.ArimaCombinations import ArimaCombinations
 
 
 

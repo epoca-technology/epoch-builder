@@ -2,8 +2,16 @@ import unittest
 from typing import List
 from copy import deepcopy
 from numpy import ndarray
-from modules.keras_models import KERAS_PATH, IKerasModelConfig
-from modules.regression import IRegressionTrainingConfig, RegressionTraining
+from modules.types import IKerasModelConfig, IRegressionTrainingConfig
+from modules.database.Database import Database
+from modules.keras_models.KerasPath import KERAS_PATH
+from modules.regression.RegressionTraining import RegressionTraining
+
+
+
+## ONLY RUN WHEN THE DATABASE TEST MODE IS ENABLED ##
+if not Database.TEST_MODE:
+    raise RuntimeError("Unit tests can only be performed when the Database is in test mode.")
 
 
 
@@ -57,7 +65,6 @@ class RegressionTrainingTestCase(unittest.TestCase):
         # Initialize the instance
         training: RegressionTraining = RegressionTraining(
             config=config,
-            max_evaluations=100,
             hyperparams_mode=False,
             test_mode=True
         )
@@ -87,7 +94,6 @@ class RegressionTrainingTestCase(unittest.TestCase):
         self.assertTrue(len(training.train_y) > 0)
         self.assertTrue(len(training.test_x) > 0)
         self.assertTrue(len(training.test_y) > 0)
-        self.assertEqual(training.max_evaluations, 100)
 
 
 

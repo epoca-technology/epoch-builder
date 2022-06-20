@@ -1,5 +1,5 @@
 from typing import List, TypedDict
-from modules.keras_models import IKerasModelConfig
+from modules.types import IKerasModelConfig
 
 
 ##################################
@@ -96,16 +96,12 @@ R_CNN_S2: List[IKerasModelConfig] = [
     {"filters": [32, 32], "kernel_sizes": [5, 3], "activations": ["", ""]},
 
     {"filters": [64, 32], "kernel_sizes": [5, 3], "activations": ["", ""]},
-    {"filters": [64, 64], "kernel_sizes": [5, 3], "activations": ["", ""]},
 
     {"filters": [128, 64], "kernel_sizes": [5, 3], "activations": ["", ""]},
-    {"filters": [128, 128], "kernel_sizes": [5, 3], "activations": ["", ""]},
 
     {"filters": [256, 128], "kernel_sizes": [5, 3], "activations": ["", ""]},
-    {"filters": [256, 256], "kernel_sizes": [5, 3], "activations": ["", ""]},
 
-    {"filters": [512, 256], "kernel_sizes": [5, 3], "activations": ["", ""]},
-    {"filters": [512, 512], "kernel_sizes": [5, 3], "activations": ["", ""]}
+    {"filters": [512, 256], "kernel_sizes": [5, 3], "activations": ["", ""]}
 ]
 
 
@@ -121,16 +117,12 @@ R_CNN_S2_DO: List[IKerasModelConfig] = [
     {"filters": [32, 32], "kernel_sizes": [5, 3], "dropout_rates": [0, 0], "activations": ["", ""]},
 
     {"filters": [64, 32], "kernel_sizes": [5, 3], "dropout_rates": [0, 0], "activations": ["", ""]},
-    {"filters": [64, 64], "kernel_sizes": [5, 3], "dropout_rates": [0, 0], "activations": ["", ""]},
 
     {"filters": [128, 64], "kernel_sizes": [5, 3], "dropout_rates": [0, 0], "activations": ["", ""]},
-    {"filters": [128, 128], "kernel_sizes": [5, 3], "dropout_rates": [0, 0], "activations": ["", ""]},
 
     {"filters": [256, 128], "kernel_sizes": [5, 3], "dropout_rates": [0, 0], "activations": ["", ""]},
-    {"filters": [256, 256], "kernel_sizes": [5, 3], "dropout_rates": [0, 0], "activations": ["", ""]},
 
-    {"filters": [512, 256], "kernel_sizes": [5, 3], "dropout_rates": [0, 0], "activations": ["", ""]},
-    {"filters": [512, 512], "kernel_sizes": [5, 3], "dropout_rates": [0, 0], "activations": ["", ""]}
+    {"filters": [512, 256], "kernel_sizes": [5, 3], "dropout_rates": [0, 0], "activations": ["", ""]}
 ]
 
 
@@ -147,16 +139,12 @@ R_CNN_S2_MP: List[IKerasModelConfig] = [
     {"filters": [32, 32], "kernel_sizes": [5, 3], "pool_sizes": [2, 2], "activations": ["", ""]},
 
     {"filters": [64, 32], "kernel_sizes": [5, 3], "pool_sizes": [2, 2], "activations": ["", ""]},
-    {"filters": [64, 64], "kernel_sizes": [5, 3], "pool_sizes": [2, 2], "activations": ["", ""]},
 
     {"filters": [128, 64], "kernel_sizes": [5, 3], "pool_sizes": [2, 2], "activations": ["", ""]},
-    {"filters": [128, 128], "kernel_sizes": [5, 3], "pool_sizes": [2, 2], "activations": ["", ""]},
 
     {"filters": [256, 128], "kernel_sizes": [5, 3], "pool_sizes": [2, 2], "activations": ["", ""]},
-    {"filters": [256, 256], "kernel_sizes": [5, 3], "pool_sizes": [2, 2], "activations": ["", ""]},
 
-    {"filters": [512, 256], "kernel_sizes": [5, 3], "pool_sizes": [2, 2], "activations": ["", ""]},
-    {"filters": [512, 512], "kernel_sizes": [5, 3], "pool_sizes": [2, 2], "activations": ["", ""]}
+    {"filters": [512, 256], "kernel_sizes": [5, 3], "pool_sizes": [2, 2], "activations": ["", ""]}
 ]
 
 
@@ -174,16 +162,12 @@ R_CNN_S2_MP_DO: List[IKerasModelConfig] = [
     {"filters": [32, 32], "kernel_sizes": [5, 3], "pool_sizes": [2, 2], "dropout_rates": [0, 0], "activations": ["", ""]},
 
     {"filters": [64, 32], "kernel_sizes": [5, 3], "pool_sizes": [2, 2], "dropout_rates": [0, 0], "activations": ["", ""]},
-    {"filters": [64, 64], "kernel_sizes": [5, 3], "pool_sizes": [2, 2], "dropout_rates": [0, 0], "activations": ["", ""]},
 
     {"filters": [128, 64], "kernel_sizes": [5, 3], "pool_sizes": [2, 2], "dropout_rates": [0, 0], "activations": ["", ""]},
-    {"filters": [128, 128], "kernel_sizes": [5, 3], "pool_sizes": [2, 2], "dropout_rates": [0, 0], "activations": ["", ""]},
 
     {"filters": [256, 128], "kernel_sizes": [5, 3], "pool_sizes": [2, 2], "dropout_rates": [0, 0], "activations": ["", ""]},
-    {"filters": [256, 256], "kernel_sizes": [5, 3], "pool_sizes": [2, 2], "dropout_rates": [0, 0], "activations": ["", ""]},
 
-    {"filters": [512, 256], "kernel_sizes": [5, 3], "pool_sizes": [2, 2], "dropout_rates": [0, 0], "activations": ["", ""]},
-    {"filters": [512, 512], "kernel_sizes": [5, 3], "pool_sizes": [2, 2], "dropout_rates": [0, 0], "activations": ["", ""]}
+    {"filters": [512, 256], "kernel_sizes": [5, 3], "pool_sizes": [2, 2], "dropout_rates": [0, 0], "activations": ["", ""]}
 ]
 
 
@@ -201,16 +185,12 @@ R_CNN_S3: List[IKerasModelConfig] = [
     {"filters": [32, 32, 32], "kernel_sizes": [5, 3, 3], "activations": ["", "", ""]},
 
     {"filters": [64, 32, 32], "kernel_sizes": [5, 3, 3], "activations": ["", "", ""]},
-    {"filters": [64, 64, 64], "kernel_sizes": [5, 3, 3], "activations": ["", "", ""]},
 
     {"filters": [128, 64, 64], "kernel_sizes": [5, 3, 3], "activations": ["", "", ""]},
-    {"filters": [128, 128, 128], "kernel_sizes": [5, 3, 3], "activations": ["", "", ""]},
 
     {"filters": [256, 128, 128], "kernel_sizes": [5, 3, 3], "activations": ["", "", ""]},
-    {"filters": [256, 256, 256], "kernel_sizes": [5, 3, 3], "activations": ["", "", ""]},
 
-    {"filters": [512, 256, 256], "kernel_sizes": [5, 3, 3], "activations": ["", "", ""]},
-    {"filters": [512, 512, 512], "kernel_sizes": [5, 3, 3], "activations": ["", "", ""]}
+    {"filters": [512, 256, 256], "kernel_sizes": [5, 3, 3], "activations": ["", "", ""]}
 ]
 
 
@@ -225,16 +205,12 @@ R_CNN_S3_DO: List[IKerasModelConfig] = [
     {"filters": [32, 32, 32], "kernel_sizes": [5, 3, 3], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
 
     {"filters": [64, 32, 32], "kernel_sizes": [5, 3, 3], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
-    {"filters": [64, 64, 64], "kernel_sizes": [5, 3, 3], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
 
     {"filters": [128, 64, 64], "kernel_sizes": [5, 3, 3], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
-    {"filters": [128, 128, 128], "kernel_sizes": [5, 3, 3], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
 
     {"filters": [256, 128, 128], "kernel_sizes": [5, 3, 3], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
-    {"filters": [256, 256, 256], "kernel_sizes": [5, 3, 3], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
 
-    {"filters": [512, 256, 256], "kernel_sizes": [5, 3, 3], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
-    {"filters": [512, 512, 512], "kernel_sizes": [5, 3, 3], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]}
+    {"filters": [512, 256, 256], "kernel_sizes": [5, 3, 3], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]}
 ]
 
 
@@ -250,16 +226,12 @@ R_CNN_S3_MP: List[IKerasModelConfig] = [
     {"filters": [32, 32, 32], "kernel_sizes": [5, 3, 3], "pool_sizes": [2, 2, 2], "activations": ["", "", ""]},
 
     {"filters": [64, 32, 32], "kernel_sizes": [5, 3, 3], "pool_sizes": [2, 2, 2], "activations": ["", "", ""]},
-    {"filters": [64, 64, 64], "kernel_sizes": [5, 3, 3], "pool_sizes": [2, 2, 2], "activations": ["", "", ""]},
 
     {"filters": [128, 64, 64], "kernel_sizes": [5, 3, 3], "pool_sizes": [2, 2, 2], "activations": ["", "", ""]},
-    {"filters": [128, 128, 128], "kernel_sizes": [5, 3, 3], "pool_sizes": [2, 2, 2], "activations": ["", "", ""]},
 
     {"filters": [256, 128, 128], "kernel_sizes": [5, 3, 3], "pool_sizes": [2, 2, 2], "activations": ["", "", ""]},
-    {"filters": [256, 256, 256], "kernel_sizes": [5, 3, 3], "pool_sizes": [2, 2, 2], "activations": ["", "", ""]},
 
-    {"filters": [512, 256, 256], "kernel_sizes": [5, 3, 3], "pool_sizes": [2, 2, 2], "activations": ["", "", ""]},
-    {"filters": [512, 512, 512], "kernel_sizes": [5, 3, 3], "pool_sizes": [2, 2, 2], "activations": ["", "", ""]}
+    {"filters": [512, 256, 256], "kernel_sizes": [5, 3, 3], "pool_sizes": [2, 2, 2], "activations": ["", "", ""]}
 ]
 
 
@@ -280,16 +252,12 @@ R_CNN_S3_MP_DO: List[IKerasModelConfig] = [
     {"filters": [32, 32, 32], "kernel_sizes": [5, 3, 3], "pool_sizes": [2, 2, 2], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
 
     {"filters": [64, 32, 32], "kernel_sizes": [5, 3, 3], "pool_sizes": [2, 2, 2], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
-    {"filters": [64, 64, 64], "kernel_sizes": [5, 3, 3], "pool_sizes": [2, 2, 2], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
 
     {"filters": [128, 64, 64], "kernel_sizes": [5, 3, 3], "pool_sizes": [2, 2, 2], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
-    {"filters": [128, 128, 128], "kernel_sizes": [5, 3, 3], "pool_sizes": [2, 2, 2], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
 
     {"filters": [256, 128, 128], "kernel_sizes": [5, 3, 3], "pool_sizes": [2, 2, 2], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
-    {"filters": [256, 256, 256], "kernel_sizes": [5, 3, 3], "pool_sizes": [2, 2, 2], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
 
-    {"filters": [512, 256, 256], "kernel_sizes": [5, 3, 3], "pool_sizes": [2, 2, 2], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
-    {"filters": [512, 512, 512], "kernel_sizes": [5, 3, 3], "pool_sizes": [2, 2, 2], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]}
+    {"filters": [512, 256, 256], "kernel_sizes": [5, 3, 3], "pool_sizes": [2, 2, 2], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]}
 ]
 
 
@@ -306,17 +274,12 @@ R_CNN_S4: List[IKerasModelConfig] = [
     {"filters": [32, 32, 32, 32], "kernel_sizes": [5, 3, 3, 3], "activations": ["", "", "", ""]},
 
     {"filters": [64, 32, 32, 32], "kernel_sizes": [5, 3, 3, 3], "activations": ["", "", "", ""]},
-    {"filters": [64, 64, 64, 64], "kernel_sizes": [5, 3, 3, 3], "activations": ["", "", "", ""]},
 
     {"filters": [128, 64, 64, 64], "kernel_sizes": [5, 3, 3, 3], "activations": ["", "", "", ""]},
-    {"filters": [128, 128, 128, 128], "kernel_sizes": [5, 3, 3, 3], "activations": ["", "", "", ""]},
 
     {"filters": [256, 128, 128, 128], "kernel_sizes": [5, 3, 3, 3], "activations": ["", "", "", ""]},
-    {"filters": [256, 256, 256, 256], "kernel_sizes": [5, 3, 3, 3], "activations": ["", "", "", ""]},
 
-    {"filters": [512, 256, 128, 64], "kernel_sizes": [5, 3, 3, 3], "activations": ["", "", "", ""]},
-    {"filters": [512, 256, 256, 256], "kernel_sizes": [5, 3, 3, 3], "activations": ["", "", "", ""]},
-    {"filters": [512, 512, 512, 512], "kernel_sizes": [5, 3, 3, 3], "activations": ["", "", "", ""]},
+    {"filters": [512, 256, 128, 64], "kernel_sizes": [5, 3, 3, 3], "activations": ["", "", "", ""]}
 ]
 
 
@@ -332,17 +295,12 @@ R_CNN_S4_DO: List[IKerasModelConfig] = [
     {"filters": [32, 32, 32, 32], "kernel_sizes": [5, 3, 3, 3], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
 
     {"filters": [64, 32, 32, 32], "kernel_sizes": [5, 3, 3, 3], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
-    {"filters": [64, 64, 64, 64], "kernel_sizes": [5, 3, 3, 3], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
 
     {"filters": [128, 64, 64, 64], "kernel_sizes": [5, 3, 3, 3], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
-    {"filters": [128, 128, 128, 128], "kernel_sizes": [5, 3, 3, 3], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
 
     {"filters": [256, 128, 128, 128], "kernel_sizes": [5, 3, 3, 3], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
-    {"filters": [256, 256, 256, 256], "kernel_sizes": [5, 3, 3, 3], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
 
-    {"filters": [512, 256, 128, 64], "kernel_sizes": [5, 3, 3, 3], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
-    {"filters": [512, 256, 256, 256], "kernel_sizes": [5, 3, 3, 3], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
-    {"filters": [512, 512, 512, 512], "kernel_sizes": [5, 3, 3, 3], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
+    {"filters": [512, 256, 128, 64], "kernel_sizes": [5, 3, 3, 3], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]}
 ]
 
 
@@ -358,17 +316,12 @@ R_CNN_S4_MP: List[IKerasModelConfig] = [
     {"filters": [32, 32, 32, 32], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "activations": ["", "", "", ""]},
 
     {"filters": [64, 32, 32, 32], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "activations": ["", "", "", ""]},
-    {"filters": [64, 64, 64, 64], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "activations": ["", "", "", ""]},
 
     {"filters": [128, 64, 64, 64], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "activations": ["", "", "", ""]},
-    {"filters": [128, 128, 128, 128], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "activations": ["", "", "", ""]},
 
     {"filters": [256, 128, 128, 128], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "activations": ["", "", "", ""]},
-    {"filters": [256, 256, 256, 256], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "activations": ["", "", "", ""]},
 
-    {"filters": [512, 256, 128, 64], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "activations": ["", "", "", ""]},
-    {"filters": [512, 256, 256, 256], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "activations": ["", "", "", ""]},
-    {"filters": [512, 512, 512, 512], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "activations": ["", "", "", ""]},
+    {"filters": [512, 256, 128, 64], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "activations": ["", "", "", ""]}
 ]
 
 
@@ -387,17 +340,12 @@ R_CNN_S4_MP_DO: List[IKerasModelConfig] = [
     {"filters": [32, 32, 32, 32], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
 
     {"filters": [64, 32, 32, 32], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
-    {"filters": [64, 64, 64, 64], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
 
     {"filters": [128, 64, 64, 64], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
-    {"filters": [128, 128, 128, 128], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
 
     {"filters": [256, 128, 128, 128], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
-    {"filters": [256, 256, 256, 256], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
 
-    {"filters": [512, 256, 128, 64], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
-    {"filters": [512, 256, 256, 256], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
-    {"filters": [512, 512, 512, 512], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
+    {"filters": [512, 256, 128, 64], "kernel_sizes": [5, 3, 3, 3], "pool_sizes": [2, 2, 2, 2], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]}
 ]
 
 

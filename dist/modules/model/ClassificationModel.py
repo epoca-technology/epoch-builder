@@ -1,11 +1,13 @@
 from typing import List, Union
 from pandas import DataFrame
-from modules.candlestick import Candlestick
-from modules.interpreter import ProbabilityInterpreter
-from modules.prediction_cache import TemporaryPredictionCache
-from modules.model import ModelInterface, IModel, RegressionModelFactory, IPrediction, \
-    IPredictionMetaData, IClassificationModelConfig, ArimaModel, RegressionModel
-from modules.technical_analysis import TechnicalAnalysis, ITechnicalAnalysis
+from modules.types import IModel, IPrediction, IPredictionMetaData, IClassificationModelConfig, ITechnicalAnalysis
+from modules.candlestick.Candlestick import Candlestick
+from modules.interpreter.ProbabilityInterpreter import ProbabilityInterpreter
+from modules.prediction_cache.TemporaryPredictionCache import TemporaryPredictionCache
+from modules.model.Interface import ModelInterface
+from modules.model.ArimaModel import ArimaModel
+from modules.model.RegressionModel import RegressionModel
+from modules.technical_analysis.TechnicalAnalysis import TechnicalAnalysis
 from modules.classification.Classification import Classification
 
 
@@ -60,7 +62,7 @@ class ClassificationModel(ModelInterface):
 
         # Initialize the Regression Instances
         self.regressions: List[Union[ArimaModel, RegressionModel]] = [
-            RegressionModelFactory(m) for m in self.classification.regressions
+            ArimaModel(m) if ArimaModel.is_config(m) else RegressionModel(m) for m in self.classification.regressions
         ]
 
         # Initialize the max lookback

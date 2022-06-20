@@ -2,7 +2,7 @@ from typing import List, Dict
 from os.path import exists, isfile
 from json import dumps
 from tqdm import tqdm
-from modules.candlestick import Candlestick
+from modules.candlestick.Candlestick import Candlestick
 
 
 ## CLI WELCOME ##

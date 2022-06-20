@@ -1,5 +1,6 @@
 from json import load
-from modules.classification import ClassificationTrainingData, ITrainingDataConfig
+from modules.types import ITrainingDataConfig
+from modules.classification.ClassificationTrainingData import ClassificationTrainingData
 
 
 # TRAINING DATA CONFIGURATION FILE

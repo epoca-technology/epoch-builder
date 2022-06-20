@@ -1,7 +1,14 @@
 from typing import List
 import unittest
 from pandas import Series
-from modules.arima import Arima
+from modules.database.Database import Database
+from modules.arima.Arima import Arima
+
+
+
+## ONLY RUN WHEN THE DATABASE TEST MODE IS ENABLED ##
+if not Database.TEST_MODE:
+    raise RuntimeError("Unit tests can only be performed when the Database is in test mode.")
 
 
 

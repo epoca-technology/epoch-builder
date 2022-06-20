@@ -2,10 +2,18 @@ import unittest
 from typing import List
 from json import load
 from pandas import Series
-from modules.candlestick import Candlestick
-from modules.keras_models import KERAS_PATH
-from modules.model import IRegressionConfig
-from modules.regression import Regression, IRegressionTrainingCertificate
+from modules.types import IRegressionConfig, IRegressionTrainingCertificate
+from modules.database.Database import Database
+from modules.candlestick.Candlestick import Candlestick
+from modules.keras_models.KerasPath import KERAS_PATH
+from modules.regression.Regression import Regression
+
+
+
+## ONLY RUN WHEN THE DATABASE TEST MODE IS ENABLED ##
+if not Database.TEST_MODE:
+    raise RuntimeError("Unit tests can only be performed when the Database is in test mode.")
+
 
 
 

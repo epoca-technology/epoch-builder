@@ -2,7 +2,8 @@ from typing import Any, Optional, Tuple, List
 from psycopg2 import connect
 from psycopg2.extras import RealDictCursor, Json
 from psycopg2.extensions import new_type, DECIMAL, register_type, register_adapter
-from modules.database import IDatabaseConnectionConfig, TABLES, IDatabaseSummary, IDatabaseTableSummary
+from modules.types import IDatabaseConnectionConfig, IDatabaseSummary, IDatabaseTableSummary
+from modules.database.DatabaseTables import TABLES
 
 
 

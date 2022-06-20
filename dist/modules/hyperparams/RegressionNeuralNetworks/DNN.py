@@ -1,5 +1,5 @@
 from typing import List, TypedDict
-from modules.keras_models import IKerasModelConfig
+from modules.types import IKerasModelConfig
 
 
 #########################
@@ -49,11 +49,9 @@ R_DNN_S2: List[IKerasModelConfig] = [
     {"units": [128, 64], "activations": ["", ""]},
     {"units": [128, 128], "activations": ["", ""]},
 
-    {"units": [256, 64], "activations": ["", ""]},
     {"units": [256, 128], "activations": ["", ""]},
     {"units": [256, 256], "activations": ["", ""]},
 
-    {"units": [512, 128], "activations": ["", ""]},
     {"units": [512, 256], "activations": ["", ""]},
     {"units": [512, 512], "activations": ["", ""]}
 ]
@@ -76,11 +74,9 @@ R_DNN_S2_DO: List[IKerasModelConfig] = [
     {"units": [128, 64], "dropout_rates": [0, 0], "activations": ["", ""]},
     {"units": [128, 128], "dropout_rates": [0, 0], "activations": ["", ""]},
 
-    {"units": [256, 64], "dropout_rates": [0, 0], "activations": ["", ""]},
     {"units": [256, 128], "dropout_rates": [0, 0], "activations": ["", ""]},
     {"units": [256, 256], "dropout_rates": [0, 0], "activations": ["", ""]},
 
-    {"units": [512, 128], "dropout_rates": [0, 0], "activations": ["", ""]},
     {"units": [512, 256], "dropout_rates": [0, 0], "activations": ["", ""]},
     {"units": [512, 512], "dropout_rates": [0, 0], "activations": ["", ""]}
 ]
@@ -99,17 +95,12 @@ R_DNN_S3: List[IKerasModelConfig] = [
     {"units": [64, 32, 32], "activations": ["", "", ""]},
     {"units": [64, 64, 64], "activations": ["", "", ""]},
 
-    {"units": [128, 64, 32], "activations": ["", "", ""]},
     {"units": [128, 64, 64], "activations": ["", "", ""]},
     {"units": [128, 128, 128], "activations": ["", "", ""]},
 
-    {"units": [256, 64, 32], "activations": ["", "", ""]},
-    {"units": [256, 128, 64], "activations": ["", "", ""]},
     {"units": [256, 128, 128], "activations": ["", "", ""]},
     {"units": [256, 256, 256], "activations": ["", "", ""]},
 
-    {"units": [512, 128, 64], "activations": ["", "", ""]},
-    {"units": [512, 256, 128], "activations": ["", "", ""]},
     {"units": [512, 256, 256], "activations": ["", "", ""]},
     {"units": [512, 512, 512], "activations": ["", "", ""]}
 ]
@@ -129,17 +120,12 @@ R_DNN_S3_DO: List[IKerasModelConfig] = [
     {"units": [64, 32, 32], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
     {"units": [64, 64, 64], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
 
-    {"units": [128, 64, 32], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
     {"units": [128, 64, 64], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
     {"units": [128, 128, 128], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
 
-    {"units": [256, 64, 32], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
-    {"units": [256, 128, 64], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
     {"units": [256, 128, 128], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
     {"units": [256, 256, 256], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
 
-    {"units": [512, 128, 64], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
-    {"units": [512, 256, 128], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
     {"units": [512, 256, 256], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]},
     {"units": [512, 512, 512], "dropout_rates": [0, 0, 0], "activations": ["", "", ""]}
 ]
@@ -157,17 +143,12 @@ R_DNN_S4: List[IKerasModelConfig] = [
     {"units": [64, 32, 32, 32], "activations": ["", "", "", ""]},
     {"units": [64, 64, 64, 64], "activations": ["", "", "", ""]},
 
-    {"units": [128, 64, 32, 32], "activations": ["", "", "", ""]},
     {"units": [128, 64, 64, 64], "activations": ["", "", "", ""]},
     {"units": [128, 128, 128, 128], "activations": ["", "", "", ""]},
 
-    {"units": [256, 128, 64, 32], "activations": ["", "", "", ""]},
-    {"units": [256, 128, 128, 64], "activations": ["", "", "", ""]},
     {"units": [256, 128, 128, 128], "activations": ["", "", "", ""]},
     {"units": [256, 256, 256, 256], "activations": ["", "", "", ""]},
 
-    {"units": [512, 256, 128, 64], "activations": ["", "", "", ""]},
-    {"units": [512, 256, 256, 128], "activations": ["", "", "", ""]},
     {"units": [512, 256, 256, 256], "activations": ["", "", "", ""]},
     {"units": [512, 512, 512, 512], "activations": ["", "", "", ""]}
 ]
@@ -188,17 +169,12 @@ R_DNN_S4_DO: List[IKerasModelConfig] = [
     {"units": [64, 32, 32, 32], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
     {"units": [64, 64, 64, 64], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
 
-    {"units": [128, 64, 32, 32], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
     {"units": [128, 64, 64, 64], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
     {"units": [128, 128, 128, 128], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
 
-    {"units": [256, 128, 64, 32], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
-    {"units": [256, 128, 128, 64], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
     {"units": [256, 128, 128, 128], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
     {"units": [256, 256, 256, 256], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
 
-    {"units": [512, 256, 128, 64], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
-    {"units": [512, 256, 256, 128], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
     {"units": [512, 256, 256, 256], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]},
     {"units": [512, 512, 512, 512], "dropout_rates": [0, 0, 0, 0], "activations": ["", "", "", ""]}
 ]

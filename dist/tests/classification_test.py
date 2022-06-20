@@ -1,9 +1,18 @@
 import unittest
 from typing import List
 from json import load
-from modules.keras_models import KERAS_PATH
-from modules.classification import ITrainingDataFile, Classification
+from modules.types import ITrainingDataFile
+from modules.database.Database import Database
+from modules.keras_models.KerasPath import KERAS_PATH
+from modules.classification.Classification import Classification
 
+
+
+## ONLY RUN WHEN THE DATABASE TEST MODE IS ENABLED ##
+if not Database.TEST_MODE:
+    raise RuntimeError("Unit tests can only be performed when the Database is in test mode.")
+
+    
 
 
 

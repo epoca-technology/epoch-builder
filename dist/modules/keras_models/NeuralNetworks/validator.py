@@ -1,5 +1,5 @@
 from typing import Union, List
-from modules.keras_models import IKerasModelConfig
+from modules.types import IKerasModelConfig
 
 
 

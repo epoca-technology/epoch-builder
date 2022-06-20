@@ -1,9 +1,17 @@
 import unittest
 from typing import Union
 from pandas import Series, DataFrame
-from modules.candlestick import Candlestick
-from modules.technical_analysis import TechnicalAnalysis, ITechnicalAnalysis
+from modules.types import ITechnicalAnalysis
+from modules.database.Database import Database
+from modules.candlestick.Candlestick import Candlestick
+from modules.technical_analysis.TechnicalAnalysis import TechnicalAnalysis
 
+
+
+## ONLY RUN WHEN THE DATABASE TEST MODE IS ENABLED ##
+if not Database.TEST_MODE:
+    raise RuntimeError("Unit tests can only be performed when the Database is in test mode.")
+    
 
 
 # Start Candlestick

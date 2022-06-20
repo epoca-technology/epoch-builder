@@ -3,9 +3,7 @@ from os.path import exists
 from typing import List, Tuple, Union
 from itertools import product
 from json import dumps
-from modules.model import IModel
-from modules.backtest import IBacktestConfig
-from modules.arima_combinations import IArimaCombinationsConfig, IArimaCombination
+from modules.types import IArimaCombinationsConfig, IArimaCombination, IModel, IBacktestConfig
 
 
 

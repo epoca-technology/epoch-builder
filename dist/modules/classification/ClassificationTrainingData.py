@@ -4,14 +4,15 @@ from os.path import exists
 from json import dumps, load
 from pandas import DataFrame, Series
 from tqdm import tqdm
-from modules.candlestick import Candlestick
-from modules.utils import Utils
-from modules.model import RegressionModelFactory, ArimaModel, RegressionModel, IModel
-from modules.keras_models import KERAS_PATH
-from modules.technical_analysis import TechnicalAnalysis, ITechnicalAnalysis
-from modules.classification import ITrainingDataConfig, ITrainingDataActivePosition, \
-    ITrainingDataFile, ITrainingDataPriceActionsInsight, ITrainingDataPredictionInsight, \
-        compress_training_data, decompress_training_data
+from modules.types import IModel, ITechnicalAnalysis, ITrainingDataConfig, ITrainingDataActivePosition,\
+    ITrainingDataFile, ITrainingDataPriceActionsInsight, ITrainingDataPredictionInsight
+from modules.utils.Utils import Utils
+from modules.candlestick.Candlestick import Candlestick
+from modules.model.ArimaModel import ArimaModel
+from modules.model.RegressionModel import RegressionModel
+from modules.keras_models.KerasPath import KERAS_PATH
+from modules.technical_analysis import TechnicalAnalysis
+from modules.classification.TrainingDataCompression import compress_training_data, decompress_training_data
 
 
 
@@ -115,13 +116,17 @@ class ClassificationTrainingData:
             if m["id"] in ids:
                 raise ValueError(f"Duplicate Model ID provided: {m['id']}")
 
-            # Make sure it is an ArimaModel or a Regression Model
-            if not ArimaModel.is_config(m) and not RegressionModel.is_config(m):
-                raise ValueError("Only ArimaModels and RegressionModels can be used to generate the \
-                    Classification Training Data")
+            # Check if it is an ArimaModel
+            if ArimaModel.is_config(m):
+                self.models.append(ArimaModel(m))
 
-            # Add the initialized model to the list
-            self.models.append(RegressionModelFactory(m))
+            # Check if it is a RegressionModel
+            elif RegressionModel.is_config(m):
+                self.models.append(RegressionModel(m))
+
+            # Otherwise, the provided model is invalid
+            else:
+                raise ValueError("Only Regression Models can be used to generate the Classification Training Data")
             
             # Populate helpers
             df_data[m["id"]] = []

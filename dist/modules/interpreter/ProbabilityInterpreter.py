@@ -1,5 +1,6 @@
 from typing import List, Tuple
-from modules.interpreter import IProbabilityInterpreterConfig, InterpreterInterface
+from modules.types import IProbabilityInterpreterConfig
+from modules.interpreter.Interface import InterpreterInterface
 
 
 

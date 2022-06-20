@@ -7,11 +7,12 @@ from json import dumps
 from functools import reduce
 from copy import deepcopy
 from math import ceil
-from modules.utils import Utils
-from modules.keras_models import KERAS_PATH, IKerasModelConfig, KerasModel
-from modules.regression import IRegressionTrainingConfig, IRegressionTrainingBatch
-from modules.classification import IClassificationTrainingConfig, IClassificationTrainingBatch
-from modules.hyperparams import IKerasLoss, IKerasHyperparamsNetworkReceipt
+from modules.types import IKerasModelConfig, IKerasLoss, IKerasHyperparamsNetworkReceipt, \
+    IRegressionTrainingConfig, IRegressionTrainingBatch, IClassificationTrainingConfig, \
+    IClassificationTrainingBatch
+from modules.utils.Utils import Utils
+from modules.keras_models.KerasPath import KERAS_PATH
+from modules.keras_models.KerasModel import KerasModel
 from modules.hyperparams.RegressionNeuralNetworks import REGRESSION_NEURAL_NETWORKS
 from modules.hyperparams.ClassificationNeuralNetworks import CLASSIFICATION_NEURAL_NETWORKS
 
@@ -67,7 +68,7 @@ class KerasHyperparams:
 
     """
     # Default Batch Size
-    DEFAULT_BATCH_SIZE: int = 350
+    DEFAULT_BATCH_SIZE: int = 170
 
     # Lookback - Only used by KerasRegression
     LOOKBACK: int = 100
@@ -598,7 +599,6 @@ class KerasHyperparams:
         receipt: str = f"{self.model_type} Hyperparams ({self.output_name})\n\n"
 
         # Configuration
-        receipt += "Configuration:\n"
         receipt += f"Creation: {Utils.from_milliseconds_to_date_string(Utils.get_time())}\n"
         receipt += f"Total Models: {total_models}\n"
         receipt += f"Batch Size: {self.batch_size}\n"

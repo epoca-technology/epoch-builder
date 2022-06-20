@@ -1,7 +1,5 @@
 from typing import TypedDict, List, Dict, Union
-from modules.keras_models import IKerasModelConfig, IKerasModelTrainingHistory
-from modules.model import IRegressionConfig
-
+from modules.types import IRegressionConfig, IKerasModelConfig, IKerasModelTrainingHistory, IRegressionConfig, IModelEvaluation
 
 
 
@@ -75,64 +73,6 @@ class IRegressionTrainingBatch(TypedDict):
 
 
 
-
-
-
-# Regression Evaluation
-# Evaluation performed right after the model is trained in order to get an overview of the
-# potential accuracy, as well as the prediction type distribution.
-# Each evaluation is performed using a random candlestick open time and is evaluated against
-# the candlestick placed at the end of the window based on the model's predictions config.
-class IRegressionEvaluation(TypedDict):
-    # The number of evaluations performed on the Regression
-    evaluations: int
-    max_evaluations: int
-
-    # The number of times the Regression predicted a price increase
-    increase_num: int
-    increase_successful_num: int
-
-    # The number of times the Regression predicted a price decrease
-    decrease_num: int
-    decrease_successful_num: int
-
-    # Accuracy
-    increase_acc: int
-    decrease_acc: int
-    acc: int
-
-    # Increase Predictions Overview
-    increase_list: List[float]
-    increase_max: float
-    increase_min: float
-    increase_mean: float
-    increase_successful_list: List[float]
-    increase_successful_max: float
-    increase_successful_min: float
-    increase_successful_mean: float
-
-    # Decrease Predictions Overview
-    decrease_list: List[float]
-    decrease_max: float
-    decrease_min: float
-    decrease_mean: float
-    decrease_successful_list: List[float]
-    decrease_successful_max: float
-    decrease_successful_min: float
-    decrease_successful_mean: float
-
-    # Outcomes
-    increase_outcomes: int
-    decrease_outcomes: int
-
-
-
-
-
-
-
-
-
 # Regression Training Certificate
 # Once the training, saving and evaluation completes, a certificate containing all the
 # data is saved and issued for batching.
@@ -178,7 +118,7 @@ class IRegressionTrainingCertificate(TypedDict):
     test_evaluation: float # loss
 
     # Regression Post-Training Evaluation
-    regression_evaluation: IRegressionEvaluation
+    regression_evaluation: IModelEvaluation
 
     # The configuration of the Regression
     regression_config: IRegressionConfig

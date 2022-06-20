@@ -1,14 +1,14 @@
-from typing import List, Dict, Union
+from typing import List
 from os import makedirs, remove
 from os.path import exists
 from json import load, dumps
-from inquirer import Text, prompt
 from tqdm import tqdm
-from modules.utils import Utils
-from modules.candlestick import Candlestick
-from modules.keras_models import KERAS_PATH
-from modules.classification import IClassificationTrainingBatch, ClassificationTraining, IClassificationTrainingCertificate, \
-    ITrainingDataFile
+from modules.types import IClassificationTrainingBatch, IClassificationTrainingCertificate, ITrainingDataFile
+from modules.utils.Utils import Utils
+from modules.candlestick.Candlestick import Candlestick
+from modules.keras_models.KerasPath import KERAS_PATH
+from modules.classification.ClassificationTraining import ClassificationTraining
+    
 
 
 # CLASSIFICATION TRAINING
@@ -59,9 +59,6 @@ training_data: ITrainingDataFile = load(training_data_config_file)
 # Results as saved when the execution has completed. If the execution is interrupted before
 # completion, results will not be saved.
 print("CLASSIFICATION TRAINING")
-# Init the max evaluations
-answers: Dict[str, str] = prompt([Text("max_evaluations", f"Number of Classification Evaluations (Defaults to {ClassificationTraining.DEFAULT_MAX_EVALUATIONS})")])
-max_evaluations: Union[int, None] = int(answers["max_evaluations"]) if answers["max_evaluations"].isdigit() else None
 
 
 # CANDLESTICK INITIALIZATION
@@ -79,7 +76,6 @@ for index, model_config in enumerate(config["models"]):
     classification_training: ClassificationTraining = ClassificationTraining(
         training_data, 
         model_config, 
-        max_evaluations=max_evaluations,
         hyperparams_mode=config["hyperparams_mode"]
     )
 
@@ -93,7 +89,7 @@ for index, model_config in enumerate(config["models"]):
     if config["hyperparams_mode"]:
         progress_bar.set_description(f"{model_config['id'][0:20]}...")
     else:    
-        print(f"\n{index + 1}/{len(config['models'])}) {model_config['id']}")
+        print(f"\n{index + 1}/{len(config['models'])}) {model_config['id'][0:20]}...")
 
     # Train the model
     cert: IClassificationTrainingCertificate = classification_training.train()

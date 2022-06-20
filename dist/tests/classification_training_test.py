@@ -2,10 +2,19 @@ import unittest
 from typing import List
 from json import load
 from copy import deepcopy
-from modules.keras_models import KERAS_PATH, IKerasModelConfig
-from modules.classification import IClassificationTrainingConfig, ITrainingDataFile, ClassificationTraining
+from modules.types import IKerasModelConfig, IClassificationTrainingConfig, ITrainingDataFile
+from modules.database.Database import Database
+from modules.keras_models.KerasPath import KERAS_PATH
+from modules.classification.ClassificationTraining import ClassificationTraining
 
 
+
+
+## ONLY RUN WHEN THE DATABASE TEST MODE IS ENABLED ##
+if not Database.TEST_MODE:
+    raise RuntimeError("Unit tests can only be performed when the Database is in test mode.")
+
+    
 
 
 # TRAINING DATA FILE
@@ -17,7 +26,6 @@ TRAINING_DATA: ITrainingDataFile = load(open(f"{KERAS_PATH['classification_train
 CONFIG: IClassificationTrainingConfig = {
     "id": "C_UNIT_TEST",
     "description": "Executed from Unit Tests",
-    "learning_rate": 0.001,
     "optimizer": "adam",
     "loss": "binary_crossentropy",
     "metric": "binary_accuracy",
@@ -60,7 +68,6 @@ class ClassificationTrainingTestCase(unittest.TestCase):
         training: ClassificationTraining = ClassificationTraining(
             training_data_file=TRAINING_DATA,
             config=config,
-            max_evaluations=1000,
             hyperparams_mode=False,
             test_mode=True
         )
@@ -69,8 +76,6 @@ class ClassificationTrainingTestCase(unittest.TestCase):
         self.assertEqual(training.id, config["id"])
         self.assertEqual(training.description, config["description"])
         self.assertEqual(len(training.models), len(TRAINING_DATA["models"]))
-        self.assertEqual(len(training.regressions), len(TRAINING_DATA["models"]))
-        self.assertEqual(training.learning_rate, config["learning_rate"])
         self.assertEqual(training.optimizer._name.lower(), config["optimizer"])
         self.assertEqual(training.loss.name, config["loss"])
         self.assertEqual(training.metric.name, config["metric"])

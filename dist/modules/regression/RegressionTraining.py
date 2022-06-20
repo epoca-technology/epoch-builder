@@ -1,11 +1,8 @@
 from typing import Union, Tuple, List
 from os import makedirs
 from os.path import exists
-from random import randint
-from numpy import mean, ndarray, array
-from pandas import Series
+from numpy import ndarray, array
 from json import dumps
-from tqdm import tqdm
 from h5py import File as h5pyFile
 from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras import Sequential
@@ -13,12 +10,16 @@ from keras.optimizers import adam_v2 as adam, rmsprop_v2 as rmsprop
 from keras.optimizer_v2.learning_rate_schedule import InverseTimeDecay
 from keras.losses import MeanSquaredError, MeanAbsoluteError
 from keras.callbacks import EarlyStopping, History
-from modules.utils import Utils
-from modules.candlestick import Candlestick
-from modules.keras_models import IKerasTrainingTypeConfig, KerasModel, IKerasModelConfig, IKerasModelTrainingHistory,\
-    get_summary, KERAS_PATH, LearningRateSchedule
-from modules.model import RegressionModel, IPrediction
-from modules.regression import IRegressionTrainingConfig, IRegressionTrainingCertificate, IRegressionEvaluation
+from modules.types import IKerasTrainingTypeConfig, IKerasModelConfig, IKerasModelTrainingHistory,\
+    IRegressionTrainingConfig, IRegressionTrainingCertificate, IModelEvaluation
+from modules.utils.Utils import Utils
+from modules.candlestick.Candlestick import Candlestick
+from modules.keras_models.KerasPath import KERAS_PATH
+from modules.keras_models.KerasModel import KerasModel
+from modules.keras_models.LearningRateSchedule import LearningRateSchedule
+from modules.keras_models.KerasModelSummary import get_summary
+#from modules.model.RegressionModel import RegressionModel
+from modules.model_evaluation.ModelEvaluation import evaluate
 
 
 
@@ -32,8 +33,6 @@ class RegressionTraining:
         HYPERPARAMS_TRAINING_CONFIG: IKerasTrainingTypeConfig
         SHORTLISTED_TRAINING_CONFIG: IKerasTrainingTypeConfig
             The configurations to be used based on the type of training.
-        DEFAULT_MAX_EVALUATIONS: int
-            The default maximum number of evaluations that will be performed on the trained model.
 
     Instance Properties:
         test_mode: bool
@@ -91,11 +90,6 @@ class RegressionTraining:
         "patience": 50
     }
 
-    # The max number of evaluations that will be performed on the trained regression model.
-    # Notice that if the number of evals is much smaller than the max it means there could be
-    # an irregularity with the model as the predicted changes are under 1%
-    DEFAULT_MAX_EVALUATIONS: int = 350
-
 
 
 
@@ -109,17 +103,14 @@ class RegressionTraining:
     def __init__(
         self, 
         config: IRegressionTrainingConfig, 
-        max_evaluations: Union[int, None],
         hyperparams_mode: bool=False,
-        test_mode: bool = False
+        test_mode: bool=False
     ):
         """Initializes the RegressionTraining Instance.
 
         Args:
             config: IRegressionTrainingConfig
                 The configuration that will be used to train the model.
-            max_evaluations: Union[int, None]
-                The maximum number of evaluations that can be performed
             hyperparams_mode: bool
                 If enabled, there will be no verbosity during training and eval.
             test_mode: bool
@@ -183,10 +174,6 @@ class RegressionTraining:
         # Initialize the Dataset Sizes
         self.train_size: int = self.train_x.shape[0]
         self.test_size: int = self.test_x.shape[0]
-
-        # Initialize the max evaluations
-        self.max_evaluations: int = max_evaluations if isinstance(max_evaluations, int) \
-            else RegressionTraining.DEFAULT_MAX_EVALUATIONS
 
         # Initialize the model's directory if not unit testing
         if not self.test_mode:
@@ -272,8 +259,9 @@ class RegressionTraining:
             Tuple[ndarray, ndarray, ndarray, ndarray]
             (train_x, train_y, test_x, test_y)
         """
-        # Init the number of rows
+        # Init the number of rows and the split that will be applied
         rows: int = Candlestick.NORMALIZED_PREDICTION_DF.shape[0]
+        split: int = int(rows * self.training_config["train_split"])
 
         # Init raw features and labels
         features_raw: Union[List[List[float]], ndarray] = []
@@ -296,8 +284,7 @@ class RegressionTraining:
         labels = array(labels_raw)
 
         # Finally, return the split datasets
-        return features[:int(rows*self.training_config["train_split"])], labels[:int(rows*self.training_config["train_split"])], \
-            features[int(rows*self.training_config["train_split"]):], labels[int(rows*self.training_config["train_split"]):]
+        return features[:split], labels[:split], features[split:], labels[split:]
 
 
 
@@ -371,7 +358,7 @@ class RegressionTraining:
         self._save_model(model)
 
         # Perform the regression evaluation
-        regression_evaluation: IRegressionEvaluation = self._evaluate_regression()
+        regression_evaluation: IModelEvaluation = self._evaluate_regression()
 
         # Save the certificate
         if not self.hyperparams_mode:
@@ -395,209 +382,41 @@ class RegressionTraining:
 
 
 
-
-
-
-
-    ## Regression Evaluation ##
-
-
-
-
-    def _evaluate_regression(self) -> IRegressionEvaluation:
-        """Loads the trained model that has just been saved and performs a series
-        of evaluations on random sequences based on the model's config.
+    def _evaluate_regression(self) -> IModelEvaluation:
+        """Loads the trained model that has just been saved and performs a runs
+        an evaluation that is similar to the backtest. This eval will only run
+        on the test dataset
 
         Returns:
-            IRegressionEvaluation
+            IModelEvaluation
         """
-        # Initialize the Regression Model
-        regression: RegressionModel = RegressionModel({
-            "id": self.id,
-            "regression_models": [ {"regression_id": self.id, "interpreter": { "long": 1, "short": 1 }} ]
-        })
-
-        # Init the min and max values for the random candlestick index
-        min_i: int = 0
-        max_i: int = int(Candlestick.DF.shape[0] * 0.99) # Omit the tail to prevent index errors
-
-        # Init evaluation data
-        evals: int = 0
-        increase: List[float] = []
-        increase_successful: List[float] = []
-        decrease: List[float] = []
-        decrease_successful: List[float] = []
-        increase_outcomes: int = 0
-        decrease_outcomes: int = 0
-
-        # Init the progress bar
-        if not self.hyperparams_mode:
-            progress_bar = tqdm( bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}", total=self.max_evaluations)
-            progress_bar.set_description("    6/7) Evaluating Regression")
-
-        # Perform the evaluation
-        for i in range(self.max_evaluations):
-            # Generate a random index and initialize the random start candlestick
-            random_index: int = randint(min_i, max_i)
-            candlestick: Series = Candlestick.DF.iloc[random_index]
-
-            # Generate a perdiction
-            pred: IPrediction = regression.predict(candlestick["ot"], enable_cache=False)
-
-            # Check if it is a non-neutral prediction
-            if pred["r"] != 0:
-                # Retrieve the outcome of the evaluation
-                outcome: int = self._get_evaluation_outcome(random_index, candlestick)
-
-                # Only process the evaluation if the outcome was determined
-                if outcome != 0:
-                    # Check if the Regression predicted an increase
-                    if pred["r"] == 1:
-                        # Append the increase prediction to the list
-                        increase.append(self._get_pred_change(pred))
-                        
-                        # Check if the prediction was correct
-                        if outcome == 1:
-                            increase_successful.append(self._get_pred_change(pred))
-                            increase_outcomes += 1
-                        else:
-                            decrease_outcomes += 1
-
-                    # Otherwise, the Classification predicted a decrease
-                    else:
-                        # Append the decrease prediction to the list
-                        decrease.append(self._get_pred_change(pred))
-                        
-                        # Check if the prediction was correct
-                        if outcome == -1:
-                            decrease_successful.append(self._get_pred_change(pred))
-                            decrease_outcomes += 1
-                        else:
-                            increase_outcomes += 1
-
-                    # Increment the evals performed
-                    evals += 1
-
-            # Update the progress bar
-            if not self.hyperparams_mode:
-                progress_bar.update()
-
-        # Initialize the lens for performance
-        increase_num: int = len(increase)
-        increase_successful_num: int = len(increase_successful)
-        decrease_num: int = len(decrease)
-        decrease_successful_num: int = len(decrease_successful)
-
-        # Finally, return the results
-        return {
-            # Evaluations
-            "evaluations": evals,
-            "max_evaluations": self.max_evaluations,
-
-            # Prediction counts
-            "increase_num": increase_num,
-            "increase_successful_num": increase_successful_num,
-            "decrease_num": decrease_num,
-            "decrease_successful_num": decrease_successful_num,
-
-            # Accuracy
-            "increase_acc": Utils.get_percentage_out_of_total(increase_successful_num, increase_num if increase_num > 0 else 1),
-            "decrease_acc": Utils.get_percentage_out_of_total(decrease_successful_num, decrease_num if decrease_num > 0 else 1),
-            "acc": Utils.get_percentage_out_of_total(increase_successful_num+decrease_successful_num, evals if evals > 0 else 1),
-            
-            # Predictions Overview
-            "increase_list": increase,
-            "increase_max": max(increase if increase_num > 0 else [0]),
-            "increase_min": min(increase if increase_num > 0 else [0]),
-            "increase_mean": mean(increase if increase_num > 0 else [0]),
-            "increase_successful_list": increase_successful,
-            "increase_successful_max": max(increase_successful if increase_successful_num > 0 else [0]),
-            "increase_successful_min": min(increase_successful if increase_successful_num > 0 else [0]),
-            "increase_successful_mean": mean(increase_successful if increase_successful_num > 0 else [0]),
-            "decrease_list": decrease,
-            "decrease_max": max(decrease if decrease_num > 0 else [0]),
-            "decrease_min": min(decrease if decrease_num > 0 else [0]),
-            "decrease_mean": mean(decrease if decrease_num > 0 else [0]),
-            "decrease_successful_list": decrease_successful,
-            "decrease_successful_max": max(decrease_successful if decrease_successful_num > 0 else [0]),
-            "decrease_successful_min": min(decrease_successful if decrease_successful_num > 0 else [0]),
-            "decrease_successful_mean": mean(decrease_successful if decrease_successful_num > 0 else [0]),
-
-            # Outcomes
-            "increase_outcomes": increase_outcomes,
-            "decrease_outcomes": decrease_outcomes,
-        }
-
-
-
-
-
-
-    def _get_evaluation_outcome(self, random_index: int, start_candlestick: Series) -> int:
-        """Simulates a trading position that starts at a random candlestick and iterates 
-        over the next records until an outcome is found.
-
-        Args:
-            random_index: int
-                The random index generated for the evaluation.
-            start_candlestick: Series
-                The candlestick located at the random_index.
-
-        Returns:
-            int
-            1 (Increase) | -1 (Decrease) | 0 (Unknown - Ran out of candlesticks)
-        """
-        # Initialize the price change requirement
+        # Price Change Requirement
         # This value is set based on the best combinations in the regression selection.
         # So far we know there are better chances of succeeding in the 2.5-3 range.
         price_change_requirement: float = 2.5
 
-        # Initialize the outcome
-        outcome: int = 0
+        # Init the number of rows and the split that will be applied
+        rows: int = Candlestick.PREDICTION_DF.shape[0]
+        split: int = int(rows * self.training_config["train_split"])
 
-        # Initialize the price range
-        increase_price: float = Utils.alter_number_by_percentage(start_candlestick["o"], price_change_requirement)
-        decrease_price: float = Utils.alter_number_by_percentage(start_candlestick["o"], -price_change_requirement)
+        # Initialize the first open time of the test dataset
+        first_ot: int = Candlestick.PREDICTION_DF[split:split+1].iloc[0]["ot"]
 
-        # Iterate over the next candlesticks until the outcome is discovered
-        candlestick_index: int = random_index + 1
-        while outcome == 0 and candlestick_index < int(Candlestick.DF.shape[0]*0.99):
-            # Initialize the candlestick
-            candlestick: Series = Candlestick.DF.iloc[candlestick_index]
-
-            # Check if it is an increase
-            if candlestick["h"] >= increase_price:
-                outcome = 1
-
-            # Check if it is a decrease
-            elif candlestick["l"] <= decrease_price:
-                outcome = -1
-
-            # Increment the index and iterate again
-            candlestick_index += 1
-
-        # Finally, return the outcome
-        return outcome
-
-
-
-
-
-
-
-
-    def _get_pred_change(self, pred: IPrediction) -> float:
-        """Given a prediction, it will calculate the percentage change between the
-        first and the last, similar to the PercentageChangeInterpreter.
-
-        Args:
-            pred: IPrediction
-                The prediction generated by the regression.
-
-        Returns:
-            float
-        """
-        return Utils.get_percentage_change(pred["md"][0]["npl"][0], pred["md"][0]["npl"][-1])
+        # Finally, evaluate the model
+        """model = RegressionModel({
+            "id": self.id,
+            "regression_models": [ {"regression_id": self.id, "interpreter": { "long": 1, "short": 1 }} ]
+        })"""
+        return evaluate(
+            model_config={
+                "id": self.id,
+                "regression_models": [ {"regression_id": self.id, "interpreter": { "long": 1, "short": 1 }} ]
+            },
+            model_type="Regression",
+            start_timestamp=first_ot,
+            price_change_requirement=price_change_requirement,
+            hyperparams_mode=self.hyperparams_mode
+        )
 
 
 
@@ -615,6 +434,9 @@ class RegressionTraining:
 
 
     ## Trained Model Saving ##
+
+
+
 
 
 
@@ -649,7 +471,7 @@ class RegressionTraining:
         model: Sequential, 
         training_history: IKerasModelTrainingHistory, 
         test_evaluation: List[float],
-        regression_evaluation: IRegressionEvaluation
+        regression_evaluation: IModelEvaluation
     ) -> IRegressionTrainingCertificate:
         """Saves a trained model in the output directory as well as the training certificate.
 
@@ -662,7 +484,7 @@ class RegressionTraining:
                 The dictionary containing the training history.
             test_evaluation: List[float]
                 The results when evaluating the test dataset.
-            regression_evaluation: IRegressionEvaluation
+            regression_evaluation: IModelEvaluation
                 The results of the regression post-training evaluation.
 
         Returns:
@@ -696,7 +518,7 @@ class RegressionTraining:
         start_time: int, 
         training_history: IKerasModelTrainingHistory, 
         test_evaluation: List[float],
-        regression_evaluation: IRegressionEvaluation
+        regression_evaluation: IModelEvaluation
     ) -> IRegressionTrainingCertificate:
         """Builds the certificate that contains all the data regarding the training process
         that will be saved alongside the model.
@@ -710,7 +532,7 @@ class RegressionTraining:
                 The model's performance history during training.
             test_evaluation: List[float]
                 The evaluation performed on the test dataset.
-            regression_evaluation: IRegressionEvaluation
+            regression_evaluation: IModelEvaluation
                 The results of the regression post-training evaluation.
 
         Returns:

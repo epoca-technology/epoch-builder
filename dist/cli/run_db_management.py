@@ -3,8 +3,9 @@ from os import makedirs, listdir
 from os.path import exists, isfile, join
 from inquirer import List as InquirerList, prompt
 from subprocess import Popen
-from modules.database import Database, DB_CONNECTION_CONFIG, IDatabaseSummary
-from modules.utils import Utils
+from modules.types import IDatabaseSummary
+from modules.utils.Utils import Utils
+from modules.database.Database import Database, DB_CONNECTION_CONFIG
 
 
 ## Database Summary ##

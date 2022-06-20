@@ -1,6 +1,6 @@
 from typing import Union, List
-from modules.model import IPrediction
-from modules.database import Database
+from modules.types import IPrediction
+from modules.database.Database import Database
 
 
 

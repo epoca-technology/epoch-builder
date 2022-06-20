@@ -1,8 +1,7 @@
 from typing import Tuple, List, Union
 from pandas import Series
-from modules.utils import Utils
-from modules.model import IPrediction
-from modules.backtest import IBacktestPerformance, IBacktestPosition
+from modules.types import IPrediction, IBacktestPerformance, IBacktestPosition
+from modules.utils.Utils import Utils
 
 
 

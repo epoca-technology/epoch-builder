@@ -2,7 +2,7 @@ from typing import Tuple, Union, TypedDict, Dict, List
 from os.path import isfile
 from json import load
 from pandas import DataFrame, Series, read_csv
-from modules.utils import Utils
+from modules.utils.Utils import Utils
 
 
 

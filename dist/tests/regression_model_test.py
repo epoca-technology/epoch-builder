@@ -1,6 +1,15 @@
 import unittest
-from modules.candlestick import Candlestick
-from modules.model import IModel, RegressionModel, IPrediction
+from modules.types import IModel, IPrediction
+from modules.database.Database import Database
+from modules.candlestick.Candlestick import Candlestick
+from modules.model.RegressionModel import RegressionModel
+
+
+
+## ONLY RUN WHEN THE DATABASE TEST MODE IS ENABLED ##
+if not Database.TEST_MODE:
+    raise RuntimeError("Unit tests can only be performed when the Database is in test mode.")
+
 
 
 

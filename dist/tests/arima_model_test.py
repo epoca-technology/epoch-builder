@@ -2,9 +2,17 @@ import unittest
 from typing import Union
 from copy import deepcopy
 from pandas import DataFrame
-from modules.candlestick import Candlestick
-from modules.prediction_cache import get_arima_pred, delete_arima_pred
-from modules.model import ArimaModel, IModel, IPrediction
+from modules.types import IModel, IPrediction
+from modules.database.Database import Database
+from modules.candlestick.Candlestick import Candlestick
+from modules.prediction_cache.ArimaPredictionCache import get_arima_pred, delete_arima_pred
+from modules.model.ArimaModel import ArimaModel
+
+
+## ONLY RUN WHEN THE DATABASE TEST MODE IS ENABLED ##
+if not Database.TEST_MODE:
+    raise RuntimeError("Unit tests can only be performed when the Database is in test mode.")
+
 
 
 ## Test Model ##

@@ -1,5 +1,14 @@
 import unittest
-from modules.backtest import Backtest, IBacktestConfig
+from modules.types import IBacktestConfig
+from modules.database.Database import Database
+from modules.backtest.Backtest import Backtest
+
+
+
+## ONLY RUN WHEN THE DATABASE TEST MODE IS ENABLED ##
+if not Database.TEST_MODE:
+    raise RuntimeError("Unit tests can only be performed when the Database is in test mode.")
+
 
 
 # Test Data

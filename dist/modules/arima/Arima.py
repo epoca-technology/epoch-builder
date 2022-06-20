@@ -1,7 +1,7 @@
 from typing import List
 from pandas import Series
 from pmdarima import ARIMA
-from modules.arima import IArimaConfig
+from modules.types import IArimaConfig
 
 
 

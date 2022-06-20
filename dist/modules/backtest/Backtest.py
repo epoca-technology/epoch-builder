@@ -3,10 +3,14 @@ from os import makedirs
 from os.path import exists
 from json import dumps
 from tqdm import tqdm
-from modules.candlestick import Candlestick
-from modules.utils import Utils
-from modules.model import IModel, ModelFactory, IPrediction, ArimaModel, RegressionModel, ClassificationModel
-from modules.backtest import BACKTEST_PATH, IBacktestConfig, Position, IBacktestPerformance, IBacktestResult
+from modules.types import IModel, IPrediction, IBacktestConfig, IBacktestPerformance, IBacktestResult
+from modules.candlestick.Candlestick import Candlestick
+from modules.utils.Utils import Utils
+from modules.backtest.Position import Position
+from modules.backtest.BacktestPath import BACKTEST_PATH
+from modules.model.ArimaModel import ArimaModel
+from modules.model.RegressionModel import RegressionModel
+from modules.model.ClassificationModel import ClassificationModel
 
 
 
@@ -16,9 +20,6 @@ class Backtest:
 
     This class performs backtesting on a batch of models and outputs the results to a json file
     that can be analyzed in the GUI.
-
-    Class Properties:
-        ...
 
     Instance Properties:
         test_mode: bool
@@ -80,7 +81,7 @@ class Backtest:
         self.description: str = config['description']
 
         # Initialize the models to be tested
-        self.models: List[Union[ArimaModel, RegressionModel, ClassificationModel]] = [ModelFactory(m) for m in config['models']]
+        self.models: List[Union[ArimaModel, RegressionModel, ClassificationModel]] = [self._get_model(m) for m in config['models']]
         self.results: List[IBacktestResult] = []
 
         # Initialize the candlesticks based on the models' lookback and the provided start and end dates
@@ -97,6 +98,40 @@ class Backtest:
 
         # Idle on position close
         self.idle_minutes_on_position_close: int = config['idle_minutes_on_position_close']
+
+
+
+
+
+
+    def _get_model(self, config: IModel) -> Union[ArimaModel, RegressionModel, ClassificationModel]:
+        """Returns an instance of a model based on its type.
+
+        Args:
+            config: IModel
+                The configuration of the model to be initialized.
+
+        Returns:
+            Union[ArimaModel, RegressionModel, ClassificationModel]
+        """
+        # Check if it is an ArimaModel
+        if ArimaModel.is_config(config):
+            return ArimaModel(config)
+
+        # Check if it is a RegressionModel
+        elif RegressionModel.is_config(config):
+            return RegressionModel(config)
+
+        # Check if it is a ClassificationModel
+        elif ClassificationModel.is_config(config):
+            return ClassificationModel(config)
+
+        # Otherwise, the provided configuration is invalid
+        else:
+            print(config)
+            raise ValueError("Couldnt find an instance for the provided model configuration.")
+
+
 
 
 

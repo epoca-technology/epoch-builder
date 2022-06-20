@@ -1,5 +1,7 @@
 from typing import Union
-from modules.model import IModel, ArimaModel, RegressionModel
+from modules.types import IModel
+from modules.model.ArimaModel import ArimaModel
+from modules.model.RegressionModel import RegressionModel
 
 
 

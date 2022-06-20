@@ -42,8 +42,3 @@ class IKerasHyperparamsReceipt(TypedDict):
 
 
 
-
-
-
-
-## XGBOOST TYPES ##

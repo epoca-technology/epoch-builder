@@ -1,7 +1,7 @@
 from typing import TypedDict, List, Union, Dict
-from modules.arima import IArimaConfig
-from modules.interpreter import IPercentChangeInterpreterConfig, IProbabilityInterpreterConfig
-from modules.keras_models import IKerasModelSummary
+from modules.types.arima_types import IArimaConfig
+from modules.types.interpreter_types import IPercentChangeInterpreterConfig, IProbabilityInterpreterConfig
+from modules.types.keras_models_types import IKerasModelSummary
 
 
 

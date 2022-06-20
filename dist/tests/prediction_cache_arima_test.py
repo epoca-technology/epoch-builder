@@ -1,9 +1,18 @@
 from typing import List, TypedDict, Union
 from unittest import TestCase, main
 from copy import deepcopy
-from modules.model import IPrediction
-from modules.prediction_cache import get_arima_pred, save_arima_pred, delete_arima_pred
+from modules.types import IPrediction
+from modules.database.Database import Database
+from modules.prediction_cache.ArimaPredictionCache import get_arima_pred, save_arima_pred, delete_arima_pred
 
+
+
+## ONLY RUN WHEN THE DATABASE TEST MODE IS ENABLED ##
+if not Database.TEST_MODE:
+    raise RuntimeError("Unit tests can only be performed when the Database is in test mode.")
+
+
+    
 
 
 ## Test Data ##
