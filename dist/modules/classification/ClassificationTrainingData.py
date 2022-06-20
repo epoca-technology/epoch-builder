@@ -10,8 +10,9 @@ from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
 from modules.model.ArimaModel import ArimaModel
 from modules.model.RegressionModel import RegressionModel
+from modules.model.RegressionModelFactory import RegressionModelFactory
 from modules.keras_models.KerasPath import KERAS_PATH
-from modules.technical_analysis import TechnicalAnalysis
+from modules.technical_analysis.TechnicalAnalysis import TechnicalAnalysis
 from modules.classification.TrainingDataCompression import compress_training_data, decompress_training_data
 
 
@@ -116,17 +117,8 @@ class ClassificationTrainingData:
             if m["id"] in ids:
                 raise ValueError(f"Duplicate Model ID provided: {m['id']}")
 
-            # Check if it is an ArimaModel
-            if ArimaModel.is_config(m):
-                self.models.append(ArimaModel(m))
-
-            # Check if it is a RegressionModel
-            elif RegressionModel.is_config(m):
-                self.models.append(RegressionModel(m))
-
-            # Otherwise, the provided model is invalid
-            else:
-                raise ValueError("Only Regression Models can be used to generate the Classification Training Data")
+            # Add the initialized model to the list
+            self.models.append(RegressionModelFactory(m))
             
             # Populate helpers
             df_data[m["id"]] = []

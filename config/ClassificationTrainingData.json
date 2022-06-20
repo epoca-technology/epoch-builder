@@ -1,7 +1,7 @@
 {
     "regression_selection_id": "e5a03686-7bb9-4e2f-ab2f-3058281f589f",
     "description": "UNIT_TEST: DO NOT DELETE.",
-    "start": "1/01/2021",
+    "start": "01/09/2020",
     "end": "22/04/2022",
     "steps": 5,
     "up_percent_change": 3,
@@ -14,8 +14,8 @@
         { "id": "R_UNIT_TEST","regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": {"long": 1, "short": 1}}] }
     ],
     "include_rsi": true,
-    "include_stoch": true,
+    "include_stoch": false,
     "include_aroon": true,
-    "include_stc": true,
+    "include_stc": false,
     "include_mfi": true
 }

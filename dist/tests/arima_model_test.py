@@ -59,6 +59,10 @@ class ArimaModelTestCase(unittest.TestCase):
         # Init the model
         model: ArimaModel = ArimaModel(config)
 
+        # Make sure the instance is recognized
+        self.assertIsInstance(model, ArimaModel)
+        self.assertEqual(type(model).__name__, "ArimaModel")
+
         # Make sure the ID is correct
         self.assertEqual(config['id'], model.id)
 

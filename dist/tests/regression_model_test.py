@@ -46,6 +46,10 @@ class RegressionModelTestCase(unittest.TestCase):
         # Initialize the instance
         model: RegressionModel = RegressionModel(CONFIG)
 
+        # Make sure the instance is recognized
+        self.assertIsInstance(model, RegressionModel)
+        self.assertEqual(type(model).__name__, "RegressionModel")
+
         # Init the test candlestick time
         time: int = Candlestick.DF.iloc[655858]["ot"]
         first_ot, last_ct = Candlestick.get_lookback_prediction_range(model.get_lookback(), time)

@@ -68,7 +68,7 @@ class KerasHyperparams:
 
     """
     # Default Batch Size
-    DEFAULT_BATCH_SIZE: int = 170
+    DEFAULT_BATCH_SIZE: int = 150
 
     # Lookback - Only used by KerasRegression
     LOOKBACK: int = 100

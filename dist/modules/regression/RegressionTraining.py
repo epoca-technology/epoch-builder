@@ -18,7 +18,6 @@ from modules.keras_models.KerasPath import KERAS_PATH
 from modules.keras_models.KerasModel import KerasModel
 from modules.keras_models.LearningRateSchedule import LearningRateSchedule
 from modules.keras_models.KerasModelSummary import get_summary
-#from modules.model.RegressionModel import RegressionModel
 from modules.model_evaluation.ModelEvaluation import evaluate
 
 
@@ -403,16 +402,11 @@ class RegressionTraining:
         first_ot: int = Candlestick.PREDICTION_DF[split:split+1].iloc[0]["ot"]
 
         # Finally, evaluate the model
-        """model = RegressionModel({
-            "id": self.id,
-            "regression_models": [ {"regression_id": self.id, "interpreter": { "long": 1, "short": 1 }} ]
-        })"""
         return evaluate(
             model_config={
                 "id": self.id,
                 "regression_models": [ {"regression_id": self.id, "interpreter": { "long": 1, "short": 1 }} ]
             },
-            model_type="Regression",
             start_timestamp=first_ot,
             price_change_requirement=price_change_requirement,
             hyperparams_mode=self.hyperparams_mode

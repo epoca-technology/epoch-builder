@@ -21,7 +21,7 @@ from modules.keras_models.KerasModel import KerasModel
 from modules.keras_models.LearningRateSchedule import LearningRateSchedule
 from modules.keras_models.KerasModelSummary import get_summary
 from modules.classification.TrainingDataCompression import decompress_training_data
-#from modules.model_evaluation import evaluate
+from modules.model_evaluation.ModelEvaluation import evaluate
         
 
 
@@ -454,16 +454,15 @@ class ClassificationTraining:
         first_ot: int = Candlestick.PREDICTION_DF[split:split+1].iloc[0]["ot"]
 
         # Finally, evaluate the model
-        """return evaluate(
+        return evaluate(
             model_config={
                 "id": self.id,
-                "classification_models": [{ "classification_id": self.id, "interpreter": { "min_probability": 0.51 }}]
+                "classification_models": [{ "classification_id": self.id, "interpreter": { "min_probability": 0.60 }}]
             },
-            model_type="Classification",
             start_timestamp=first_ot,
             price_change_requirement=self.training_data_summary["up_percent_change"],
             hyperparams_mode=self.hyperparams_mode
-        )"""
+        )
 
 
 

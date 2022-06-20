@@ -17,7 +17,7 @@ if not Database.TEST_MODE:
 
 
 # TRAINING DATA FILE
-FILE_ID: str = "21cd7b6d-e3df-45cc-af2e-0352905d6b57"
+FILE_ID: str = "5b0133d4-309b-44ae-93e9-c952e76dec34"
 TRAINING_DATA: ITrainingDataFile = load(open(f"{KERAS_PATH['classification_training_data']}/{FILE_ID}.json"))
 MODEL_ID: str = "C_UNIT_TEST"
 
