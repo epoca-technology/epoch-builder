@@ -750,46 +750,6 @@ def R_CLSTM_S1(m: IKerasModelConfig) -> Sequential:
 
 
 
-# Regression CLSTM Stack 1 with Dropout
-# R_CLSTM_S1_DO
-# 1 filters:        Conv1D_1
-# 1 kernel_sizes:   Conv1D_1
-# 1 units:          LSTM_1
-# 1 dropout_rates:  Dropout_1
-# 1 activations:    Conv1D_1
-def R_CLSTM_S1_DO(m: IKerasModelConfig) -> Sequential:
-    validate(m, "R_CLSTM_S1_DO", filters=1, kernel_sizes=1, units=1, dropout_rates=1, activations=1)
-    return Sequential([
-        Input(shape=(m["lookback"],1), name="Input_1"),
-        Reshape((m["lookback"],1,), name="Reshape_1"),
-        Conv1D(m["filters"][0], kernel_size=(m["kernel_sizes"][0],), activation=m["activations"][0], name="Conv1D_1"),
-        LSTM(m["units"][0], return_sequences=False, name="LSTM_1"),
-        Dropout(m["dropout_rates"][0], name="Dropout_1"),
-        Dense(1 if m["autoregressive"] else m["predictions"], name="Dense_Output")
-    ])
-
-
-
-
-
-# Regression CLSTM Stack 1 with MaxPooling
-# R_CLSTM_S1_MP
-# 1 filters:        Conv1D_1
-# 1 kernel_sizes:   Conv1D_1
-# 1 pool_sizes:     MaxPooling1D_1
-# 1 units:          LSTM_1
-# 1 activations:    Conv1D_1
-def R_CLSTM_S1_MP(m: IKerasModelConfig) -> Sequential:
-    validate(m, "R_CLSTM_S1_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=1, activations=1)
-    return Sequential([
-        Input(shape=(m["lookback"],1), name="Input_1"),
-        Reshape((m["lookback"],1,), name="Reshape_1"),
-        Conv1D(m["filters"][0], kernel_size=(m["kernel_sizes"][0],), activation=m["activations"][0], name="Conv1D_1"),
-        MaxPooling1D(m["pool_sizes"][0], name="MaxPooling1D_1"),
-        LSTM(m["units"][0], return_sequences=False, name="LSTM_1"),
-        Dense(1 if m["autoregressive"] else m["predictions"], name="Dense_Output")
-    ])
-
 
 
 
@@ -837,49 +797,7 @@ def R_CLSTM_S2(m: IKerasModelConfig) -> Sequential:
 
 
 
-# Regression CLSTM Stack 2 with Dropout
-# R_CLSTM_S2_DO
-# 1 filters:        Conv1D_1
-# 1 kernel_sizes:   Conv1D_1
-# 2 units:          LSTM_1, LSTM_2
-# 2 dropout_rates:  Dropout_1, Dropout_2
-# 1 activations:    Conv1D_1
-def R_CLSTM_S2_DO(m: IKerasModelConfig) -> Sequential:
-    validate(m, "R_CLSTM_S2_DO", filters=1, kernel_sizes=1, units=2, dropout_rates=2, activations=1)
-    return Sequential([
-        Input(shape=(m["lookback"],1), name="Input_1"),
-        Reshape((m["lookback"],1,), name="Reshape_1"),
-        Conv1D(m["filters"][0], kernel_size=(m["kernel_sizes"][0],), activation=m["activations"][0], name="Conv1D_1"),
-        LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
-        Dropout(m["dropout_rates"][0], name="Dropout_1"),
-        LSTM(m["units"][1], return_sequences=False, name="LSTM_2"),
-        Dropout(m["dropout_rates"][1], name="Dropout_2"),
-        Dense(1 if m["autoregressive"] else m["predictions"], name="Dense_Output")
-    ])
 
-
-
-
-
-
-# Regression CLSTM Stack 2 with MaxPooling
-# R_CLSTM_S2_MP
-# 1 filters:        Conv1D_1
-# 1 kernel_sizes:   Conv1D_1
-# 1 pool_sizes:     MaxPooling1D_1
-# 2 units:          LSTM_1, LSTM_2
-# 1 activations:    Conv1D_1
-def R_CLSTM_S2_MP(m: IKerasModelConfig) -> Sequential:
-    validate(m, "R_CLSTM_S2_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=2, activations=1)
-    return Sequential([
-        Input(shape=(m["lookback"],1), name="Input_1"),
-        Reshape((m["lookback"],1,), name="Reshape_1"),
-        Conv1D(m["filters"][0], kernel_size=(m["kernel_sizes"][0],), activation=m["activations"][0], name="Conv1D_1"),
-        MaxPooling1D(m["pool_sizes"][0], name="MaxPooling1D_1"),
-        LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
-        LSTM(m["units"][1], return_sequences=False, name="LSTM_2"),
-        Dense(1 if m["autoregressive"] else m["predictions"], name="Dense_Output")
-    ])
 
 
 
@@ -933,52 +851,6 @@ def R_CLSTM_S3(m: IKerasModelConfig) -> Sequential:
 
 
 
-# Regression CLSTM Stack 3 with Dropout
-# R_CLSTM_S3_DO
-# 1 filters:        Conv1D_1
-# 1 kernel_sizes:   Conv1D_1
-# 3 units:          LSTM_1, LSTM_2, LSTM_3
-# 3 dropout_rates:  Dropout_1, Dropout_2, Dropout_3
-# 1 activations:    Conv1D_1
-def R_CLSTM_S3_DO(m: IKerasModelConfig) -> Sequential:
-    validate(m, "R_CLSTM_S3_DO", filters=1, kernel_sizes=1, units=3, dropout_rates=3, activations=1)
-    return Sequential([
-        Input(shape=(m["lookback"],1), name="Input_1"),
-        Reshape((m["lookback"],1,), name="Reshape_1"),
-        Conv1D(m["filters"][0], kernel_size=(m["kernel_sizes"][0],), activation=m["activations"][0], name="Conv1D_1"),
-        LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
-        Dropout(m["dropout_rates"][0], name="Dropout_1"),
-        LSTM(m["units"][1], return_sequences=True, name="LSTM_2"),
-        Dropout(m["dropout_rates"][1], name="Dropout_2"),
-        LSTM(m["units"][2], return_sequences=False, name="LSTM_3"),
-        Dropout(m["dropout_rates"][2], name="Dropout_3"),
-        Dense(1 if m["autoregressive"] else m["predictions"], name="Dense_Output")
-    ])
-
-
-
-
-
-
-# Regression CLSTM Stack 3 with MaxPooling
-# R_CLSTM_S3_MP
-# 1 filters:        Conv1D_1
-# 1 kernel_sizes:   Conv1D_1
-# 1 pool_sizes:     MaxPooling1D_1
-# 3 units:          LSTM_1, LSTM_2, LSTM_3
-# 1 activations:    Conv1D_1
-def R_CLSTM_S3_MP(m: IKerasModelConfig) -> Sequential:
-    validate(m, "R_CLSTM_S3_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=3, activations=1)
-    return Sequential([
-        Input(shape=(m["lookback"],1), name="Input_1"),
-        Reshape((m["lookback"],1,), name="Reshape_1"),
-        Conv1D(m["filters"][0], kernel_size=(m["kernel_sizes"][0],), activation=m["activations"][0], name="Conv1D_1"),
-        MaxPooling1D(m["pool_sizes"][0], name="MaxPooling1D_1"),
-        LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
-        LSTM(m["units"][1], return_sequences=True, name="LSTM_2"),
-        LSTM(m["units"][2], return_sequences=False, name="LSTM_3"),
-        Dense(1 if m["autoregressive"] else m["predictions"], name="Dense_Output")
-    ])
 
 
 
@@ -1033,55 +905,6 @@ def R_CLSTM_S4(m: IKerasModelConfig) -> Sequential:
 
 
 
-# Regression CLSTM Stack 4 with Dropout
-# R_CLSTM_S4_DO
-# 1 filters:        Conv1D_1
-# 1 kernel_sizes:   Conv1D_1
-# 4 units:          LSTM_1, LSTM_2, LSTM_3, LSTM_4
-# 4 dropout_rates:  Dropout_1, Dropout_2, Dropout_3, Dropout_4
-# 1 activations:    Conv1D_1
-def R_CLSTM_S4_DO(m: IKerasModelConfig) -> Sequential:
-    validate(m, "R_CLSTM_S4_DO", filters=1, kernel_sizes=1, units=4, dropout_rates=4, activations=1)
-    return Sequential([
-        Input(shape=(m["lookback"],1), name="Input_1"),
-        Reshape((m["lookback"],1,), name="Reshape_1"),
-        Conv1D(m["filters"][0], kernel_size=(m["kernel_sizes"][0],), activation=m["activations"][0], name="Conv1D_1"),
-        LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
-        Dropout(m["dropout_rates"][0], name="Dropout_1"),
-        LSTM(m["units"][1], return_sequences=True, name="LSTM_2"),
-        Dropout(m["dropout_rates"][1], name="Dropout_2"),
-        LSTM(m["units"][2], return_sequences=True, name="LSTM_3"),
-        Dropout(m["dropout_rates"][2], name="Dropout_3"),
-        LSTM(m["units"][3], return_sequences=False, name="LSTM_4"),
-        Dropout(m["dropout_rates"][3], name="Dropout_4"),
-        Dense(1 if m["autoregressive"] else m["predictions"], name="Dense_Output")
-    ])
-
-
-
-
-
-
-# Regression CLSTM Stack 4 with MaxPooling
-# R_CLSTM_S4_MP
-# 1 filters:        Conv1D_1
-# 1 kernel_sizes:   Conv1D_1
-# 1 pool_sizes:     MaxPooling1D_1
-# 4 units:          LSTM_1, LSTM_2, LSTM_3, LSTM_4
-# 1 activations:    Conv1D_1
-def R_CLSTM_S4_MP(m: IKerasModelConfig) -> Sequential:
-    validate(m, "R_CLSTM_S4_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=4, activations=1)
-    return Sequential([
-        Input(shape=(m["lookback"],1), name="Input_1"),
-        Reshape((m["lookback"],1,), name="Reshape_1"),
-        Conv1D(m["filters"][0], kernel_size=(m["kernel_sizes"][0],), activation=m["activations"][0], name="Conv1D_1"),
-        MaxPooling1D(m["pool_sizes"][0], name="MaxPooling1D_1"),
-        LSTM(m["units"][0], return_sequences=True, name="LSTM_1"),
-        LSTM(m["units"][1], return_sequences=True, name="LSTM_2"),
-        LSTM(m["units"][2], return_sequences=True, name="LSTM_3"),
-        LSTM(m["units"][3], return_sequences=False, name="LSTM_4"),
-        Dense(1 if m["autoregressive"] else m["predictions"], name="Dense_Output")
-    ])
 
 
 

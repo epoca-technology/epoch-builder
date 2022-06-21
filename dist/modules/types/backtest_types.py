@@ -10,6 +10,11 @@ class IBacktestPath(TypedDict):
     # The root path for the assets
     assets: str
 
+    # Backtest Configurations
+    # All automatically generated configurations will be placed in this directory and
+    # should be moved to their permanent directories ASAP.
+    configurations: str
+
     # Backtest Results
     # The path in which all backtest results are stored. These files should be moved 
     # to final_results once the process completes.

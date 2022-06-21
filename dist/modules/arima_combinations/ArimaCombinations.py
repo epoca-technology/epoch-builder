@@ -4,7 +4,7 @@ from typing import List, Tuple, Union
 from itertools import product
 from json import dumps
 from modules.types import IArimaCombinationsConfig, IArimaCombination, IModel, IBacktestConfig
-
+from modules.backtest.BacktestPath import BACKTEST_PATH
 
 
 
@@ -40,7 +40,7 @@ class ArimaCombinations:
     """
     
     # Directory where the Backtest configuration files will be placed
-    OUTPUT_PATH: str = './backtest_assets/configurations'
+    OUTPUT_PATH: str = BACKTEST_PATH["configurations"]
 
 
 
@@ -220,12 +220,11 @@ class ArimaCombinations:
             makedirs(ArimaCombinations.OUTPUT_PATH)
 
         # Initialize the backtest directory and the file
-        backtest_dir_path: str = f"{ArimaCombinations.OUTPUT_PATH}/{self.base_id}_{self.focus_number}"
-        backtest_file_path: str = f"{backtest_dir_path}/{backtest_file['id']}.json"
+        backtest_file_path: str = f"{ArimaCombinations.OUTPUT_PATH}/{backtest_file['id']}.json"
 
         # If the backtest directory does not exist, create it
-        if not exists(backtest_dir_path):
-            makedirs(backtest_dir_path)
+        if not exists(ArimaCombinations.OUTPUT_PATH):
+            makedirs(ArimaCombinations.OUTPUT_PATH)
 
         # If the backtest file already exists, raise an error
         if exists(backtest_file_path):
