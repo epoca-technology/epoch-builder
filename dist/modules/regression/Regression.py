@@ -108,12 +108,11 @@ class Regression(KerasModelInterface):
                 close = append(close, pred)
 
             # Finally, return the predictions
-            return list(close[-self.predictions:])
+            return close[-self.predictions:].tolist()
 
         # If it is not autoregressive, generate all the predictions in one go
         else:
-            return list(self.model.predict(close.reshape((1, self.lookback)))[0])
-
+            return self.model.predict(close.reshape((1, self.lookback)))[0].tolist()
 
 
 

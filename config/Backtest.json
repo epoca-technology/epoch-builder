@@ -1,35 +1,299 @@
 {
-    "id": "CLASSIFICATION_MOCK_1",
-    "description": "The purpose of this test is to make sure the Backtest Module can run any Model.",
+    "id": "Apdq_3_1",
+    "description": "The purpose of this backtest is to find out how different p, d, q combinations can output better results with different TP and SL.",
     "start": "1/10/2021",
     "end": "22/04/2022",
-    "take_profit": 3,
-    "stop_loss": 3,
+    "take_profit": 1,
+    "stop_loss": 1,
     "idle_minutes_on_position_close": 30,
     "models": [
         {
-            "id": "C_UNIT_TEST_55",
-            "classification_models": [{"classification_id": "C_UNIT_TEST", "interpreter": {"min_probability": 0.55}}]
+            "id": "A213",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 2,
+                        "d": 1,
+                        "q": 3
+                    }
+                }
+            ]
         },
         {
-            "id": "C_UNIT_TEST_60",
-            "classification_models": [{"classification_id": "C_UNIT_TEST", "interpreter": {"min_probability": 0.60}}]
+            "id": "A321",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 3,
+                        "d": 2,
+                        "q": 1
+                    }
+                }
+            ]
         },
         {
-            "id": "C_UNIT_TEST_65",
-            "classification_models": [{"classification_id": "C_UNIT_TEST", "interpreter": {"min_probability": 0.65}}]
+            "id": "A133",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 1,
+                        "d": 3,
+                        "q": 3
+                    }
+                }
+            ]
         },
         {
-            "id": "C_UNIT_TEST_70",
-            "classification_models": [{"classification_id": "C_UNIT_TEST", "interpreter": {"min_probability": 0.70}}]
+            "id": "A312",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 3,
+                        "d": 1,
+                        "q": 2
+                    }
+                }
+            ]
         },
         {
-            "id": "C_UNIT_TEST_75",
-            "classification_models": [{"classification_id": "C_UNIT_TEST", "interpreter": {"min_probability": 0.75}}]
+            "id": "A332",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 3,
+                        "d": 3,
+                        "q": 2
+                    }
+                }
+            ]
         },
         {
-            "id": "C_UNIT_TEST_80",
-            "classification_models": [{"classification_id": "C_UNIT_TEST", "interpreter": {"min_probability": 0.80}}]
+            "id": "A233",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 2,
+                        "d": 3,
+                        "q": 3
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A303",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 3,
+                        "d": 0,
+                        "q": 3
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A113",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 1,
+                        "d": 1,
+                        "q": 3
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A311",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 3,
+                        "d": 1,
+                        "q": 1
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A301",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 3,
+                        "d": 0,
+                        "q": 1
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A132",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 1,
+                        "d": 3,
+                        "q": 2
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A323",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 3,
+                        "d": 2,
+                        "q": 3
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A331",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 3,
+                        "d": 3,
+                        "q": 1
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A232",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 2,
+                        "d": 3,
+                        "q": 2
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A302",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 3,
+                        "d": 0,
+                        "q": 2
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A103",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 1,
+                        "d": 0,
+                        "q": 3
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A203",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 2,
+                        "d": 0,
+                        "q": 3
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A223",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 2,
+                        "d": 2,
+                        "q": 3
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A313",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 3,
+                        "d": 1,
+                        "q": 3
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A131",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 1,
+                        "d": 3,
+                        "q": 1
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A123",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 1,
+                        "d": 2,
+                        "q": 3
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A322",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 3,
+                        "d": 2,
+                        "q": 2
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A333",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 3,
+                        "d": 3,
+                        "q": 3
+                    }
+                }
+            ]
+        },
+        {
+            "id": "A231",
+            "arima_models": [
+                {
+                    "arima": {
+                        "p": 2,
+                        "d": 3,
+                        "q": 1
+                    }
+                }
+            ]
         }
     ]
 }

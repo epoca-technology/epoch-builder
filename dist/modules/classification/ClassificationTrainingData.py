@@ -284,7 +284,7 @@ class ClassificationTrainingData:
         execution_start: int = Utils.get_time()
 
         # Iterate over the candlesticks based on the real steps
-        for index in range(0, Candlestick.DF.shape[0], real_steps):
+        for index in range(0, Candlestick.DF.shape[0]-1, real_steps):
             # Open a position
             self._open_position(Candlestick.DF.iloc[index])
 

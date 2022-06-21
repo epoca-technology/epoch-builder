@@ -11,7 +11,6 @@ from modules.backtest.BacktestPath import BACKTEST_PATH
 from modules.model.ArimaModel import ArimaModel
 from modules.model.RegressionModel import RegressionModel
 from modules.model.ClassificationModel import ClassificationModel
-from modules.model.ModelFactory import ModelFactory
 
 
 
@@ -82,7 +81,7 @@ class Backtest:
         self.description: str = config['description']
 
         # Initialize the models to be tested
-        self.models: List[Union[ArimaModel, RegressionModel, ClassificationModel]] = [ModelFactory(m) for m in config['models']]
+        self.models: List[Union[ArimaModel, RegressionModel, ClassificationModel]] = [self._get_model(m) for m in config['models']]
         self.results: List[IBacktestResult] = []
 
         # Initialize the candlesticks based on the models' lookback and the provided start and end dates
@@ -99,6 +98,38 @@ class Backtest:
 
         # Idle on position close
         self.idle_minutes_on_position_close: int = config['idle_minutes_on_position_close']
+
+
+
+
+
+
+    def _get_model(self, config: IModel) -> Union[ArimaModel, RegressionModel, ClassificationModel]:
+        """Returns an instance of a model based on its type.
+
+        Args:
+            config: IModel
+                The configuration of the model to be initialized.
+
+        Returns:
+            Union[ArimaModel, RegressionModel, ClassificationModel]
+        """
+        # Check if it is an ArimaModel
+        if ArimaModel.is_config(config):
+            return ArimaModel(config)
+
+        # Check if it is a RegressionModel
+        elif RegressionModel.is_config(config):
+            return RegressionModel(config)
+
+        # Check if it is a ClassificationModel
+        elif ClassificationModel.is_config(config):
+            return ClassificationModel(config)
+
+        # Otherwise, the provided configuration is invalid
+        else:
+            print(config)
+            raise ValueError("Couldnt find an instance for the provided model configuration.")
 
 
 
@@ -140,11 +171,6 @@ class Backtest:
             # The model will remain in an idle state until a candlestick's ot is greater than this value.
             idle_until: int = 0
 
-            # Last neutral prediction range close time.
-            # The purpose of this functionality is to prevent the model from predicting neutrality
-            # multiple times in the same prediction range.
-            last_neutral_ct: int = 0
-
             # Iterate over each 1 minute candlestick
             for candlestick_index, candlestick in Candlestick.DF.iterrows():
                 # Check if it is the last candlestick
@@ -165,20 +191,14 @@ class Backtest:
                 # If there is not an active position, a prediction will be generated and a position will be opened (if applies).
                 # To perform predictions, the following criteria must be met:
                 # 1) The model isnt idle 
-                # 2) It isn't the last candlestick
-                # 3) The current prediction range's close time is greater than the last one
+                # 2) It isn't the last candlestick 
                 elif (position.active == None) and (candlestick['ot'] > idle_until) and (not is_last_candlestick):
-                    # Retrieve the current prediction range's close time
-                    _, last_ct = Candlestick.get_lookback_prediction_range(100, candlestick["ot"])
+                    # Perform a prediction
+                    pred: IPrediction = model.predict(candlestick['ot'], enable_cache=not self.test_mode)
 
-                    # Only predict in new ranges
-                    if last_ct > last_neutral_ct:
-                        # Perform a prediction
-                        pred: IPrediction = model.predict(candlestick['ot'], enable_cache=not self.test_mode)
-
-                        # If the result isn't neutral, open a position
-                        if pred['r'] != 0:
-                            position.open_position(candlestick, pred)
+                    # If the result isn't neutral, open a position
+                    if pred['r'] != 0:
+                        position.open_position(candlestick, pred)
 
                 # Update the progress bar
                 progress_bar.update()

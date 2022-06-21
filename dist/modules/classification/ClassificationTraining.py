@@ -4,6 +4,7 @@ from os.path import exists
 from pandas import DataFrame, concat
 from json import dumps
 from h5py import File as h5pyFile
+from tensorflow import random as tf_random
 from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras import Sequential
 from keras.optimizers import adam_v2 as adam, rmsprop_v2 as rmsprop
@@ -79,7 +80,7 @@ class ClassificationTraining:
         "decay_steps": 1.5,
         "decay_rate": 0.28,
         "epochs": 100,
-        "patience": 20
+        "patience": 30
     }
 
     # Shortlisted Training Configuration
@@ -89,7 +90,7 @@ class ClassificationTraining:
         "decay_steps": 2,
         "decay_rate": 0.065,
         "epochs": 500,
-        "patience": 50
+        "patience": 100
     }
 
 
@@ -122,6 +123,9 @@ class ClassificationTraining:
                 If the model is not correctly preffixed.
                 If the model's directory already exists.
         """
+        # Set the Global Random Seed to ensure training reproducibility
+        tf_random.set_seed(60184)
+
         # Initialize the type of execution
         self.test_mode: bool = test_mode
 

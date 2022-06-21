@@ -126,12 +126,6 @@ def evaluate(
 
                 # If the result isn't neutral, open a position
                 if pred['r'] != 0:
-                    # Downcast the probability values if applies, so the JSON file can be saved
-                    if model_type == "ClassificationModel":
-                        pred["md"][0]["up"] = float(pred["md"][0]["up"])
-                        pred["md"][0]["dp"] = float(pred["md"][0]["dp"])
-                    
-                    # Open a position
                     position.open_position(candlestick, pred)
 
                 # Otherwise, handle the neutrality
@@ -222,9 +216,9 @@ def _get_prediction_metadata_value(model_type: str, pred: IPrediction) -> float:
     # Extract the data from a Classification Model
     elif model_type == "ClassificationModel":
         if pred["r"] == 1:
-            return float(pred["md"][0]["up"])
+            return pred["md"][0]["up"]
         else:
-            return float(pred["md"][0]["dp"])
+            return pred["md"][0]["dp"]
 
     # Otherwise, stop the execution
     else:

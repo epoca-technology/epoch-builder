@@ -4,6 +4,7 @@ from os.path import exists
 from numpy import ndarray, array
 from json import dumps
 from h5py import File as h5pyFile
+from tensorflow import random as tf_random
 from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras import Sequential
 from keras.optimizers import adam_v2 as adam, rmsprop_v2 as rmsprop
@@ -120,6 +121,9 @@ class RegressionTraining:
                 If the model is not correctly preffixed.
                 If the model's directory already exists.
         """
+        # Set the Global Random Seed to ensure training reproducibility
+        tf_random.set_seed(60184)
+
         # Initialize the type of execution
         self.test_mode: bool = test_mode
 

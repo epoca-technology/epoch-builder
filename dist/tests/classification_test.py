@@ -66,7 +66,7 @@ class ClassificationTestCase(unittest.TestCase):
         # Can generate a prediction with some dummy features
         pred: List[float] = c.predict(features=[0]*c.features_num)
         self.assertEqual(len(pred), 2)
-        self.assertEqual(pred[0]+pred[1], 1)
+        self.assertAlmostEqual(pred[0]+pred[1], 1, delta=0.00001)
 
         # Can build the configuration dict
         self.assertIsInstance(c.get_config(), dict)

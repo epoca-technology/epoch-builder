@@ -105,7 +105,7 @@ class Classification(KerasModelInterface):
             List[float]
             [up_probability, down_probability]
         """
-        return self.model.predict([features])[0]
+        return self.model.predict([features])[0].tolist()
 
 
 
