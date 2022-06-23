@@ -1,6 +1,6 @@
 from typing import Union, List
 from pandas import DataFrame
-from numpy import mean
+from numpy import mean, median
 from tqdm import tqdm
 from modules.types import IModel, IPrediction, IBacktestPerformance, IModelEvaluation
 from modules.utils.Utils import Utils
@@ -154,6 +154,9 @@ def evaluate(
 
         # Positions
         "positions": performance["positions"],
+
+        # Points Median
+        "points_median": median(performance["points_hist"]),
 
         # Prediction counts
         "increase_num": performance["long_num"],

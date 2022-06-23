@@ -6,11 +6,11 @@ from modules.hyperparams.KerasHyperparams import KerasHyperparams
 # Configuration Input
 print("HYPERPARAMS\n")
 
-# Output Name
-output: Dict[str, str] = prompt([Text("name", "Enter the name of the output directory")])
-output_name: str = output["name"]
-if len(output_name) < 4:
-    raise ValueError("The name of the output directory must be at least 4 characters long.")
+# Epoch Name
+epoch: Dict[str, str] = prompt([Text("name", "Enter the name of the epoch")])
+epoch_name: str = epoch["name"]
+if len(epoch_name) < 4 or epoch_name[0] != "_":
+    raise ValueError("The name of the epoch must be at least 4 characters long and must be prefixed with '_EPOCHNAME'.")
 
 
 # Main Inputs
@@ -70,7 +70,7 @@ if "Classification" in model_type:
 if model_type == "KerasRegression" or model_type == "KerasClassification":
     # Initialize the Hyperparams Instance
     hyperparams: KerasHyperparams = KerasHyperparams(
-        output_name, 
+        epoch_name, 
         model_type, 
         batch_size, 
         start,

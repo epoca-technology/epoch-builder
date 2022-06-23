@@ -16,6 +16,9 @@ class IModelEvaluation(TypedDict):
     # Positions
     positions: List[IBacktestPosition]
 
+    # The median of the points collected during the evaluation
+    points_median: float
+
     # The number of times the Model predicted a price increase
     increase_num: int
     increase_successful_num: int

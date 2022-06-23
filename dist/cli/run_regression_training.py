@@ -90,7 +90,6 @@ for index, model_config in enumerate(config["models"]):
     # Add the certificate to the list
     certificates.append(cert)
 
-
     # Perform the post evaluation cleanup if applies
     if config["hyperparams_mode"]:
         remove(f"{KERAS_PATH['models']}/{regression_training.id}/model.h5")
