@@ -358,6 +358,7 @@ class KerasHyperparams:
             keras_model_name=keras_model_name,
             optimizer=optimizer,
             loss=loss,
+            autoregressive=True,
             activations=c.get("activations"),
             units=c.get("units"),
             filters=c.get("filters"),
@@ -372,21 +373,22 @@ class KerasHyperparams:
 
         # Otherwise, add the autoregressive variation
         else:
-            ar_configs: Union[List[IRegressionTrainingConfig], List[IClassificationTrainingConfig]] = [self._generate_model_config(
-                keras_model_name=keras_model_name,
-                optimizer=optimizer,
-                loss=loss,
-                autoregressive=True,
-                activations=c.get("activations"),
-                units=c.get("units"),
-                filters=c.get("filters"),
-                kernel_sizes=c.get("kernel_sizes"),
-                pool_sizes=c.get("pool_sizes"),
-                dropout_rates=c.get("dropout_rates"),
-            ) for c in keras_model_configs]
+            return configs
+            #ar_configs: Union[List[IRegressionTrainingConfig], List[IClassificationTrainingConfig]] = [self._generate_model_config(
+            #    keras_model_name=keras_model_name,
+            #    optimizer=optimizer,
+            #    loss=loss,
+            #    autoregressive=True,
+            #    activations=c.get("activations"),
+            #    units=c.get("units"),
+            #    filters=c.get("filters"),
+            #    kernel_sizes=c.get("kernel_sizes"),
+            #    pool_sizes=c.get("pool_sizes"),
+            #    dropout_rates=c.get("dropout_rates"),
+            #) for c in keras_model_configs]
 
             # Finally, return the concatenated list
-            return configs + ar_configs
+            #return configs + ar_configs
 
 
 

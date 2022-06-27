@@ -72,7 +72,6 @@ class RegressionTraining:
     """
     # Hyperparams Training Configuration
     HYPERPARAMS_TRAINING_CONFIG: IKerasTrainingTypeConfig = {
-        "train_split": 0.8,
         "initial_lr": 0.01,
         "decay_steps": 1.5,
         "decay_rate": 0.55,
@@ -82,7 +81,6 @@ class RegressionTraining:
 
     # Shortlisted Training Configuration
     SHORTLISTED_TRAINING_CONFIG: IKerasTrainingTypeConfig = {
-        "train_split": 0.8,
         "initial_lr": 0.01,
         "decay_steps": 2,
         "decay_rate": 0.065,
@@ -104,6 +102,7 @@ class RegressionTraining:
         self, 
         config: IRegressionTrainingConfig, 
         hyperparams_mode: bool=False,
+        datasets: Union[Tuple[ndarray, ndarray, ndarray, ndarray], None]=None,
         test_mode: bool=False
     ):
         """Initializes the RegressionTraining Instance.
@@ -167,12 +166,17 @@ class RegressionTraining:
         self.keras_model["lookback"] = self.lookback
         self.keras_model["predictions"] = self.predictions
 
-        # Initialize the train and test datasets
-        train_x, train_y, test_x, test_y = self._make_datasets()
-        self.train_x: ndarray = train_x
-        self.train_y: ndarray = train_y
-        self.test_x: ndarray = test_x
-        self.test_y: ndarray = test_y
+        # Make the datasets if they weren't provided
+        if datasets is None:
+            self.train_x, self.train_y, self.test_x, self.test_y = RegressionTraining.make_datasets(
+                lookback=self.lookback,
+                autoregressive=self.autoregressive,
+                predictions=self.predictions
+            )
+
+        # Otherwise, unpack the provided datasets
+        else:
+            self.train_x, self.train_y, self.test_x, self.test_y = datasets
 
         # Initialize the Dataset Sizes
         self.train_size: int = self.train_x.shape[0]
@@ -253,8 +257,8 @@ class RegressionTraining:
 
 
     
-
-    def _make_datasets(self) -> Tuple[ndarray, ndarray, ndarray, ndarray]:
+    @staticmethod
+    def make_datasets(lookback: int, autoregressive: bool, predictions: int) -> Tuple[ndarray, ndarray, ndarray, ndarray]:
         """Builds a tuple containing the features and labels for the train and test datasets based
         on the kind of regression. 
 
@@ -264,23 +268,23 @@ class RegressionTraining:
         """
         # Init the number of rows and the split that will be applied
         rows: int = Candlestick.NORMALIZED_PREDICTION_DF.shape[0]
-        split: int = int(rows * self.training_config["train_split"])
+        split: int = int(rows * 0.8)
 
         # Init raw features and labels
         features_raw: Union[List[List[float]], ndarray] = []
         labels_raw: Union[List[List[float]], ndarray] = []
 
         # Iterate over the normalized ds and build the features & labels
-        for i in range(self.lookback, rows):
+        for i in range(lookback, rows):
             # If it is an autoregression, add only 1 price as the label
-            if self.autoregressive:
-                features_raw.append(Candlestick.NORMALIZED_PREDICTION_DF.iloc[i-self.lookback:i, 0])
+            if autoregressive:
+                features_raw.append(Candlestick.NORMALIZED_PREDICTION_DF.iloc[i-lookback:i, 0])
                 labels_raw.append(Candlestick.NORMALIZED_PREDICTION_DF.iloc[i, 0])
 
             # If it is not an autoregression, add the labels based on the number of predictions
-            elif not self.autoregressive and i < (rows-self.predictions):
-                features_raw.append(Candlestick.NORMALIZED_PREDICTION_DF.iloc[i-self.lookback:i, 0])
-                labels_raw.append(Candlestick.NORMALIZED_PREDICTION_DF.iloc[i:i+self.predictions, 0])
+            elif not autoregressive and i < (rows-predictions):
+                features_raw.append(Candlestick.NORMALIZED_PREDICTION_DF.iloc[i-lookback:i, 0])
+                labels_raw.append(Candlestick.NORMALIZED_PREDICTION_DF.iloc[i:i+predictions, 0])
 
         # Convert the features and labels into np arrays
         features = array(features_raw)
@@ -396,11 +400,11 @@ class RegressionTraining:
         # Price Change Requirement
         # This value is set based on the best combinations in the regression selection.
         # So far we know there are better chances of succeeding in the 2.5-3 range.
-        price_change_requirement: float = 2.5
+        price_change_requirement: float = 3
 
         # Init the number of rows and the split that will be applied
         rows: int = Candlestick.PREDICTION_DF.shape[0]
-        split: int = int(rows * self.training_config["train_split"])
+        split: int = int(rows * 0.8)
 
         # Initialize the first open time of the test dataset
         first_ot: int = Candlestick.PREDICTION_DF[split:split+1].iloc[0]["ot"]

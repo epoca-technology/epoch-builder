@@ -75,7 +75,6 @@ class ClassificationTraining:
     """
     # Hyperparams Training Configuration
     HYPERPARAMS_TRAINING_CONFIG: IKerasTrainingTypeConfig = {
-        "train_split": 0.8,
         "initial_lr": 0.01,
         "decay_steps": 1.5,
         "decay_rate": 0.28,
@@ -85,7 +84,6 @@ class ClassificationTraining:
 
     # Shortlisted Training Configuration
     SHORTLISTED_TRAINING_CONFIG: IKerasTrainingTypeConfig = {
-        "train_split": 0.8,
         "initial_lr": 0.01,
         "decay_steps": 2,
         "decay_rate": 0.065,
@@ -104,6 +102,7 @@ class ClassificationTraining:
         training_data_file: ITrainingDataFile, 
         config: IClassificationTrainingConfig, 
         hyperparams_mode: bool=False,
+        datasets: Union[Tuple[DataFrame, DataFrame, DataFrame, DataFrame], None]=None,
         test_mode: bool = False
     ):
         """Initializes the ClassificationTraining Instance.
@@ -160,12 +159,15 @@ class ClassificationTraining:
         # Initialize the metric function
         self.metric: Union[CategoricalAccuracy, BinaryAccuracy] = self._get_metric(config["metric"])
 
-        # Initialize the Training Data
-        train_x, train_y, test_x, test_y = self._make_datasets(training_data_file["training_data"])
-        self.train_x: DataFrame = train_x
-        self.train_y: DataFrame = train_y
-        self.test_x: DataFrame = test_x
-        self.test_y: DataFrame = test_y
+        # Make the datasets if they weren't provided
+        if datasets is None:
+            self.train_x, self.train_y, self.test_x, self.test_y = ClassificationTraining.make_datasets(
+                training_data=training_data_file["training_data"]
+            )
+
+        # Otherwise, unpack the provided datasets
+        else:
+            self.train_x, self.train_y, self.test_x, self.test_y = datasets
 
         # Initialize the Training Data Summary
         self.training_data_summary: ITrainingDataSummary = self._get_training_data_summary(training_data_file)
@@ -278,7 +280,8 @@ class ClassificationTraining:
 
 
 
-    def _make_datasets(self, training_data: ICompressedTrainingData) -> Tuple[DataFrame, DataFrame, DataFrame, DataFrame]:
+    @staticmethod
+    def make_datasets(training_data: ICompressedTrainingData) -> Tuple[DataFrame, DataFrame, DataFrame, DataFrame]:
         """Splits the Classification Training Data into train and test dataframes.
 
         Args:
@@ -294,7 +297,7 @@ class ClassificationTraining:
         
         # Initialize the total rows and the split size
         rows: int = df.shape[0]
-        split: int = int(rows*self.training_config["train_split"])
+        split: int = int(rows*0.8)
 
         # Initialize the features dfs
         train_x: DataFrame = df[:split]
@@ -452,7 +455,7 @@ class ClassificationTraining:
         """
         # Init the number of rows and the split that will be applied
         rows: int = Candlestick.PREDICTION_DF.shape[0]
-        split: int = int(rows * self.training_config["train_split"])
+        split: int = int(rows * 0.8)
 
         # Initialize the first open time of the test dataset
         first_ot: int = Candlestick.PREDICTION_DF[split:split+1].iloc[0]["ot"]

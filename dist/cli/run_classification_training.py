@@ -1,6 +1,7 @@
-from typing import List
+from typing import List, Tuple
 from os import makedirs, remove
 from os.path import exists
+from pandas import DataFrame
 from json import load, dumps
 from tqdm import tqdm
 from modules.types import IClassificationTrainingBatch, IClassificationTrainingCertificate, ITrainingDataFile
@@ -66,6 +67,13 @@ print("CLASSIFICATION TRAINING")
 Candlestick.init(300, start=training_data["start"], end=training_data["end"])
 
 
+# DATASETS
+# Initialize the train and test datasets for the entire batch of models that will be trained.
+datasets: Tuple[DataFrame, DataFrame, DataFrame, DataFrame] = ClassificationTraining.make_datasets(
+    training_data=training_data["training_data"]
+)
+
+
 # Init the list of certificates
 certificates: List[IClassificationTrainingCertificate] = []
 
@@ -76,14 +84,15 @@ for index, model_config in enumerate(config["models"]):
     classification_training: ClassificationTraining = ClassificationTraining(
         training_data, 
         model_config, 
-        hyperparams_mode=config["hyperparams_mode"]
+        hyperparams_mode=config["hyperparams_mode"],
+        datasets=datasets
     )
 
     # Log the progress
     if index == 0:
-        print("\nCLASSIFICATION TRAINING RUNNING")
+        print("\nCLASSIFICATION TRAINING RUNNING\n")
+        print(f"{config['name']}\n")
         if config["hyperparams_mode"]:
-            print("\n")
             progress_bar = tqdm( bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}", total=len(config["models"]))
 
     if config["hyperparams_mode"]:

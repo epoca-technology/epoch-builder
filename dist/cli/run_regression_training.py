@@ -1,6 +1,7 @@
-from typing import List
+from typing import List, Tuple
 from os import makedirs, remove
 from os.path import exists
+from numpy import ndarray
 from json import load, dumps
 from tqdm import tqdm
 from modules.types import IRegressionTrainingBatch, IRegressionTrainingCertificate
@@ -55,10 +56,26 @@ config: IRegressionTrainingBatch = load(config_file)
 # completion, results will not be saved.
 
 
-# CANDLESTICK INITIALIZATION
-# Initialize the Candlesticks Module based on the highest lookback among the models config.
-Candlestick.init(max([m["lookback"] for m in config["models"]]), config.get("start"), config.get("end"))
+# REGRESSION SHARED PROPERTIES
+# For performance reasons, the train and test datasets should be generated only once prior to training.
+# IMPORTANT: with this change in place, all models must have the same properties.
+lookback: int = config["models"][0]["lookback"]
+autoregressive: bool = config["models"][0]["autoregressive"]
+predictions: int = config["models"][0]["predictions"]
 
+
+# CANDLESTICK INITIALIZATION
+# Initialize the Candlesticks Module based on the regressions' lookback.
+Candlestick.init(lookback, config.get("start"), config.get("end"))
+
+
+# DATASETS
+# Initialize the train and test datasets for the entire batch of models that will be trained.
+datasets: Tuple[ndarray, ndarray, ndarray, ndarray] = RegressionTraining.make_datasets(
+    lookback=lookback, 
+    autoregressive=autoregressive,
+    predictions=predictions
+)
 
 
 # Init the list of certificates
@@ -68,13 +85,17 @@ certificates: List[IRegressionTrainingCertificate] = []
 # Run the training
 for index, model_config in enumerate(config["models"]):
     # Initialize the instance of the model
-    regression_training: RegressionTraining = RegressionTraining(model_config, hyperparams_mode=config["hyperparams_mode"])
+    regression_training: RegressionTraining = RegressionTraining(
+        model_config, 
+        hyperparams_mode=config["hyperparams_mode"],
+        datasets=datasets
+    )
 
     # Print the progress
     if index == 0:
-        print("REGRESSION TRAINING RUNNING")
+        print("REGRESSION TRAINING RUNNING\n")
+        print(f"{config['name']}\n")
         if config["hyperparams_mode"]:
-            print("\n")
             progress_bar = tqdm( bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}", total=len(config["models"]))
 
     if config["hyperparams_mode"]:
