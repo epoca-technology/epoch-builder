@@ -3,7 +3,7 @@ from pandas import DataFrame
 from modules.types import IModel, IPrediction, IPredictionMetaData, IRegressionModelConfig
 from modules.candlestick.Candlestick import Candlestick
 from modules.interpreter.PercentageChangeInterpreter import PercentageChangeInterpreter
-from modules.prediction_cache.TemporaryPredictionCache import TemporaryPredictionCache
+from modules.prediction_cache.RegressionPredictionCache import RegressionPredictionCache
 from modules.model.Interface import ModelInterface
 from modules.regression.Regression import Regression
 
@@ -24,8 +24,8 @@ class RegressionModel(ModelInterface):
             The instance of the Keras Regression Model.
         interpreter: PercentageChangeInterpreter
             The Interpreter instance that will be used to interpret Regression Predictions.
-        cache: TemporaryPredictionCache
-            The instance of the prediction temporary cache.
+        cache: RegressionPredictionCache
+            The instance of the prediction cache.
     """
 
 
@@ -41,24 +41,31 @@ class RegressionModel(ModelInterface):
                 The configuration to be used to initialize the model's instance
         """
         # Make sure there is 1 Regression Model
-        if len(config['regression_models']) != 1:
+        if len(config["regression_models"]) != 1:
             raise ValueError(f"A RegressionModel can only be initialized if 1 configuration item is provided. \
                 Received: {len(config['regression_models'])}")
 
         # Initialize the ID of the model
-        self.id: str = config['id']
+        self.id: str = config["id"]
 
         # Initialize the Model's Config
-        model_config: IRegressionModelConfig = config['regression_models'][0]
+        model_config: IRegressionModelConfig = config["regression_models"][0]
 
         # Initialize the regression
-        self.regression: Regression = Regression(model_config['regression_id'])
+        self.regression: Regression = Regression(model_config["regression_id"])
 
         # Initialize the Interpreter Instance
-        self.interpreter: PercentageChangeInterpreter = PercentageChangeInterpreter(model_config['interpreter'])
+        self.interpreter: PercentageChangeInterpreter = PercentageChangeInterpreter(model_config["interpreter"])
 
         # Initialize the prediction cache instance
-        self.cache: TemporaryPredictionCache = TemporaryPredictionCache()
+        self.cache: RegressionPredictionCache = RegressionPredictionCache(
+            model_id=self.id,
+            predictions=self.regression.predictions,
+            interpreter_long=self.interpreter.long,
+            interpreter_short=self.interpreter.short,
+        )
+
+
 
 
 
@@ -71,8 +78,8 @@ class RegressionModel(ModelInterface):
     def predict(
         self, 
         current_timestamp: int, 
-        lookback_df: Union[DataFrame, None] = None, 
-        enable_cache: bool = False
+        lookback_df: Union[DataFrame, None]=None, 
+        enable_cache: bool=False
     ) -> IPrediction:
         """In order to optimize performance, if cache is enabled, it will check the db
         before performing an actual prediction. If the prediction is not found, it will
@@ -157,12 +164,15 @@ class RegressionModel(ModelInterface):
         result, description = self.interpreter.interpret(preds)
 
         # Build the metadata
-        metadata: IPredictionMetaData = { 'd': description }
+        metadata: IPredictionMetaData = { "d": description }
         if not minimized_metadata:
-            metadata['npl'] = preds
+            metadata["npl"] = preds
         
         # Finally, return the prediction results
         return { "r": result, "t": int(current_timestamp), "md": [ metadata ] }
+
+
+
 
 
 
@@ -254,7 +264,7 @@ class RegressionModel(ModelInterface):
         Returns:
             bool
         """
-        return isinstance(model.get('regression_models'), list) \
-                and len(model['regression_models']) == 1 \
-                    and model.get('arima_models') == None \
-                        and model.get('classification_models') == None
+        return isinstance(model.get("regression_models"), list) \
+                and len(model["regression_models"]) == 1 \
+                    and model.get("arima_models") == None \
+                        and model.get("classification_models") == None

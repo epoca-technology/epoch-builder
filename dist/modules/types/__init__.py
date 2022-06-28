@@ -11,3 +11,4 @@ from modules.types.regression_types import *
 from modules.types.regression_selection_types import *
 from modules.types.classification_types import *
 from modules.types.hyperparams_types import *
+from modules.types.prediction_cache_types import *

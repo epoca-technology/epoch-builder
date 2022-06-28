@@ -1,8 +1,6 @@
 from typing import Union, List, Tuple
 from os import makedirs
 from os.path import exists
-from random import choice
-from string import ascii_uppercase, digits
 from json import dumps
 from functools import reduce
 from copy import deepcopy
@@ -532,7 +530,7 @@ class KerasHyperparams:
         Returns:
             str
         """
-        return f"{model_name}_" + "".join(choice(ascii_uppercase + digits) for _ in range(20))
+        return f"{model_name}_{Utils.generate_uuid4()}"
 
 
 

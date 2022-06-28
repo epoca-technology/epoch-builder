@@ -5,7 +5,6 @@ from pandas import DataFrame
 from modules.types import IModel, IPrediction
 from modules.database.Database import Database
 from modules.candlestick.Candlestick import Candlestick
-from modules.prediction_cache.ArimaPredictionCache import get_arima_pred, delete_arima_pred
 from modules.model.ArimaModel import ArimaModel
 
 
@@ -174,14 +173,7 @@ class ArimaModelTestCase(unittest.TestCase):
         first_ot, last_ct = Candlestick.get_lookback_prediction_range(m.get_lookback(), CURRENT_TIME)
 
         # Make sure the prediction was not stored
-        cached_pred: Union[IPrediction, None] = get_arima_pred(
-            m.id, 
-            first_ot, 
-            last_ct,
-            m.predictions,
-            m.interpreter.long,
-            m.interpreter.short
-        )
+        cached_pred: Union[IPrediction, None] = m.cache.get(first_ot, last_ct)
         self.assertEqual(cached_pred, None)
 
 
@@ -206,21 +198,14 @@ class ArimaModelTestCase(unittest.TestCase):
         first_ot, last_ct = Candlestick.get_lookback_prediction_range(m.get_lookback(), CURRENT_TIME)
 
         # Make sure the prediction was stored
-        cached_pred: Union[IPrediction, None] = get_arima_pred(
-            m.id, 
-            first_ot, 
-            last_ct,
-            m.predictions,
-            m.interpreter.long,
-            m.interpreter.short
-        )
+        cached_pred: Union[IPrediction, None] = m.cache.get(first_ot, last_ct)
         self.assertFalse(cached_pred == None)
         self.assertDictEqual(pred, cached_pred)
         self.assertEqual(cached_pred['md'][0].get('pl'), None)
 
         # Clean up the prediction
-        delete_arima_pred(m.id, first_ot, last_ct, m.predictions, m.interpreter.long, m.interpreter.short)
-        cached_pred = get_arima_pred(m.id, first_ot, last_ct, m.predictions, m.interpreter.long, m.interpreter.short)
+        m.cache.delete(first_ot, last_ct)
+        cached_pred = m.cache.get(first_ot, last_ct)
         self.assertTrue(cached_pred == None)
 
 
@@ -248,21 +233,14 @@ class ArimaModelTestCase(unittest.TestCase):
         first_ot, last_ct = Candlestick.get_lookback_prediction_range(m.get_lookback(), CURRENT_TIME)
 
         # Make sure the prediction was stored
-        cached_pred: Union[IPrediction, None] = get_arima_pred(
-            m.id, 
-            first_ot, 
-            last_ct,
-            m.predictions,
-            m.interpreter.long,
-            m.interpreter.short
-        )
+        cached_pred: Union[IPrediction, None] = m.cache.get(first_ot, last_ct)
         self.assertFalse(cached_pred == None)
         self.assertDictEqual(pred, cached_pred)
         self.assertEqual(cached_pred['md'][0].get('pl'), None)
 
         # Clean up the prediction
-        delete_arima_pred(m.id, first_ot, last_ct, m.predictions, m.interpreter.long, m.interpreter.short)
-        cached_pred = get_arima_pred(m.id, first_ot, last_ct, m.predictions, m.interpreter.long, m.interpreter.short)
+        m.cache.delete(first_ot, last_ct)
+        cached_pred = m.cache.get(first_ot, last_ct)
         self.assertTrue(cached_pred == None)
 
 
@@ -349,8 +327,8 @@ class ArimaModelTestCase(unittest.TestCase):
         self.assertIsInstance(pred['md'], list)
 
         # Clean up the prediction
-        delete_arima_pred(m.id, first_ot, last_ct, m.predictions, m.interpreter.long, m.interpreter.short)
-        cached_pred = get_arima_pred(m.id, first_ot, last_ct, m.predictions, m.interpreter.long, m.interpreter.short)
+        m.cache.delete(first_ot, last_ct)
+        cached_pred = m.cache.get(first_ot, last_ct)
         self.assertTrue(cached_pred == None)
 
 
@@ -381,8 +359,8 @@ class ArimaModelTestCase(unittest.TestCase):
         self.assertIsInstance(pred['md'], list)
 
         # Clean up the prediction
-        delete_arima_pred(m.id, first_ot, last_ct, m.predictions, m.interpreter.long, m.interpreter.short)
-        cached_pred = get_arima_pred(m.id, first_ot, last_ct, m.predictions, m.interpreter.long, m.interpreter.short)
+        m.cache.delete(first_ot, last_ct)
+        cached_pred = m.cache.get(first_ot, last_ct)
         self.assertTrue(cached_pred == None)
 
 
