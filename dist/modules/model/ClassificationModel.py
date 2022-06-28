@@ -93,7 +93,7 @@ class ClassificationModel(ModelInterface):
         self, 
         current_timestamp: int, 
         lookback_df: Union[DataFrame, None]=None, 
-        enable_cache: bool = False
+        enable_cache: bool=False
     ) -> IPrediction:
         """In order to optimize performance, if cache is enabled, it will check the db
         or the temp cachebefore performing an actual prediction. If the prediction is not found, 

@@ -66,3 +66,6 @@ for pred_record in preds:
 
     # Update the progress bar
     progress_bar_val.update()
+
+
+print("\nARIMA CACHE MIGRATION COMPLETED")

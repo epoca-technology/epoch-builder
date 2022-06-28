@@ -1,6 +1,6 @@
 from typing import TypedDict, List, Union, Dict
 from modules.types.arima_types import IArimaConfig
-from modules.types.interpreter_types import IPercentChangeInterpreterConfig, IProbabilityInterpreterConfig
+from modules.types.interpreter_types import IPercentChangeInterpreterConfig, IProbabilityInterpreterConfig, IConsensusInterpreterConfig
 from modules.types.keras_models_types import IKerasModelSummary
 
 
@@ -171,12 +171,12 @@ class IRegressionModelConfig(TypedDict):
     # The ID of the saved keras regression model
     regression_id: str
 
-    # The interpreter that will determine the prediction's result
-    interpreter: IPercentChangeInterpreterConfig
-
     # The entire configuration used by the regression. This value is only present
     # when the function get_model is used.
     regression: Union[IRegressionConfig, None]
+
+    # The interpreter that will determine the prediction's result
+    interpreter: IPercentChangeInterpreterConfig
 
 
 
@@ -189,12 +189,29 @@ class IClassificationModelConfig(TypedDict):
     # The ID of the saved keras classification model
     classification_id: str
 
-    # The interpreter that will determine the prediction's result
-    interpreter: IProbabilityInterpreterConfig
-
     # The entire configuration used by the classification. This value is only present
     # when the function get_model is used.
     classification: Union[IClassificationConfig, None]
+
+    # The interpreter that will determine the prediction's result
+    interpreter: IProbabilityInterpreterConfig
+
+
+
+
+
+# ConsensusModel Configuration
+# The configuration that will be use to generate and interpret predictions.
+class IConsensusModelConfig(TypedDict):
+    # The list of ArimaModel|RegressionModel|ClassificationModel attached to the ConsensusModel.
+    # This value is only populated when get_model is invoked
+    sub_models: Union[List[Dict], None] # IModel does not exist yet.
+
+    # The interpreter that will determine the prediction's result
+    interpreter: IConsensusInterpreterConfig
+
+
+
 
 
 
@@ -205,27 +222,32 @@ class IClassificationModelConfig(TypedDict):
 ## Model ##
 
 
+
 # Model
-# The final state of an ArimaModel, RegressionModel or ClassificationModel once an 
+# The final state of an ArimaModel, RegressionModel, ClassificationModel or ConsensusModel once an 
 # instance is initialized.
 # The type of a model can be determined based on its configuration. Existing models are:
-# 1) ArimaModel: A model with a single ArimaModel.
-# 2) RegressionModel: A model with a single RegressionModel.
-# 3) ClassificationModel: A model with a minimum of 5 ArimaModels|RegressionModels as well as
-# a single ClassificationModel Config.
+# 1) ArimaModel: a model with a single ArimaModel.
+# 2) RegressionModel: a model with a single RegressionModel.
+# 3) ClassificationModel: a model with a minimum of 5 ArimaModels|RegressionModels embedded in the
+#       Training Data as well as a single ClassificationModel Config.
+# 4) ConsensusModel: a model that can contain any number (>= 2) of models except for itself as well as a 
+#       single ConsensusModelConfig.
 class IModel(TypedDict):
     # Identity of the Model. If it is an ArimaModel, it must follow the guidelines.
     id: str
 
-    # ArimaModels that will be used to predict accordingly based on the type of model.
+    # ArimaModels' Configurations
     arima_models: Union[List[IArimaModelConfig], None]
 
-    # RegressionModels that will be used to predict accordingly based on the type of model.
+    # RegressionModels' Configurations
     regression_models: Union[List[IRegressionModelConfig], None]
 
-    # ClassificationModels that will be used to predict accordingly based on the type of model.
+    # ClassificationModels' Configurations
     classification_models: Union[List[IClassificationModelConfig], None]
 
+    # ConsensusModel's Configuration
+    consensus_model: Union[IConsensusModelConfig, None]
 
 
 

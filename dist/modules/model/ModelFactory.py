@@ -3,13 +3,14 @@ from modules.types import IModel
 from modules.model.ArimaModel import ArimaModel
 from modules.model.RegressionModel import RegressionModel
 from modules.model.ClassificationModel import ClassificationModel
+from modules.model.ConsensusModel import ConsensusModel
 
 
 
 # Model Factory
 # Based on given configuration, it returns the appropiate Model Instance
-def ModelFactory(config: IModel) -> Union[ArimaModel, RegressionModel, ClassificationModel]:
-    """Returns the instance of an ArimaModel, RegressionModel or ClassificationModel based on the 
+def ModelFactory(config: IModel) -> Union[ArimaModel, RegressionModel, ClassificationModel, ConsensusModel]:
+    """Returns the instance of an ArimaModel, RegressionModel, ClassificationModel or ConsensusModel based on the 
     provided configuration.
 
     Args:
@@ -17,7 +18,7 @@ def ModelFactory(config: IModel) -> Union[ArimaModel, RegressionModel, Classific
             The configuration of module to return the instance of.
 
     Returns:
-        Union[ArimaModel, RegressionModel, ClassificationModel]
+        Union[ArimaModel, RegressionModel, ClassificationModel, ConsensusModel]
     """
     # Check if it is an ArimaModel
     if ArimaModel.is_config(config):
@@ -30,6 +31,10 @@ def ModelFactory(config: IModel) -> Union[ArimaModel, RegressionModel, Classific
     # Check if it is a ClassificationModel
     elif ClassificationModel.is_config(config):
         return ClassificationModel(config)
+
+    # Check if it is a ConsensusModel
+    elif ConsensusModel.is_config(config):
+        return ConsensusModel(config)
 
     # Otherwise, the provided configuration is invalid
     else:
