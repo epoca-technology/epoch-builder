@@ -53,7 +53,7 @@ class ClassificationModelTestCase(unittest.TestCase):
         self.assertEqual(type(model).__name__, "ClassificationModel")
 
         # Init the test candlestick time
-        time: int = Candlestick.DF.iloc[655858]["ot"]
+        time: int = Candlestick.DF.iloc[815655]["ot"]
         first_ot, last_ct = Candlestick.get_lookback_prediction_range(model.get_lookback(), time)
 
         # Perform a random prediction
