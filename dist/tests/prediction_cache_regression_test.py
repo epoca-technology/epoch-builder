@@ -244,7 +244,7 @@ class RegressionPredictionCacheTestCase(TestCase):
         cache_4.delete(sample['first_ot'], sample['last_ct'])
 
         # Make sure the sample is gone
-        pred = cache_4(sample['first_ot'], sample['last_ct'])
+        pred = cache_4.get(sample['first_ot'], sample['last_ct'])
         self.assertEqual(pred, None)
 
 

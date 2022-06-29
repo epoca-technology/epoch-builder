@@ -83,6 +83,10 @@ class ClassificationModelTestCase(unittest.TestCase):
         cached_pred = model.cache.get(first_ot, last_ct)
         self.assertTrue(cached_pred == None)
 
+        # Retrieve the summary and make sure it is a dict
+        summary: IModel = model.get_model()
+        self.assertIsInstance(summary, dict)
+
 
 
 

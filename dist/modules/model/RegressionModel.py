@@ -267,4 +267,5 @@ class RegressionModel(ModelInterface):
         return isinstance(model.get("regression_models"), list) \
                 and len(model["regression_models"]) == 1 \
                     and model.get("arima_models") == None \
-                        and model.get("classification_models") == None
+                        and model.get("classification_models") == None \
+                            and model.get("consensus_model") == None

@@ -166,7 +166,7 @@ class ClassificationPredictionCacheTestCase(TestCase):
         cache_3.delete(sample['first_ot'], sample['last_ct'])
 
         # Make sure the sample is gone
-        pred = cache_3(sample['first_ot'], sample['last_ct'])
+        pred = cache_3.get(sample['first_ot'], sample['last_ct'])
         self.assertEqual(pred, None)
 
 

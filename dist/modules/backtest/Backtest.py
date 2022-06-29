@@ -11,6 +11,7 @@ from modules.backtest.BacktestPath import BACKTEST_PATH
 from modules.model.ArimaModel import ArimaModel
 from modules.model.RegressionModel import RegressionModel
 from modules.model.ClassificationModel import ClassificationModel
+from modules.model.ConsensusModel import ConsensusModel
 from modules.model.ModelFactory import ModelFactory
 
 
@@ -48,7 +49,7 @@ class Backtest:
                 The number of minutes that the model will be idle when a position is closed.
 
         Models:
-            models: List[Union[ArimaModel, RegressionModel, ClassificationModel]]
+            models: List[Union[ArimaModel, RegressionModel, ClassificationModel, ConsensusModel]]
                 The list of models that will be backtested
             results: List[IBacktestResult]
                 The list of results by model. This list will be sorted by points prior to outputting it
@@ -82,7 +83,9 @@ class Backtest:
         self.description: str = config['description']
 
         # Initialize the models to be tested
-        self.models: List[Union[ArimaModel, RegressionModel, ClassificationModel]] = [ModelFactory(m) for m in config['models']]
+        self.models: List[Union[ArimaModel, RegressionModel, ClassificationModel, ConsensusModel]] = [
+            ModelFactory(m) for m in config['models']
+        ]
         self.results: List[IBacktestResult] = []
 
         # Initialize the candlesticks based on the models' lookback and the provided start and end dates

@@ -1,8 +1,7 @@
 from typing import List
 import os
 from tqdm import tqdm
-from dist.modules.types.model_types import IPrediction
-from modules.types import IRegressionPredictionRecord
+from modules.types import IRegressionPredictionRecord, IPrediction
 from modules.database.Database import Database, CURSOR, CONNECTION
 from modules.prediction_cache.RegressionPredictionCache import RegressionPredictionCache
 

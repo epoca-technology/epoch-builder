@@ -326,7 +326,8 @@ class ArimaModel(ModelInterface):
             and isinstance(model.get("arima_models"), list) \
                 and len(model["arima_models"]) == 1 \
                     and model.get("regression_models") == None \
-                        and model.get("classification_models") == None
+                        and model.get("classification_models") == None \
+                            and model.get("consensus_model") == None
 
 
 

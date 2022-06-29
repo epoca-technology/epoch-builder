@@ -328,4 +328,7 @@ class ClassificationModel(ModelInterface):
             bool
         """
         return isinstance(model.get("classification_models"), list) \
-                and len(model["classification_models"]) == 1
+                and len(model["classification_models"]) == 1\
+                    and model.get("arima_models") == None \
+                        and model.get("regression_models") == None \
+                            and model.get("consensus_model") == None

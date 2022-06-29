@@ -51,8 +51,11 @@ class RegressionModelTestCase(unittest.TestCase):
         self.assertEqual(type(model).__name__, "RegressionModel")
 
         # Init the test candlestick time
-        time: int = Candlestick.DF.iloc[655858]["ot"]
+        time: int = Candlestick.DF.iloc[799551]["ot"]
         first_ot, last_ct = Candlestick.get_lookback_prediction_range(model.get_lookback(), time)
+
+        # Make sure the prediction does not exist
+        self.assertEqual(model.cache.get(first_ot, last_ct), None)
 
         # Perform a random prediction
         pred: IPrediction = model.predict(time, enable_cache=False)
@@ -85,6 +88,10 @@ class RegressionModelTestCase(unittest.TestCase):
         model.cache.delete(first_ot, last_ct)
         cached_pred = model.cache.get(first_ot, last_ct)
         self.assertTrue(cached_pred == None)
+
+        # Retrieve the summary and make sure it is a dict
+        summary: IModel = model.get_model()
+        self.assertIsInstance(summary, dict)
 
 
 

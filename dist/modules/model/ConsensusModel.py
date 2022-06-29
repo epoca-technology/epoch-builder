@@ -296,7 +296,7 @@ class ConsensusModel(ModelInterface):
         Returns:
             bool
         """
-        return isinstance(model.get("consensus_model", dict)) and (
+        return isinstance(model.get("consensus_model"), dict) and (
             isinstance(model.get("arima_models"), list) or
             isinstance(model.get("regression_models"), list) or
             isinstance(model.get("classification_models"), list)
