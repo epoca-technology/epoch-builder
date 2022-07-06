@@ -89,6 +89,7 @@ Create the repository configuration file:
 
 Install for both desktop and web modes: `sudo apt install pgadmin4`
 
+
 Install for desktop mode only: `sudo apt install pgadmin4-desktop`
 
 

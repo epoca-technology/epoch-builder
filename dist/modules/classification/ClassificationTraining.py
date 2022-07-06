@@ -34,6 +34,8 @@ class ClassificationTraining:
     This class handles the training of a Classification Model.
 
     Class Properties:
+        TRAIN_SPLIT: float
+            The split that will be applied to the dataset for training and testing.
         HYPERPARAMS_TRAINING_CONFIG: IKerasTrainingTypeConfig
         SHORTLISTED_TRAINING_CONFIG: IKerasTrainingTypeConfig
             The configurations to be used based on the type of training.
@@ -73,6 +75,9 @@ class ClassificationTraining:
         training_data_summary: ITrainingDataSummary
             The summary of the training data that will be attached to the training certificate
     """
+    # Train Split
+    TRAIN_SPLIT: float = 0.8
+
     # Hyperparams Training Configuration
     HYPERPARAMS_TRAINING_CONFIG: IKerasTrainingTypeConfig = {
         "initial_lr": 0.01,
@@ -297,7 +302,7 @@ class ClassificationTraining:
         
         # Initialize the total rows and the split size
         rows: int = df.shape[0]
-        split: int = int(rows*0.8)
+        split: int = int(rows * ClassificationTraining.TRAIN_SPLIT)
 
         # Initialize the features dfs
         train_x: DataFrame = df[:split]
@@ -455,7 +460,7 @@ class ClassificationTraining:
         """
         # Init the number of rows and the split that will be applied
         rows: int = Candlestick.PREDICTION_DF.shape[0]
-        split: int = int(rows * 0.8)
+        split: int = int(rows * ClassificationTraining.TRAIN_SPLIT)
 
         # Initialize the first open time of the test dataset
         first_ot: int = Candlestick.PREDICTION_DF[split:split+1].iloc[0]["ot"]

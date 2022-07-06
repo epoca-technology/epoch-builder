@@ -1,6 +1,7 @@
 from typing import List, Dict, Union
 from os import walk, makedirs
 from os.path import exists, isfile
+from shutil import rmtree
 from json import load, dumps
 from inquirer import List as InquirerList, prompt
 from modules.types import IRegressionTrainingCertificate, IClassificationTrainingCertificate
@@ -48,10 +49,14 @@ if len(ids) == 0:
 certificates: Union[List[IRegressionTrainingCertificate], List[IClassificationTrainingCertificate]] = \
     [load(open(f"{KERAS_PATH['models']}/{id}/certificate.json")) for id in ids]
 
-# Finally, dump the merged file in the configs directory
+# Dump the merged file in the output directory
 if not exists(KERAS_PATH["batched_training_certificates"]):
     makedirs(KERAS_PATH["batched_training_certificates"])
 path: str = f"{KERAS_PATH['batched_training_certificates']}/{model_type}_MERGE_{Utils.get_time()}.json"
 with open(path, "w") as outfile:
     outfile.write(dumps(certificates))
+
+# Finally, clean the models' residue
+for id in ids:
+    rmtree(f"{KERAS_PATH['models']}/{id}")
 print("\nMERGE TRAINING CERTIFICATES COMPLETED")

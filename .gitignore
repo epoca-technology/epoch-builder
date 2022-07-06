@@ -47,14 +47,17 @@ Thumbs.db
 *.wmv
 
 
-# Backtest Assets
-backtest_assets/
-
 # Candlesticks CSV Files
 candlesticks/
 
 # Database Management
 db_management/
+
+# Epoch
+_ALPHA
+
+# Backtest Assets
+backtest_assets/
 
 # Keras Assets
 keras_assets/

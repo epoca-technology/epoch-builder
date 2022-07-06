@@ -64,7 +64,7 @@ class KerasHyperparams:
 
     """
     # Default Batch Size
-    DEFAULT_BATCH_SIZE: int = 20
+    DEFAULT_BATCH_SIZE: int = 75
 
     # Lookback - Only used by KerasRegression
     LOOKBACK: int = 100
@@ -77,8 +77,8 @@ class KerasHyperparams:
 
     # Regression Loss Functions
     REGRESSION_LOSS_FUNCTIONS: List[IKerasLoss] = [ 
-        { "name": "mean_absolute_error", "metric": None },
-        #{ "name": "mean_squared_error", "metric": None }
+        { "name": "mean_squared_error", "metric": None },
+        { "name": "mean_absolute_error", "metric": None }
     ]
 
     # Classification Loss Functions

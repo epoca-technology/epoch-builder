@@ -30,6 +30,8 @@ class RegressionTraining:
     This class handles the training of a RegressionModel.
 
     Class Properties:
+        TRAIN_SPLIT: float
+            The split that will be applied to the dataset for training and testing.
         HYPERPARAMS_TRAINING_CONFIG: IKerasTrainingTypeConfig
         SHORTLISTED_TRAINING_CONFIG: IKerasTrainingTypeConfig
             The configurations to be used based on the type of training.
@@ -70,6 +72,9 @@ class RegressionTraining:
         test_size: int
             The number of rows included in the test dataset.
     """
+    # Train Split
+    TRAIN_SPLIT: float = 0.8
+
     # Hyperparams Training Configuration
     HYPERPARAMS_TRAINING_CONFIG: IKerasTrainingTypeConfig = {
         "initial_lr": 0.01,
@@ -268,7 +273,7 @@ class RegressionTraining:
         """
         # Init the number of rows and the split that will be applied
         rows: int = Candlestick.NORMALIZED_PREDICTION_DF.shape[0]
-        split: int = int(rows * 0.8)
+        split: int = int(rows * RegressionTraining.TRAIN_SPLIT)
 
         # Init raw features and labels
         features_raw: Union[List[List[float]], ndarray] = []
@@ -322,8 +327,8 @@ class RegressionTraining:
 
         # Initialize the early stopping callback
         early_stopping = EarlyStopping(
-            monitor='val_loss', 
-            mode='min', 
+            monitor="val_loss", 
+            mode="min", 
             patience=self.training_config["patience"],
             restore_best_weights=True
         )
@@ -404,7 +409,7 @@ class RegressionTraining:
 
         # Init the number of rows and the split that will be applied
         rows: int = Candlestick.PREDICTION_DF.shape[0]
-        split: int = int(rows * 0.8)
+        split: int = int(rows * RegressionTraining.TRAIN_SPLIT)
 
         # Initialize the first open time of the test dataset
         first_ot: int = Candlestick.PREDICTION_DF[split:split+1].iloc[0]["ot"]
