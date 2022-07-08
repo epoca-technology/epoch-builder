@@ -60,9 +60,6 @@ class IRegressionTrainingBatch(TypedDict):
     start: Union[str, int, None]
     end: Union[str, int, None]
 
-    # If enabled, it will delete the model files once the evaluation is complete
-    hyperparams_mode: bool
-
     # The configurations for the models that will be trained within the batch.
     models: List[IRegressionTrainingConfig]
 

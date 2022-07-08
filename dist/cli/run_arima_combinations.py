@@ -1,9 +1,11 @@
 from typing import List
 from json import load
 from modules.types import IArimaCombinationsConfig
+from modules.epoch.Epoch import Epoch
 from modules.arima_combinations.ArimaCombinations import ArimaCombinations
 
-
+# Initialize the Epoch
+Epoch.init()
 
 
 # CONFIGURATION

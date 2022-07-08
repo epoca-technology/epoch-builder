@@ -17,7 +17,7 @@ def evaluate(
     model_config: IModel,
     start_timestamp: int,
     price_change_requirement: float,
-    hyperparams_mode: bool
+    progress_bar_description: str
 ) -> IModelEvaluation:
     """Performs an evaluation on a recently trained model. The evaluation works 
     similarly to the backtests and it is only performed on the test dataset to 
@@ -32,9 +32,8 @@ def evaluate(
             The price percentage change requirement in order for an outcome to be 
             determined. F.e. If increase_requirement is 3 and the price goes
             up 3%, the outcome will be "increased".
-        hyperparams_mode: bool
-            The type of training being performed. If provided, enables some verbose
-            features.
+        progress_bar_description: str
+            The description that will be placed in the progress bar.
 
     Returns:
         IModelEvaluation
@@ -59,9 +58,8 @@ def evaluate(
     decrease_outcomes: int = 0
 
     # Init the progress bar
-    if not hyperparams_mode:
-        progress_bar = tqdm(bar_format='{l_bar}{bar:20}{r_bar}{bar:-20b}', total=df.shape[0])
-        progress_bar.set_description(f"    6/7) Evaluating {model_type}")
+    progress_bar = tqdm(bar_format='{l_bar}{bar:20}{r_bar}{bar:-20b}', total=df.shape[0])
+    progress_bar.set_description(progress_bar_description)
 
     # Init the Position Instance
     position: Position = Position(price_change_requirement, price_change_requirement)
@@ -137,8 +135,7 @@ def evaluate(
                     last_neutral_ct = last_ct
 
         # Update the progress bar
-        if not hyperparams_mode:
-            progress_bar.update()
+        progress_bar.update()
 
     # Output the performance
     performance: IBacktestPerformance = position.get_performance()

@@ -1,5 +1,6 @@
 from json import load
 from modules.types import ITrainingDataConfig
+from modules.epoch.Epoch import Epoch
 from modules.classification.ClassificationTrainingData import ClassificationTrainingData
 
 
@@ -27,6 +28,10 @@ from modules.classification.ClassificationTrainingData import ClassificationTrai
 # The Training Data Instance will create a trading simulation environment similar to the Backtest. However, 
 # positions are not successful or unsuccessful, instead they determine wether the price has moved up or down.
 # Once the test completes, the results will be placed on the /training_data directory.
+
+
+# Initialize the Epoch
+Epoch.init()
 
 
 # TRAINING DATA CONFIGURATION

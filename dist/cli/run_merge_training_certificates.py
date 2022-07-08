@@ -1,14 +1,16 @@
 from typing import List, Dict, Union
 from os import walk, makedirs
 from os.path import exists, isfile
-from shutil import rmtree
 from json import load, dumps
 from inquirer import List as InquirerList, prompt
 from modules.types import IRegressionTrainingCertificate, IClassificationTrainingCertificate
+from modules.epoch.Epoch import Epoch
 from modules.utils.Utils import Utils
 from modules.keras_models.KerasPath import KERAS_PATH
 
 
+# Initialize the Epoch
+Epoch.init()
 
 
 # Configuration Input
@@ -56,7 +58,5 @@ path: str = f"{KERAS_PATH['batched_training_certificates']}/{model_type}_MERGE_{
 with open(path, "w") as outfile:
     outfile.write(dumps(certificates))
 
-# Finally, clean the models' residue
-for id in ids:
-    rmtree(f"{KERAS_PATH['models']}/{id}")
+
 print("\nMERGE TRAINING CERTIFICATES COMPLETED")

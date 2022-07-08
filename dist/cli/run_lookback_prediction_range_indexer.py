@@ -2,7 +2,12 @@ from typing import List, Dict
 from os.path import exists, isfile
 from json import dumps
 from tqdm import tqdm
+from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
+
+
+# Initialize the Epoch
+Epoch.init()
 
 
 ## CLI WELCOME ##

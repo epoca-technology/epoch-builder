@@ -1,5 +1,6 @@
 from json import load
 from modules.types import IBacktestConfig
+from modules.epoch.Epoch import Epoch
 from modules.backtest.Backtest import Backtest
 
 
@@ -31,6 +32,10 @@ from modules.backtest.Backtest import Backtest
 # BACKTEST PROCESS
 # The Backtest Instance will run the test on the models in order and will output the results to the 
 # directory /backtest_results
+
+
+# Initialize the Epoch
+Epoch.init()
 
 
 # BACKTEST CONFIGURATION

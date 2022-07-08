@@ -1,7 +1,13 @@
 from typing import Dict, Union
 from inquirer import Text, List as InquirerList, prompt
+from modules.epoch.Epoch import Epoch
 from modules.utils.Utils import Utils
 from modules.hyperparams.KerasHyperparams import KerasHyperparams
+
+
+# Initialize the Epoch
+Epoch.init()
+
 
 # Configuration Input
 print("HYPERPARAMS\n")

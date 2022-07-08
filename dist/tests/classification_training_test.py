@@ -68,7 +68,6 @@ class ClassificationTrainingTestCase(unittest.TestCase):
         training: ClassificationTraining = ClassificationTraining(
             training_data_file=TRAINING_DATA,
             config=config,
-            hyperparams_mode=False,
             test_mode=True
         )
 

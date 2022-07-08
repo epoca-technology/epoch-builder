@@ -257,7 +257,6 @@ class KerasHyperparams:
         # Init the batched training config file
         training_config: Union[IRegressionTrainingBatch, IClassificationTrainingBatch] = {
             "name": "", # Placeholder
-            "hyperparams_mode": True,
             "models": [] # Placeholder
         }
 

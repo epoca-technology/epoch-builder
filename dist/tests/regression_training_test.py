@@ -65,14 +65,11 @@ class RegressionTrainingTestCase(unittest.TestCase):
         # Initialize the instance
         training: RegressionTraining = RegressionTraining(
             config=config,
-            hyperparams_mode=False,
             test_mode=True
         )
 
         # Validate properties
         self.assertEqual(training.test_mode, True)
-        self.assertEqual(training.hyperparams_mode, False)
-        self.assertDictEqual(training.training_config, RegressionTraining.SHORTLISTED_TRAINING_CONFIG)
         self.assertEqual(training.id, config["id"])
         self.assertEqual(training.model_path, f"{KERAS_PATH['models']}/{config['id']}")
         self.assertEqual(training.description, config["description"])

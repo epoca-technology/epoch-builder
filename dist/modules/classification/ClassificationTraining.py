@@ -4,7 +4,6 @@ from os.path import exists
 from pandas import DataFrame, concat
 from json import dumps
 from h5py import File as h5pyFile
-from tensorflow import random as tf_random
 from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras import Sequential
 from keras.optimizers import adam_v2 as adam, rmsprop_v2 as rmsprop
@@ -36,18 +35,12 @@ class ClassificationTraining:
     Class Properties:
         TRAIN_SPLIT: float
             The split that will be applied to the dataset for training and testing.
-        HYPERPARAMS_TRAINING_CONFIG: IKerasTrainingTypeConfig
-        SHORTLISTED_TRAINING_CONFIG: IKerasTrainingTypeConfig
-            The configurations to be used based on the type of training.
+        TRAINING_CONFIG: IKerasTrainingTypeConfig
+            The configuration to be used in order to train the models
 
     Instance Properties:
         test_mode: bool
             If running from unit tests, it won't check the model's directory.
-        hyperparams_mode: bool
-            If enabled, it means that the purpose of the training is to identify the best hyperparams
-            and therefore, a large amount of models will be trained.
-        training_config: IRegressionTrainingTypeConfig
-            The config of the type of training that will be performed (Hyperparams|Shortlisted).
         id: str
             A descriptive identifier compatible with filesystems.
         model_path: str
@@ -78,22 +71,13 @@ class ClassificationTraining:
     # Train Split
     TRAIN_SPLIT: float = 0.8
 
-    # Hyperparams Training Configuration
-    HYPERPARAMS_TRAINING_CONFIG: IKerasTrainingTypeConfig = {
+    # Training Configuration
+    TRAINING_CONFIG: IKerasTrainingTypeConfig = {
         "initial_lr": 0.01,
         "decay_steps": 1.5,
-        "decay_rate": 0.28,
-        "epochs": 100,
-        "patience": 30
-    }
-
-    # Shortlisted Training Configuration
-    SHORTLISTED_TRAINING_CONFIG: IKerasTrainingTypeConfig = {
-        "initial_lr": 0.01,
-        "decay_steps": 2,
-        "decay_rate": 0.065,
-        "epochs": 500,
-        "patience": 100
+        "decay_rate": 0.85,
+        "epochs": 50,
+        "patience": 20
     }
 
 
@@ -106,7 +90,6 @@ class ClassificationTraining:
         self, 
         training_data_file: ITrainingDataFile, 
         config: IClassificationTrainingConfig, 
-        hyperparams_mode: bool=False,
         datasets: Union[Tuple[DataFrame, DataFrame, DataFrame, DataFrame], None]=None,
         test_mode: bool = False
     ):
@@ -117,8 +100,6 @@ class ClassificationTraining:
                 The training data file that will be used to train and evaluate the model.
             config: IClassificationTrainingConfig
                 The configuration that will be used to train the model.
-            hyperparams_mode: bool
-                If enabled, there will be no verbosity during training and eval.
             test_mode: bool
                 If running from unit tests, it won't check the model's directory.
 
@@ -127,19 +108,8 @@ class ClassificationTraining:
                 If the model is not correctly preffixed.
                 If the model's directory already exists.
         """
-        # Set the Global Random Seed to ensure training reproducibility
-        tf_random.set_seed(60184)
-
         # Initialize the type of execution
         self.test_mode: bool = test_mode
-
-        # Initialize the mode
-        self.hyperparams_mode: bool = hyperparams_mode
-
-        # Set the type of training that will be performed
-        self.training_config: IKerasTrainingTypeConfig = \
-            ClassificationTraining.HYPERPARAMS_TRAINING_CONFIG if self.hyperparams_mode \
-                else ClassificationTraining.SHORTLISTED_TRAINING_CONFIG
         
         # Initialize the id
         self.id: str = config["id"]
@@ -209,9 +179,9 @@ class ClassificationTraining:
         """
         # Initialize the Learning Rate Schedule
         lr_schedule: InverseTimeDecay = LearningRateSchedule(
-            initial_learning_rate=self.training_config["initial_lr"],
-            decay_steps=self.training_config["decay_steps"],
-            decay_rate=self.training_config["decay_rate"]
+            initial_learning_rate=ClassificationTraining.TRAINING_CONFIG["initial_lr"],
+            decay_steps=ClassificationTraining.TRAINING_CONFIG["decay_steps"],
+            decay_rate=ClassificationTraining.TRAINING_CONFIG["decay_rate"]
         )
 
         # Return the Optimizer Instance
@@ -382,28 +352,25 @@ class ClassificationTraining:
             monitor="val_categorical_accuracy" if self.metric.name == "categorical_accuracy" else "val_binary_accuracy", 
             mode="max", 
             min_delta=0.001, 
-            patience=self.training_config["patience"],
+            patience=ClassificationTraining.TRAINING_CONFIG["patience"],
             restore_best_weights=True
         )
 
         # Retrieve the Keras Model
-        if not self.hyperparams_mode:
-            print("    1/7) Initializing Model...")
+        print("    1/7) Initializing Model...")
         model: Sequential = KerasModel(config=self.keras_model)
 
         # Compile the model
-        if not self.hyperparams_mode:
-            print("    2/7) Compiling Model...")
+        print("    2/7) Compiling Model...")
         model.compile(optimizer=self.optimizer, loss=self.loss, metrics=[self.metric])
   
         # Train the model
-        if not self.hyperparams_mode:
-            print("    3/7) Training Model...")
+        print("    3/7) Training Model...")
         history_object: History = model.fit(
             self.train_x,
             self.train_y,
             validation_split=0.2,
-            epochs=self.training_config["epochs"],
+            epochs=ClassificationTraining.TRAINING_CONFIG["epochs"],
             shuffle=True,
             callbacks=[ early_stopping ],
             verbose=0
@@ -413,21 +380,18 @@ class ClassificationTraining:
         history: IKerasModelTrainingHistory = history_object.history
 
         # Evaluate the test dataset
-        if not self.hyperparams_mode:
-            print("    4/7) Evaluating Test Dataset...")
+        print("    4/7) Evaluating Test Dataset...")
         test_evaluation: List[float] = model.evaluate(self.test_x, self.test_y, verbose=0) # [loss, accuracy]
 
         # Save the model
-        if not self.hyperparams_mode:
-            print("    5/7) Saving Model...")
+        print("    5/7) Saving Model...")
         self._save_model(model)
 
         # Perform the Classification Evaluation
         classification_evaluation: IModelEvaluation = self._evaluate_classification()
 
         # Save the certificate
-        if not self.hyperparams_mode:
-            print("    7/7) Saving Certificate...")
+        print("    7/7) Saving Certificate...")
         certificate: IClassificationTrainingCertificate = self._save_certificate(
             start_time, 
             model, 
@@ -473,7 +437,7 @@ class ClassificationTraining:
             },
             start_timestamp=first_ot,
             price_change_requirement=self.training_data_summary["up_percent_change"],
-            hyperparams_mode=self.hyperparams_mode
+            progress_bar_description="    6/7) Evaluating ClassificationModel"
         )
 
 

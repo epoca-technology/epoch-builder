@@ -1,11 +1,10 @@
 from typing import List, Tuple
-from os import makedirs, remove
+from os import makedirs
 from os.path import exists
-from shutil import rmtree
 from pandas import DataFrame
 from json import load, dumps
-from tqdm import tqdm
 from modules.types import IClassificationTrainingBatch, IClassificationTrainingCertificate, ITrainingDataFile
+from modules.epoch.Epoch import Epoch
 from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
 from modules.keras_models.KerasPath import KERAS_PATH
@@ -36,6 +35,9 @@ from modules.classification.ClassificationTraining import ClassificationTraining
 # {KERAS_MODELS_PATH}/{MODEL_ID}. Once all the models have been trained and evaluated, the certificates
 # batch is saved in {KERAS_MODELS_CERTIFICATES_PATH}/{BATCH_NAME}_{BATCH_TIME}.json
 
+
+# Initialize the Epoch
+Epoch.init()
 
 
 
@@ -85,7 +87,6 @@ for index, model_config in enumerate(config["models"]):
     classification_training: ClassificationTraining = ClassificationTraining(
         training_data, 
         model_config, 
-        hyperparams_mode=config["hyperparams_mode"],
         datasets=datasets
     )
 
@@ -93,13 +94,8 @@ for index, model_config in enumerate(config["models"]):
     if index == 0:
         print("\nCLASSIFICATION TRAINING RUNNING\n")
         print(f"{config['name']}\n")
-        if config["hyperparams_mode"]:
-            progress_bar = tqdm( bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}", total=len(config["models"]))
 
-    if config["hyperparams_mode"]:
-        progress_bar.set_description(f"{model_config['id'][0:20]}...")
-    else:    
-        print(f"\n{index + 1}/{len(config['models'])}) {model_config['id'][0:20]}...")
+    print(f"\n{index + 1}/{len(config['models'])}) {model_config['id'][0:20]}...")
 
     # Train the model
     cert: IClassificationTrainingCertificate = classification_training.train()
@@ -107,19 +103,10 @@ for index, model_config in enumerate(config["models"]):
     # Add the certificate to the list
     certificates.append(cert)
 
-    # Update progress bar if applies
-    if config["hyperparams_mode"]:
-        progress_bar.update()
-
 # Save the certificates
 if not exists(KERAS_PATH["batched_training_certificates"]):
     makedirs(KERAS_PATH["batched_training_certificates"])
 with open(f"{KERAS_PATH['batched_training_certificates']}/{config['name']}_{Utils.get_time()}.json", "w") as outfile:
     outfile.write(dumps(certificates))
 
-
-# If running on hyperparams mode, clean up the residue
-if config["hyperparams_mode"]:
-    for cert in certificates:
-        rmtree(f"{KERAS_PATH['models']}/{cert['id']}")
 print("\nCLASSIFICATION TRAINING COMPLETED")
