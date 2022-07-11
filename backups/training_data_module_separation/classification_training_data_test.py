@@ -6,8 +6,8 @@ from modules.types import ITrainingDataConfig, ICompressedTrainingData, ITrainin
 from modules.database.Database import Database
 from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
-from modules.classification_training_data.ClassificationTrainingData import ClassificationTrainingData
-from modules.classification_training_data.TrainingDataCompression import compress_training_data, decompress_training_data
+from modules.classification.ClassificationTrainingData import ClassificationTrainingData
+from modules.classification.TrainingDataCompression import compress_training_data, decompress_training_data
 
 
 

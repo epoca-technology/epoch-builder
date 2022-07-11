@@ -20,7 +20,7 @@ from modules.keras_models.KerasPath import KERAS_PATH
 from modules.keras_models.KerasModel import KerasModel
 from modules.keras_models.LearningRateSchedule import LearningRateSchedule
 from modules.keras_models.KerasModelSummary import get_summary
-from modules.classification_training_data.TrainingDataCompression import decompress_training_data
+from modules.classification.TrainingDataCompression import decompress_training_data
 from modules.model_evaluation.ModelEvaluation import evaluate
         
 

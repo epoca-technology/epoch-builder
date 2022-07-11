@@ -1,7 +1,7 @@
 from json import load
 from modules.types import ITrainingDataConfig
 from modules.epoch.Epoch import Epoch
-from modules.classification.ClassificationTrainingData import ClassificationTrainingData
+from modules.classification_training_data.ClassificationTrainingData import ClassificationTrainingData
 
 
 # TRAINING DATA CONFIGURATION FILE
