@@ -253,7 +253,7 @@ def _perform_early_stopping_evaluation(
 
     # If the first checkpoint should be evaluated, make sure it has the min required positions
     elif eval_checkpoint_1 and (longs_num < 1 or shorts_num < 1):
-        return "The model evaluation was stopped because the model had less than 1 longs or short during the first checkpoint."
+        return "The model evaluation was stopped because the model had less than 1 long or short during the first checkpoint."
 
     # If the second checkpoint should be evaluated, make sure it has the min required positions
     elif eval_checkpoint_2 and (longs_num < 3 or shorts_num < 3):

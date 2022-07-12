@@ -59,10 +59,6 @@ C_DNN_S2: List[IKerasModelConfig] = [
 
 
 
-
-
-
-
 # Classification DNN Stack 3
 # C_DNN_S3
 # 3 units:          Dense_1, Dense_2, Dense_3
@@ -93,9 +89,6 @@ C_DNN_S3: List[IKerasModelConfig] = [
 
 
 
-
-
-
 # Classification DNN Stack 4
 # C_DNN_S4
 # 4 units:          Dense_1, Dense_2, Dense_3, Dense_4
@@ -120,16 +113,6 @@ C_DNN_S4: List[IKerasModelConfig] = [
     {"units": [512, 256, 256, 256], "activations": ["", "", "", ""]},
     {"units": [512, 512, 512, 512], "activations": ["", "", "", ""]}
 ]
-
-
-
-
-
-
-
-
-
-
 
 
 

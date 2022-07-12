@@ -65,13 +65,6 @@ C_LSTM_S2: List[IKerasModelConfig] = [
 
 
 
-
-
-
-
-
-
-
 # Classification LSTM Stack 3
 # C_LSTM_S3
 # 3 units: LSTM_1, LSTM_2, LSTM_3
@@ -101,15 +94,6 @@ C_LSTM_S3: List[IKerasModelConfig] = [
 
 
 
-
-
-
-
-
-
-
-
-
 # Classification LSTM Stack 4
 # C_LSTM_S4
 # 4 units: LSTM_1, LSTM_2, LSTM_3, LSTM_4
@@ -134,13 +118,6 @@ C_LSTM_S4: List[IKerasModelConfig] = [
     {"units": [512, 256, 256, 256]},
     {"units": [512, 512, 512, 512]}
 ]
-
-
-
-
-
-
-
 
 
 
