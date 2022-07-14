@@ -1,4 +1,4 @@
-from typing import TypedDict, Union, List, Tuple
+from typing import Literal, TypedDict, Union, List, Tuple
 
 
 
@@ -48,6 +48,26 @@ class IKerasPath(TypedDict):
 ## Configuration ##
 
 
+# Optimizer Functions
+IKerasOptimizer = Literal["adam", "rmsprop"]
+
+
+# Loss Functions
+IKerasLoss = Literal["mean_absolute_error", "mean_squared_error", "categorical_crossentropy", "binary_crossentropy"]
+IKerasRegressionLoss = Literal["mean_absolute_error", "mean_squared_error"]
+IKerasClassificationLoss = Literal["categorical_crossentropy", "binary_crossentropy"]
+
+
+# Metric Functions
+IKerasMetric = Literal["mean_absolute_error", "mean_squared_error", "categorical_accuracy", "binary_accuracy"]
+IKerasRegressionMetric = Literal["mean_absolute_error", "mean_squared_error"]
+IKerasClassificationMetric = Literal["categorical_accuracy", "binary_accuracy"]
+
+
+# Activation Functions
+IKerasActivation = Literal["relu", "tanh"]
+
+
 # Keras Model Configuration
 # The configuration that will be used to build the Keras Model.
 class IKerasModelConfig(TypedDict):
@@ -61,7 +81,7 @@ class IKerasModelConfig(TypedDict):
     dropout_rates: Union[List[float], None]
 
     # Activations
-    activations: Union[List[str], None]
+    activations: Union[List[str], List[IKerasActivation], None]
 
     # Filters
     filters: Union[List[int], None]
@@ -165,11 +185,16 @@ class IKerasModelTrainingHistory(TypedDict):
 
 
 
+# Optimizer Name
+IKerasOptimizerName = Literal["Adam", "RMSprop"]
+
+
+
 # Model Optimizer Config
 # The optimizer configuration used when the model was compiled. Keep in mind that
 # all these values are stringified to ensure compatibility with the JSON file format.
 class IKerasModelOptimizerConfig(TypedDict):
-    name: str
+    name: IKerasOptimizerName
     learning_rate: str
     decay: Union[str, None]
     beta_1: Union[str, None]
@@ -184,11 +209,13 @@ class IKerasModelOptimizerConfig(TypedDict):
 
 
 
+
+
 # Model Loss Config
 # The loss configuration used when the model was compiled. Keep in mind that
 # all these values are stringified to ensure compatibility with the JSON file format.
 class IKerasModelLossConfig(TypedDict):
-    name: str
+    name: IKerasLoss
     reduction: Union[str, None]
     from_logits: Union[str, None]
     label_smoothing: Union[str, None]
@@ -209,12 +236,19 @@ class IKerasModelLayer(TypedDict):
 
 
 
+# Model Class Name
+IKerasModelClassName = Literal["Sequential"]
+
+
+# Metric Names
+IKerasMetricName = Literal["loss", "categorical_accuracy", "binary_accuracy"]
+
 
 # Model Summary
 # Extracts all the relevant information from a trained model.
 class IKerasModelSummary(TypedDict):
     # The name of the class used to create the model.
-    model_class: str
+    model_class: IKerasModelClassName
 
     # Optimizer Config
     optimizer_config: IKerasModelOptimizerConfig
@@ -223,7 +257,7 @@ class IKerasModelSummary(TypedDict):
     loss_config: IKerasModelLossConfig
 
     # Metrics
-    metrics: List[str]
+    metrics: List[IKerasMetricName]
 
     # Input and output shapes
     input_shape: Tuple[Union[int, None]]

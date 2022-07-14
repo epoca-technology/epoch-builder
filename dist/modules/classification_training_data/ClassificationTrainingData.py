@@ -3,9 +3,10 @@ from os import makedirs
 from os.path import exists
 from json import dumps, load
 from pandas import DataFrame, Series
+from math import ceil
 from tqdm import tqdm
 from modules.types import IModel, ITechnicalAnalysis, ITrainingDataConfig, ITrainingDataActivePosition,\
-    ITrainingDataFile, ITrainingDataPriceActionsInsight, ITrainingDataPredictionInsight
+    ITrainingDataFile, ITrainingDataPriceActionsInsight, ITrainingDataPredictionInsight, ITechnicalAnalysisInsight
 from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
 from modules.model.ArimaModel import ArimaModel
@@ -90,7 +91,7 @@ class ClassificationTrainingData:
                 If a duplicate Model ID is found.
                 If a provided model isn't Arima or Regression
         """
-        # Make sure that at least 5 Arima Models were provided
+        # Make sure that at least 5 Regression Models were provided
         if len(config["models"]) < 5:
             raise ValueError(f"A minimum of 5 ArimaModels|RegressionModels are required in order to generate \
                 the classification training data. Received: {len(config['models'])}")
@@ -278,7 +279,7 @@ class ClassificationTrainingData:
         real_steps: int = self.steps * Candlestick.PREDICTION_CANDLESTICK_CONFIG["interval_minutes"]
 
         # Init the progress bar
-        progress_bar = tqdm(bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}", total=int(Candlestick.DF.shape[0]/real_steps))
+        progress_bar = tqdm(bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}", total=ceil(Candlestick.DF.shape[0]/real_steps))
 
         # Init the time in which the execution started
         execution_start: int = Utils.get_time()
@@ -654,12 +655,12 @@ class ClassificationTrainingData:
 
 
 
-    def _get_technical_analysis_insight(self) -> Union[Dict[str, Dict[str, float]], None]:
+    def _get_technical_analysis_insight(self) -> ITechnicalAnalysisInsight:
         """Retrieves the summary for each of the technical analysis features that are enabled.
         In case none is enabled, returns None.
 
         Returns:
-            Union[Dict[str, Dict[str, float]], None]
+            ITechnicalAnalysisInsight
         """
         # Make sure at least 1 ta feature is enabled
         if self.include_rsi or self.include_stoch or self.include_aroon or self.include_stc or self.include_mfi:

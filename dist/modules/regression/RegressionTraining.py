@@ -11,7 +11,8 @@ from keras.optimizer_v2.learning_rate_schedule import InverseTimeDecay
 from keras.losses import MeanSquaredError, MeanAbsoluteError
 from keras.callbacks import EarlyStopping, History
 from modules.types import IKerasTrainingTypeConfig, IKerasModelConfig, IKerasModelTrainingHistory,\
-    IRegressionTrainingConfig, IRegressionTrainingCertificate, IModelEvaluation
+    IRegressionTrainingConfig, IRegressionTrainingCertificate, IModelEvaluation, IKerasOptimizer,\
+        IKerasRegressionLoss
 from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
 from modules.keras_models.KerasPath import KERAS_PATH
@@ -169,11 +170,11 @@ class RegressionTraining:
 
 
 
-    def _get_optimizer(self, func_name: str) -> Union[adam.Adam, rmsprop.RMSProp]:
+    def _get_optimizer(self, func_name: IKerasOptimizer) -> Union[adam.Adam, rmsprop.RMSProp]:
         """Based on a optimizer function name, it will return the instance ready to be initialized.
 
         Args:
-            func_name: str
+            func_name: IKerasOptimizer
                 The name of the optimizer function to be used.
 
         Returns:
@@ -205,11 +206,11 @@ class RegressionTraining:
 
 
 
-    def _get_loss(self, func_name: str) -> Union[MeanSquaredError, MeanAbsoluteError]:
+    def _get_loss(self, func_name: IKerasRegressionLoss) -> Union[MeanSquaredError, MeanAbsoluteError]:
         """Based on a loss function name, it will return the instance ready to be initialized.
 
         Args:
-            func_name: str
+            func_name: IKerasRegressionLoss
                 The name of the loss function to be used.
 
         Returns:

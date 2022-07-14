@@ -19,9 +19,6 @@ class ILSTM(TypedDict):
 
 
 
-
-
-
 # Regression LSTM Stack 1
 # R_LSTM_S1
 # 1 units: LSTM_1
@@ -32,7 +29,6 @@ R_LSTM_S1: List[IKerasModelConfig] = [
     {"units": [256]},
     {"units": [512]}
 ]
-
 
 
 
@@ -59,9 +55,6 @@ R_LSTM_S2: List[IKerasModelConfig] = [
 
 
 
-
-
-
 # Regression LSTM Stack 3
 # R_LSTM_S3
 # 3 units: LSTM_1, LSTM_2, LSTM_3
@@ -75,17 +68,16 @@ R_LSTM_S3: List[IKerasModelConfig] = [
     {"units": [128, 128, 64]},
     {"units": [128, 128, 128]},
 
+    {"units": [256, 64, 32]},
     {"units": [256, 128, 64]},
     {"units": [256, 128, 128]},
     {"units": [256, 256, 256]},
 
+    {"units": [512, 128, 64]},
     {"units": [512, 256, 128]},
     {"units": [512, 256, 256]},
     {"units": [512, 512, 512]}
 ]
-
-
-
 
 
 
@@ -103,17 +95,15 @@ R_LSTM_S4: List[IKerasModelConfig] = [
     {"units": [128, 128, 128, 128]},
 
     {"units": [256, 128, 64, 32]},
+    {"units": [256, 128, 128, 64]},
     {"units": [256, 128, 128, 128]},
     {"units": [256, 256, 256, 256]},
 
     {"units": [512, 256, 128, 64]},
+    {"units": [512, 256, 256, 128]},
     {"units": [512, 256, 256, 256]},
     {"units": [512, 512, 512, 512]}
 ]
-
-
-
-
 
 
 

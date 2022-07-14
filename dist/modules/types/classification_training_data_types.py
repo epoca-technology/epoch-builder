@@ -1,5 +1,5 @@
 from typing import TypedDict, List, Union, Dict
-from modules.types import IModel
+from modules.types.model_types import IModel
 
 
 
@@ -87,6 +87,23 @@ class ICompressedTrainingData(TypedDict):
 
 
 
+# Prediction Insight 
+# Position type count for each ArimaModel|RegressionModel in this format:
+# {[modelID: str]: ITrainingDataPredictionInsight}
+IPredictionsInsight = Dict[str, Dict[str, float]]
+
+
+
+
+# Technical Analysis Summary
+# If none of the technical analysis features are enabled, this value will be None.
+# {[taName: str]: df.describe().to_dict()}|null
+ITechnicalAnalysisInsight = Union[Dict[str, Dict[str, float]], None]
+
+
+
+
+
 # Training Data File
 # The dict that contains all the information needed to train a ClassificationModel.
 class ITrainingDataFile(TypedDict):
@@ -136,14 +153,10 @@ class ITrainingDataFile(TypedDict):
     price_actions_insight: ITrainingDataPriceActionsInsight
 
     # Prediction Insight 
-    # Position type count for each ArimaModel|RegressionModel in this format:
-    # {[modelID: str]: ITrainingDataPredictionInsight}
-    predictions_insight: Dict[str, Dict[str, float]]
+    predictions_insight: IPredictionsInsight
 
     # Technical Analysis Summary
-    # If none of the technical analysis features are enabled, this value will be None.
-    # {[taName: str]: df.describe().to_dict()}|null
-    technical_analysis_insight: Union[Dict[str, Dict[str, float]], None]
+    technical_analysis_insight: ITechnicalAnalysisInsight
 
     # Training Data
     # The training data generated in a compressed format.

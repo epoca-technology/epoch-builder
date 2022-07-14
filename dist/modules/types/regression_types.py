@@ -1,5 +1,8 @@
 from typing import TypedDict, List, Dict, Union
-from modules.types import IRegressionConfig, IKerasModelConfig, IKerasModelTrainingHistory, IRegressionConfig, IModelEvaluation
+from modules.types.model_types import IRegressionConfig
+from modules.types.keras_models_types import IKerasModelConfig, IKerasModelTrainingHistory,\
+    IKerasOptimizer, IKerasRegressionLoss, IKerasOptimizerName
+from modules.types.model_evaluation_types import IModelEvaluation
 
 
 
@@ -34,10 +37,10 @@ class IRegressionTrainingConfig(TypedDict):
     predictions: int
 
     # The optimizer to be used.
-    optimizer: str # 'adam'|'rmsprop'
+    optimizer: IKerasOptimizer # 'adam'|'rmsprop'
 
     # The loss function to be used
-    loss: str # 'mean_squared_error'|'mean_absolute_error'
+    loss: IKerasRegressionLoss # 'mean_squared_error'|'mean_absolute_error'
 
     # Keras Model Configuration
     keras_model: IKerasModelConfig
@@ -74,37 +77,30 @@ class IRegressionTrainingBatch(TypedDict):
 # Once the training, saving and evaluation completes, a certificate containing all the
 # data is saved and issued for batching.
 class IRegressionTrainingCertificate(TypedDict):
-    ## Identification ##
+    # Identification
     id: str
     description: str
 
-
-    ## Training Data ##
-
-    # Date Range
+    # Training Data Date Range
     training_data_start: int    # Open Time of the first prediction candlestick
     training_data_end: int      # Close Time of the last prediction candlestick
 
-    # Dataset Sizes
+    # Training Data Dataset Sizes
     train_size: int     # Number of rows in the train dataset
     test_size: int      # Number of rows in the test dataset
 
-    # Data Summary - Description extracted directly from the normalized dataframe
+    # Training Data Summary - Description extracted directly from the normalized dataframe
     training_data_summary: Dict[str, float]
 
-
-    ## Training Configuration ##
+    # Training Configuration
     autoregressive: bool
     lookback: int
     predictions: int
-    optimizer: str
-    loss: str
+    optimizer: IKerasOptimizerName
+    loss: IKerasRegressionLoss
     keras_model_config: IKerasModelConfig
 
-
-    ## Training ##
-
-    # Date Range
+    # Training Duration
     training_start: int     # Time in which the training started
     training_end: int       # Time in which the training ended
 

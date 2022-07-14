@@ -13,7 +13,8 @@ from keras.metrics import CategoricalAccuracy, BinaryAccuracy
 from keras.callbacks import EarlyStopping, History
 from modules.types import IKerasTrainingTypeConfig, IKerasModelConfig, IKerasModelTrainingHistory, IModel,\
     ITrainingDataFile, ICompressedTrainingData, IClassificationTrainingConfig, ITrainingDataSummary, \
-        IClassificationTrainingCertificate, IModelEvaluation
+        IClassificationTrainingCertificate, IModelEvaluation, IKerasOptimizer, IKerasClassificationLoss,\
+            IKerasClassificationMetric
 from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
 from modules.keras_models.KerasPath import KERAS_PATH
@@ -77,7 +78,7 @@ class ClassificationTraining:
         "decay_steps": 1,
         "decay_rate": 0.35,
         "epochs": 100,
-        "patience": 30
+        "patience": 40
     }
 
 
@@ -163,11 +164,11 @@ class ClassificationTraining:
 
 
 
-    def _get_optimizer(self, func_name: str) -> Union[adam.Adam, rmsprop.RMSProp]:
+    def _get_optimizer(self, func_name: IKerasOptimizer) -> Union[adam.Adam, rmsprop.RMSProp]:
         """Based on a optimizer function name, it will return the instance ready to be initialized.
 
         Args:
-            func_name: str
+            func_name: IKerasOptimizer
                 The name of the optimizer function to be used.
 
         Returns:
@@ -197,11 +198,11 @@ class ClassificationTraining:
 
 
 
-    def _get_loss(self, func_name: str) -> Union[CategoricalCrossentropy, BinaryCrossentropy]:
+    def _get_loss(self, func_name: IKerasClassificationLoss) -> Union[CategoricalCrossentropy, BinaryCrossentropy]:
         """Based on a loss function name, it will return the instance ready to be initialized.
 
         Args:
-            func_name: str
+            func_name: IKerasClassificationLoss
                 The name of the loss function to be used.
 
         Returns:
@@ -224,11 +225,11 @@ class ClassificationTraining:
 
 
 
-    def _get_metric(self, func_name: str) -> Union[CategoricalAccuracy, BinaryAccuracy]:
+    def _get_metric(self, func_name: IKerasClassificationMetric) -> Union[CategoricalAccuracy, BinaryAccuracy]:
         """Based on a metric function name, it will return the instance ready to be initialized.
 
         Args:
-            func_name: str
+            func_name: IKerasClassificationMetric
                 The name of the loss function to be used.
 
         Returns:

@@ -1,5 +1,6 @@
 from typing import Dict, Union
 from inquirer import Text, List as InquirerList, prompt
+from modules.types import ITrainableModelType
 from modules.epoch.Epoch import Epoch
 from modules.utils.Utils import Utils
 from modules.hyperparams.KerasHyperparams import KerasHyperparams
@@ -12,32 +13,42 @@ Epoch.init()
 # Configuration Input
 print("HYPERPARAMS\n")
 
-# Epoch Name
+# Epoch Name - @DEPRECATE
 epoch: Dict[str, str] = prompt([Text("name", "Enter the name of the epoch")])
 epoch_name: str = epoch["name"]
 if len(epoch_name) < 4 or epoch_name[0] != "_":
     raise ValueError("The name of the epoch must be at least 4 characters long and must be prefixed with '_EPOCHNAME'.")
 
 
-# Main Inputs
+# Main Inputs - The type of model to generate hyperparams for
 print(" ")
-answers: Dict[str, str] = prompt([
-    # The type of model to generate hyperparams for
+model_type_answers: Dict[str, str] = prompt([
     InquirerList(
         "model_type", 
         message="Select the type of model", 
-        choices=["KerasRegression", "KerasClassification"]
-    ),
-
-    # The maximum amount of models that will be included per batch.
-    Text("batch_size", f"Enter the Batch Size (Defaults to {KerasHyperparams.DEFAULT_BATCH_SIZE})")
+        choices=["keras_regression", "keras_classification"]
+    )
 ])
-model_type: str = answers["model_type"]
-batch_size: int = int(answers["batch_size"]) if answers["batch_size"].isdigit() else KerasHyperparams.DEFAULT_BATCH_SIZE
+model_type: ITrainableModelType = model_type_answers["model_type"]
 
 
 
-# Start and End Date - Only applies to Regressions
+# Batch Size - The maximum amount of models that will be included per batch.
+print(" ")
+default_batch_size: int
+if model_type == "keras_regression":
+    default_batch_size = KerasHyperparams.REGRESSION_BATCH_SIZE
+elif model_type == "keras_classification":
+    default_batch_size = KerasHyperparams.CLASSIFICATION_BATCH_SIZE
+batch_size_answer: Dict[str, str] = prompt([
+    Text("size", f"Enter the Batch Size (Defaults to {default_batch_size})")
+])
+batch_size: int = int(batch_size_answer["size"]) if batch_size_answer["size"].isdigit() else default_batch_size
+
+
+
+
+# Start and End Date - Only applies to Regressions - DEPRECATE
 start: Union[str, None] = None
 end: Union[str, None] = None
 if "Regression" in model_type:
@@ -73,7 +84,7 @@ if "Classification" in model_type:
 
 
 # Hyperparams Generation
-if model_type == "KerasRegression" or model_type == "KerasClassification":
+if model_type == "keras_regression" or model_type == "keras_classification":
     # Initialize the Hyperparams Instance
     hyperparams: KerasHyperparams = KerasHyperparams(
         epoch_name, 

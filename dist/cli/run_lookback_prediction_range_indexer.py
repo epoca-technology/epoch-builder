@@ -29,7 +29,7 @@ Candlestick.init(lookbacks[-1])
 indexer: Dict[str, List[int]] = {}
 
 # Init the progress bar
-progress_bar = tqdm( bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}", total=len(lookbacks)*Candlestick.DF.shape[0])
+progress_bar = tqdm( bar_format="{l_bar}{bar:20}{r_bar}{bar:-20b}", total=(len(lookbacks)*Candlestick.DF.shape[0]) - 1)
 
 # Iterate over each lookback
 for lookback in lookbacks:
@@ -40,6 +40,7 @@ for lookback in lookbacks:
         # Calculate the range
         first_ot, last_ct = Candlestick._calculate_lookback_prediction_range(lookback, candlestick["ot"])
 
+        # Populate the indexer
         indexer[id] = [first_ot, last_ct]
 
         # Update the progress bar

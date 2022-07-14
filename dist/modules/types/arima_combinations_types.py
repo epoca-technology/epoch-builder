@@ -1,6 +1,5 @@
 from typing import TypedDict, Union
-
-
+from modules.types.arima_types import IArimaConfigValue
 
 
 
@@ -26,7 +25,7 @@ class IArimaCombinationsConfig(TypedDict):
     idle_minutes_on_position_close: int
 
     # The number that will be focused when generating combinations for p,d and q
-    focus_number: int
+    focus_number: IArimaConfigValue
 
     # The maximum number of models that should go in each file
     batch_size: int
@@ -38,6 +37,6 @@ class IArimaCombinationsConfig(TypedDict):
 # ARIMA COMBINATION
 # The dictionary that contains a single Arima Combination (p, d, q).
 class IArimaCombination(TypedDict):
-    p: int
-    d: int
-    q: int
+    p: IArimaConfigValue
+    d: IArimaConfigValue
+    q: IArimaConfigValue

@@ -1,5 +1,5 @@
 from typing import List
-from modules.types import IDatabaseTable
+from modules.types import IDatabaseTable, IDatabaseTableName
 
 
 
@@ -25,7 +25,7 @@ from modules.types import IDatabaseTable
 # p: The prediction's dictionary
 # Notice there is no need to store the lookback value as it can be derived from
 # the fot and lct.
-def REGRESSION_PREDICTIONS_TABLE_SQL(table_name: str) -> str:
+def REGRESSION_PREDICTIONS_TABLE_SQL(table_name: IDatabaseTableName) -> str:
     """Returns the Regression Predictions Table's SQL based on the provided table name.
 
     Args:
@@ -69,7 +69,7 @@ def REGRESSION_PREDICTIONS_TABLE_SQL(table_name: str) -> str:
 # lct: The last close time of the lookback candlesticks in milliseconds.
 # mp: The minimum probability set in the interpreter.
 # p: The prediction's dictionary
-def CLASSIFICATION_PREDICTIONS_TABLE_SQL(table_name: str) -> str:
+def CLASSIFICATION_PREDICTIONS_TABLE_SQL(table_name: IDatabaseTableName) -> str:
     """Returns the Classifcation Predictions Table's SQL based on the provided table name.
 
     Args:
@@ -105,7 +105,7 @@ def CLASSIFICATION_PREDICTIONS_TABLE_SQL(table_name: str) -> str:
 # Column Descriptions:
 # id: The identifier of the range that is being covered. F.e: FIRSTOT_LASTCT
 # ta: The technical analysis dictionary
-def TECHNICAL_ANALYSIS_TABLE_SQL(table_name: str) -> str:
+def TECHNICAL_ANALYSIS_TABLE_SQL(table_name: IDatabaseTableName) -> str:
     """Returns the Technical Analysis Table's SQL based on the provided table name.
 
     Args:

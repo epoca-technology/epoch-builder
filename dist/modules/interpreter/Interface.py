@@ -1,5 +1,6 @@
 from typing import Tuple, Union
-from modules.types import IPercentChangeInterpreterConfig, IProbabilityInterpreterConfig, IConsensusInterpreterConfig
+from modules.types import IPercentChangeInterpreterConfig, IProbabilityInterpreterConfig, IConsensusInterpreterConfig,\
+    IPredictionResult, IPredictionDescription
 
 
 
@@ -11,7 +12,7 @@ class InterpreterInterface:
     # arguments can vary depending on the type of interpreter, the output will always be the 
     # same. 
     # prediction_result (1|0|-1) , result_description ('long'|'neutral'|'short')
-    def interpret(self, *args) -> Tuple[int, str]:
+    def interpret(self, *args) -> Tuple[IPredictionResult, IPredictionDescription]:
         raise NotImplementedError("Interpreter.interpret has not been implemented.")
 
 

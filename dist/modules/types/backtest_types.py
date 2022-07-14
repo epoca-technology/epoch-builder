@@ -1,4 +1,4 @@
-from typing import TypedDict, Union, List
+from typing import TypedDict, Union, List, Literal
 from modules.types.model_types import IPrediction, IModel
 
 
@@ -33,12 +33,16 @@ class IBacktestPath(TypedDict):
 ## Position ##
 
 
+# Types of positions
+IPositionType = Literal[1, -1]
+
+
 # Position Record
 # When a position is closed, it is saved in a list that can be reviewed in the GUI when
 # the backtest completes.
 class IBacktestPosition(TypedDict):
     # Type of position: 1 = long, -1 = short
-    t: int
+    t: IPositionType
 
     # Prediction Dict
     p: IPrediction

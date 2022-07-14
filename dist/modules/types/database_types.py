@@ -1,4 +1,4 @@
-from typing import Callable, TypedDict, List
+from typing import Callable, Literal, TypedDict, List
 
 
 
@@ -19,11 +19,24 @@ class IDatabaseConnectionConfig(TypedDict):
 
 
 
+
+
+# Database Table Names Input & Output
+IDatabaseTableNameInput = Literal["classification_predictions", "regression_predictions", "technical_analysis"]
+IDatabaseTableName = Literal[
+    "classification_predictions", "regression_predictions", "technical_analysis",
+    "test_classification_predictions", "test_regression_predictions", "test_technical_analysis"
+]
+
+
+
+
 # Database Table Type
 # Includes the base name of the table as well as the sql to create it safely
 class IDatabaseTable(TypedDict):
-    name: str
+    name: IDatabaseTableNameInput
     sql: Callable[[str], str]
+
 
 
 
@@ -33,7 +46,7 @@ class IDatabaseTable(TypedDict):
 # General information about the Database and its configuration.
 
 class IDatabaseTableSummary(TypedDict):
-    name: str
+    name: IDatabaseTableName
     size: float
 
 class IDatabaseSummary(TypedDict):

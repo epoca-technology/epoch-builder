@@ -2,7 +2,8 @@ from typing import Any, Optional, Tuple, List
 from psycopg2 import connect
 from psycopg2.extras import RealDictCursor, Json
 from psycopg2.extensions import new_type, DECIMAL, register_type, register_adapter
-from modules.types import IDatabaseConnectionConfig, IDatabaseSummary, IDatabaseTableSummary
+from modules.types import IDatabaseConnectionConfig, IDatabaseSummary, IDatabaseTableSummary,\
+    IDatabaseTableName, IDatabaseTableNameInput
 from modules.database.DatabaseTables import TABLES
 
 
@@ -240,17 +241,17 @@ class Database:
 
 
     @staticmethod
-    def tn(table_name: str) -> str:
+    def tn(table_name: IDatabaseTableNameInput) -> IDatabaseTableName:
         """Retrieves a table name based on the current TEST_MODE Value.
         If test_mode is enabled, it will attach the test_ string to the provided name.
         F.e test_$TABLE_NAME
 
         Args:
-            table_name (str): 
+            table_name: IDatabaseTableNameInput
                 The name of the table.
 
         Returns:
-            str
+            IDatabaseTableName
         """
         return table_name if not Database.TEST_MODE else f"test_{table_name}"
 

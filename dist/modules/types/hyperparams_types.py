@@ -1,5 +1,6 @@
 from typing import TypedDict, Union, List
-
+from modules.types.model_types import ITrainableModelType
+from modules.types.keras_models_types import IKerasLoss, IKerasClassificationMetric
 
 
 
@@ -8,9 +9,9 @@ from typing import TypedDict, Union, List
 
 # Keras Loss
 # The loss and metric to use to train models.
-class IKerasLoss(TypedDict):
-    name: str
-    metric: Union[str, None] # Metric is only populated in Classification Models
+class IKerasHyperparamsLoss(TypedDict):
+    name: IKerasLoss
+    metric: Union[IKerasClassificationMetric, None] # Metric is only populated in Classification Models
 
 
 
@@ -28,10 +29,11 @@ class IKerasHyperparamsNetworkReceipt(TypedDict):
     batches: int
 
 
+
 # Main Receipt
 class IKerasHyperparamsReceipt(TypedDict):
     creation: str
-    model_type: str
+    model_type: ITrainableModelType
     batch_size: int
     start: Union[str, None]
     end: Union[str, None]

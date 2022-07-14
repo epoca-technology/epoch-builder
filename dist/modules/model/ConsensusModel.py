@@ -1,6 +1,6 @@
 from typing import List, Union
 from pandas import DataFrame
-from modules.types import IModel, IPrediction, IPredictionMetaData
+from modules.types import IModel, IPrediction, IPredictionMetaData, IPredictionResult
 from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
 from modules.interpreter.ConsensusInterpreter import ConsensusInterpreter
@@ -168,7 +168,7 @@ class ConsensusModel(ModelInterface):
             IPrediction
         """
         # Initialize the list of prediction results and the metadata items
-        results: List[int] = []
+        results: List[IPredictionResult] = []
         metadata_items: List[IPredictionMetaData] = []
 
         # Initialize the lookback df

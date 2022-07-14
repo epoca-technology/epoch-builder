@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from modules.types import IProbabilityInterpreterConfig
+from modules.types import IProbabilityInterpreterConfig, IPredictionResult, IPredictionDescription
 from modules.interpreter.Interface import InterpreterInterface
 
 
@@ -64,7 +64,7 @@ class ProbabilityInterpreter(InterpreterInterface):
 
 
 
-    def interpret(self, probabilities: List[float]) -> Tuple[int, str]:
+    def interpret(self, probabilities: List[float]) -> Tuple[IPredictionResult, IPredictionDescription]:
         """Given a list of probabilities for up and down, it will check if the requirement
         is met to return a non-neutral result. 
          1  =   Long
@@ -76,7 +76,8 @@ class ProbabilityInterpreter(InterpreterInterface):
                 The predicted probabilities for up and down.
 
         Returns:
-            Tuple[int, str] (1|0|-1, 'long'|'neutral'|'short')
+            Tuple[IPredictionResult, IPredictionDescription] 
+            (1|0|-1, 'long'|'neutral'|'short')
         
         Raises:
             ValueError: 

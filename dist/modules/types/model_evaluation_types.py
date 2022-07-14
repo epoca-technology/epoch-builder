@@ -1,5 +1,5 @@
 from typing import TypedDict, List, Union
-from modules.types import IBacktestPosition
+from modules.types.backtest_types import IBacktestPosition
 
 
 
