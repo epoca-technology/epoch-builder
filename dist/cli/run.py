@@ -11,7 +11,6 @@ processes: Dict[str, str] = {
     "Classification Training": "run_classification_training.py",
     "Database Management": "run_db_management.py",
     "Hyperparams": "run_hyperparams.py",
-    "Lookback Prediction Range Indexer": "run_lookback_prediction_range_indexer.py",
     "Merge Training Certificates": "run_merge_training_certificates.py",
     "Regression Selection": "run_regression_selection.py",
     "Regression Training": "run_regression_training.py"
@@ -19,7 +18,7 @@ processes: Dict[str, str] = {
 
 
 # Configuration Input
-os.system('cls' if os.name == 'nt' else 'clear')
+os.system("cls" if os.name == "nt" else "clear")
 print("PREDICTION BACKTESTING")
 answer: List[Dict[str, str]] = prompt([
     InquirerList("process", message="Select the process to run", choices=processes.keys())
@@ -27,6 +26,6 @@ answer: List[Dict[str, str]] = prompt([
 
 
 # Execute the process
-os.system('cls' if os.name == 'nt' else 'clear')
+os.system("cls" if os.name == "nt" else "clear")
 proc = Popen(f"python3 dist/cli/{processes[answer['process']]}", shell=True)
 proc.wait()

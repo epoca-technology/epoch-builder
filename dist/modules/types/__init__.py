@@ -1,4 +1,5 @@
 from modules.types.arima_types import *
+from modules.types.candlestick_types import *
 from modules.types.database_types import *
 from modules.types.interpreter_types import *
 from modules.types.technical_analysis_types import *

@@ -11,6 +11,7 @@ from modules.types import IKerasModelConfig, IKerasHyperparamsLoss, IKerasHyperp
 from modules.utils.Utils import Utils
 from modules.keras_models.KerasPath import KERAS_PATH
 from modules.keras_models.KerasModel import KerasModel
+from modules.model.RegressionModel import RegressionModel
 from modules.hyperparams.RegressionNeuralNetworks import REGRESSION_NEURAL_NETWORKS
 from modules.hyperparams.ClassificationNeuralNetworks import CLASSIFICATION_NEURAL_NETWORKS
 
@@ -26,9 +27,6 @@ class KerasHyperparams:
         REGRESSION_BATCH_SIZE: int
         CLASSIFICATION_BATCH_SIZE: int
             The maximum number of models per batch that will be used if none was provided.
-        LOOKBACK: int
-        PREDICTIONS: int
-            Default values used by Regression Models only.
         OPTIMIZERS: List[IKerasOptimizer]
             The list of optimizers that will be used when compiling models.
         REGRESSION_LOSS_FUNCTIONS: List[IKerasHyperparamsLoss]
@@ -67,12 +65,6 @@ class KerasHyperparams:
     # Default Batch Size
     REGRESSION_BATCH_SIZE: int = 20
     CLASSIFICATION_BATCH_SIZE: int = 60
-
-    # Lookback - Only used by keras_regression
-    LOOKBACK: int = 100
-
-    # Predictions - Only used by keras_regression
-    PREDICTIONS: int = 30
 
     # Optimizers
     OPTIMIZERS: List[IKerasOptimizer] = [ "adam", "rmsprop" ]
@@ -478,8 +470,8 @@ class KerasHyperparams:
                 "id": id,
                 "description": description,
                 "autoregressive": autoregressive if isinstance(autoregressive, bool) else False,
-                "lookback": KerasHyperparams.LOOKBACK,
-                "predictions": KerasHyperparams.PREDICTIONS,
+                "lookback": RegressionModel.DEFAULT_LOOKBACK,
+                "predictions": RegressionModel.DEFAULT_PREDICTIONS,
                 "optimizer": optimizer,
                 "loss": loss["name"],
                 "keras_model": keras_model
@@ -509,8 +501,8 @@ class KerasHyperparams:
         # Add model type specific properties
         if self.model_type == "keras_regression":
             keras_model_val["autoregressive"] = autoregressive if isinstance(autoregressive, bool) else False
-            keras_model_val["lookback"] = KerasHyperparams.LOOKBACK
-            keras_model_val["predictions"] = KerasHyperparams.PREDICTIONS
+            keras_model_val["lookback"] = RegressionModel.DEFAULT_LOOKBACK
+            keras_model_val["predictions"] = RegressionModel.DEFAULT_PREDICTIONS
         else:
             keras_model_val["features_num"] = 5 # Minimum number of features allowed
 
@@ -596,7 +588,7 @@ class KerasHyperparams:
         total_models: int = total_models_result["models"]
 
         # Init the receipt
-        receipt: str = f"{self.model_type} Hyperparams ({self.epoch_name})\n\n"
+        receipt: str = f"{self.epoch_name}: {self.model_type} hyperparams\n\n"
 
         # Configuration
         receipt += f"Creation: {Utils.from_milliseconds_to_date_string(Utils.get_time())}\n"

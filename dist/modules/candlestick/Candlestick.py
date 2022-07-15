@@ -1,18 +1,11 @@
-from typing import Tuple, Union, TypedDict, Dict, List
+from typing import Tuple, Union, List
 from os.path import isfile
 from json import load
 from pandas import DataFrame, Series, read_csv
+from modules.types import ICandlestickConfig, IPredictionRangeIndexer
 from modules.utils.Utils import Utils
 
 
-
-
-
-# Candlesticks Config Type
-class ICandlestickConfig(TypedDict):
-    columns: Tuple[str]
-    csv_file_name: str
-    interval_minutes: int
 
 
 
@@ -40,9 +33,9 @@ class Candlestick:
         NORMALIZED_PREDICTION_DF: Union[DataFrame, None] 
             Prediction Candlesticks DataFrame with the following columns normalized: o, h, l, c.
             Only initialized when normalized is set to True
-        INDEXER_NAME: str
-            The name of the indexer's file located within the candlesticks directory.
-        PREDICTION_RANGE_INDEXER: Dict[str, List[int]]
+        PREDICTION_RANGE_INDEXER_PATH: str
+            The path in which the indexer should be stored.
+        PREDICTION_RANGE_INDEXER: IPredictionRangeIndexer
             The dict that stores the already initialized indexed prediction ranges as well as the
             new ranges that are generated as the process goes. Notice that new ranges are only
             stored temporarily in RAM and not saved into the json indexer.
@@ -75,8 +68,8 @@ class Candlestick:
 
 
     # Lookback Prediction Range Indexer
-    INDEXER_NAME: str = "lookback_prediction_range_indexer"
-    PREDICTION_RANGE_INDEXER: Dict[str, List[int]] = {}
+    PREDICTION_RANGE_INDEXER_PATH: str = f"{BASE_PATH}/lookback_prediction_range_indexer.json"
+    PREDICTION_RANGE_INDEXER: IPredictionRangeIndexer = {}
 
 
 
@@ -301,7 +294,7 @@ class Candlestick:
             ValueError:
                 If the subset forecast df has less or more rows than the provided lookback.
         """
-        return Candlestick.get_lookback_df(lookback, current_time)['c']
+        return Candlestick.get_lookback_df(lookback, current_time)["c"]
 
 
 
@@ -369,12 +362,9 @@ class Candlestick:
         """Checks if the indexer's file exists. If so, it loads it. 
         Otherwise, prints a warning.
         """
-        # Init the file's path
-        path: str = f"{Candlestick.BASE_PATH}/{Candlestick.INDEXER_NAME}.json"
-
         # Check if the file exists
-        if isfile(path):
-            Candlestick.PREDICTION_RANGE_INDEXER = load(open(path))
+        if isfile(Candlestick.PREDICTION_RANGE_INDEXER_PATH):
+            Candlestick.PREDICTION_RANGE_INDEXER = load(open(Candlestick.PREDICTION_RANGE_INDEXER_PATH))
         else:
             print("CandlesticksWarning: the lookback prediction range indexer file could not be found. Making use of the indexer\
                 improves performance significantly.")
@@ -407,7 +397,7 @@ class Candlestick:
         df: DataFrame = Candlestick.get_lookback_df(lookback, current_time)
 
         # Return the first ot and the last ct
-        return int(df.iloc[0]['ot']), int(df.iloc[-1]['ct'])
+        return int(df.iloc[0]["ot"]), int(df.iloc[-1]["ct"])
 
 
 

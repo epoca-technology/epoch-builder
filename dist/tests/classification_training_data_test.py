@@ -6,6 +6,8 @@ from modules.types import ITrainingDataConfig, ICompressedTrainingData, ITrainin
 from modules.database.Database import Database
 from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
+from modules.model.ArimaModel import ArimaModel
+from modules.model.RegressionModel import RegressionModel
 from modules.classification_training_data.ClassificationTrainingData import ClassificationTrainingData
 from modules.classification_training_data.TrainingDataCompression import compress_training_data, decompress_training_data
 
@@ -30,11 +32,43 @@ DEFAULT_CONFIG: ITrainingDataConfig = {
     'up_percent_change': 2, 
     'down_percent_change': 2, 
     'models': [
-        { "id": "A101","arima_models": [{"arima": {"p": 1, "d": 0,"q": 1}}] },
-        { "id": "A111","arima_models": [{"arima": {"p": 1, "d": 1,"q": 1}}] },
-        { "id": "A112","arima_models": [{"arima": {"p": 1, "d": 1,"q": 2}}] },
-        { "id": "A121","arima_models": [{"arima": {"p": 1, "d": 2,"q": 1}}] },
-        { "id": "R_UNIT_TEST","regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": {"long": 1.5, "short": 1.5}}] }
+        {
+            "id": "A101",
+            "arima_models": [{
+                "lookback": ArimaModel.DEFAULT_LOOKBACK,
+                "predictions": ArimaModel.DEFAULT_PREDICTIONS,
+                "arima": {"p": 1,"d": 0,"q": 1},
+                "interpreter": ArimaModel.DEFAULT_INTERPRETER
+            }]
+        },
+        {
+            "id": "A111",
+            "arima_models": [{
+                "lookback": ArimaModel.DEFAULT_LOOKBACK,
+                "predictions": ArimaModel.DEFAULT_PREDICTIONS,
+                "arima": {"p": 1,"d": 1,"q": 1},
+                "interpreter": ArimaModel.DEFAULT_INTERPRETER
+            }]
+        },
+        {
+            "id": "A112",
+            "arima_models": [{
+                "lookback": ArimaModel.DEFAULT_LOOKBACK,
+                "predictions": ArimaModel.DEFAULT_PREDICTIONS,
+                "arima": {"p": 1,"d": 1,"q": 2},
+                "interpreter": ArimaModel.DEFAULT_INTERPRETER
+            }]
+        },
+        {
+            "id": "A121",
+            "arima_models": [{
+                "lookback": ArimaModel.DEFAULT_LOOKBACK,
+                "predictions": ArimaModel.DEFAULT_PREDICTIONS,
+                "arima": {"p": 1,"d": 2,"q": 1},
+                "interpreter": ArimaModel.DEFAULT_INTERPRETER
+            }]
+        },
+        { "id": "R_UNIT_TEST", "regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": RegressionModel.DEFAULT_INTERPRETER}] }
     ],
     "include_rsi": False,
     "include_stoch": False,

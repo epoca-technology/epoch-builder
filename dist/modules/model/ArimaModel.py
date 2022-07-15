@@ -71,16 +71,13 @@ class ArimaModel(ModelInterface):
         model_config: IArimaModelConfig = config["arima_models"][0]
 
         # Initialize the lookback
-        self.lookback: int = model_config["lookback"] \
-            if isinstance(model_config.get("lookback"), int) else ArimaModel.DEFAULT_LOOKBACK
+        self.lookback: int = model_config["lookback"]
 
         # Initialize the number of predictions
-        self.predictions: int = model_config["predictions"] \
-            if isinstance(model_config.get("predictions"), int) else ArimaModel.DEFAULT_PREDICTIONS
+        self.predictions: int = model_config["predictions"]
 
         # Initialize the Interpreter Instance
-        self.interpreter: PercentageChangeInterpreter = PercentageChangeInterpreter(model_config["interpreter"] \
-            if isinstance(model_config.get("interpreter"), dict) else ArimaModel.DEFAULT_INTERPRETER)
+        self.interpreter: PercentageChangeInterpreter = PercentageChangeInterpreter(model_config["interpreter"])
 
         # Initialize the Arima Wrapper
         self.arima: Arima = Arima(model_config["arima"], self.predictions)

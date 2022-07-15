@@ -1,6 +1,7 @@
 from typing import List, Union
 from pandas import DataFrame
-from modules.types import IModel, IPrediction, IPredictionMetaData, IRegressionModelConfig
+from modules.types import IModel, IPrediction, IPredictionMetaData, IRegressionModelConfig,\
+    IPercentChangeInterpreterConfig
 from modules.candlestick.Candlestick import Candlestick
 from modules.interpreter.PercentageChangeInterpreter import PercentageChangeInterpreter
 from modules.prediction_cache.RegressionPredictionCache import RegressionPredictionCache
@@ -17,6 +18,14 @@ class RegressionModel(ModelInterface):
     
     This class is responsible of handling interactions with Keras Regression Models.
 
+    Class Properties:
+        DEFAULT_LOOKBACK: int
+            The default lookback value.
+        DEFAULT_PREDICTIONS: int
+            The default predictions value.
+        DEFAULT_INTERPRETER: IPercentChangeInterpreterConfig
+            The default interpreter configuration.
+
     Instance Properties:
         id: str
             The identifier of the saved keras model.
@@ -27,6 +36,15 @@ class RegressionModel(ModelInterface):
         cache: RegressionPredictionCache
             The instance of the prediction cache.
     """
+    # Default Lookback
+    DEFAULT_LOOKBACK: int = 100
+
+    # Default # of Predictions
+    DEFAULT_PREDICTIONS: int = 30
+
+    # Default Interpreter
+    DEFAULT_INTERPRETER: IPercentChangeInterpreterConfig = { "long": 1, "short": 1 }
+
 
 
 

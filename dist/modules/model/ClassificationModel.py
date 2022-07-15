@@ -1,6 +1,7 @@
 from typing import List, Union
 from pandas import DataFrame
-from modules.types import IModel, IPrediction, IPredictionMetaData, IClassificationModelConfig, ITechnicalAnalysis
+from modules.types import IModel, IPrediction, IPredictionMetaData, IClassificationModelConfig, ITechnicalAnalysis,\
+    IProbabilityInterpreterConfig
 from modules.candlestick.Candlestick import Candlestick
 from modules.interpreter.ProbabilityInterpreter import ProbabilityInterpreter
 from modules.prediction_cache.ClassificationPredictionCache import ClassificationPredictionCache
@@ -18,6 +19,10 @@ class ClassificationModel(ModelInterface):
     
     This class is responsible of handling interactions with Keras Classification Models.
 
+    Class Properties:
+        DEFAULT_INTERPRETER: IProbabilityInterpreterConfig
+            The default interpreter configuration.
+
     Instance Properties:
         id: str
             The identifier of the saved keras model.
@@ -32,6 +37,8 @@ class ClassificationModel(ModelInterface):
         cache: ClassificationPredictionCache
             The instance of the prediction cache.
     """
+    # Default Interpreter
+    DEFAULT_INTERPRETER: IProbabilityInterpreterConfig = { "min_probability": 0.6 }
 
 
 

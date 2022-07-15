@@ -51,9 +51,9 @@ class ArimaModelTestCase(unittest.TestCase):
     def testInitWithDefaultValues(self):
         # Init the config
         config: IModel = deepcopy(BASIC_CONFIG)
-        del config['arima_models'][0]['lookback']
-        del config['arima_models'][0]['predictions']
-        del config['arima_models'][0]['interpreter']
+        config['arima_models'][0]['lookback'] = ArimaModel.DEFAULT_LOOKBACK
+        config['arima_models'][0]['predictions'] = ArimaModel.DEFAULT_PREDICTIONS
+        config['arima_models'][0]['interpreter'] = ArimaModel.DEFAULT_INTERPRETER
 
         # Init the model
         model: ArimaModel = ArimaModel(config)
