@@ -6,7 +6,7 @@ from copy import deepcopy
 from shutil import rmtree
 from inquirer import List as InquirerList, prompt
 from modules.types import IRegressionTrainingCertificate, IClassificationTrainingCertificate, \
-    ITrainableModelType, ITrainableModelPrefix, IRegressionTrainingBatch, IClassificationTrainingBatch,\
+    ITrainableModelType, IModelIDPrefix, IRegressionTrainingBatch, IClassificationTrainingBatch,\
         IRegressionTrainingConfig, IClassificationTrainingConfig
 from modules.epoch.Epoch import Epoch
 from modules.utils.Utils import Utils
@@ -33,14 +33,14 @@ model_type_answer: Dict[str, str] = prompt([
     )
 ])
 model_type: ITrainableModelType = model_type_answer["model_type"]
-prefix: ITrainableModelPrefix
+prefix: IModelIDPrefix
 config_file_name: str
 if model_type == "keras_regression":
     prefix = "R_"
     config_file_name = "RegressionTraining.json"
 elif model_type == "keras_classification":
     prefix = "C_"
-    config_file_name = "RegressionTraining.json"
+    config_file_name = "ClassificationTraining.json"
 
 
 

@@ -18,7 +18,7 @@ if not Database.TEST_MODE:
 
 # TRAINING DATA FILE
 CONFIG: IModel = {
-    "id": "CONSENSUS_UNIT_TEST",    
+    "id": "CON_UNIT_TEST",    
     "arima_models": [{"lookback": 150,"predictions": 10,"arima": { "p": 2, "d": 1, "q": 2 },"interpreter": { "long": 0.5, "short": 0.5 }}],
     "regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": { "long": 1, "short": 1 }}],
     "classification_models": [{"classification_id": "C_UNIT_TEST", "interpreter": { "min_probability": 0.51 }}],

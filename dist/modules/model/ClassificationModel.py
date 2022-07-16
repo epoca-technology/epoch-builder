@@ -5,6 +5,7 @@ from modules.types import IModel, IPrediction, IPredictionMetaData, IClassificat
 from modules.candlestick.Candlestick import Candlestick
 from modules.interpreter.ProbabilityInterpreter import ProbabilityInterpreter
 from modules.prediction_cache.ClassificationPredictionCache import ClassificationPredictionCache
+from modules.model.ModelType import validate_id
 from modules.model.Interface import ModelInterface
 from modules.model.ArimaModel import ArimaModel
 from modules.model.RegressionModel import RegressionModel
@@ -60,6 +61,7 @@ class ClassificationModel(ModelInterface):
                 Received: {len(config['classification_models'])}")
 
         # Initialize the ID of the model
+        validate_id("ClassificationModel", config["id"])
         self.id: str = config["id"]
 
         # Initialize the Model's Config

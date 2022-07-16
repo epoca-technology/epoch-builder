@@ -4,6 +4,7 @@ from modules.types import IModel, IPrediction, IPredictionMetaData, IPredictionR
 from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
 from modules.interpreter.ConsensusInterpreter import ConsensusInterpreter
+from modules.model.ModelType import validate_id
 from modules.model.Interface import ModelInterface
 from modules.model.ArimaModel import ArimaModel
 from modules.model.RegressionModel import RegressionModel
@@ -56,6 +57,7 @@ class ConsensusModel(ModelInterface):
             raise ValueError(f"The provided consensus_model configuration is invalid.")
 
         # Initialize the ID of the model
+        validate_id("ConsensusModel", config["id"])
         self.id: str = config["id"]
 
         # Initialize the sub_models
@@ -94,7 +96,11 @@ class ConsensusModel(ModelInterface):
                 for model_config in config["arima_models"]:
                     models.append(ArimaModel({
                         "id": f"A{model_config['arima']['p']}{model_config['arima']['d']}{model_config['arima']['q']}",
-                        "arima_models": [{"arima": model_config["arima"], "interpreter": model_config["interpreter"]}]
+                        "arima_models": [{
+                            "lookback": model_config["lookback"], 
+                            "predictions": model_config["predictions"], 
+                            "arima": model_config["arima"], 
+                            "interpreter": model_config["interpreter"]}]
                     }))
             else:
                 raise ValueError("Received an empty list in the arima_models configuration.")

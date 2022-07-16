@@ -5,6 +5,7 @@ from modules.types import IModel, IPrediction, IPredictionMetaData, IRegressionM
 from modules.candlestick.Candlestick import Candlestick
 from modules.interpreter.PercentageChangeInterpreter import PercentageChangeInterpreter
 from modules.prediction_cache.RegressionPredictionCache import RegressionPredictionCache
+from modules.model.ModelType import validate_id
 from modules.model.Interface import ModelInterface
 from modules.regression.Regression import Regression
 
@@ -64,6 +65,7 @@ class RegressionModel(ModelInterface):
                 Received: {len(config['regression_models'])}")
 
         # Initialize the ID of the model
+        validate_id("RegressionModel", config["id"])
         self.id: str = config["id"]
 
         # Initialize the Model's Config

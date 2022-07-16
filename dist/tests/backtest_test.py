@@ -42,7 +42,7 @@ CONFIG: IBacktestConfig = {
             "classification_models": [{"classification_id": "C_UNIT_TEST", "interpreter": ClassificationModel.DEFAULT_INTERPRETER}]
         },
         {
-            "id": "CONSENSUS_UNIT_TEST",    
+            "id": "CON_UNIT_TEST",    
             "arima_models": [{
                 "lookback": ArimaModel.DEFAULT_LOOKBACK,
                 "predictions": ArimaModel.DEFAULT_PREDICTIONS,

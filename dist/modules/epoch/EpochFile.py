@@ -5,7 +5,9 @@ from shutil import rmtree
 from json import load, dumps
 from modules.types import IConfigPath, IBacktestAssetsPath, IModelAssetsPath, IEpochConfig, \
     IBacktestConfig, IRegressionTrainingBatch, ITrainingDataConfig, IClassificationTrainingBatch
+from modules.model.ModelType import TRAINABLE_MODEL_TYPES
 from modules.utils.Utils import Utils
+from modules.epoch.PositionExitCombination import PositionExitCombination
 
 
 
@@ -31,31 +33,35 @@ class EpochFile:
     """
     # Configuration Files' Paths
     CONFIG_PATH: IConfigPath = {
-        "epoch":                                "config/Epoch.json",
-        "backtest":                             "config/Backtest.json",
-        "regression_training":                  "config/RegressionTraining.json",
-        "classification_training_data":         "config/ClassificationTrainingData.json",
-        "classification_training":              "config/ClassificationTraining.json"
+        "epoch":                                    "config/Epoch.json",
+        "backtest":                                 "config/Backtest.json",
+        "classification_training_data":             "config/ClassificationTrainingData.json",
+        "keras_classification_training":            "config/KerasClassificationTraining.json",
+        "keras_regression_training":                "config/KerasRegressionTraining.json",
+        "xgb_classification_training":              "config/XGBClassificationTraining.json",
+        "xgb_regression_training":                  "config/XGBRegressionTraining.json",
     }
 
     # Backtest Files' Paths
     BACKTEST_PATH: IBacktestAssetsPath = {
-        "assets":                               "backtest_assets",
-        "configurations":                       "backtest_assets/configurations",
-        "results":                              "backtest_assets/results",
-        "regression_selection":                 "backtest_assets/regression_selection",
+        "assets":                                   "backtest_assets",
+        "configurations":                           "backtest_assets/configurations",
+        "results":                                  "backtest_assets/results",
+        "regression_selection":                     "backtest_assets/regression_selection",
     }
 
     # Model Files' Paths
     MODEL_PATH: IModelAssetsPath = {
-        "assets":                               "model_assets",
-        "batched_training_certificates":        "model_assets/batched_training_certificates",
-        "classification_training_configs":      "model_assets/classification_training_configs",
-        "classification_training_data":         "model_assets/classification_training_data",
-        "classification_training_data_configs": "model_assets/classification_training_data_configs",
-        "models":                               "model_assets/models",
-        "models_bank":                          "model_assets/models_bank",
-        "regression_training_configs":          "model_assets/regression_training_configs",
+        "assets":                                   "model_assets",
+        "batched_training_certificates":            "model_assets/batched_training_certificates",
+        "classification_training_data":             "model_assets/classification_training_data",
+        "classification_training_data_configs":     "model_assets/classification_training_data_configs",
+        "models":                                   "model_assets/models",
+        "models_bank":                              "model_assets/models_bank",
+        "keras_classification_training_configs":    "model_assets/keras_classification_training_configs",
+        "keras_regression_training_configs":        "model_assets/keras_regression_training_configs",
+        "xgb_classification_training_configs":      "model_assets/xgb_classification_training_configs",
+        "xgb_regression_training_configs":          "model_assets/xgb_regression_training_configs",
     }
 
 
@@ -103,11 +109,44 @@ class EpochFile:
 
 
 
-    ## Epoch Directories Init ##
+    ## Epoch Directories Creation ##
 
 
 
 
+
+    @staticmethod
+    def create_epoch_directories(epoch_id: str) -> None:
+        """Creates all the directories required for the epoch to function.
+
+        Args:
+            epoch_id: str
+                The identifier of the epoch.
+        """
+        # Create all the backtest asset directories
+        EpochFile.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['assets']}")
+        EpochFile.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['configurations']}")
+        EpochFile.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['results']}")
+        EpochFile.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['regression_selection']}")
+        for exit_combination in PositionExitCombination.get_records():
+            EpochFile.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['configurations']}/{exit_combination['path']}")
+            EpochFile.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['results']}/{exit_combination['path']}")
+
+        # Create all the model asset directories
+        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['assets']}")
+        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['batched_training_certificates']}")
+        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['batched_training_certificates']}/unit_tests")
+        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['classification_training_data']}")
+        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['classification_training_data_configs']}")
+        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['models']}")
+        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['models_bank']}")
+        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['keras_classification_training_configs']}")
+        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['keras_regression_training_configs']}")
+        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['xgb_classification_training_configs']}")
+        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['xgb_regression_training_configs']}")
+        for trainable_model in TRAINABLE_MODEL_TYPES:
+            EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['batched_training_certificates']}/{trainable_model}")
+            EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['models_bank']}/{trainable_model}")
 
 
 

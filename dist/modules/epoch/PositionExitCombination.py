@@ -1,5 +1,6 @@
 from typing import List
-from modules.types import IPositionExitCombinationDatabase, IPositionExitCombinationID, IPositionExitCombinationPath
+from modules.types import IPositionExitCombinationDatabase, IPositionExitCombinationID, IPositionExitCombinationPath,\
+    IPositionExitCombinationRecord
 
 
 
@@ -111,10 +112,10 @@ class PositionExitCombination:
 
 
     @staticmethod
-    def get_paths() -> List[IPositionExitCombinationPath]:
+    def get_records() -> List[IPositionExitCombinationRecord]:
         """Retrieves a list with all the combination paths.
 
         Returns:
             List[IPositionExitCombinationPath]
         """
-        return [record["path"] for record in PositionExitCombination.DB.values()]
+        return PositionExitCombination.DB.values()

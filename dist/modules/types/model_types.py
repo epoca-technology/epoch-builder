@@ -84,14 +84,6 @@ class IPrediction(TypedDict):
 
 
 
-# Trainable Model Types
-ITrainableModelType = Literal["keras_regression", "keras_classification"]
-
-
-# Trainable Model ID Prefix
-ITrainableModelPrefix = Literal["R_", "C_"]
-
-
 
 
 
@@ -157,6 +149,38 @@ class IClassificationConfig(TypedDict):
 
 
 
+## Model Types ##
+
+
+# Types of models supported by the project
+IModelType = Literal[
+    "ArimaModel",               # A
+    "RegressionModel",          # R_
+    "ClassificationModel",      # C_
+    "XGBRegressionModel",       # XGBR_
+    "XGBClassificationModel",   # XGBC_
+    "ConsensusModel"            # CON_
+]
+
+
+# Trainable Model Types
+ITrainableModelType = Literal[
+    "keras_regression",     # RegressionModel
+    "keras_classification", # ClassificationModel
+    "xgb_regression",       # XGBRegressionModel
+    "xgb_classification"    # XGBClassificationModel
+]
+
+
+# Model ID Prefix
+IModelIDPrefix = Literal[
+    "A",       # ArimaModel
+    "R_",      # RegressionModel
+    "C_",      # ClassificationModel
+    "XGBR_",   # XGBRegressionModel
+    "XGBC_",   # XGBClassificationModel
+    "CON_",    # ConsensusModel
+]
 
 
 

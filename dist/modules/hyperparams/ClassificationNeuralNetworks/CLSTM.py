@@ -45,9 +45,7 @@ C_CLSTM_S1: List[IKerasModelConfig] = [
     {"filters": [128], "kernel_sizes": [3], "units": [512], "activations": [""]},
 
     {"filters": [256], "kernel_sizes": [3], "units": [256], "activations": [""]},
-    {"filters": [256], "kernel_sizes": [3], "units": [512], "activations": [""]},
-
-    {"filters": [512], "kernel_sizes": [3], "units": [512], "activations": [""]}
+    {"filters": [256], "kernel_sizes": [3], "units": [512], "activations": [""]}
 ]
 
 
@@ -76,9 +74,7 @@ C_CLSTM_S1_MP: List[IKerasModelConfig] = [
     {"filters": [128], "kernel_sizes": [3], "pool_sizes": [2], "units": [512], "activations": [""]},
 
     {"filters": [256], "kernel_sizes": [3], "pool_sizes": [2], "units": [256], "activations": [""]},
-    {"filters": [256], "kernel_sizes": [3], "pool_sizes": [2], "units": [512], "activations": [""]},
-
-    {"filters": [512], "kernel_sizes": [3], "pool_sizes": [2], "units": [512], "activations": [""]}
+    {"filters": [256], "kernel_sizes": [3], "pool_sizes": [2], "units": [512], "activations": [""]}
 ]
 
 
