@@ -14,10 +14,10 @@ if not Database.TEST_MODE:
 
 
 
-# TRAINING DATA FILE
+# TEST DATA
 CONFIG: IModel = {
     "id": "R_UNIT_TEST",
-    "regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": { "long": 1, "short": 1 }}]
+    "regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": RegressionModel.DEFAULT_INTERPRETER}]
 }
 
 

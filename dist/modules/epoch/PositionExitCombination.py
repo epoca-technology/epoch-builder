@@ -113,9 +113,9 @@ class PositionExitCombination:
 
     @staticmethod
     def get_records() -> List[IPositionExitCombinationRecord]:
-        """Retrieves a list with all the combination paths.
+        """Retrieves a list with all the combination records.
 
         Returns:
-            List[IPositionExitCombinationPath]
+            List[IPositionExitCombinationRecord]
         """
         return PositionExitCombination.DB.values()

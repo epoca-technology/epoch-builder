@@ -148,17 +148,15 @@ class IEpochConfig(TypedDict):
     # Identifier, must be preffixed with "_". For example: "_EPOCHNAME"
     id: str
 
-    # The range of the Epoch and is used to calculate the backtest and training ranges
+    # The range of the Epoch. These values are used for:
+    # 1) Calculate the Backtests' Date ranges (epoch_width * 0.35)
+    # 2) Train Keras and XGBoost Models (epoch_width)
     start: int
     end: int
 
-    # The range that will be used to backtest all the models (epoch_width * 0.5)
+    # The range that will be used to backtest all the models
     backtest_start: int
     backtest_end: int
-
-    # The range that will be used to train the Keras & XGBoost Models (epoch_width * 1.5)
-    training_start: int
-    training_end: int
 
     # Price Change Requirement
     # This value is used to evaluate Keras & XGB Regression Models. When creating an Epoch or 
@@ -184,7 +182,7 @@ class IEpochConfig(TypedDict):
 
 # Default values to speed up the creation process
 class IEpochDefaults(TypedDict):
-    epoch_width: int
+    epoch_width: int # Number of months that will comprise the Epoch
     seed: int
     price_change_requirement: int
     idle_minutes_on_position_close: int

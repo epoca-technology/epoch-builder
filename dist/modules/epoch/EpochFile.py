@@ -368,7 +368,7 @@ class EpochFile:
 
     @staticmethod
     def make_directory(path: str) -> None:
-        """Creates a directory at a given path.
+        """Creates a directory at a given path if it doesnt already exist.
 
         Args:
             path: str
@@ -426,6 +426,7 @@ class EpochFile:
         
         Returns:
             Any
+
         Raises:
             RuntimeError:
                 If the file does not exist and allow_empty is set to False.

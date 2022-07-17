@@ -1,6 +1,8 @@
 from typing import Union
 from modules.types import IBacktestConfig
-
+from modules.model.ArimaModel import ArimaModel
+from modules.model.RegressionModel import RegressionModel
+from modules.model.ClassificationModel import ClassificationModel
 
 
 
@@ -17,21 +19,43 @@ def _backtest_config_ut(price_change_requirement: float, idle_minutes_on_positio
         "models": [
             {
                 "id": "A212",
-                "arima_models": [{"lookback": 150,"predictions": 10,"arima": { "p": 2, "d": 1, "q": 2 },"interpreter": { "long": 0.05, "short": 0.05 }}]
+                "arima_models": [{
+                    "lookback": ArimaModel.DEFAULT_LOOKBACK,
+                    "predictions": ArimaModel.DEFAULT_PREDICTIONS,
+                    "arima": { "p": 2, "d": 1, "q": 2 },
+                    "interpreter": ArimaModel.DEFAULT_INTERPRETER
+                }]
             },
             {
                 "id": "R_UNIT_TEST",
-                "regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": {"long": 1,"short": 1}}]
+                "regression_models": [{
+                    "regression_id": "R_UNIT_TEST", 
+                    "interpreter": RegressionModel.DEFAULT_INTERPRETER
+                }]
             },
             {
                 "id": "C_UNIT_TEST",
-                "classification_models": [{"classification_id": "C_UNIT_TEST", "interpreter": {"min_probability": 0.6}}]
+                "classification_models": [{
+                    "classification_id": "C_UNIT_TEST", 
+                    "interpreter": ClassificationModel.DEFAULT_INTERPRETER
+                }]
             },
             {
                 "id": "CON_UNIT_TEST",    
-                "arima_models": [{"lookback": 150,"predictions": 10,"arima": { "p": 2, "d": 1, "q": 2 },"interpreter": { "long": 0.05, "short": 0.05 }}],
-                "regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": { "long": 1, "short": 1 }}],
-                "classification_models": [{"classification_id": "C_UNIT_TEST", "interpreter": { "min_probability": 0.6 }}],
+                "arima_models": [{
+                    "lookback": ArimaModel.DEFAULT_LOOKBACK,
+                    "predictions": ArimaModel.DEFAULT_PREDICTIONS,
+                    "arima": { "p": 2, "d": 1, "q": 2 },
+                    "interpreter": ArimaModel.DEFAULT_INTERPRETER
+                }],
+                "regression_models": [{
+                    "regression_id": "R_UNIT_TEST", 
+                    "interpreter": RegressionModel.DEFAULT_INTERPRETER
+                }],
+                "classification_models": [{
+                    "classification_id": "C_UNIT_TEST", 
+                    "interpreter": ClassificationModel.DEFAULT_INTERPRETER
+                }],
                 "consensus_model": { "interpreter": { "min_consensus": 2 } }
             }
         ]
