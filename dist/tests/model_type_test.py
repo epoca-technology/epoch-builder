@@ -97,7 +97,7 @@ class ModelTypeTestCase(unittest.TestCase):
         #Iterate over each test item
         for item in ITEMS:
             # Validate the ID
-            validate_id(item["id"])
+            validate_id(item["model_type"], item["id"])
 
             # Extract the model prefix from the id or the prefix itself
             self.assertEqual(get_prefix(item["id"]), item["prefix"])
@@ -128,7 +128,7 @@ class ModelTypeTestCase(unittest.TestCase):
         for id_or_prefix in INVALID_LIST:
             # The validation should raise an error
             with self.assertRaises(ValueError):
-                validate_id(id_or_prefix)
+                validate_id("RegressionModel", id_or_prefix)
 
             # The prefix retriever should raise an error
             with self.assertRaises(ValueError):

@@ -72,7 +72,11 @@ def evaluate(
     # Init the values that will help evaluate if the model's evaluation should continue 
     # or be aborted in order to save time and resources.
     es: EarlyStopping = EarlyStopping(df.shape[0])
-    es_motive: Union[str, None] = None
+    early_stopping: Union[str, None] = None
+    es_checkpoint_1: int = int(df.shape[0] * 0.15)
+    es_checkpoint_2: int = int(df.shape[0] * 0.3)
+    es_checkpoint_3: int = int(df.shape[0] * 0.5)
+    es_checkpoint_4: int = int(df.shape[0] * 0.7)
 
     # Iterate over each 1 minute candlestick from the test dataset
     for candlestick_index, candlestick in df.iterrows():
@@ -142,10 +146,18 @@ def evaluate(
                     last_neutral_ct = last_ct
 
         # Perform the early stopping evaluation
-        es_motive = es.check(position.points[-1], candlestick_index, position.long_num, position.short_num)
+        early_stopping = _perform_early_stopping_evaluation(
+            current_points=position.points[-1],
+            eval_checkpoint_1=candlestick_index >= es_checkpoint_1 and candlestick_index < es_checkpoint_2,
+            eval_checkpoint_2=candlestick_index >= es_checkpoint_2 and candlestick_index < es_checkpoint_3,
+            eval_checkpoint_3=candlestick_index >= es_checkpoint_3 and candlestick_index < es_checkpoint_4,
+            eval_checkpoint_4=candlestick_index >= es_checkpoint_4,
+            longs_num=position.long_num,
+            shorts_num=position.short_num
+        )
 
         # Check if the early stopping has been triggered
-        if isinstance(es_motive, str):
+        if isinstance(early_stopping, str):
             break
 
         # Otherwise, update the progress bar and move on to the next candlestick
@@ -157,7 +169,7 @@ def evaluate(
 
     # Finally, return the results
     return _build_evaluation_result(
-        early_stopping=es_motive,
+        early_stopping=early_stopping,
         neutral_predictions=neutral_predictions,
         increase=increase,
         increase_successful=increase_successful,
@@ -207,6 +219,55 @@ def _get_prediction_metadata_value(model_type: str, pred: IPrediction) -> float:
 
 
 
+
+def _perform_early_stopping_evaluation(
+    current_points: float,
+    eval_checkpoint_1: bool,
+    eval_checkpoint_2: bool,
+    eval_checkpoint_3: bool,
+    eval_checkpoint_4: bool,
+    longs_num: int,
+    shorts_num: int
+) -> Union[str, None]:
+    """Verifies if the model evaluation should be stopped early. If so, it returns
+    a string describing the reason. Otherwise, returns None. The Model Evaluation will stop early if:
+    1) The model reaches -20 points
+    2) The model has less than 1 long or 1 short at the first early stopping checkpoint (15% of the dataset)
+    3) The model has less than 3 longs or 3 shorts at the first early stopping checkpoint (30% of the dataset)
+    4) The model has less than 10 longs or 10 shorts at the second early stopping checkpoint (50% of the dataset)
+    5) The model has less than 15 longs or 15 shorts at the third early stopping checkpoint (70% of the dataset)
+
+    Args:
+        current_points: float
+            The points that have been collected by the model so far.
+        eval_checkpoint_1: bool
+        eval_checkpoint_2: bool
+        eval_checkpoint_3: bool
+        eval_checkpoint_4: bool
+            The checkpoint evaluation that should be performed based on the progress.
+        longs_num: int
+        shorts_num: int
+            The number of long and short positions predicted by the model so far.
+    """
+    # Make sure the min points has not been reached
+    if current_points <= -20:
+        return "The model evaluation was stopped because the model reached -20 points."
+
+    # If the first checkpoint should be evaluated, make sure it has the min required positions
+    elif eval_checkpoint_1 and (longs_num < 1 or shorts_num < 1):
+        return "The model evaluation was stopped because the model had less than 1 long or short during the first checkpoint."
+
+    # If the second checkpoint should be evaluated, make sure it has the min required positions
+    elif eval_checkpoint_2 and (longs_num < 3 or shorts_num < 3):
+        return "The model evaluation was stopped because the model had less than 3 longs or shorts during the second checkpoint."
+
+    # If the third checkpoint should be evaluated, make sure it has the min required positions
+    elif eval_checkpoint_3 and (longs_num < 10 or shorts_num < 10):
+        return "The model evaluation was stopped because the model had less than 10 longs or shorts during the third checkpoint."
+
+    # If the third checkpoint should be evaluated, make sure it has the min required positions
+    elif eval_checkpoint_4 and (longs_num < 15 or shorts_num < 15):
+        return "The model evaluation was stopped because the model had less than 15 longs or shorts during the fourth checkpoint."
 
 
 

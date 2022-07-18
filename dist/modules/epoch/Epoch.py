@@ -135,29 +135,29 @@ class Epoch:
 
         # Check if the candlesticks' prediction range need to be indexed
         if EpochFile.file_exists(Candlestick.PREDICTION_RANGE_INDEXER_PATH):
-            print("1/6) Creating Prediction Range Indexer: Skipped")
+            print("1/7) Creating Prediction Range Indexer: Skipped")
         else:
-            create_indexer(lookbacks, "1/6) Creating Prediction Range Indexer")
+            create_indexer(lookbacks, "1/7) Creating Prediction Range Indexer")
 
         # Calculate the epoch's date ranges
-        print("2/6) Calculating the Epoch Range...")
+        print("2/7) Calculating the Epoch Range...")
         start, end = Epoch._calculate_date_range(epoch_width)
         backtest_start, backtest_end = Epoch._calculate_date_range(ceil(epoch_width * 0.35))
 
         # Initialize the Epoch's directories
-        print("3/6) Creating Directories...")
+        print("3/7) Creating Directories...")
         EpochFile.create_epoch_directories(id)
 
         # Generate Arima's Backtest Configurations
-        print("4/6) Generating Arima Backtest Configuration Files...")
-
+        print("4/7) Generating Arima Backtest Configuration Files...")
+        # @TODO
 
         # Create the Epoch's Default Files
-        print("5/6) Creating Default Files...")
-
+        print("5/7) Creating Default Files...")
+        # @TODO
 
         # Save the epoch's config file
-        print("6/6) Saving Epoch Configuration...")
+        print("6/7) Saving Epoch Configuration...")
         EpochFile.update_epoch_config({
             "seed": seed,
             "id": id,
@@ -168,6 +168,11 @@ class Epoch:
             "price_change_requirement": price_change_requirement,
             "idle_minutes_on_position_close": idle_minutes_on_position_close
         })
+
+        # Add the Epoch's Directory to the gitignore file
+        print("7/7) Adding Epoch to .gitignore file...")
+        EpochFile.add_epoch_to_gitignore_file(id)
+
 
 
 
@@ -315,6 +320,8 @@ class Epoch:
         #Epoch.PRICE_CHANGE_REQUIREMENT = config["price_change_requirement"]
         #Epoch.IDLE_MINUTES_ON_POSITION_CLOSE = config["idle_minutes_on_position_close"]
         #Epoch.UT_CLASS_TRAINING_DATA_ID = config.get("ut_class_training_data_id")
+        #Epoch.TAKE_PROFIT = config.get("take_profit")
+        #Epoch.STOP_LOSS = config.get("stop_loss")
 
         # Set a static seed on all required libraries
         seed(Epoch.DEFAULTS["seed"])
@@ -485,10 +492,8 @@ class Epoch:
         stop_loss: float = config.get("stop_loss")
         if not isinstance(ut_class_training_data_id, str):
             raise RuntimeError("The Classification Training Data for Unit Tests has not been set.")
-        if not isinstance(take_profit, (int, float)):
-            raise RuntimeError("The Take Profit has not been set.")
-        if not isinstance(stop_loss, (int, float)):
-            raise RuntimeError("The Stop Loss has not been set.")
+        if not isinstance(take_profit, (int, float)) or not isinstance(stop_loss, (int, float)):
+            raise RuntimeError("The Take Profit or the Stop Loss has not been set.")
 
         # Make sure the epoch's directory exists
         if not EpochFile.directory_exists(config["id"]):

@@ -313,6 +313,43 @@ class EpochFile:
 
 
 
+    ## Git Ignore File ##
+
+
+
+
+    @staticmethod
+    def add_epoch_to_gitignore_file(epoch_id: str) -> None:
+        """Loads the entire .gitignore file and appends the epoch's
+        id at the end of it.
+
+        Args:
+            epoch_id: str
+                The ID of the epoch to be added to the gitignore file.
+        """
+        # Init the path of the file
+        path: str = ".gitignore"
+
+        # Init the file
+        gitignore: str = EpochFile.read(path)
+
+        # Append the new Epoch
+        gitignore += f"\n{epoch_id}"
+
+        # Save the file
+        EpochFile.write(path, gitignore)
+
+        
+
+
+
+
+
+
+
+
+
+
 
 
     ## File System Management ##
@@ -414,12 +451,12 @@ class EpochFile:
 
     @staticmethod
     def read(path: str, allow_empty: bool = False) -> Any:
-        """Reads a JSON file located at a given path and returns
+        """Reads a file located at a given path and returns
         its contents.
 
         Args:
             path: str
-                The path in which the JSON file is located.
+                The path in which the file is located.
             allow_empty: bool
                 If enabled, the function won't raise an error if the file
                 does not exist.
@@ -433,7 +470,14 @@ class EpochFile:
         """
         # Check if the file exists
         if EpochFile.file_exists(path):
-            return load(open(path))
+            # Split the path into path name and extension
+            path_name, extension = splitext(path)
+
+            # Read the file according to its format
+            if extension == ".json":
+                return load(open(path))
+            else:
+                return open(path).read()
 
         # Otherwise, check if an error needs to raised
         else:

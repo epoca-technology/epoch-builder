@@ -4,21 +4,37 @@ from modules.types.backtest_types import IBacktestPosition
 
 
 
-# Model Evaluation
-# Evaluation performed right after the model is trained in order to get an overview of the
-# potential accuracy, as well as the prediction type distribution.
-# The evaluation works similarly to the backtests and it is only performed on the test
-# dataset to ensure the model has not yet seen it.
-#
 # Early Stopping
 # The process of training and evaluating models creates a massive bottleneck as computing
 # resources are limited. In order to speed up the process, a Model Evaluation will stop early
 # if any of the following is met:
 # 1) The model reaches -20 points
 # 2) The model has less than 1 long or 1 short at the first early stopping checkpoint (15% of the dataset)
-# 3) The model has less than 3 longs or 3 shorts at the first early stopping checkpoint (30% of the dataset)
-# 4) The model has less than 10 longs or 10 shorts at the second early stopping checkpoint (50% of the dataset)
-# 5) The model has less than 15 longs or 15 shorts at the third early stopping checkpoint (70% of the dataset)
+# 3) The model has less than 3 longs or 3 shorts at the second early stopping checkpoint (30% of the dataset)
+# 4) The model has less than 10 longs or 10 shorts at the third early stopping checkpoint (50% of the dataset)
+# 5) The model has less than 15 longs or 15 shorts at the fourth early stopping checkpoint (70% of the dataset)
+class IEarlyStoppingCheckpoint(TypedDict):
+    # The candlestick index in which the checkpoint should be evaluated
+    index: int
+
+    # The state of the checkpoint
+    passed: bool
+
+    # The minimum required positions
+    required_longs: int
+    required_shorts: int
+
+    # The reason why the model's evaluation should be stopped early
+    motive: str
+
+
+
+
+# Model Evaluation
+# Evaluation performed right after the model is trained in order to get an overview of the
+# potential accuracy, as well as the prediction type distribution.
+# The evaluation works similarly to the backtests and it is only performed on the test
+# dataset to ensure the model has not yet seen it.
 class IModelEvaluation(TypedDict):
     # Early stopping description. Will only be present is the evaluation was stopped early.
     early_stopping: Union[str, None]
