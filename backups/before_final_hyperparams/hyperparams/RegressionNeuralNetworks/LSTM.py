@@ -12,11 +12,24 @@ from modules.types import IKerasModelConfig
 
 # Network Type
 class ILSTM(TypedDict):
+    R_LSTM_S1: List[IKerasModelConfig]
     R_LSTM_S2: List[IKerasModelConfig]
     R_LSTM_S3: List[IKerasModelConfig]
     R_LSTM_S4: List[IKerasModelConfig]
     R_LSTM_S5: List[IKerasModelConfig]
 
+
+
+# Regression LSTM Stack 1
+# R_LSTM_S1
+# 1 units: LSTM_1
+R_LSTM_S1: List[IKerasModelConfig] = [
+    {"units": [32]},
+    {"units": [64]},
+    {"units": [128]},
+    {"units": [256]},
+    {"units": [512]}
+]
 
 
 
@@ -124,6 +137,7 @@ R_LSTM_S5: List[IKerasModelConfig] = [
 
 # Network Variations
 LSTM: ILSTM = {
+    "R_LSTM_S1": R_LSTM_S1,
     "R_LSTM_S2": R_LSTM_S2,
     "R_LSTM_S3": R_LSTM_S3,
     "R_LSTM_S4": R_LSTM_S4,

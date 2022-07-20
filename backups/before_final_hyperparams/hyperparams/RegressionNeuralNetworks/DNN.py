@@ -9,19 +9,34 @@ from modules.types import IKerasModelConfig
 
 # Network Type
 class IDNN(TypedDict):
-    C_DNN_S2: List[IKerasModelConfig]
-    C_DNN_S3: List[IKerasModelConfig]
-    C_DNN_S4: List[IKerasModelConfig]
+    R_DNN_S1: List[IKerasModelConfig]
+    R_DNN_S2: List[IKerasModelConfig]
+    R_DNN_S3: List[IKerasModelConfig]
+    R_DNN_S4: List[IKerasModelConfig]
+    R_DNN_S5: List[IKerasModelConfig]
 
 
 
 
+# Regression DNN Stack 1
+# R_DNN_S1
+# 1 units:       Dense_1
+# 1 activations: Dense_1
+R_DNN_S1: List[IKerasModelConfig] = [
+    {"units": [32], "activations": [""]},
+    {"units": [64], "activations": [""]},
+    {"units": [128], "activations": [""]},
+    {"units": [256], "activations": [""]},
+    {"units": [512], "activations": [""]}
+]
 
-# Classification DNN Stack 2
-# C_DNN_S2 
+
+
+# Regression DNN Stack 2
+# R_DNN_S2 
 # 2 units:          Dense_1, Dense_2
 # 2 activations:    Dense_1, Dense_2
-C_DNN_S2: List[IKerasModelConfig] = [
+R_DNN_S2: List[IKerasModelConfig] = [
     {"units": [32, 32], "activations": ["", ""]},
 
     {"units": [64, 32], "activations": ["", ""]},
@@ -41,11 +56,11 @@ C_DNN_S2: List[IKerasModelConfig] = [
 
 
 
-# Classification DNN Stack 3
-# C_DNN_S3
+# Regression DNN Stack 3
+# R_DNN_S3
 # 3 units:          Dense_1, Dense_2, Dense_3
 # 3 activations:    Dense_1, Dense_2, Dense_3
-C_DNN_S3: List[IKerasModelConfig] = [
+R_DNN_S3: List[IKerasModelConfig] = [
     {"units": [32, 32, 32], "activations": ["", "", ""]},
 
     {"units": [64, 32, 32], "activations": ["", "", ""]},
@@ -68,17 +83,17 @@ C_DNN_S3: List[IKerasModelConfig] = [
 
 
 
-# Classification DNN Stack 4
-# C_DNN_S4
+# Regression DNN Stack 4
+# R_DNN_S4
 # 4 units:          Dense_1, Dense_2, Dense_3, Dense_4
 # 4 activations:    Dense_1, Dense_2, Dense_3, Dense_4
-C_DNN_S4: List[IKerasModelConfig] = [
+R_DNN_S4: List[IKerasModelConfig] = [
     {"units": [32, 32, 32, 32], "activations": ["", "", "", ""]},
 
     {"units": [64, 32, 32, 32], "activations": ["", "", "", ""]},
     {"units": [64, 64, 64, 64], "activations": ["", "", "", ""]},
 
-    {"units": [128, 64, 32, 32], "activations": ["", "", "", ""]},
+    {"units": [128, 64, 64, 32], "activations": ["", "", "", ""]},
     {"units": [128, 64, 64, 64], "activations": ["", "", "", ""]},
     {"units": [128, 128, 128, 128], "activations": ["", "", "", ""]},
 
@@ -94,11 +109,13 @@ C_DNN_S4: List[IKerasModelConfig] = [
 ]
 
 
-# Classification DNN Stack 5
-# C_DNN_S5
+
+
+# Regression DNN Stack 5
+# R_DNN_S5
 # 5 units:          Dense_1, Dense_2, Dense_3, Dense_4, Dense_5
 # 5 activations:    Dense_1, Dense_2, Dense_3, Dense_4, Dense_5
-C_DNN_S5: List[IKerasModelConfig] = [
+R_DNN_S5: List[IKerasModelConfig] = [
     {"units": [32, 32, 32, 32, 32], "activations": ["", "", "", "", ""]},
 
     {"units": [64, 32, 32, 32, 32], "activations": ["", "", "", "", ""]},
@@ -121,10 +138,12 @@ C_DNN_S5: List[IKerasModelConfig] = [
 
 
 
+
 # Network Variations
 DNN: IDNN = {
-    "C_DNN_S2": C_DNN_S2,
-    "C_DNN_S3": C_DNN_S3,
-    "C_DNN_S4": C_DNN_S4,
-    "C_DNN_S5": C_DNN_S5
+    "R_DNN_S1": R_DNN_S1,
+    "R_DNN_S2": R_DNN_S2,
+    "R_DNN_S3": R_DNN_S3,
+    "R_DNN_S4": R_DNN_S4,
+    "R_DNN_S5": R_DNN_S5
 }

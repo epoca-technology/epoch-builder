@@ -12,18 +12,32 @@ from modules.types import IKerasModelConfig
 
 # Network Type
 class ILSTM(TypedDict):
-    R_LSTM_S2: List[IKerasModelConfig]
-    R_LSTM_S3: List[IKerasModelConfig]
-    R_LSTM_S4: List[IKerasModelConfig]
-    R_LSTM_S5: List[IKerasModelConfig]
+    C_LSTM_S1: List[IKerasModelConfig]
+    C_LSTM_S2: List[IKerasModelConfig]
+    C_LSTM_S3: List[IKerasModelConfig]
+    C_LSTM_S4: List[IKerasModelConfig]
+    C_LSTM_S5: List[IKerasModelConfig]
 
 
 
 
-# Regression LSTM Stack 2
-# R_LSTM_S2
+# Classification LSTM Stack 1
+# C_LSTM_S1
+# 1 units: LSTM_1
+C_LSTM_S1: List[IKerasModelConfig] = [
+    {"units": [32]},
+    {"units": [64]},
+    {"units": [128]},
+    {"units": [256]},
+    {"units": [512]}
+]
+
+
+
+# Classification LSTM Stack 2
+# C_LSTM_S2
 # 2 units: LSTM_1, LSTM_2
-R_LSTM_S2: List[IKerasModelConfig] = [
+C_LSTM_S2: List[IKerasModelConfig] = [
     {"units": [32, 32]},
 
     {"units": [64, 32]},
@@ -43,10 +57,10 @@ R_LSTM_S2: List[IKerasModelConfig] = [
 
 
 
-# Regression LSTM Stack 3
-# R_LSTM_S3
+# Classification LSTM Stack 3
+# C_LSTM_S3
 # 3 units: LSTM_1, LSTM_2, LSTM_3
-R_LSTM_S3: List[IKerasModelConfig] = [
+C_LSTM_S3: List[IKerasModelConfig] = [
     {"units": [32, 32, 32]},
 
     {"units": [64, 32, 32]},
@@ -69,10 +83,10 @@ R_LSTM_S3: List[IKerasModelConfig] = [
 
 
 
-# Regression LSTM Stack 4
-# R_LSTM_S4
+# Classification LSTM Stack 4
+# C_LSTM_S4
 # 4 units: LSTM_1, LSTM_2, LSTM_3, LSTM_4
-R_LSTM_S4: List[IKerasModelConfig] = [
+C_LSTM_S4: List[IKerasModelConfig] = [
     {"units": [32, 32, 32, 32]},
 
     {"units": [64, 32, 32, 32]},
@@ -94,11 +108,10 @@ R_LSTM_S4: List[IKerasModelConfig] = [
 ]
 
 
-
-# Regression LSTM Stack 5
-# R_LSTM_S5
+# Classification LSTM Stack 5
+# C_LSTM_S5
 # 5 units: LSTM_1, LSTM_2, LSTM_3, LSTM_4, LSTM_5
-R_LSTM_S5: List[IKerasModelConfig] = [
+C_LSTM_S5: List[IKerasModelConfig] = [
     {"units": [32, 32, 32, 32, 32]},
 
     {"units": [64, 32, 32, 32, 32]},
@@ -121,11 +134,11 @@ R_LSTM_S5: List[IKerasModelConfig] = [
 
 
 
-
 # Network Variations
 LSTM: ILSTM = {
-    "R_LSTM_S2": R_LSTM_S2,
-    "R_LSTM_S3": R_LSTM_S3,
-    "R_LSTM_S4": R_LSTM_S4,
-    "R_LSTM_S5": R_LSTM_S5
+    "C_LSTM_S1": C_LSTM_S1,
+    "C_LSTM_S2": C_LSTM_S2,
+    "C_LSTM_S3": C_LSTM_S3,
+    "C_LSTM_S4": C_LSTM_S4,
+    "C_LSTM_S5": C_LSTM_S5
 }

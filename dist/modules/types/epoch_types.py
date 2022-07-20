@@ -149,22 +149,34 @@ class IEpochConfig(TypedDict):
     id: str
 
     # The range of the Epoch. These values are used for:
-    # 1) Calculate the Backtests' Date ranges (epoch_width * 0.35)
-    # 2) Train Keras and XGBoost Models (epoch_width)
+    # 1) Calculate the training evaluation range (epoch_width * 0.1)
+    # 2) Calculate the backtest range (epoch_width * 0.2)
     start: int
     end: int
 
-    # The range that will be used to backtest all the models
+    # The training evaluation range is used for the following:
+    # 1) Backtest ArimaModels in all position exit combinations
+    # 2) Evaluate freshly trained Regression Models
+    # 3) Backtest shortlisted RegressionModels in all position exit combinations
+    # 4) Evaluate freshly trained Classification Models
+    # training_evaluation_range = epoch_width * 0.1
+    training_evaluation_start: int
+    training_evaluation_end: int
+
+    # The backtest range is used for the following:
+    # 1) Backtest shortlisted ClassificationModels
+    # 2) Backtest generated ConsensusModels
+    # backtest_range = epoch_width * 0.2
     backtest_start: int
     backtest_end: int
 
-    # Price Change Requirement
+    # Regression Price Change Requirement
     # This value is used to evaluate Keras & XGB Regression Models. When creating an Epoch or 
     # training a regression, the best position exit combination is unknown and therefore it 
-    # may require permanent adjustments.
+    # may require recurrent adjustments.
     # At the time of coding this module, after having completed the Arima Backtests in the _ALPHA
-    # Epoch, the Regression Selection Results pointing to TP30_SL30 as the best combination.
-    price_change_requirement: float
+    # Epoch, the Regression Selection results pointed to TP30_SL30 as the best combination.
+    regression_price_change_requirement: float
 
     # The number of minutes the model will remain idle when a position is closed during backtests
     idle_minutes_on_position_close: int
@@ -184,5 +196,5 @@ class IEpochConfig(TypedDict):
 class IEpochDefaults(TypedDict):
     epoch_width: int # Number of months that will comprise the Epoch
     seed: int
-    price_change_requirement: int
+    regression_price_change_requirement: int
     idle_minutes_on_position_close: int

@@ -27,13 +27,25 @@ class Epoch:
             The ID of the Epoch.
         START: int
         END: int
-            The range of the Epoch and is used to calculate the backtest and training ranges
+            The range of the Epoch. These values are used for:
+            1) Calculate the training evaluation range (epoch_width * 0.1)
+            2) Calculate the backtest range (epoch_width * 0.2)
+        TRAINING_EVALUATION_START: int
+        TRAINING_EVALUATION_END: int
+            The training evaluation range is used for the following:
+            1) Backtest ArimaModels in all position exit combinations
+            2) Evaluate freshly trained Regression Models
+            3) Backtest shortlisted RegressionModels in all position exit combinations
+            4) Evaluate freshly trained Classification Models
+            training_evaluation_range = epoch_width * 0.1
         BACKTEST_START: int
         BACKTEST_END: int
-            The range that will be used to backtest all the models (epoch_width * 0.5)
-        TRAINING_START: int
-        TRAINING_END: int
-            The range that will be used to train the Keras & XGBoost Models (epoch_width * 1.5)
+            The backtest range is used for the following:
+            1) Backtest shortlisted ClassificationModels
+            2) Backtest generated ConsensusModels
+            backtest_range = epoch_width * 0.2
+        REGRESSION_PRICE_CHANGE_REQUIREMENT: float
+            This value is used to evaluate Keras & XGB Regression Models.
         IDLE_MINUTES_ON_POSITION_CLOSE: int
             The number of minutes a model must remain idle once a position is closed.
         UT_CLASS_TRAINING_DATA_ID: Union[str, None]
@@ -48,9 +60,9 @@ class Epoch:
 
     # Epoch Defaults
     DEFAULTS: IEpochDefaults = {
-        "epoch_width": 18,
+        "epoch_width": 36,
         "seed": 60184,
-        "price_change_requirement": 3,
+        "regression_price_change_requirement": 3,
         "idle_minutes_on_position_close": 30
     }
 
@@ -61,12 +73,16 @@ class Epoch:
     START: int
     END: int
 
-    # The range that will be used to backtest all the models (epoch_width * 0.5)
+    # Training Evaluation Range
+    TRAINING_EVALUATION_START: int
+    TRAINING_EVALUATION_END: int
+
+    # Backtest Range
     BACKTEST_START: int
     BACKTEST_END: int
 
-    # Price Change Requirement
-    PRICE_CHANGE_REQUIREMENT: float
+    # Regression Price Change Requirement
+    REGRESSION_PRICE_CHANGE_REQUIREMENT: float
 
     # Idle minutes on position close
     IDLE_MINUTES_ON_POSITION_CLOSE: int
@@ -93,7 +109,7 @@ class Epoch:
         id: str, 
         epoch_width: int,
         seed: int,
-        price_change_requirement: float,
+        regression_price_change_requirement: float,
         idle_minutes_on_position_close: int
     ) -> None:
         """Creates all the neccessary directories and files for the epoch
@@ -109,7 +125,7 @@ class Epoch:
                 is also used to calculate the Backtests' Date Range.
             seed: int
                 The random seed to be set on all required libs and machines.
-            price_change_requirement: float
+            regression_price_change_requirement: float
                 The best position exit combination known so far.
             idle_minutes_on_position_close: int
                 The number of minutes a model must remain idle after closing a position.
@@ -123,7 +139,7 @@ class Epoch:
             ValueError:
                 If the id is invalid.
                 If the epoch_width is invalid.
-                If the price_change_requirement is invalid.
+                If the regression_price_change_requirement is invalid.
                 If the idle_minutes_on_position_close is invalid.
         """
         # Make sure the epoch can be created
@@ -141,8 +157,10 @@ class Epoch:
 
         # Calculate the epoch's date ranges
         print("2/7) Calculating the Epoch Range...")
-        start, end = Epoch._calculate_date_range(epoch_width)
-        backtest_start, backtest_end = Epoch._calculate_date_range(ceil(epoch_width * 0.35))
+        epoch_width_days: int = ceil(epoch_width * 30)
+        start, end = Epoch._calculate_date_range(epoch_width_days)
+        training_evaluation_start, training_evaluation_end = Epoch._calculate_date_range(ceil(epoch_width_days * 0.1))
+        backtest_start, backtest_end = Epoch._calculate_date_range(ceil(epoch_width_days * 0.2))
 
         # Initialize the Epoch's directories
         print("3/7) Creating Directories...")
@@ -163,9 +181,11 @@ class Epoch:
             "id": id,
             "start": start,
             "end": end,
+            "training_evaluation_start": training_evaluation_start,
+            "training_evaluation_end": training_evaluation_end,
             "backtest_start": backtest_start,
             "backtest_end": backtest_end,
-            "price_change_requirement": price_change_requirement,
+            "regression_price_change_requirement": regression_price_change_requirement,
             "idle_minutes_on_position_close": idle_minutes_on_position_close
         })
 
@@ -183,7 +203,7 @@ class Epoch:
         id: str, 
         epoch_width: int,
         seed: int,
-        price_change_requirement: float,
+        regression_price_change_requirement: float,
         idle_minutes_on_position_close: int
     ) -> None:
         """Verifies if an Epoch can be created. Raises an error if any of the
@@ -193,7 +213,7 @@ class Epoch:
             id: str
             epoch_width: int
             seed: int
-            price_change_requirement: float
+            regression_price_change_requirement: float
             idle_minutes_on_position_close: int
         Raises:
             RuntimeError:
@@ -204,7 +224,7 @@ class Epoch:
             ValueError:
                 If the id is invalid.
                 If the epoch_width is invalid.
-                If the price_change_requirement is invalid.
+                If the regression_price_change_requirement is invalid.
                 If the idle_minutes_on_position_close is invalid.
         """
         # Make sure the epoch has not been initialized
@@ -223,9 +243,9 @@ class Epoch:
         if not isinstance(seed, int) or seed < 1 or seed > 100000000:
             raise ValueError(f"The provided seed is invalid {seed}. It must be an int ranging 1-100000000")
 
-        # Validate the provided price_change_requirement
-        if not isinstance(price_change_requirement, (int, float)) or price_change_requirement < 1 or price_change_requirement > 5:
-            raise ValueError(f"The provided price_change_requirement is invalid {price_change_requirement}. It must be a float ranging 1-5")
+        # Validate the provided regression_price_change_requirement
+        if not isinstance(regression_price_change_requirement, (int, float)) or regression_price_change_requirement < 1 or regression_price_change_requirement > 5:
+            raise ValueError(f"The provided regression_price_change_requirement is invalid {regression_price_change_requirement}. It must be a float ranging 1-5")
 
         # Validate the provided idle_minutes_on_position_close
         if not isinstance(idle_minutes_on_position_close, int) or idle_minutes_on_position_close < 0 or idle_minutes_on_position_close > 1000:
@@ -253,22 +273,22 @@ class Epoch:
 
 
     @staticmethod
-    def _calculate_date_range(epoch_width: int) -> Tuple[int, int]:
+    def _calculate_date_range(epoch_width_days: int) -> Tuple[int, int]:
         """Based on the provided epoch_width (Number of months), it will calculate
         the start and end timestamps.
 
         Args:
-            epoch_width: int
-                The number of months that comprise the epoch.
+            epoch_width_days: int
+                The number of days that comprise the epoch.
 
         Returns:
             Tuple[int, int]
             (start, end)
         """
         # Calculate the number of candlesticks that will be in the range
-        mins_in_a_month: int = (24 * 60) * 30
-        candles_in_a_month: float = mins_in_a_month / Candlestick.PREDICTION_CANDLESTICK_CONFIG["interval_minutes"]
-        candles_in_range: int = ceil(candles_in_a_month * epoch_width)
+        mins_in_a_day: int = 24 * 60
+        candles_in_a_day: float = mins_in_a_day / Candlestick.PREDICTION_CANDLESTICK_CONFIG["interval_minutes"]
+        candles_in_range: int = ceil(candles_in_a_day * epoch_width_days)
 
         # Subset the last items based on the range
         df: DataFrame = Candlestick.PREDICTION_DF.iloc[-candles_in_range:]
@@ -315,9 +335,11 @@ class Epoch:
         #Epoch.ID = config["id"]
         #Epoch.START = config["start"]
         #Epoch.END = config["end"]
+        #Epoch.TRAINING_EVALUATION_START = config["training_evaluation_start"]
+        #Epoch.TRAINING_EVALUATION_END = config["training_evaluation_end"]
         #Epoch.BACKTEST_START = config["backtest_start"]
         #Epoch.BACKTEST_END = config["backtest_end"]
-        #Epoch.PRICE_CHANGE_REQUIREMENT = config["price_change_requirement"]
+        #Epoch.REGRESSION_PRICE_CHANGE_REQUIREMENT = config["regression_price_change_requirement"]
         #Epoch.IDLE_MINUTES_ON_POSITION_CLOSE = config["idle_minutes_on_position_close"]
         #Epoch.UT_CLASS_TRAINING_DATA_ID = config.get("ut_class_training_data_id")
         #Epoch.TAKE_PROFIT = config.get("take_profit")

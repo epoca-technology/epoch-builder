@@ -10,8 +10,6 @@ from modules.types import IKerasModelConfig
 
 # Network Type
 class ICLSTM(TypedDict):
-    C_CLSTM_S1: List[IKerasModelConfig]
-    C_CLSTM_S1_MP: List[IKerasModelConfig]
     C_CLSTM_S2: List[IKerasModelConfig]
     C_CLSTM_S2_MP: List[IKerasModelConfig]
     C_CLSTM_S3: List[IKerasModelConfig]
@@ -21,69 +19,6 @@ class ICLSTM(TypedDict):
     C_CLSTM_S5: List[IKerasModelConfig]
     C_CLSTM_S5_MP: List[IKerasModelConfig]
 
-
-
-
-
-
-
-# Classification CLSTM Stack 1
-# C_CLSTM_S1
-# 1 filters:        Conv1D_1
-# 1 kernel_sizes:   Conv1D_1
-# 1 units:          LSTM_1
-# 1 activations:    Conv1D_1
-C_CLSTM_S1: List[IKerasModelConfig] = [
-    {"filters": [32], "kernel_sizes": [3], "units": [32], "activations": [""]},
-    {"filters": [32], "kernel_sizes": [3], "units": [64], "activations": [""]},
-    {"filters": [32], "kernel_sizes": [3], "units": [128], "activations": [""]},
-    {"filters": [32], "kernel_sizes": [3], "units": [256], "activations": [""]},
-    {"filters": [32], "kernel_sizes": [3], "units": [512], "activations": [""]},
-
-    {"filters": [64], "kernel_sizes": [3], "units": [32], "activations": [""]},
-    {"filters": [64], "kernel_sizes": [3], "units": [64], "activations": [""]},
-    {"filters": [64], "kernel_sizes": [3], "units": [128], "activations": [""]},
-    {"filters": [64], "kernel_sizes": [3], "units": [256], "activations": [""]},
-    {"filters": [64], "kernel_sizes": [3], "units": [512], "activations": [""]},
-
-    {"filters": [128], "kernel_sizes": [3], "units": [32], "activations": [""]},
-    {"filters": [128], "kernel_sizes": [3], "units": [64], "activations": [""]},
-    {"filters": [128], "kernel_sizes": [3], "units": [128], "activations": [""]},
-    {"filters": [128], "kernel_sizes": [3], "units": [256], "activations": [""]},
-    {"filters": [128], "kernel_sizes": [3], "units": [512], "activations": [""]}
-]
-
-
-
-
-
-
-# Classification CLSTM Stack 1 with MaxPooling
-# C_CLSTM_S1_MP
-# 1 filters:        Conv1D_1
-# 1 kernel_sizes:   Conv1D_1
-# 1 pool_sizes:     MaxPooling1D_1
-# 1 units:          LSTM_1
-# 1 activations:    Conv1D_1
-C_CLSTM_S1_MP: List[IKerasModelConfig] = [
-    {"filters": [32], "kernel_sizes": [3], "pool_sizes": [2], "units": [32], "activations": [""]},
-    {"filters": [32], "kernel_sizes": [3], "pool_sizes": [2], "units": [64], "activations": [""]},
-    {"filters": [32], "kernel_sizes": [3], "pool_sizes": [2], "units": [128], "activations": [""]},
-    {"filters": [32], "kernel_sizes": [3], "pool_sizes": [2], "units": [256], "activations": [""]},
-    {"filters": [32], "kernel_sizes": [3], "pool_sizes": [2], "units": [512], "activations": [""]},
-
-    {"filters": [64], "kernel_sizes": [3], "pool_sizes": [2], "units": [32], "activations": [""]},
-    {"filters": [64], "kernel_sizes": [3], "pool_sizes": [2], "units": [64], "activations": [""]},
-    {"filters": [64], "kernel_sizes": [3], "pool_sizes": [2], "units": [128], "activations": [""]},
-    {"filters": [64], "kernel_sizes": [3], "pool_sizes": [2], "units": [256], "activations": [""]},
-    {"filters": [64], "kernel_sizes": [3], "pool_sizes": [2], "units": [512], "activations": [""]},
-
-    {"filters": [128], "kernel_sizes": [3], "pool_sizes": [2], "units": [32], "activations": [""]},
-    {"filters": [128], "kernel_sizes": [3], "pool_sizes": [2], "units": [64], "activations": [""]},
-    {"filters": [128], "kernel_sizes": [3], "pool_sizes": [2], "units": [128], "activations": [""]},
-    {"filters": [128], "kernel_sizes": [3], "pool_sizes": [2], "units": [256], "activations": [""]},
-    {"filters": [128], "kernel_sizes": [3], "pool_sizes": [2], "units": [512], "activations": [""]}
-]
 
 
 
@@ -363,8 +298,6 @@ C_CLSTM_S5_MP: List[IKerasModelConfig] = [
 
 # Network Variations
 CLSTM: ICLSTM = {
-    "C_CLSTM_S1": C_CLSTM_S1,
-    "C_CLSTM_S1_MP": C_CLSTM_S1_MP,
     "C_CLSTM_S2": C_CLSTM_S2,
     "C_CLSTM_S2_MP": C_CLSTM_S2_MP,
     "C_CLSTM_S3": C_CLSTM_S3,

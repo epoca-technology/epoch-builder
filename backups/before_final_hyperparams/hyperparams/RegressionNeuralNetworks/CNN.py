@@ -11,6 +11,8 @@ from modules.types import IKerasModelConfig
 
 # Network Type
 class ICNN(TypedDict):
+    R_CNN_S1: List[IKerasModelConfig]
+    R_CNN_S1_MP: List[IKerasModelConfig]
     R_CNN_S2: List[IKerasModelConfig]
     R_CNN_S2_MP: List[IKerasModelConfig]
     R_CNN_S3: List[IKerasModelConfig]
@@ -19,6 +21,73 @@ class ICNN(TypedDict):
     R_CNN_S4_MP: List[IKerasModelConfig]
     R_CNN_S5: List[IKerasModelConfig]
     R_CNN_S5_MP: List[IKerasModelConfig]
+
+
+
+
+
+
+
+# Regression CNN Stack 1
+# R_CNN_S1
+# 1 filters:        Conv1D_1
+# 1 kernel_sizes:   Conv1D_1
+# 1 units:          Dense_1
+# 2 activations:    Conv1D_1, Dense_1
+R_CNN_S1: List[IKerasModelConfig] = [
+    {"filters": [32], "kernel_sizes": [3], "units": [32], "activations": ["", ""]},
+    {"filters": [32], "kernel_sizes": [3], "units": [64], "activations": ["", ""]},
+    {"filters": [32], "kernel_sizes": [3], "units": [128], "activations": ["", ""]},
+    {"filters": [32], "kernel_sizes": [3], "units": [256], "activations": ["", ""]},
+    {"filters": [32], "kernel_sizes": [3], "units": [512], "activations": ["", ""]},
+
+    {"filters": [64], "kernel_sizes": [3], "units": [32], "activations": ["", ""]},
+    {"filters": [64], "kernel_sizes": [3], "units": [64], "activations": ["", ""]},
+    {"filters": [64], "kernel_sizes": [3], "units": [128], "activations": ["", ""]},
+    {"filters": [64], "kernel_sizes": [3], "units": [256], "activations": ["", ""]},
+    {"filters": [64], "kernel_sizes": [3], "units": [512], "activations": ["", ""]},
+
+    {"filters": [128], "kernel_sizes": [3], "units": [32], "activations": ["", ""]},
+    {"filters": [128], "kernel_sizes": [3], "units": [64], "activations": ["", ""]},
+    {"filters": [128], "kernel_sizes": [3], "units": [128], "activations": ["", ""]},
+    {"filters": [128], "kernel_sizes": [3], "units": [256], "activations": ["", ""]},
+    {"filters": [128], "kernel_sizes": [3], "units": [512], "activations": ["", ""]}
+]
+
+
+
+
+
+# Regression CNN Stack 1 with MaxPooling
+# R_CNN_S1_MP
+# 1 filters:        Conv1D_1
+# 1 kernel_sizes:   Conv1D_1
+# 1 pool_sizes:     MaxPooling1D_1
+# 1 units:          Dense_1
+# 2 activations:    Conv1D_1, Dense_1
+R_CNN_S1_MP: List[IKerasModelConfig] = [
+    {"filters": [32], "kernel_sizes": [3], "pool_sizes": [2], "units": [32], "activations": ["", ""]},
+    {"filters": [32], "kernel_sizes": [3], "pool_sizes": [2], "units": [64], "activations": ["", ""]},
+    {"filters": [32], "kernel_sizes": [3], "pool_sizes": [2], "units": [128], "activations": ["", ""]},
+    {"filters": [32], "kernel_sizes": [3], "pool_sizes": [2], "units": [256], "activations": ["", ""]},
+    {"filters": [32], "kernel_sizes": [3], "pool_sizes": [2], "units": [512], "activations": ["", ""]},
+
+    {"filters": [64], "kernel_sizes": [3], "pool_sizes": [2], "units": [32], "activations": ["", ""]},
+    {"filters": [64], "kernel_sizes": [3], "pool_sizes": [2], "units": [64], "activations": ["", ""]},
+    {"filters": [64], "kernel_sizes": [3], "pool_sizes": [2], "units": [128], "activations": ["", ""]},
+    {"filters": [64], "kernel_sizes": [3], "pool_sizes": [2], "units": [256], "activations": ["", ""]},
+    {"filters": [64], "kernel_sizes": [3], "pool_sizes": [2], "units": [512], "activations": ["", ""]},
+
+    {"filters": [128], "kernel_sizes": [3], "pool_sizes": [2], "units": [32], "activations": ["", ""]},
+    {"filters": [128], "kernel_sizes": [3], "pool_sizes": [2], "units": [64], "activations": ["", ""]},
+    {"filters": [128], "kernel_sizes": [3], "pool_sizes": [2], "units": [128], "activations": ["", ""]},
+    {"filters": [128], "kernel_sizes": [3], "pool_sizes": [2], "units": [256], "activations": ["", ""]},
+    {"filters": [128], "kernel_sizes": [3], "pool_sizes": [2], "units": [512], "activations": ["", ""]}
+]
+
+
+
+
 
 
 
@@ -309,6 +378,8 @@ R_CNN_S5_MP: List[IKerasModelConfig] = [
 
 # Network Variations
 CNN: ICNN = {
+    "R_CNN_S1": R_CNN_S1,
+    "R_CNN_S1_MP": R_CNN_S1_MP,
     "R_CNN_S2": R_CNN_S2,
     "R_CNN_S2_MP": R_CNN_S2_MP,
     "R_CNN_S3": R_CNN_S3,

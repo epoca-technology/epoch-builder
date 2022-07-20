@@ -9,7 +9,6 @@ from modules.types import IKerasModelConfig
 
 # Network Type
 class IDNN(TypedDict):
-    R_DNN_S1: List[IKerasModelConfig]
     R_DNN_S2: List[IKerasModelConfig]
     R_DNN_S3: List[IKerasModelConfig]
     R_DNN_S4: List[IKerasModelConfig]
@@ -17,18 +16,6 @@ class IDNN(TypedDict):
 
 
 
-
-# Regression DNN Stack 1
-# R_DNN_S1
-# 1 units:       Dense_1
-# 1 activations: Dense_1
-R_DNN_S1: List[IKerasModelConfig] = [
-    {"units": [32], "activations": [""]},
-    {"units": [64], "activations": [""]},
-    {"units": [128], "activations": [""]},
-    {"units": [256], "activations": [""]},
-    {"units": [512], "activations": [""]}
-]
 
 
 
@@ -141,7 +128,6 @@ R_DNN_S5: List[IKerasModelConfig] = [
 
 # Network Variations
 DNN: IDNN = {
-    "R_DNN_S1": R_DNN_S1,
     "R_DNN_S2": R_DNN_S2,
     "R_DNN_S3": R_DNN_S3,
     "R_DNN_S4": R_DNN_S4,
