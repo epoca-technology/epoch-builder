@@ -70,7 +70,7 @@ class ClassificationTraining:
             The summary of the training data that will be attached to the training certificate
     """
     # Train Split
-    TRAIN_SPLIT: float = 0.8
+    TRAIN_SPLIT: float = 0.9
 
     # Training Configuration
     TRAINING_CONFIG: IKerasTrainingTypeConfig = {
@@ -78,7 +78,8 @@ class ClassificationTraining:
         "decay_steps": 1,
         "decay_rate": 0.35,
         "epochs": 100,
-        "patience": 40
+        "patience": 40,
+        "batch_size": 32
     }
 
 
@@ -374,6 +375,7 @@ class ClassificationTraining:
             epochs=ClassificationTraining.TRAINING_CONFIG["epochs"],
             shuffle=True,
             callbacks=[ early_stopping ],
+            batch_size=ClassificationTraining.TRAINING_CONFIG["batch_size"],
             verbose=0
         )
 

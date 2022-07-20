@@ -131,7 +131,8 @@ class Backtest:
         # Iterate over each model
         for model_index, model in enumerate(self.models):
             # Set the Model's ID on the progress bar
-            progress_bar.set_description(f"{model_index + 1}/{len(self.models)}) {model.id}")
+            model_id: str = model.id if len(model.id) < 20 else f"{model.id[0:10]}...{model.id[-10:]}"
+            progress_bar.set_description(f"{model_index + 1}/{len(self.models)}) {model_id}")
 
             # Init the time in which the model's backtesting started
             model_start: int = Utils.get_time()
@@ -182,6 +183,10 @@ class Backtest:
                         # If the result isn't neutral, open a position
                         if pred['r'] != 0:
                             position.open_position(candlestick, pred)
+                        
+                        # Otherwise, handle the neutrality
+                        else:
+                            last_neutral_ct = last_ct
 
                 # Update the progress bar
                 progress_bar.update()

@@ -49,7 +49,7 @@ elif model_type == "keras_classification":
 # Original Training Configuration File
 # Load the original configuration file in order to extract the name of the batch
 # and be able to clear the models that have already been trained.
-original_config_file = open(f"config/${config_file_name}")
+original_config_file = open(f"config/{config_file_name}")
 original_config: Union[IRegressionTrainingBatch, IClassificationTrainingBatch] = load(original_config_file)
 
 
@@ -117,7 +117,7 @@ for model_config in new_config["models"]:
     if model_config["id"] not in ids:
         remaining_models.append(model_config)
 new_config["models"] = remaining_models
-with open(f"config/${config_file_name}", "w") as config_file:
+with open(f"config/{config_file_name}", "w") as config_file:
     config_file.write(dumps(new_config, indent=4))
 
 

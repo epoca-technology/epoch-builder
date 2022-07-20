@@ -144,6 +144,10 @@ class IKerasTrainingTypeConfig(TypedDict):
     # Number of epochs with no improvement after which training will be stopped.
     patience: int
 
+    # Number of samples per gradient update. If unspecified, batch_size will default to 32. 
+    # Do not specify the batch_size if your data is in the form of datasets
+    batch_size: int
+
 
 
 

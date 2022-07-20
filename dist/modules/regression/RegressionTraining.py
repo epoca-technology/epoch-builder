@@ -67,7 +67,7 @@ class RegressionTraining:
             The number of rows included in the test dataset.
     """
     # Train Split
-    TRAIN_SPLIT: float = 0.8
+    TRAIN_SPLIT: float = 0.9
 
     # Training Configuration
     TRAINING_CONFIG: IKerasTrainingTypeConfig = {
@@ -75,7 +75,8 @@ class RegressionTraining:
         "decay_steps": 1.5,
         "decay_rate": 0.85,
         "epochs": 50,
-        "patience": 20
+        "patience": 20,
+        "batch_size": 128
     }
 
 
@@ -323,6 +324,7 @@ class RegressionTraining:
             epochs=RegressionTraining.TRAINING_CONFIG["epochs"],
             callbacks=[ early_stopping ],
             shuffle=True,
+            batch_size=RegressionTraining.TRAINING_CONFIG["batch_size"],
             verbose=0
         )
 
@@ -385,7 +387,7 @@ class RegressionTraining:
         return evaluate(
             model_config={
                 "id": self.id,
-                "regression_models": [ {"regression_id": self.id, "interpreter": { "long": 1, "short": 1 }} ]
+                "regression_models": [ {"regression_id": self.id, "interpreter": { "long": 0.5, "short": 0.5 }} ]
             },
             start_timestamp=first_ot,
             price_change_requirement=price_change_requirement,

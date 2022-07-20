@@ -51,7 +51,7 @@ batch_size: int = int(batch_size_answer["size"]) if batch_size_answer["size"].is
 # Start and End Date - Only applies to Regressions - DEPRECATE
 start: Union[str, None] = None
 end: Union[str, None] = None
-if "Regression" in model_type:
+if model_type == "keras_regression":
     print(" ")
     date_range: Dict[str, str] = prompt([
         Text("start", "Enter the Start Date 'DD/MM/YYYY'"),

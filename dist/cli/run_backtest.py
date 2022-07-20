@@ -1,6 +1,7 @@
 from json import load
 from modules.types import IBacktestConfig
 from modules.epoch.Epoch import Epoch
+from modules.epoch.PositionExitCombination import PositionExitCombination
 from modules.backtest.Backtest import Backtest
 
 
@@ -54,6 +55,6 @@ backtest: Backtest = Backtest(config)
 # Results as saved when the Backtest Instances completes. If the test is interrupted before
 # completion, results will not be saved.
 print("PREDICTION BACKTESTING RUNNING")
-print(f"\n{backtest.id}:\n")
+print(f"\n{backtest.id} ({PositionExitCombination.get_id(backtest.take_profit, backtest.stop_loss)}):\n")
 backtest.run()
 print("\nPREDICTION BACKTESTING COMPLETED")

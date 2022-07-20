@@ -44,7 +44,7 @@ class RegressionModel(ModelInterface):
     DEFAULT_PREDICTIONS: int = 30
 
     # Default Interpreter
-    DEFAULT_INTERPRETER: IPercentChangeInterpreterConfig = { "long": 1, "short": 1 }
+    DEFAULT_INTERPRETER: IPercentChangeInterpreterConfig = { "long": 0.5, "short": 0.5 }
 
 
 

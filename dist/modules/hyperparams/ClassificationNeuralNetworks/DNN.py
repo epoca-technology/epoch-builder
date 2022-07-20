@@ -108,11 +108,38 @@ C_DNN_S4: List[IKerasModelConfig] = [
 ]
 
 
+# Classification DNN Stack 5
+# C_DNN_S5
+# 5 units:          Dense_1, Dense_2, Dense_3, Dense_4, Dense_5
+# 5 activations:    Dense_1, Dense_2, Dense_3, Dense_4, Dense_5
+C_DNN_S5: List[IKerasModelConfig] = [
+    {"units": [32, 32, 32, 32, 32], "activations": ["", "", "", "", ""]},
+
+    {"units": [64, 32, 32, 32, 32], "activations": ["", "", "", "", ""]},
+    {"units": [64, 64, 64, 64, 64], "activations": ["", "", "", "", ""]},
+
+    {"units": [128, 64, 64, 32, 32], "activations": ["", "", "", "", ""]},
+    {"units": [128, 64, 64, 64, 64], "activations": ["", "", "", "", ""]},
+    {"units": [128, 128, 128, 128, 128], "activations": ["", "", "", "", ""]},
+
+    {"units": [256, 128, 64, 32, 32], "activations": ["", "", "", "", ""]},
+    {"units": [256, 128, 128, 64, 64], "activations": ["", "", "", "", ""]},
+    {"units": [256, 128, 128, 128, 128], "activations": ["", "", "", "", ""]},
+    {"units": [256, 256, 256, 256, 256], "activations": ["", "", "", "", ""]},
+
+    {"units": [512, 256, 128, 64, 32], "activations": ["", "", "", "", ""]},
+    {"units": [512, 256, 256, 128, 128], "activations": ["", "", "", "", ""]},
+    {"units": [512, 256, 256, 256, 256], "activations": ["", "", "", "", ""]},
+    {"units": [512, 512, 512, 512, 512], "activations": ["", "", "", "", ""]}
+]
+
+
 
 # Network Variations
 DNN: IDNN = {
     "C_DNN_S1": C_DNN_S1,
     "C_DNN_S2": C_DNN_S2,
     "C_DNN_S3": C_DNN_S3,
-    "C_DNN_S4": C_DNN_S4
+    "C_DNN_S4": C_DNN_S4,
+    "C_DNN_S5": C_DNN_S5
 }

@@ -63,7 +63,7 @@ class KerasHyperparams:
 
     """
     # Default Batch Size
-    REGRESSION_BATCH_SIZE: int = 20
+    REGRESSION_BATCH_SIZE: int = 60
     CLASSIFICATION_BATCH_SIZE: int = 60
 
     # Optimizers
@@ -349,7 +349,6 @@ class KerasHyperparams:
             keras_model_name=keras_model_name,
             optimizer=optimizer,
             loss=loss,
-            autoregressive=True,
             activations=c.get("activations"),
             units=c.get("units"),
             filters=c.get("filters"),
@@ -364,23 +363,21 @@ class KerasHyperparams:
 
         # Otherwise, add the autoregressive variation
         else:
-            return configs
-            # 1 shot predictions have been deprecated in favor of the autoregressive approach
-            # ar_configs: Union[List[IRegressionTrainingConfig], List[IClassificationTrainingConfig]] = [self._generate_model_config(
-            #    keras_model_name=keras_model_name,
-            #    optimizer=optimizer,
-            #    loss=loss,
-            #    autoregressive=True,
-            #    activations=c.get("activations"),
-            #    units=c.get("units"),
-            #    filters=c.get("filters"),
-            #    kernel_sizes=c.get("kernel_sizes"),
-            #    pool_sizes=c.get("pool_sizes"),
-            #    dropout_rates=c.get("dropout_rates"),
-            #) for c in keras_model_configs]
+            ar_configs: Union[List[IRegressionTrainingConfig], List[IClassificationTrainingConfig]] = [self._generate_model_config(
+                keras_model_name=keras_model_name,
+                optimizer=optimizer,
+                loss=loss,
+                autoregressive=True,
+                activations=c.get("activations"),
+                units=c.get("units"),
+                filters=c.get("filters"),
+                kernel_sizes=c.get("kernel_sizes"),
+                pool_sizes=c.get("pool_sizes"),
+                dropout_rates=c.get("dropout_rates"),
+            ) for c in keras_model_configs]
 
             # Finally, return the concatenated list
-            #return configs + ar_configs
+            return configs + ar_configs
 
 
 
@@ -597,16 +594,21 @@ class KerasHyperparams:
         if self.model_type == "keras_regression":
             receipt += f"Start: {self.start}\n"
             if isinstance(self.end, str):
-                receipt += f"End: {self.start}\n"
+                receipt += f"End: {self.end}\n"
         if self.model_type == "keras_classification":
             receipt += f"Training Data ID: {self.training_data_id}\n"
 
         # Networks
-        receipt += "\n\nNetworks:\n"
         for net in network_receipts:
+            # General Info
             receipt += f"\n\n{net['name']}\n"
             receipt += f"Models: {net['models']}\n"
             receipt += f"Batches: {net['batches']}\n"
+
+            # Fillable Batches
+            receipt += "\n"
+            for batch_number in range(1, net["batches"] + 1, 1):
+                receipt += f"{net['name']}_{batch_number}: \n"
 
         # Finally, write the receipt in a text file
         with open(f"{self.output_path}/receipt.txt", "w") as outfile:
