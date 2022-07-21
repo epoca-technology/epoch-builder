@@ -11,8 +11,8 @@ from modules.types.backtest_types import IBacktestPosition
 # 1) The model reaches -20 points
 # 2) The model has less than 1 long or 1 short at the first early stopping checkpoint (15% of the dataset)
 # 3) The model has less than 3 longs or 3 shorts at the second early stopping checkpoint (30% of the dataset)
-# 4) The model has less than 10 longs or 10 shorts at the third early stopping checkpoint (50% of the dataset)
-# 5) The model has less than 15 longs or 15 shorts at the fourth early stopping checkpoint (70% of the dataset)
+# 4) The model has less than 7 longs or 7 shorts at the third early stopping checkpoint (50% of the dataset)
+# 5) The model has less than 10 longs or 10 shorts at the fourth early stopping checkpoint (70% of the dataset)
 class IEarlyStoppingCheckpoint(TypedDict):
     # The candlestick index in which the checkpoint should be evaluated
     index: int

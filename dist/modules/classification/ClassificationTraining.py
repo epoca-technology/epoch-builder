@@ -16,7 +16,6 @@ from modules.types import IKerasTrainingTypeConfig, IKerasModelConfig, IKerasMod
         IClassificationTrainingCertificate, IModelEvaluation, IKerasOptimizer, IKerasClassificationLoss,\
             IKerasClassificationMetric
 from modules.utils.Utils import Utils
-from modules.candlestick.Candlestick import Candlestick
 from modules.keras_models.KerasPath import KERAS_PATH
 from modules.keras_models.KerasModel import KerasModel
 from modules.keras_models.LearningRateSchedule import LearningRateSchedule
@@ -34,8 +33,6 @@ class ClassificationTraining:
     This class handles the training of a Classification Model.
 
     Class Properties:
-        TRAIN_SPLIT: float
-            The split that will be applied to the dataset for training and testing.
         TRAINING_CONFIG: IKerasTrainingTypeConfig
             The configuration to be used in order to train the models
 
@@ -69,11 +66,9 @@ class ClassificationTraining:
         training_data_summary: ITrainingDataSummary
             The summary of the training data that will be attached to the training certificate
     """
-    # Train Split
-    TRAIN_SPLIT: float = 0.9
-
     # Training Configuration
     TRAINING_CONFIG: IKerasTrainingTypeConfig = {
+        "train_split": 0.9,
         "initial_lr": 0.01,
         "decay_steps": 1,
         "decay_rate": 0.35,
@@ -274,7 +269,7 @@ class ClassificationTraining:
         
         # Initialize the total rows and the split size
         rows: int = df.shape[0]
-        split: int = int(rows * ClassificationTraining.TRAIN_SPLIT)
+        split: int = int(rows * ClassificationTraining.TRAINING_CONFIG["train_split"])
 
         # Initialize the features dfs
         train_x: DataFrame = df[:split]
@@ -391,7 +386,14 @@ class ClassificationTraining:
         self._save_model(model)
 
         # Perform the Classification Evaluation
-        classification_evaluation: IModelEvaluation = self._evaluate_classification()
+        classification_evaluation: IModelEvaluation = evaluate(
+            model_config={
+                "id": self.id,
+                "classification_models": [{ "classification_id": self.id, "interpreter": { "min_probability": 0.6 }}]
+            },
+            price_change_requirement=self.training_data_summary["up_percent_change"],
+            progress_bar_description="    6/7) Evaluating ClassificationModel"
+        )
 
         # Save the certificate
         print("    7/7) Saving Certificate...")
@@ -405,44 +407,6 @@ class ClassificationTraining:
 
         # Return it so it can be added to the batch
         return certificate
-
-
-
-
-
-
-
-
-
-
-
-
-    def _evaluate_classification(self) -> IModelEvaluation:
-        """Loads the trained model that has just been saved and performs a runs
-        an evaluation that is similar to the backtest. This eval will only run
-        on the test dataset
-
-        Returns:
-            IModelEvaluation
-        """
-        # Init the number of rows and the split that will be applied
-        rows: int = Candlestick.PREDICTION_DF.shape[0]
-        split: int = int(rows * ClassificationTraining.TRAIN_SPLIT)
-
-        # Initialize the first open time of the test dataset
-        first_ot: int = Candlestick.PREDICTION_DF[split:split+1].iloc[0]["ot"]
-
-        # Finally, evaluate the model
-        return evaluate(
-            model_config={
-                "id": self.id,
-                "classification_models": [{ "classification_id": self.id, "interpreter": { "min_probability": 0.60 }}]
-            },
-            start_timestamp=first_ot,
-            price_change_requirement=self.training_data_summary["up_percent_change"],
-            progress_bar_description="    6/7) Evaluating ClassificationModel"
-        )
-
 
 
 

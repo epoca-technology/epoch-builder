@@ -32,8 +32,8 @@ class EarlyStopping:
     UNACCEPTABLE_POINTS_MOTIVE: str = "The model evaluation was stopped because the model reached -20 points."
     CHECKPOINT_1_MOTIVE: str = "The model evaluation was stopped because the model had less than 1 long or short during the first checkpoint (15% of the dataset)."
     CHECKPOINT_2_MOTIVE: str = "The model evaluation was stopped because the model had less than 3 longs or shorts during the second checkpoint (30% of the dataset)."
-    CHECKPOINT_3_MOTIVE: str = "The model evaluation was stopped because the model had less than 10 longs or shorts during the third checkpoint (50% of the dataset)."
-    CHECKPOINT_4_MOTIVE: str = "The model evaluation was stopped because the model had less than 15 longs or shorts during the fourth checkpoint (70% of the dataset)."
+    CHECKPOINT_3_MOTIVE: str = "The model evaluation was stopped because the model had less than 7 longs or shorts during the third checkpoint (50% of the dataset)."
+    CHECKPOINT_4_MOTIVE: str = "The model evaluation was stopped because the model had less than 10 longs or shorts during the fourth checkpoint (70% of the dataset)."
 
 
 
@@ -68,8 +68,8 @@ class EarlyStopping:
         self.checkpoint_3: IEarlyStoppingCheckpoint = {
             "index": int(candlesticks_num * 0.5),
             "passed": False,
-            "required_longs": 10,
-            "required_shorts": 10,
+            "required_longs": 7,
+            "required_shorts": 7,
             "motive": EarlyStopping.CHECKPOINT_3_MOTIVE,
         }
 
@@ -77,8 +77,8 @@ class EarlyStopping:
         self.checkpoint_4: IEarlyStoppingCheckpoint = {
             "index": int(candlesticks_num * 0.7),
             "passed": False,
-            "required_longs": 15,
-            "required_shorts": 15,
+            "required_longs": 10,
+            "required_shorts": 10,
             "motive": EarlyStopping.CHECKPOINT_4_MOTIVE,
         }
 

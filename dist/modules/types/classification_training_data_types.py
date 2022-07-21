@@ -49,10 +49,6 @@ class ITrainingDataConfig(TypedDict):
     # The description of the Training Data that will be generated.
     description: str
 
-    # Start and end time - If none provided, will use all the available data
-    start: Union[str, int, None]
-    end: Union[str, int, None]
-
     # The Prediction Candlestick steps that will be used to generate the data. If 0 is provided
     # the training data will be generated the traditional way.
     # The purpose of this mode is to increase the size of the Training Dataset and cover more 

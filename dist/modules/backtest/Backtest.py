@@ -79,29 +79,29 @@ class Backtest:
         self.test_mode: bool = test_mode
 
         # ID & Description
-        self.id: str = config['id']
-        self.description: str = config['description']
+        self.id: str = config["id"]
+        self.description: str = config["description"]
 
         # Initialize the models to be tested
         self.models: List[Union[ArimaModel, RegressionModel, ClassificationModel, ConsensusModel]] = [
-            ModelFactory(m) for m in config['models']
+            ModelFactory(m) for m in config["models"]
         ]
         self.results: List[IBacktestResult] = []
 
         # Initialize the candlesticks based on the models' lookback and the provided start and end dates
         if not self.test_mode:
-            Candlestick.init(self.models[0].get_lookback(), config.get('start'), config.get('end'))
+            Candlestick.init(self.models[0].get_lookback(), config.get("start"), config.get("end"))
         
         # Init the start and end
-        self.start: int = int(Candlestick.DF.iloc[0]['ot'])
-        self.end: int = int(Candlestick.DF.iloc[-1]['ct'])
+        self.start: int = int(Candlestick.DF.iloc[0]["ot"])
+        self.end: int = int(Candlestick.DF.iloc[-1]["ct"])
 
         # Postitions Take Profit & Stop Loss
-        self.take_profit: float = config['take_profit']
-        self.stop_loss: float = config['stop_loss']
+        self.take_profit: float = config["take_profit"]
+        self.stop_loss: float = config["stop_loss"]
 
         # Idle on position close
-        self.idle_minutes_on_position_close: int = config['idle_minutes_on_position_close']
+        self.idle_minutes_on_position_close: int = config["idle_minutes_on_position_close"]
 
 
 
@@ -163,25 +163,26 @@ class Backtest:
 
                     # Enable idling if a position has been closed
                     if closed_position:
-                        idle_until = Utils.add_minutes(candlestick['ct'], self.idle_minutes_on_position_close)
+                        idle_until = Utils.add_minutes(candlestick["ct"], self.idle_minutes_on_position_close)
 
                 # Inactive Position
                 # If there is not an active position, a prediction will be generated and a position will be opened (if applies).
                 # To perform predictions, the following criteria must be met:
-                # 1) The model isnt idle 
-                # 2) It isn't the last candlestick
-                # 3) The current prediction range's close time is greater than the last one
-                elif (position.active == None) and (candlestick['ot'] > idle_until) and (not is_last_candlestick):
+                # 1) There isn't an active position
+                # 2) The model isnt idle 
+                # 3) It isn't the last candlestick
+                # 4) The current prediction range's close time is greater than the last one
+                elif (position.active == None) and (candlestick["ot"] > idle_until) and (not is_last_candlestick):
                     # Retrieve the current prediction range's close time
                     _, last_ct = Candlestick.get_lookback_prediction_range(100, candlestick["ot"])
 
                     # Only predict in new ranges
                     if last_ct > last_neutral_ct:
                         # Perform a prediction
-                        pred: IPrediction = model.predict(candlestick['ot'], enable_cache=not self.test_mode)
+                        pred: IPrediction = model.predict(candlestick["ot"], enable_cache=not self.test_mode)
 
                         # If the result isn't neutral, open a position
-                        if pred['r'] != 0:
+                        if pred["r"] != 0:
                             position.open_position(candlestick, pred)
                         
                         # Otherwise, handle the neutrality
@@ -231,20 +232,20 @@ class Backtest:
 
         # Apend the model result
         self.results.append({
-            'backtest': {
-                'id': self.id,
-                'description': self.description,
-                'start': self.start,
-                'end': self.end,
-                'take_profit': self.take_profit,
-                'stop_loss': self.stop_loss,
-                'idle_minutes_on_position_close': self.idle_minutes_on_position_close,
-                'model_start': model_start,
-                'model_end': model_end,
-                'model_duration': Utils.from_milliseconds_to_minutes(model_end - model_start)
+            "backtest": {
+                "id": self.id,
+                "description": self.description,
+                "start": self.start,
+                "end": self.end,
+                "take_profit": self.take_profit,
+                "stop_loss": self.stop_loss,
+                "idle_minutes_on_position_close": self.idle_minutes_on_position_close,
+                "model_start": model_start,
+                "model_end": model_end,
+                "model_duration": Utils.from_milliseconds_to_minutes(model_end - model_start)
             },
-            'model': model,
-            'performance': performance
+            "model": model,
+            "performance": performance
         })
 
 
@@ -258,8 +259,8 @@ class Backtest:
         """Saves the backtest results into the system's directory.
         """
         # If the results directory doesn't exist, create it
-        if not exists(BACKTEST_PATH['results']):
-            makedirs(BACKTEST_PATH['results'])
+        if not exists(BACKTEST_PATH["results"]):
+            makedirs(BACKTEST_PATH["results"])
 
         # Write the results on a JSON File
         with open(f"{BACKTEST_PATH['results']}/{self._get_result_file_name()}", "w") as outfile:

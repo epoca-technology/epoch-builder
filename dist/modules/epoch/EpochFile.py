@@ -87,7 +87,7 @@ class EpochFile:
 
 
 
-    def _epoch_path(self, path: str) -> str:
+    def _path(self, path: str) -> str:
         """Adds the Epoch's name to the beggining of a given path.
 
         Args:
@@ -206,6 +206,9 @@ class EpochFile:
 
 
 
+
+
+
     # Backtest Configuration
 
 
@@ -217,6 +220,8 @@ class EpochFile:
             IBacktestConfig
         """
         return EpochFile.read(EpochFile.CONFIG_PATH["backtest"])
+
+
 
 
 
@@ -255,6 +260,8 @@ class EpochFile:
 
 
 
+
+
     # Classification Training Data Configuration
 
 
@@ -268,6 +275,8 @@ class EpochFile:
             ITrainingDataConfig
         """
         return EpochFile.read(EpochFile.CONFIG_PATH["classification_training_data"])
+
+
 
 
 

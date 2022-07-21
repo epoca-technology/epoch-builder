@@ -10,6 +10,7 @@ from keras.optimizers import adam_v2 as adam, rmsprop_v2 as rmsprop
 from keras.optimizer_v2.learning_rate_schedule import InverseTimeDecay
 from keras.losses import MeanSquaredError, MeanAbsoluteError
 from keras.callbacks import EarlyStopping, History
+from dist.modules.epoch.Epoch import Epoch
 from modules.types import IKerasTrainingTypeConfig, IKerasModelConfig, IKerasModelTrainingHistory,\
     IRegressionTrainingConfig, IRegressionTrainingCertificate, IModelEvaluation, IKerasOptimizer,\
         IKerasRegressionLoss
@@ -30,8 +31,6 @@ class RegressionTraining:
     This class handles the training of a RegressionModel.
 
     Class Properties:
-        TRAIN_SPLIT: float
-            The split that will be applied to the dataset for training and testing.
         TRAINING_CONFIG: IKerasTrainingTypeConfig
             The configuration to be used in order to train the models.
 
@@ -66,11 +65,9 @@ class RegressionTraining:
         test_size: int
             The number of rows included in the test dataset.
     """
-    # Train Split
-    TRAIN_SPLIT: float = 0.9
-
     # Training Configuration
     TRAINING_CONFIG: IKerasTrainingTypeConfig = {
+        "train_split": 0.9,
         "initial_lr": 0.01,
         "decay_steps": 1.5,
         "decay_rate": 0.85,
@@ -247,7 +244,7 @@ class RegressionTraining:
         """
         # Init the number of rows and the split that will be applied
         rows: int = Candlestick.NORMALIZED_PREDICTION_DF.shape[0]
-        split: int = int(rows * RegressionTraining.TRAIN_SPLIT)
+        split: int = int(rows * RegressionTraining.TRAINING_CONFIG["train_split"])
 
         # Init raw features and labels
         features_raw: Union[List[List[float]], ndarray] = []
@@ -257,13 +254,13 @@ class RegressionTraining:
         for i in range(lookback, rows):
             # If it is an autoregression, add only 1 price as the label
             if autoregressive:
-                features_raw.append(Candlestick.NORMALIZED_PREDICTION_DF.iloc[i-lookback:i, 0])
-                labels_raw.append(Candlestick.NORMALIZED_PREDICTION_DF.iloc[i, 0])
+                features_raw.append(Candlestick.NORMALIZED_PREDICTION_DF["c"].iloc[i-lookback:i, 0])
+                labels_raw.append(Candlestick.NORMALIZED_PREDICTION_DF["c"].iloc[i, 0])
 
             # If it is not an autoregression, add the labels based on the number of predictions
             elif not autoregressive and i < (rows-predictions):
-                features_raw.append(Candlestick.NORMALIZED_PREDICTION_DF.iloc[i-lookback:i, 0])
-                labels_raw.append(Candlestick.NORMALIZED_PREDICTION_DF.iloc[i:i+predictions, 0])
+                features_raw.append(Candlestick.NORMALIZED_PREDICTION_DF["c"].iloc[i-lookback:i, 0])
+                labels_raw.append(Candlestick.NORMALIZED_PREDICTION_DF["c"].iloc[i:i+predictions, 0])
 
         # Convert the features and labels into np arrays
         features = array(features_raw)
@@ -340,7 +337,14 @@ class RegressionTraining:
         self._save_model(model)
 
         # Perform the regression evaluation
-        regression_evaluation: IModelEvaluation = self._evaluate_regression()
+        regression_evaluation: IModelEvaluation = evaluate(
+            model_config={
+                "id": self.id,
+                "regression_models": [ {"regression_id": self.id, "interpreter": { "long": 0.5, "short": 0.5 }} ]
+            },
+            price_change_requirement=Epoch.REGRESSION_PRICE_CHANGE_REQUIREMENT,
+            progress_bar_description="    6/7) Evaluating RegressionModel"
+        )
 
         # Save the certificate
         print("    7/7) Saving Certificate...")
@@ -354,48 +358,6 @@ class RegressionTraining:
 
         # Return it so it can be added to the batch
         return certificate
-
-
-
-
-
-
-
-
-
-    def _evaluate_regression(self) -> IModelEvaluation:
-        """Loads the trained model that has just been saved and performs a runs
-        an evaluation that is similar to the backtest. This eval will only run
-        on the test dataset
-
-        Returns:
-            IModelEvaluation
-        """
-        # Price Change Requirement
-        # This value is set based on the best combinations in the regression selection.
-        # So far we know there are better chances of succeeding in the 2.5-3 range.
-        price_change_requirement: float = 3
-
-        # Init the number of rows and the split that will be applied
-        rows: int = Candlestick.PREDICTION_DF.shape[0]
-        split: int = int(rows * RegressionTraining.TRAIN_SPLIT)
-
-        # Initialize the first open time of the test dataset
-        first_ot: int = Candlestick.PREDICTION_DF[split:split+1].iloc[0]["ot"]
-
-        # Finally, evaluate the model
-        return evaluate(
-            model_config={
-                "id": self.id,
-                "regression_models": [ {"regression_id": self.id, "interpreter": { "long": 0.5, "short": 0.5 }} ]
-            },
-            start_timestamp=first_ot,
-            price_change_requirement=price_change_requirement,
-            progress_bar_description="    6/7) Evaluating RegressionModel"
-        )
-
-
-
 
 
 

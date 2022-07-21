@@ -60,6 +60,14 @@ class Candlestick:
     }
 
 
+    # Normalized Prediction Candlesticks Configuration
+    NORMALIZED_PREDICTION_CANDLESTICK_CONFIG: ICandlestickConfig = {
+        "columns": ("ot", "ct", "c"),
+        "csv_file": f"{BASE_PATH}/normalized_prediction_candlesticks.csv",
+        "interval_minutes": PREDICTION_CANDLESTICK_CONFIG["interval_minutes"]
+    }
+
+
     # DataFrames
     DF: DataFrame = DataFrame()
     PREDICTION_DF: DataFrame = DataFrame()
@@ -107,16 +115,17 @@ class Candlestick:
         # Init the Default & Forecast Candlestick DataFrames
         Candlestick.DF: DataFrame = Candlestick._get_df(Candlestick.DEFAULT_CANDLESTICK_CONFIG, start, end)
         Candlestick.PREDICTION_DF: DataFrame = Candlestick._get_df(Candlestick.PREDICTION_CANDLESTICK_CONFIG, start, end)
+        Candlestick.NORMALIZED_PREDICTION_DF: DataFrame = Candlestick._get_df(Candlestick.NORMALIZED_PREDICTION_CANDLESTICK_CONFIG, start, end)
 
         # The models need data prior to the current time to perform predictions. Since the default candlesticks
         # will be used for simulating, the df needs to start from a point in which there are enough forecast
         # candlesticks in order to make a prediction. Once the subsetting is done, reset the indexes.
-        Candlestick.DF = Candlestick.DF[Candlestick.DF['ot'] >= Candlestick.PREDICTION_DF.iloc[max_lookback]['ot']]
+        Candlestick.DF = Candlestick.DF[Candlestick.DF["ot"] >= Candlestick.PREDICTION_DF.iloc[max_lookback]["ot"]]
         Candlestick.DF.reset_index(drop=True, inplace=True)
 
         # Both datasets should start at the same time. The first forecast candlestick must be selected based on
         # the max_lookback
-        if Candlestick.DF.iloc[0]['ot'] != Candlestick.PREDICTION_DF.iloc[max_lookback]['ot']:
+        if Candlestick.DF.iloc[0]["ot"] != Candlestick.PREDICTION_DF.iloc[max_lookback]["ot"]:
             raise ValueError(f"The candlestick dataframes dont start at the same time. \
                 {Candlestick.DF.iloc[0]['ot']} != {Candlestick.PREDICTION_DF.iloc[max_lookback]['ot']}")
         
@@ -125,15 +134,12 @@ class Candlestick:
             raise ValueError(f"The default candlesticks dataframe must contain more rows than the prediction dataframe. \
                 {Candlestick.DF.shape[0]} <= {Candlestick.PREDICTION_DF.shape[0]}")
 
-        # Initialize the Normalized DataFrame
-        # Populate the MIN & MAX
-        min: float = Candlestick.PREDICTION_DF['c'].min()
-        max: float = Candlestick.PREDICTION_DF['c'].max()
+        # The prediction and its normalized variant should have the same number of rows
+        if Candlestick.PREDICTION_DF.shape[0] != Candlestick.NORMALIZED_PREDICTION_DF.shape[0]:
+            raise ValueError(f"The prediction and the normalized prediction candlestick dataframes have different number of rows. \
+                {Candlestick.PREDICTION_DF.shape[0]} != {Candlestick.NORMALIZED_PREDICTION_DF.shape[0]}")
 
-        # Initialize the normalized df
-        Candlestick.NORMALIZED_PREDICTION_DF = Candlestick.PREDICTION_DF[['c']].apply(lambda x: (x - min) / (max - min))
-
-        # Build the prediction range indexer
+        # Initialize the prediction range indexer
         Candlestick._init_lookback_prediction_range_indexer()
 
 
@@ -196,24 +202,24 @@ class Candlestick:
 
         # Start and End Range have been provided
         if isinstance(start, int) and isinstance(end, int):
-            df = df[(df['ot'] >= start) & (df['ct'] <= end)]
+            df = df[(df["ot"] >= start) & (df["ct"] <= end)]
             df.reset_index(drop=True, inplace=True)
 
         # Only the Start was provided
         elif isinstance(start, int):
-            df = df[df['ot'] >= start]
+            df = df[df["ot"] >= start]
             df.reset_index(drop=True, inplace=True)
 
         # Only the End was provided
         elif isinstance(end, int):
-            df = df[df['ct'] <= end]
+            df = df[df["ct"] <= end]
             df.reset_index(drop=True, inplace=True)
         
         # Make sure it has the correct amount of rows & columns
         if df.shape[0] == 0:
-            raise ValueError('The candlesticks dataframe does not have the correct amount of rows. Expected > 0 but got 0')
+            raise ValueError("The candlesticks dataframe does not have the correct amount of rows. Expected > 0 but got 0")
         elif df.shape[1] != len(config["columns"]):
-            raise ValueError(f'The candlesticks dataframe does not have the correct amount of columns. Expected {len(config["columns"])} but got {df.shape[1]}')
+            raise ValueError(f"The candlesticks dataframe does not have the correct amount of columns. Expected {len(config['columns'])} but got {df.shape[1]}")
         
         # Return the DataFrame
         return df
@@ -259,8 +265,10 @@ class Candlestick:
         """
 
         # Subset the Prediction DF to only include the rows that will be used
-        df: DataFrame = Candlestick.PREDICTION_DF[Candlestick.PREDICTION_DF['ct'] <= current_time].iloc[-lookback:]\
-            if not normalized else Candlestick.NORMALIZED_PREDICTION_DF[Candlestick.PREDICTION_DF['ct'] <= current_time].iloc[-lookback:]
+        df: DataFrame = \
+            Candlestick.PREDICTION_DF[Candlestick.PREDICTION_DF["ct"] <= current_time].iloc[-lookback:]\
+            if not normalized else \
+            Candlestick.NORMALIZED_PREDICTION_DF[Candlestick.NORMALIZED_PREDICTION_DF["ct"] <= current_time].iloc[-lookback:]
 
         # Make sure the number of rows in the df matches the lookback value
         if df.shape[0] != lookback:

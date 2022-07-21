@@ -170,6 +170,12 @@ class IEpochConfig(TypedDict):
     backtest_start: int
     backtest_end: int
 
+    # Highest and lowest price within the Epoch.
+    # If the price was to go above the highest or below the lowest price, trading should be
+    # stopped and a new epoch should be published once the market is "stable"
+    highest_price: float
+    lowest_price: float
+
     # Regression Price Change Requirement
     # This value is used to evaluate Keras & XGB Regression Models. When creating an Epoch or 
     # training a regression, the best position exit combination is unknown and therefore it 

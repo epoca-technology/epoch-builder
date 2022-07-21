@@ -8,7 +8,9 @@ from modules.types import IEpochConfig, IEpochDefaults
 from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
 from modules.epoch.EpochFile import EpochFile
+from modules.epoch.CandlestickNormalization import normalize_prediction_candlesticks
 from modules.epoch.PredictionRangeIndexer import create_indexer
+from modules.epoch.EpochDefaultFiles import create_default_files
 
 
 
@@ -44,6 +46,12 @@ class Epoch:
             1) Backtest shortlisted ClassificationModels
             2) Backtest generated ConsensusModels
             backtest_range = epoch_width * 0.2
+        HIGHEST_PRICE: float
+        LOWEST_PRICE: float
+            Highest and lowest price within the Epoch. These values are stored as 
+            they are used to scale the prediction candlesticks for trainable models.
+            If the price was to go above the highest or below the lowest price, trading should be
+            stopped and a new epoch should be published once the market is "stable"
         REGRESSION_PRICE_CHANGE_REQUIREMENT: float
             This value is used to evaluate Keras & XGB Regression Models.
         IDLE_MINUTES_ON_POSITION_CLOSE: int
@@ -80,6 +88,10 @@ class Epoch:
     # Backtest Range
     BACKTEST_START: int
     BACKTEST_END: int
+
+    # Normalization Price Range
+    HIGHEST_PRICE: float
+    LOWEST_PRICE: float
 
     # Regression Price Change Requirement
     REGRESSION_PRICE_CHANGE_REQUIREMENT: float
@@ -143,39 +155,56 @@ class Epoch:
                 If the idle_minutes_on_position_close is invalid.
         """
         # Make sure the epoch can be created
-        Epoch._can_epoch_be_created(id)
+        Epoch._can_epoch_be_created(
+            id=id,
+            epoch_width=epoch_width,
+            seed=seed,
+            regression_price_change_requirement=regression_price_change_requirement,
+            idle_minutes_on_position_close=idle_minutes_on_position_close
+        )
+
+        # Calculate the number of days in the epoch's width
+        epoch_width_days: int = ceil(epoch_width * 30)
+
+        # Extract the predictions candlestick df
+        print("1/9) Extracting the Prediction Candlesticks DF...")
+        prediction_df: DataFrame = Epoch._extract_epoch_prediction_candlesticks_df(epoch_width_days)
+
+        # Calculate the epoch's date ranges
+        print("2/9) Calculating the Epoch Range...")
+        start: int = int(prediction_df.iloc[0]["ot"])
+        end: int = int(prediction_df.iloc[-1]["ct"])
+        training_evaluation_start, training_evaluation_end = Epoch._calculate_date_range(prediction_df, ceil(epoch_width_days * 0.1))
+        backtest_start, backtest_end = Epoch._calculate_date_range(prediction_df, ceil(epoch_width_days * 0.2))
+
+        # Check if the normalized prediction candlesticks csv needs to be created
+        print("3/9) Creating the Normalized Prediction Candlesticks CSV...")
+        highest_price, lowest_price = normalize_prediction_candlesticks(prediction_df)
 
         # Initialize the candlesticks based on the prediction range lookbacks
         lookbacks: List[int] = [ 100, 300 ]
-        Candlestick.init(max(lookbacks))
+        Candlestick.init(max(lookbacks), start=start, end=end)
 
         # Check if the candlesticks' prediction range need to be indexed
         if EpochFile.file_exists(Candlestick.PREDICTION_RANGE_INDEXER_PATH):
-            print("1/7) Creating Prediction Range Indexer: Skipped")
+            print("4/9) Creating Prediction Range Indexer: Skipped")
         else:
-            create_indexer(lookbacks, "1/7) Creating Prediction Range Indexer")
-
-        # Calculate the epoch's date ranges
-        print("2/7) Calculating the Epoch Range...")
-        epoch_width_days: int = ceil(epoch_width * 30)
-        start, end = Epoch._calculate_date_range(epoch_width_days)
-        training_evaluation_start, training_evaluation_end = Epoch._calculate_date_range(ceil(epoch_width_days * 0.1))
-        backtest_start, backtest_end = Epoch._calculate_date_range(ceil(epoch_width_days * 0.2))
+            create_indexer(lookbacks, "4/9) Creating Prediction Range Indexer")
 
         # Initialize the Epoch's directories
-        print("3/7) Creating Directories...")
+        print("5/9) Creating Directories...")
         EpochFile.create_epoch_directories(id)
 
         # Generate Arima's Backtest Configurations
-        print("4/7) Generating Arima Backtest Configuration Files...")
+        print("6/9) Generating Arima Backtest Configuration Files...")
         # @TODO
 
         # Create the Epoch's Default Files
-        print("5/7) Creating Default Files...")
-        # @TODO
+        print("7/9) Creating Default Files...")
+        create_default_files(id)
 
         # Save the epoch's config file
-        print("6/7) Saving Epoch Configuration...")
+        print("8/9) Saving Epoch Configuration...")
         EpochFile.update_epoch_config({
             "seed": seed,
             "id": id,
@@ -185,12 +214,14 @@ class Epoch:
             "training_evaluation_end": training_evaluation_end,
             "backtest_start": backtest_start,
             "backtest_end": backtest_end,
+            "highest_price": highest_price,
+            "lowest_price": lowest_price,
             "regression_price_change_requirement": regression_price_change_requirement,
             "idle_minutes_on_position_close": idle_minutes_on_position_close
         })
 
         # Add the Epoch's Directory to the gitignore file
-        print("7/7) Adding Epoch to .gitignore file...")
+        print("9/9) Adding Epoch to .gitignore file...")
         EpochFile.add_epoch_to_gitignore_file(id)
 
 
@@ -273,29 +304,70 @@ class Epoch:
 
 
     @staticmethod
-    def _calculate_date_range(epoch_width_days: int) -> Tuple[int, int]:
-        """Based on the provided epoch_width (Number of months), it will calculate
-        the start and end timestamps.
+    def _extract_epoch_prediction_candlesticks_df(epoch_width_days: int) -> DataFrame:
+        """Extracts the prediction candlesticks only covering the epoch. This df is 
+        used to calculate date ranges as well as generating the 
+        normalized prediction candlesticks df.
 
         Args:
             epoch_width_days: int
                 The number of days that comprise the epoch.
 
         Returns:
+            DataFrame
+        """
+        # Extract the entire csv
+        df: DataFrame = Candlestick._get_df(Candlestick.PREDICTION_CANDLESTICK_CONFIG)
+
+        # Subset the rows that are part of the epoch
+        return df.iloc[-(Epoch._calculate_candlesticks_in_range(epoch_width_days)):]
+
+
+
+
+
+
+
+    @staticmethod
+    def _calculate_date_range(df: DataFrame, days: int) -> Tuple[int, int]:
+        """Calculates the date range for a given number of days.
+
+        Args:
+            df: DataFrame
+                The prediction candlesticks dataframe.
+            days: int
+                The number of days that comprise the date range that will be calculated
+
+        Returns:
             Tuple[int, int]
             (start, end)
         """
-        # Calculate the number of candlesticks that will be in the range
-        mins_in_a_day: int = 24 * 60
-        candles_in_a_day: float = mins_in_a_day / Candlestick.PREDICTION_CANDLESTICK_CONFIG["interval_minutes"]
-        candles_in_range: int = ceil(candles_in_a_day * epoch_width_days)
-
         # Subset the last items based on the range
-        df: DataFrame = Candlestick.PREDICTION_DF.iloc[-candles_in_range:]
+        range_df: DataFrame = df.iloc[-(Epoch._calculate_candlesticks_in_range(days)):]
 
         # Finally, return the first ot and the last ct
-        return int(df.iloc[0]["ot"]), int(df.iloc[-1]["ct"])
+        return int(range_df.iloc[0]["ot"]), int(range_df.iloc[-1]["ct"])
 
+
+
+
+
+
+    @staticmethod
+    def _calculate_candlesticks_in_range(days: int) -> int:
+        """Calculates the number of prediction candlesticks that fit within a given
+        number of days
+
+        Args:
+            days: int
+                The number of days in which the candlesticks will be fit.
+
+        Returns:
+            int
+        """
+        mins_in_a_day: int = 24 * 60
+        candles_in_a_day: float = mins_in_a_day / Candlestick.PREDICTION_CANDLESTICK_CONFIG["interval_minutes"]
+        return ceil(candles_in_a_day * days)
 
 
 
@@ -339,6 +411,8 @@ class Epoch:
         #Epoch.TRAINING_EVALUATION_END = config["training_evaluation_end"]
         #Epoch.BACKTEST_START = config["backtest_start"]
         #Epoch.BACKTEST_END = config["backtest_end"]
+        #Epoch.HIGHEST_PRICE = config["highest_price"]
+        #Epoch.LOWEST_PRICE = config["lowest_price"]
         #Epoch.REGRESSION_PRICE_CHANGE_REQUIREMENT = config["regression_price_change_requirement"]
         #Epoch.IDLE_MINUTES_ON_POSITION_CLOSE = config["idle_minutes_on_position_close"]
         #Epoch.UT_CLASS_TRAINING_DATA_ID = config.get("ut_class_training_data_id")

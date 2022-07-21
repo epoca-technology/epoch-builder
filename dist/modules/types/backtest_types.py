@@ -113,10 +113,6 @@ class IBacktestConfig(TypedDict):
     # Description of the backtest (purpose)
     description: str
 
-    # Start and end time - If none provided, will use all the available data
-    start: Union[str, int, None] # TO BE DEPRECATED
-    end: Union[str, int, None] # TO BE DEPRECATED
-
     # Postitions Take Profit & Stop Loss
     take_profit: float
     stop_loss: float

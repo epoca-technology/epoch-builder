@@ -4,6 +4,7 @@ from numpy import mean, median
 from tqdm import tqdm
 from modules.types import IModel, IPrediction, IBacktestPerformance, IModelEvaluation
 from modules.utils.Utils import Utils
+from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
 from modules.model.RegressionModel import RegressionModel
 from modules.model.ClassificationModel import ClassificationModel
@@ -14,12 +15,9 @@ from modules.model_evaluation.EarlyStopping import EarlyStopping
 
 
 
-def evaluate(
-    model_config: IModel,
-    start_timestamp: int,
-    price_change_requirement: float,
-    progress_bar_description: str
-) -> IModelEvaluation:
+
+
+def evaluate(model_config: IModel, price_change_requirement: float, progress_bar_description: str) -> IModelEvaluation:
     """Performs an evaluation on a recently trained model. The evaluation works 
     similarly to the backtests and it is only performed on the test dataset to 
     ensure the model has not yet seen it.
@@ -27,12 +25,9 @@ def evaluate(
     Args:
         model: IModel
             The model to be initialized and evaluated.
-        start_timestamp: int
-            The open time of the first candlestick in the test dataset.
         price_change_requirement: float
-            The price percentage change requirement in order for an outcome to be 
-            determined. F.e. If increase_requirement is 3 and the price goes
-            up 3%, the outcome will be "increased".
+            Percentage the price needs to increase or decrease in order for a position to be 
+            closed.
         progress_bar_description: str
             The description that will be placed in the progress bar.
 
@@ -46,7 +41,7 @@ def evaluate(
     model_type: str = type(model).__name__
 
     # Init the test dataset
-    df: DataFrame = Candlestick.DF[Candlestick.DF['ot'] >= start_timestamp]
+    df: DataFrame = Candlestick.DF[Candlestick.DF["ot"] >= Epoch.TRAINING_EVALUATION_START]
     df.reset_index(drop=True, inplace=True)
 
     # Init evaluation data
@@ -63,7 +58,11 @@ def evaluate(
     progress_bar.set_description(progress_bar_description)
 
     # Init the Position Instance
-    position: Position = Position(price_change_requirement, price_change_requirement)
+    position: Position = Position(take_profit=price_change_requirement, stop_loss=price_change_requirement)
+
+    # Idle Until
+    # The model will remain in an idle state until a candlestick's ot is greater than this value.
+    idle_until: int = 0
 
     # Last neutral prediction range close time.
     last_neutral_ct: int = 0
@@ -86,7 +85,7 @@ def evaluate(
             # Check the position against the new candlestick
             closed_position: bool = position.check_position(candlestick)
 
-            # If the position has been closed, process the metrics
+            # If the position has been closed, process the metrics and enable idle state
             if closed_position:
                 # Extract the metadata value
                 metadata_value: float = _get_prediction_metadata_value(model_type, position.positions[-1]["p"])
@@ -115,12 +114,16 @@ def evaluate(
                     else:
                         increase_outcomes += 1
 
+                # Enable the idle state
+                idle_until = Utils.add_minutes(candlestick['ct'], Epoch.IDLE_MINUTES_ON_POSITION_CLOSE)
+
         # Inactive Position
         # A new prediction will be generated if the following is met:
         # 1) There isn't an active position
+        # 1) The model isnt idle 
         # 2) It isn't the last candlestick
         # 3) The current prediction range's close time is greater than the last one
-        elif (position.active == None) and (not is_last_candlestick):
+        elif (position.active == None) and (candlestick["ot"] > idle_until) and (not is_last_candlestick):
             # Retrieve the current prediction range's close time
             _, last_ct = Candlestick.get_lookback_prediction_range(100, candlestick["ot"])
 
