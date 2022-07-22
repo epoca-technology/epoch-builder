@@ -187,6 +187,8 @@ IModelIDPrefix = Literal[
 IPrefixOrID = Union[IModelIDPrefix, str]
 
 
+# The extension of trained models
+ITrainableModelExtension = Literal["h5", "json"]
 
 
 

@@ -5,7 +5,7 @@ from h5py import File as h5pyFile
 from tensorflow.python.keras.saving.hdf5_format import load_model_from_hdf5
 from keras import Sequential
 from modules.types import IRegressionConfig
-from modules.keras_models.KerasPath import KERAS_PATH
+from modules.epoch.Epoch import Epoch
 from modules.keras_models.Interface import KerasModelInterface
 from modules.keras_models.KerasModelSummary import get_summary
 
@@ -49,7 +49,8 @@ class Regression(KerasModelInterface):
                 If any of the other metadata is invalid.
         """
         # Load the model
-        with h5pyFile(f"{KERAS_PATH['models']}/{id}/model.h5", mode='r') as model_file:
+        model_path: str = Epoch.FILE.get_active_model_path(id, "keras_regression")
+        with h5pyFile(model_path, mode="r") as model_file:
             self.id: str = model_file.attrs["id"]
             self.description: str = model_file.attrs["description"]
             self.autoregressive: bool = bool(model_file.attrs["autoregressive"]) # Downcast to bool

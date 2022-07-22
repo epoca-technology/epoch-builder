@@ -1,6 +1,4 @@
 from typing import Union, List, Tuple
-from os import makedirs
-from os.path import exists
 from pandas import DataFrame, concat
 from json import dumps
 from h5py import File as h5pyFile
@@ -14,9 +12,9 @@ from keras.callbacks import EarlyStopping, History
 from modules.types import IKerasTrainingTypeConfig, IKerasModelConfig, IKerasModelTrainingHistory, IModel,\
     ITrainingDataFile, ICompressedTrainingData, IClassificationTrainingConfig, ITrainingDataSummary, \
         IClassificationTrainingCertificate, IModelEvaluation, IKerasOptimizer, IKerasClassificationLoss,\
-            IKerasClassificationMetric
+            IKerasClassificationMetric, ITrainableModelType
 from modules.utils.Utils import Utils
-from modules.keras_models.KerasPath import KERAS_PATH
+from modules.epoch.Epoch import Epoch
 from modules.keras_models.KerasModel import KerasModel
 from modules.keras_models.LearningRateSchedule import LearningRateSchedule
 from modules.keras_models.KerasModelSummary import get_summary
@@ -39,10 +37,10 @@ class ClassificationTraining:
     Instance Properties:
         test_mode: bool
             If running from unit tests, it won't check the model's directory.
+        model_type: ITrainableModelType
+            The type of model that will be trained.
         id: str
             A descriptive identifier compatible with filesystems.
-        model_path: str
-            The directory in which the model will be stored.
         description: str
             Important information regarding the model that will be trained.
         models: List[IModel]
@@ -97,24 +95,28 @@ class ClassificationTraining:
                 The training data file that will be used to train and evaluate the model.
             config: IClassificationTrainingConfig
                 The configuration that will be used to train the model.
+            datasets: Union[Tuple[DataFrame, DataFrame, DataFrame, DataFrame], None]
+                The datasets that will be used to train and test the model. This data
+                can be built in the CLI script or in the instance itself.
             test_mode: bool
                 If running from unit tests, it won't check the model's directory.
 
         Raises:
             ValueError:
                 If the model is not correctly preffixed.
+            RuntimeError:
                 If the model's directory already exists.
         """
         # Initialize the type of execution
         self.test_mode: bool = test_mode
+
+        # Init the type of model
+        self.model_type: ITrainableModelType = "keras_classification"
         
         # Initialize the id
         self.id: str = config["id"]
         if self.id[0:2] != "C_":
             raise ValueError("The ID of the ClassificationModel must be preffixed with C_")
-
-        # Initialize the Model's path
-        self.model_path: str = f"{KERAS_PATH['models']}/{self.id}"
 
         # Initialize the description
         self.description: str = config["description"]
@@ -148,9 +150,9 @@ class ClassificationTraining:
         self.keras_model: IKerasModelConfig = config["keras_model"]
         self.keras_model["features_num"] = self.training_data_summary["features_num"]
 
-        # Initialize the model's directory if not unit testing
-        if not self.test_mode:
-            self._init_model_dir()
+        # Make sure the model does not exist if not unit testing
+        if not self.test_mode and Epoch.FILE.model_exists(self.id, self.model_type):
+            raise RuntimeError(f"Cannot train the model {self.id} because it already exists.")
 
 
 
@@ -436,10 +438,10 @@ class ClassificationTraining:
                 The instance of the trained model.
         """
         # Create the model's directory
-        makedirs(self.model_path)
+        Epoch.FILE.make_active_model_dir(self.id)
         
         # Save the model with the required metadata
-        with h5pyFile(f"{self.model_path}/model.h5", mode="w") as f:
+        with h5pyFile(Epoch.FILE.get_active_model_path(self.id, self.model_type), mode="w") as f:
             save_model_to_hdf5(model, f)
             f.attrs["id"] = self.id
             f.attrs["description"] = self.description
@@ -484,7 +486,7 @@ class ClassificationTraining:
             IClassificationTrainingCertificate
         """
         # Build the certificate
-        certificate: IClassificationTrainingCertificate = self._get_certificate(
+        certificate: IClassificationTrainingCertificate = self._build_certificate(
             model, 
             start_time, 
             training_history, 
@@ -493,8 +495,7 @@ class ClassificationTraining:
         )
 
         # Save the file
-        with open(f"{self.model_path}/certificate.json", "w") as outfile:
-            outfile.write(dumps(certificate))
+        Epoch.FILE.save_training_certificate(certificate)
 
         # Finally, return it so it can be added to the batch
         return certificate
@@ -505,7 +506,7 @@ class ClassificationTraining:
 
 
 
-    def _get_certificate(
+    def _build_certificate(
         self,
         model: Sequential,
         start_time: int, 
@@ -569,27 +570,3 @@ class ClassificationTraining:
                 "summary": get_summary(model)
             }
         }
-
-
-
-
-
-
-
-
-
-    def _init_model_dir(self) -> None:
-        """Creates the required directories in which the model and the certificate
-        will be stored.
-
-        Raises:
-            ValueError:
-                If the model's directory already exists.
-        """
-        # If the output directory doesn't exist, create it
-        if not exists(KERAS_PATH["models"]):
-            makedirs(KERAS_PATH["models"])
-
-        # Make sure the model's directory does not exist
-        if exists(self.model_path):
-            raise ValueError(f"The model {self.id} already exists.")

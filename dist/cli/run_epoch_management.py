@@ -5,7 +5,7 @@ from modules.epoch.Epoch import Epoch
 
 
 
-## CLI ##
+## Welcome ##
 print("EPOCH MANAGEMENT")
 action_answer: Dict[str, str] = prompt([InquirerList("action", message="Select an action to execute", choices=[ 
     "Create Epoch", 

@@ -312,3 +312,25 @@ class Utils:
         except ValueError:
             return False
         return str(uuid_obj) == uuid
+
+
+
+
+
+
+
+
+    ## Model Helpers ##
+
+
+
+
+    @staticmethod
+    def prettify_model_id(id: str) -> str:
+        """Given a model id, it will prettify it so it can be viewed
+        in the console properly.
+
+        Returns:
+            str
+        """
+        return id if len(id) < 13 else f"{id[0:10]}..."

@@ -1,4 +1,4 @@
-from typing import TypedDict, Union, List
+from typing import TypedDict, Union, List, Literal
 from modules.types.model_types import ITrainableModelType
 from modules.types.keras_models_types import IKerasLoss, IKerasClassificationMetric
 
@@ -35,8 +35,6 @@ class IKerasHyperparamsReceipt(TypedDict):
     creation: str
     model_type: ITrainableModelType
     batch_size: int
-    start: Union[str, None]
-    end: Union[str, None]
     training_data_id: Union[str, None]
     output_name: str
     total_models: int

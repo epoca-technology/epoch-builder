@@ -1,20 +1,19 @@
 from typing import Union, List, Tuple
+from os import makedirs
+from os.path import exists
+from json import dumps
 from functools import reduce
 from copy import deepcopy
 from math import ceil
 from modules.types import IKerasModelConfig, IKerasHyperparamsLoss, IKerasHyperparamsNetworkReceipt, \
     IRegressionTrainingConfig, IRegressionTrainingBatch, IClassificationTrainingConfig, \
-    IClassificationTrainingBatch, IKerasOptimizer, IKerasActivation, ITrainableModelType, IModelIDPrefix
+    IClassificationTrainingBatch, IKerasOptimizer, IKerasActivation, ITrainableModelType
 from modules.utils.Utils import Utils
-from modules.epoch.Epoch import Epoch
+from modules.keras_models.KerasPath import KERAS_PATH
 from modules.keras_models.KerasModel import KerasModel
 from modules.model.RegressionModel import RegressionModel
-from modules.model.ModelType import get_prefix_by_trainable_model_type
 from modules.hyperparams.RegressionNeuralNetworks import REGRESSION_NEURAL_NETWORKS
 from modules.hyperparams.ClassificationNeuralNetworks import CLASSIFICATION_NEURAL_NETWORKS
-
-
-
 
 
 
@@ -44,10 +43,23 @@ class KerasHyperparams:
             The type of model to generate hyperparameters for.
         networks: INeuralNetworks
             The list of networks supported by the model type.
+        prefix: str
+            The prefix of the model based on its type. It can be "C_" or "R_".
         batch_size: int
             The max number of models that will go on each batch.
+        start: Union[str, None]
+        end: Union[str, None]
+            The date range that will be used to train the model. Notice that this value is 
+            only used in keras_regression
         training_data_id: Union[str, None]
             The identifier of the classification training data.
+        epoch_name: str
+            The name of the output.
+        base_path: str
+            The base training configuration directory based on the model type.
+        output_path: str
+            The output path where the configuration files will be stored based on the
+            provided out_dir.
 
     """
     # Default Batch Size
@@ -87,33 +99,70 @@ class KerasHyperparams:
 
     def __init__(
         self, 
+        epoch_name: str, 
         model_type: ITrainableModelType, 
         batch_size: int, 
+        start: Union[str, None] = None, 
+        end: Union[str, None] = None, 
         training_data_id: Union[str, None] = None
     ):
         """Initializes the KerasHyperparams instance based on the provided configuration.
 
         Args:
+            epoch_name: str
+                The name of the directory that in which the configuration files will be 
+                included.
             model_type: ITrainableModelType "keras_regression"|"keras_classification"
                 The type of model which hyperparams will be generated for.
             batch_size: int
                 The number of models that will go on each batch.
+            start: Union[str, None]
+            end: Union[str, None]
+                The date range that will be used to train the model. Notice that this value is 
+                only used in keras_regression
             training_data_id: Union[str, None]
                 The training data id that will be included in the model configurations. Notice
-                that this value is only used in classification models.
+                that this value is only used in keras_classification.
         """
         # Initialize the type of model
-        self.model_type: ITrainableModelType = model_type
+        self.model_type: str = model_type
 
         # Init the networks
         self.networks = REGRESSION_NEURAL_NETWORKS if self.model_type == "keras_regression" \
             else CLASSIFICATION_NEURAL_NETWORKS
 
+        # Initialize the prefix
+        self.prefix: str = "C_" if self.model_type == "keras_classification" else "R_"
+
         # Initialize the batch size
         self.batch_size: int = batch_size
 
+        # Initialize the date range
+        self.start: Union[str, None] = start
+        self.end: Union[str, None] = end
+
         # Initialize the training data id
         self.training_data_id: Union[str, None] = training_data_id
+
+        # Initialize the base of the output path
+        self.base_path: str = KERAS_PATH["classification_training_configs"] if self.model_type == "keras_classification" \
+            else KERAS_PATH["regression_training_configs"]
+
+        # Initialize the output name
+        self.epoch_name: str = epoch_name
+
+        # Initialize the out path
+        self.output_path: str = f"{self.base_path}/{self.epoch_name}"
+
+        # If the base output directory doesn't exist, create it
+        if not exists(self.base_path):
+            makedirs(self.base_path)
+
+        # Make sure the final output path does not exist
+        if exists(self.output_path):
+            raise ValueError(f"The path {self.output_path} already exists.")
+        else:
+            makedirs(self.output_path)
 
 
 
@@ -167,12 +216,10 @@ class KerasHyperparams:
                         )
 
             # Build batches and save the network configurations
-            print(f"Generating {network_type} Neural Networks...")
             models, batches = self._build_and_save_batches(network_type, configs)
             network_receipts.append({ "name": network_type, "models": models, "batches": batches})
 
         # Finally, save the receipt
-        print("Saving receipt...")
         self._save_receipt(network_receipts)
 
 
@@ -206,24 +253,28 @@ class KerasHyperparams:
             "name": "", # Placeholder
             "models": [] # Placeholder
         }
+
+        # Add the regression specific values
+        if self.model_type == "keras_regression":
+            training_config["start"] = self.start
+            training_config["end"] = self.end
         
         # Add the classification specific values
-        if self.model_type == "keras_classification":
+        else:
             training_config["training_data_id"] = self.training_data_id
 
         # Save the configurations in batches
         slice_start: int = 0
         for batch_number in range(1, batches+1):
             # Include the name
-            prefix: IModelIDPrefix = get_prefix_by_trainable_model_type(self.model_type)
-            training_config["name"] = f"{prefix}{network_type}_{batch_number}_{batches}"
+            training_config["name"] = f"{self.prefix}{network_type}_{batch_number}_{batches}"
 
             # Include the sliced configs
             slice_end: int = slice_start + self.batch_size
             training_config["models"] = configs[slice_start:slice_end]
 
             # Save the batch
-            Epoch.FILE.save_keras_hyperparams_batch(self.model_type, network_type, training_config)
+            self._save_batch(network_type, batch_number, training_config)
 
             # Set the end of the slice as the new start
             slice_start = slice_end
@@ -376,7 +427,7 @@ class KerasHyperparams:
         """
         # Init values
         id: str = self._generate_model_id(keras_model_name)
-        description: str = f"Generated by Hyperparams ({Epoch.ID})."
+        description: str = f"Generated by Hyperparams ({self.epoch_name})."
         keras_model: IKerasModelConfig = { "name": keras_model_name }
 
         # Populate the units if any
@@ -488,7 +539,38 @@ class KerasHyperparams:
 
 
 
-    ## Hyperparams Receipt ##
+    ## Saving ##
+
+
+
+
+
+    def _save_batch(
+        self, 
+        network: str, 
+        batch_num: int, 
+        network_file: Union[IRegressionTrainingBatch, IClassificationTrainingBatch]
+    ) -> None:
+        """Saves a Keras Training Batch File into the configs directory.
+
+        Args:
+            network: str
+                The type of network that is going to be saved.
+            batch_num: int
+                The batch number for the given network.
+            network_file: 
+                The configuration file for given network.
+        """
+        # If the network's directory doesn't exist, create it
+        if not exists(f"{self.output_path}/{network}"):
+            makedirs(f"{self.output_path}/{network}")
+
+        # Write the results on a JSON File
+        with open(f"{self.output_path}/{network}/{self.prefix}{network}_{batch_num}.json", "w") as outfile:
+            outfile.write(dumps(network_file, indent=4))
+
+
+
 
 
 
@@ -508,12 +590,16 @@ class KerasHyperparams:
         total_models: int = total_models_result["models"]
 
         # Init the receipt
-        receipt: str = f"{Epoch.ID}: {self.model_type} hyperparams\n\n"
+        receipt: str = f"{self.epoch_name}: {self.model_type} hyperparams\n\n"
 
         # Configuration
         receipt += f"Creation: {Utils.from_milliseconds_to_date_string(Utils.get_time())}\n"
         receipt += f"Total Models: {total_models}\n"
         receipt += f"Batch Size: {self.batch_size}\n"
+        if self.model_type == "keras_regression":
+            receipt += f"Start: {self.start}\n"
+            if isinstance(self.end, str):
+                receipt += f"End: {self.end}\n"
         if self.model_type == "keras_classification":
             receipt += f"Training Data ID: {self.training_data_id}\n"
 
@@ -530,4 +616,12 @@ class KerasHyperparams:
                 receipt += f"{net['name']}_{batch_number}: \n"
 
         # Finally, write the receipt in a text file
-        Epoch.FILE.save_keras_hyperparams_receipt(self.model_type, receipt)
+        with open(f"{self.output_path}/receipt.txt", "w") as outfile:
+            outfile.write(receipt)
+
+
+
+
+
+
+

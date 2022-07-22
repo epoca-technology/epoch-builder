@@ -2,45 +2,6 @@ from typing import Literal, TypedDict, Union, List, Tuple
 
 
 
-# Keras Path
-# A dictionary containing the path to all directories that will be used by Keras.
-class IKerasPath(TypedDict):
-    # Keras Assets
-    # The root path for the assets
-    assets: str
-
-    # Keras Models
-    # The path in which all regression and classification models are stored
-    models: str
-
-    # Classification Training Data
-    # The path containing all the classification training data files.
-    classification_training_data: str
-
-    # Batched Training Certificates
-    # Even though individual certificates are stored within the model's directory,
-    # a batch is also saved on a different directory so multiple configurations can
-    # be evaluated simultaneously.
-    batched_training_certificates: str
-
-    # Regression Training Configurations
-    # Even though this path is not used by the system yet, it is recommended to keep all
-    # the relevant configuration files in this directory.
-    regression_training_configs: str
-
-    # Classification Training Data Configs
-    # Even though this path is not used by the system yet, it is recommended to keep all
-    # the relevant configuration files in this directory.
-    classification_training_data_configs: str
-
-    # Classification Training Configs
-    # Even though this path is not used by the system yet, it is recommended to keep all
-    # the relevant configuration files in this directory.
-    classification_training_configs: str
-
-
-
-
 
 
 
@@ -66,6 +27,7 @@ IKerasClassificationMetric = Literal["categorical_accuracy", "binary_accuracy"]
 
 # Activation Functions
 IKerasActivation = Literal["relu", "tanh"]
+
 
 
 # Keras Model Configuration

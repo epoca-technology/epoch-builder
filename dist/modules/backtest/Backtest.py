@@ -95,7 +95,7 @@ class Backtest:
         # IMPORTANT: Candlesticks should not be initialized when running on test mode.
         if not self.test_mode:
             lookbacks: List[int] = [m.get_lookback() for m in self.models]
-            regressions: List[IModel] = list(filter(is_regression, config["models"]))
+            regressions: List[IModel] = list(filter(lambda x: is_regression(x["id"]), config["models"]))
             if len(regressions) > 0:
                 Candlestick.init(max(lookbacks), Epoch.TRAINING_EVALUATION_START, Epoch.TRAINING_EVALUATION_END)
             else:
@@ -140,8 +140,7 @@ class Backtest:
         # Iterate over each model
         for model_index, model in enumerate(self.models):
             # Set the Model's ID on the progress bar
-            model_id: str = model.id if len(model.id) < 20 else f"{model.id[0:10]}...{model.id[-10:]}"
-            progress_bar.set_description(f"{model_index + 1}/{len(self.models)}) {model_id}")
+            progress_bar.set_description(f"{model_index + 1}/{len(self.models)}) {Utils.prettify_model_id(model.id)}")
 
             # Init the time in which the model's backtesting started
             model_start: int = Utils.get_time()

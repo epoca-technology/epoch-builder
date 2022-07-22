@@ -177,7 +177,7 @@ class BacktestConfigFactory:
         receipt += f"ArimaModels:\n"
         for focus_number, count in model_count.items():
             receipt += f"{focus_number}: {count}\n"
-        receipt += f"\nTotal: {sum(model_count.values())}\n\n"
+        receipt += f"Total: {sum(model_count.values())}\n\n"
 
         # Models by position exit combination
         receipt += f"Backtest Configurations:\n\n"

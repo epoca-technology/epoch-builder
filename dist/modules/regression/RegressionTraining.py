@@ -1,8 +1,5 @@
 from typing import Union, Tuple, List
-from os import makedirs
-from os.path import exists
 from numpy import ndarray, array
-from json import dumps
 from h5py import File as h5pyFile
 from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras import Sequential
@@ -13,10 +10,9 @@ from keras.callbacks import EarlyStopping, History
 from dist.modules.epoch.Epoch import Epoch
 from modules.types import IKerasTrainingTypeConfig, IKerasModelConfig, IKerasModelTrainingHistory,\
     IRegressionTrainingConfig, IRegressionTrainingCertificate, IModelEvaluation, IKerasOptimizer,\
-        IKerasRegressionLoss
+        IKerasRegressionLoss, ITrainableModelType
 from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
-from modules.keras_models.KerasPath import KERAS_PATH
 from modules.keras_models.KerasModel import KerasModel
 from modules.keras_models.LearningRateSchedule import LearningRateSchedule
 from modules.keras_models.KerasModelSummary import get_summary
@@ -37,10 +33,10 @@ class RegressionTraining:
     Instance Properties:
         test_mode: bool
              If running from unit tests, it won't check the model's directory.
+        model_type: ITrainableModelType
+            The type of model that will be trained.
         id: str
             A descriptive identifier compatible with filesystems
-        model_path: str
-            The directory in which the model will be stored.
         description: str
             Important information regarding the model that will be trained.
         autoregressive: bool
@@ -110,13 +106,13 @@ class RegressionTraining:
         # Initialize the type of execution
         self.test_mode: bool = test_mode
 
-        # Initialize the id
-        self.id: str = config['id']
-        if self.id[0:2] != 'R_':
-            raise ValueError("The ID of the Regression Model must be preffixed with R_")
+        # Init the type of model
+        self.model_type: ITrainableModelType = "keras_regression"
 
-        # Initialize the Model's path
-        self.model_path: str = f"{KERAS_PATH['models']}/{self.id}"
+        # Initialize the id
+        self.id: str = config["id"]
+        if self.id[0:2] != "R_":
+            raise ValueError("The ID of the Regression Model must be preffixed with R_")
 
         # Initialize the description
         self.description: str = config["description"]
@@ -158,9 +154,11 @@ class RegressionTraining:
         self.train_size: int = self.train_x.shape[0]
         self.test_size: int = self.test_x.shape[0]
 
-        # Initialize the model's directory if not unit testing
-        if not self.test_mode:
-            self._init_model_dir()
+        # Make sure the model does not exist if not unit testing
+        if not self.test_mode and Epoch.FILE.model_exists(self.id, self.model_type):
+            raise RuntimeError(f"Cannot train the model {self.id} because it already exists.")
+
+
 
 
 
@@ -190,9 +188,9 @@ class RegressionTraining:
         )
 
         # Return the Optimizer Instance
-        if func_name == 'adam':
+        if func_name == "adam":
             return adam.Adam(lr_schedule)
-        elif func_name == 'rmsprop':
+        elif func_name == "rmsprop":
             return rmsprop.RMSProp(lr_schedule)
         else:
             raise ValueError(f"The optimizer function for {func_name} was not found.")
@@ -218,9 +216,9 @@ class RegressionTraining:
             ValueError:
                 If the function name does not match any function in the conditionings.
         """
-        if func_name == 'mean_squared_error':
+        if func_name == "mean_squared_error":
             return MeanSquaredError()
-        elif func_name == 'mean_absolute_error':
+        elif func_name == "mean_absolute_error":
             return MeanAbsoluteError()
         else:
             raise ValueError(f"The loss function for {func_name} was not found.")
@@ -386,16 +384,16 @@ class RegressionTraining:
                 The instance of the trained model.
         """
         # Create the model's directory
-        makedirs(self.model_path)
+        Epoch.FILE.make_active_model_dir(self.id)
         
         # Save the model with the required metadata
-        with h5pyFile(f"{self.model_path}/model.h5", mode='w') as f:
+        with h5pyFile(Epoch.FILE.get_active_model_path(self.id, self.model_type), mode="w") as f:
             save_model_to_hdf5(model, f)
-            f.attrs['id'] = self.id
-            f.attrs['description'] = self.description
-            f.attrs['autoregressive'] = self.autoregressive
-            f.attrs['lookback'] = self.lookback
-            f.attrs['predictions'] = self.predictions
+            f.attrs["id"] = self.id
+            f.attrs["description"] = self.description
+            f.attrs["autoregressive"] = self.autoregressive
+            f.attrs["lookback"] = self.lookback
+            f.attrs["predictions"] = self.predictions
 
 
 
@@ -438,8 +436,7 @@ class RegressionTraining:
         )
 
         # Save the file
-        with open(f"{self.model_path}/certificate.json", "w") as outfile:
-            outfile.write(dumps(certificate))
+        Epoch.FILE.save_training_certificate(certificate)
 
         # Finally, return it so it can be added to the batch
         return certificate
@@ -482,8 +479,8 @@ class RegressionTraining:
             "description": self.description,
 
             # Training Data
-            "training_data_start": int(Candlestick.PREDICTION_DF.iloc[0]['ot']),
-            "training_data_end": int(Candlestick.PREDICTION_DF.iloc[-1]['ct']),
+            "training_data_start": int(Candlestick.NORMALIZED_PREDICTION_DF.iloc[0]["ot"]),
+            "training_data_end": int(Candlestick.NORMALIZED_PREDICTION_DF.iloc[-1]["ct"]),
             "train_size": self.train_size,
             "test_size": self.test_size,
             "training_data_summary": Candlestick.NORMALIZED_PREDICTION_DF["c"].describe().to_dict(),
@@ -515,27 +512,3 @@ class RegressionTraining:
                 "summary": get_summary(model)
             }
         }
-
-
-
-
-
-
-
-
-
-    def _init_model_dir(self) -> None:
-        """Creates the required directories in which the model and the certificate
-        will be stored.
-
-        Raises:
-            ValueError:
-                If the model's directory already exists.
-        """
-        # If the output directory doesn't exist, create it
-        if not exists(KERAS_PATH["models"]):
-            makedirs(KERAS_PATH["models"])
-
-        # Make sure the model's directory does not exist
-        if exists(self.model_path):
-            raise ValueError(f"The model {self.id} already exists.")

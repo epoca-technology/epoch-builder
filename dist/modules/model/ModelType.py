@@ -17,6 +17,8 @@ MODEL_TYPES: List[IModelType] = [
 TRAINABLE_MODEL_TYPES: List[ITrainableModelType] = [
     "keras_regression", "keras_classification", "xgb_regression", "xgb_classification"
 ]
+TRAINABLE_REGRESSION_MODEL_TYPES: List[ITrainableModelType] = ["keras_regression", "xgb_regression"]
+TRAINABLE_CLASSIFICATION_MODEL_TYPES: List[ITrainableModelType] = ["keras_classification", "xgb_classification"]
 
 
 # Model ID Prefixes
@@ -208,6 +210,33 @@ def get_trainable_model_type(model_id: IPrefixOrID) -> ITrainableModelType:
         raise ValueError(f"The provided Model ID does not have a trainable model type: {model_id}")
 
 
+
+
+
+def get_prefix_by_trainable_model_type(model_type: ITrainableModelType) -> IModelIDPrefix:
+    """Retrieves the prefix of a model based on its trainable type.
+
+    Args:
+        model_type: ITrainableModelType
+            The trainable type of the model.
+
+    Returns:
+        IModelIDPrefix
+
+    Raises:
+        ValueError:
+            If no prefix is found.
+    """
+    if model_type == "keras_regression":
+        return "R_"
+    elif model_type == "keras_classification":
+        return "C_"
+    elif model_type == "xgb_regression":
+        return "XGBR_"
+    elif model_type == "xgb_classification":
+        return "XGBC_"
+    else:
+        raise ValueError(f"Could not find a prefix for: {model_type}")
 
 
 

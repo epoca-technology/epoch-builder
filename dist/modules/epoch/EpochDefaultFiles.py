@@ -1,8 +1,4 @@
-from typing import Union
 from modules.types import IBacktestConfig, ITrainingDataConfig
-from modules.model.ArimaModel import ArimaModel
-from modules.model.RegressionModel import RegressionModel
-from modules.model.ClassificationModel import ClassificationModel
 from modules.epoch.EpochFile import EpochFile
 
 
@@ -21,41 +17,41 @@ BACKTEST_CONFIG_UT: IBacktestConfig = {
         {
             "id": "A212",
             "arima_models": [{
-                "lookback": ArimaModel.DEFAULT_LOOKBACK,
-                "predictions": ArimaModel.DEFAULT_PREDICTIONS,
+                "lookback": 300,
+                "predictions": 10,
                 "arima": { "p": 2, "d": 1, "q": 2 },
-                "interpreter": ArimaModel.DEFAULT_INTERPRETER
+                "interpreter": { "long": 0.05, "short": 0.05 }
             }]
         },
         {
             "id": "R_UNIT_TEST",
             "regression_models": [{
                 "regression_id": "R_UNIT_TEST", 
-                "interpreter": RegressionModel.DEFAULT_INTERPRETER
+                "interpreter": { "long": 0.5, "short": 0.5 }
             }]
         },
         {
             "id": "C_UNIT_TEST",
             "classification_models": [{
                 "classification_id": "C_UNIT_TEST", 
-                "interpreter": ClassificationModel.DEFAULT_INTERPRETER
+                "interpreter": { "min_probability": 0.6 }
             }]
         },
         {
             "id": "CON_UNIT_TEST",    
             "arima_models": [{
-                "lookback": ArimaModel.DEFAULT_LOOKBACK,
-                "predictions": ArimaModel.DEFAULT_PREDICTIONS,
+                "lookback": 300,
+                "predictions": 10,
                 "arima": { "p": 2, "d": 1, "q": 2 },
-                "interpreter": ArimaModel.DEFAULT_INTERPRETER
+                "interpreter": { "long": 0.05, "short": 0.05 }
             }],
             "regression_models": [{
                 "regression_id": "R_UNIT_TEST", 
-                "interpreter": RegressionModel.DEFAULT_INTERPRETER
+                "interpreter": { "long": 0.5, "short": 0.5 }
             }],
             "classification_models": [{
                 "classification_id": "C_UNIT_TEST", 
-                "interpreter": ClassificationModel.DEFAULT_INTERPRETER
+                "interpreter": { "min_probability": 0.6 }
             }],
             "consensus_model": { "interpreter": { "min_consensus": 2 } }
         }
@@ -105,40 +101,40 @@ CLASSIFICATION_TRAINING_DATA_CONFIG_UT: ITrainingDataConfig = {
         {
             "id": "101",
             "arima_models": [{
-                "lookback": ArimaModel.DEFAULT_LOOKBACK,
-                "predictions": ArimaModel.DEFAULT_PREDICTIONS,
+                "lookback": 300,
+                "predictions": 10,
                 "arima": { "p": 1, "d": 0, "q": 1 },
-                "interpreter": ArimaModel.DEFAULT_INTERPRETER
+                "interpreter": { "long": 0.05, "short": 0.05 }
             }]
         },
         {
             "id": "111",
             "arima_models": [{
-                "lookback": ArimaModel.DEFAULT_LOOKBACK,
-                "predictions": ArimaModel.DEFAULT_PREDICTIONS,
+                "lookback": 300,
+                "predictions": 10,
                 "arima": { "p": 1, "d": 1, "q": 1 },
-                "interpreter": ArimaModel.DEFAULT_INTERPRETER
+                "interpreter": { "long": 0.05, "short": 0.05 }
             }]
         },
         {
             "id": "112",
             "arima_models": [{
-                "lookback": ArimaModel.DEFAULT_LOOKBACK,
-                "predictions": ArimaModel.DEFAULT_PREDICTIONS,
+                "lookback": 300,
+                "predictions": 10,
                 "arima": { "p": 1, "d": 1, "q": 2 },
-                "interpreter": ArimaModel.DEFAULT_INTERPRETER
+                "interpreter": { "long": 0.05, "short": 0.05 }
             }]
         },
         {
             "id": "121",
             "arima_models": [{
-                "lookback": ArimaModel.DEFAULT_LOOKBACK,
-                "predictions": ArimaModel.DEFAULT_PREDICTIONS,
+                "lookback": 300,
+                "predictions": 10,
                 "arima": { "p": 1, "d": 2, "q": 1 },
-                "interpreter": ArimaModel.DEFAULT_INTERPRETER
+                "interpreter": { "long": 0.05, "short": 0.05 }
             }]
         },
-        { "id": "R_UNIT_TEST","regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": RegressionModel.DEFAULT_INTERPRETER}] }
+        { "id": "R_UNIT_TEST","regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": { "long": 0.5, "short": 0.5 }}] }
     ],
     "include_rsi": True,
     "include_stoch": False,

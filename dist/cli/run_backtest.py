@@ -4,32 +4,10 @@ from modules.epoch.PositionExitCombination import PositionExitCombination
 from modules.backtest.Backtest import Backtest
 
 
-# BACKTEST CONFIGURATION FILE
-# A Backtest instance can perform a backtesting process on a series of models.
-#
-# Identification:
-#   id: The identification/description of the Backtest Instance. This value must be compatible
-#       with file systems as it will be part of the result name like {BACKTEST_ID}_{TIMESTAMP}.json
-#
-# Positions:
-#   take_profit: The percentage that will be applied when opening a position. F.e: If the open price
-#       is 100 and the take_profit is set at 10, it will set the take profit price at 110 in the case of a long 
-#       or 90 in the case of a short.
-#   stop_loss: The percentage that will be applied when opening a position. F.e: If the open price
-#       is 100 and the stop_loss is set at 10, it will set the stop loss price at 90 in the case of a long 
-#       or 110 in the case of a short.
-#   idle_minutes_on_position_close: The number of minutes the model will not trade for after closing a position.
-# 
-# Models:
-#   models: The list of Model Configurations that will be put through the backtest. 
-#
-# BACKTEST PROCESS
-# The Backtest Instance will run the test on the models in order and will output the results to the 
-# directory /backtest_assets/results/$position_exit_combination/$backtest_id.json
-
 
 # Initialize the Epoch
 Epoch.init()
+
 
 
 # BACKTEST CONFIGURATION
@@ -37,9 +15,11 @@ Epoch.init()
 config: IBacktestConfig = Epoch.FILE.get_backtest_config()
 
 
+
 # BACKTEST INSTANCE
 # The Instance of the Backtest that will be executed
 backtest: Backtest = Backtest(config)
+
 
 
 # BACKTEST EXECUTION
