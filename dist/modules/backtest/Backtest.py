@@ -1,18 +1,16 @@
 from typing import List, Union
-from os import makedirs
-from os.path import exists
-from json import dumps
 from tqdm import tqdm
 from modules.types import IModel, IPrediction, IBacktestConfig, IBacktestPerformance, IBacktestResult
-from modules.candlestick.Candlestick import Candlestick
 from modules.utils.Utils import Utils
+from modules.epoch.Epoch import Epoch
+from modules.candlestick.Candlestick import Candlestick
 from modules.backtest.Position import Position
-from modules.backtest.BacktestPath import BACKTEST_PATH
 from modules.model.ArimaModel import ArimaModel
 from modules.model.RegressionModel import RegressionModel
 from modules.model.ClassificationModel import ClassificationModel
 from modules.model.ConsensusModel import ConsensusModel
 from modules.model.ModelFactory import ModelFactory
+from modules.model.ModelType import is_regression
 
 
 
@@ -86,11 +84,22 @@ class Backtest:
         self.models: List[Union[ArimaModel, RegressionModel, ClassificationModel, ConsensusModel]] = [
             ModelFactory(m) for m in config["models"]
         ]
+
+        # Initialize the results
         self.results: List[IBacktestResult] = []
 
-        # Initialize the candlesticks based on the models' lookback and the provided start and end dates
+        # Candlesticks Initialization
+        # Initialize the candlesticks based on the type of models being trained. If there is a regression
+        # within the models, it will use the Training Evaluation Range. Otherwise, it will make use of 
+        # the Backtest Range.
+        # IMPORTANT: Candlesticks should not be initialized when running on test mode.
         if not self.test_mode:
-            Candlestick.init(self.models[0].get_lookback(), config.get("start"), config.get("end"))
+            lookbacks: List[int] = [m.get_lookback() for m in self.models]
+            regressions: List[IModel] = list(filter(is_regression, config["models"]))
+            if len(regressions) > 0:
+                Candlestick.init(max(lookbacks), Epoch.TRAINING_EVALUATION_START, Epoch.TRAINING_EVALUATION_END)
+            else:
+                Candlestick.init(max(lookbacks), Epoch.BACKTEST_START, Epoch.BACKTEST_END)
         
         # Init the start and end
         self.start: int = int(Candlestick.DF.iloc[0]["ot"])
@@ -196,22 +205,13 @@ class Backtest:
             self._append_result(model_start, model.get_model(), position.get_performance())
         
         # Save the results
-        self._save_results()
+        Epoch.FILE.save_backtest_results(self.results)
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-    ## Results ##
 
 
 
@@ -247,38 +247,3 @@ class Backtest:
             "model": model,
             "performance": performance
         })
-
-
-
-
-
-
-
-
-    def _save_results(self):
-        """Saves the backtest results into the system's directory.
-        """
-        # If the results directory doesn't exist, create it
-        if not exists(BACKTEST_PATH["results"]):
-            makedirs(BACKTEST_PATH["results"])
-
-        # Write the results on a JSON File
-        with open(f"{BACKTEST_PATH['results']}/{self._get_result_file_name()}", "w") as outfile:
-            outfile.write(dumps(self.results))
-
-
-
-
-
-
-
-
-
-    def _get_result_file_name(self) -> str:
-        """Returns the result file name based on the id of the backtest and
-        the current time.
-
-        Returns:
-            str
-        """
-        return f"{self.id}_{str(Utils.get_time())}.json"

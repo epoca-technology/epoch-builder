@@ -133,6 +133,16 @@ IPositionExitCombinationDatabase = Dict[IPositionExitCombinationID, IPositionExi
 
 
 
+## Backtest Config Factory ##
+
+
+
+
+
+
+
+
+
 
 
 ## Configuration ##

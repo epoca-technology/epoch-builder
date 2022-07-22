@@ -1,1 +1,23 @@
-{}
+{
+    "name": "R_UNIT_TEST",
+    "models": [
+        {
+            "id": "R_UNIT_TEST",
+            "description": "Official Unit Test Regression Model.",
+            "autoregressive": true,
+            "lookback": 100,
+            "predictions": 30,
+            "optimizer": "adam",
+            "loss": "mean_squared_error",
+            "keras_model": {
+                "name": "R_UNIT_TEST",
+                "units": [
+                    64
+                ],
+                "activations": [
+                    "relu"
+                ]
+            }
+        }
+    ]
+}

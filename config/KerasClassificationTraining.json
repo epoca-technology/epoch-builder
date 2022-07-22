@@ -1,1 +1,22 @@
-{}
+{
+    "name": "C_UNIT_TEST",
+    "training_data_id": "",
+    "models": [
+        {
+            "id": "C_UNIT_TEST",
+            "description": "This is the official ClassificationModel for Unit Tests.",
+            "optimizer": "adam",
+            "loss": "binary_crossentropy",
+            "metric": "binary_accuracy",
+            "keras_model": {
+                "name": "C_UNIT_TEST",
+                "units": [
+                    64
+                ],
+                "activations": [
+                    "relu"
+                ]
+            }
+        }
+    ]
+}

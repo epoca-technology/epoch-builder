@@ -1,0 +1,14 @@
+{
+    "seed": 60184,
+    "id": "_ALPHA",
+    "start": 1557140400000,
+    "end": 1650659639999,
+    "training_evaluation_start": 1641330000000,
+    "training_evaluation_end": 1650659639999,
+    "backtest_start": 1631991600000,
+    "backtest_end": 1650659639999,
+    "highest_price": 68633.69,
+    "lowest_price": 4130.64,
+    "regression_price_change_requirement": 3,
+    "idle_minutes_on_position_close": 30
+}

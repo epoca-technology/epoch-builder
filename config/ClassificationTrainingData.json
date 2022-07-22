@@ -1,21 +1,98 @@
 {
     "regression_selection_id": "e5a03686-7bb9-4e2f-ab2f-3058281f589f",
     "description": "UNIT_TEST: DO NOT DELETE.",
-    "start": "01/09/2020",
-    "end": "22/04/2022",
     "steps": 5,
     "up_percent_change": 3,
     "down_percent_change": 3,
     "models": [
-        { "id": "A101","arima_models": [{"arima": {"p": 1, "d": 0,"q": 1}}] },
-        { "id": "A111","arima_models": [{"arima": {"p": 1, "d": 1,"q": 1}}] },
-        { "id": "A112","arima_models": [{"arima": {"p": 1, "d": 1,"q": 2}}] },
-        { "id": "A121","arima_models": [{"arima": {"p": 1, "d": 2,"q": 1}}] },
-        { "id": "R_UNIT_TEST","regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": {"long": 1, "short": 1}}] }
+        {
+            "id": "101",
+            "arima_models": [
+                {
+                    "lookback": 300,
+                    "predictions": 10,
+                    "arima": {
+                        "p": 1,
+                        "d": 0,
+                        "q": 1
+                    },
+                    "interpreter": {
+                        "long": 0.05,
+                        "short": 0.05
+                    }
+                }
+            ]
+        },
+        {
+            "id": "111",
+            "arima_models": [
+                {
+                    "lookback": 300,
+                    "predictions": 10,
+                    "arima": {
+                        "p": 1,
+                        "d": 1,
+                        "q": 1
+                    },
+                    "interpreter": {
+                        "long": 0.05,
+                        "short": 0.05
+                    }
+                }
+            ]
+        },
+        {
+            "id": "112",
+            "arima_models": [
+                {
+                    "lookback": 300,
+                    "predictions": 10,
+                    "arima": {
+                        "p": 1,
+                        "d": 1,
+                        "q": 2
+                    },
+                    "interpreter": {
+                        "long": 0.05,
+                        "short": 0.05
+                    }
+                }
+            ]
+        },
+        {
+            "id": "121",
+            "arima_models": [
+                {
+                    "lookback": 300,
+                    "predictions": 10,
+                    "arima": {
+                        "p": 1,
+                        "d": 2,
+                        "q": 1
+                    },
+                    "interpreter": {
+                        "long": 0.05,
+                        "short": 0.05
+                    }
+                }
+            ]
+        },
+        {
+            "id": "R_UNIT_TEST",
+            "regression_models": [
+                {
+                    "regression_id": "R_UNIT_TEST",
+                    "interpreter": {
+                        "long": 0.5,
+                        "short": 0.5
+                    }
+                }
+            ]
+        }
     ],
     "include_rsi": true,
     "include_stoch": false,
     "include_aroon": true,
     "include_stc": false,
-    "include_mfi": true
+    "include_mfi": false
 }

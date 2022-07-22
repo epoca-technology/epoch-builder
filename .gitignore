@@ -53,11 +53,6 @@ candlesticks/
 # Database Management
 db_management/
 
-# Epoch
+# Epochs
+_TEST
 _ALPHA
-
-# Backtest Assets
-backtest_assets/
-
-# Keras Assets
-keras_assets/

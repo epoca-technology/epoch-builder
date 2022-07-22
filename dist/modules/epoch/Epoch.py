@@ -10,6 +10,7 @@ from modules.candlestick.Candlestick import Candlestick
 from modules.epoch.EpochFile import EpochFile
 from modules.epoch.CandlestickNormalization import normalize_prediction_candlesticks
 from modules.epoch.PredictionRangeIndexer import create_indexer
+from modules.epoch.BacktestConfigFactory import BacktestConfigFactory
 from modules.epoch.EpochDefaultFiles import create_default_files
 
 
@@ -25,6 +26,8 @@ class Epoch:
             Indicates if the Epoch has been initialized.
         DEFAULTS: IEpochDefaults
             The default values that will be set if no data is provided through the CLI.
+        SEED: int
+            The set that will be used to set randomness in all required libs
         ID: str
             The ID of the Epoch.
         START: int
@@ -74,6 +77,9 @@ class Epoch:
         "idle_minutes_on_position_close": 30
     }
 
+    # The set that will be used to set randomness in all required libs
+    SEED: int
+
     # Identifier, must be preffixed with "_EPOCHNAME"
     ID: str
 
@@ -108,6 +114,9 @@ class Epoch:
 
     # EpochFile Instance
     FILE: EpochFile
+
+
+
 
 
 
@@ -167,18 +176,18 @@ class Epoch:
         epoch_width_days: int = ceil(epoch_width * 30)
 
         # Extract the predictions candlestick df
-        print("1/9) Extracting the Prediction Candlesticks DF...")
+        print("1/10) Extracting the Prediction Candlesticks DF...")
         prediction_df: DataFrame = Epoch._extract_epoch_prediction_candlesticks_df(epoch_width_days)
 
         # Calculate the epoch's date ranges
-        print("2/9) Calculating the Epoch Range...")
+        print("2/10) Calculating the Epoch Range...")
         start: int = int(prediction_df.iloc[0]["ot"])
         end: int = int(prediction_df.iloc[-1]["ct"])
         training_evaluation_start, training_evaluation_end = Epoch._calculate_date_range(prediction_df, ceil(epoch_width_days * 0.1))
         backtest_start, backtest_end = Epoch._calculate_date_range(prediction_df, ceil(epoch_width_days * 0.2))
 
         # Check if the normalized prediction candlesticks csv needs to be created
-        print("3/9) Creating the Normalized Prediction Candlesticks CSV...")
+        print("3/10) Creating the Normalized Prediction Candlesticks CSV...")
         highest_price, lowest_price = normalize_prediction_candlesticks(prediction_df)
 
         # Initialize the candlesticks based on the prediction range lookbacks
@@ -187,25 +196,25 @@ class Epoch:
 
         # Check if the candlesticks' prediction range need to be indexed
         if EpochFile.file_exists(Candlestick.PREDICTION_RANGE_INDEXER_PATH):
-            print("4/9) Creating Prediction Range Indexer: Skipped")
+            print("4/10) Creating Prediction Range Indexer: Skipped")
         else:
-            create_indexer(lookbacks, "4/9) Creating Prediction Range Indexer")
+            create_indexer(lookbacks, "4/10) Creating Prediction Range Indexer")
 
         # Initialize the Epoch's directories
-        print("5/9) Creating Directories...")
+        print("5/10) Creating Directories...")
         EpochFile.create_epoch_directories(id)
 
         # Generate Arima's Backtest Configurations
-        print("6/9) Generating Arima Backtest Configuration Files...")
-        # @TODO
+        print("6/10) Generating Arima Backtest Configuration Files...")
+        BacktestConfigFactory.build_arima_backtest_configs(id, idle_minutes_on_position_close)
 
         # Create the Epoch's Default Files
-        print("7/9) Creating Default Files...")
+        print("7/10) Creating Default Files...")
         create_default_files(id)
 
         # Save the epoch's config file
-        print("8/9) Saving Epoch Configuration...")
-        EpochFile.update_epoch_config({
+        print("8/10) Saving Epoch Configuration...")
+        epoch_config: IEpochConfig = {
             "seed": seed,
             "id": id,
             "start": start,
@@ -218,11 +227,17 @@ class Epoch:
             "lowest_price": lowest_price,
             "regression_price_change_requirement": regression_price_change_requirement,
             "idle_minutes_on_position_close": idle_minutes_on_position_close
-        })
+        }
+        EpochFile.update_epoch_config(epoch_config)
 
         # Add the Epoch's Directory to the gitignore file
-        print("9/9) Adding Epoch to .gitignore file...")
-        EpochFile.add_epoch_to_gitignore_file(id)
+        print("9/10) Adding Epoch to .gitignore file...")
+        Epoch.add_epoch_to_gitignore_file(id)
+
+        # Create the Epoch's Receipt
+        print("10/10) Creating receipt...")
+        Epoch._create_epoch_receipt(epoch_config)
+
 
 
 
@@ -374,6 +389,70 @@ class Epoch:
 
 
 
+    @staticmethod
+    def add_epoch_to_gitignore_file(epoch_id: str) -> None:
+        """Loads the entire .gitignore file and appends the epoch's
+        id at the end of it.
+
+        Args:
+            epoch_id: str
+                The ID of the epoch to be added to the gitignore file.
+        """
+        # Init the path of the file
+        path: str = "./.gitignore"
+
+        # Init the file
+        gitignore: str = EpochFile.read(path)
+
+        # Append the new Epoch
+        gitignore += f"\n{epoch_id}"
+
+        # Save the file
+        EpochFile.write(path, gitignore)
+
+
+
+
+    @staticmethod
+    def _create_epoch_receipt(config: IEpochConfig) -> None:
+        """Creates the Epoch's receipt and stores it in the root directory.
+
+        Args:
+            config: IEpochConfig
+                The configuration that was used to create the epoch.
+        """
+        # Init values
+        receipt: str = f"{config['id']}\n\n"
+
+        # General
+        receipt += f"Creation: {Utils.from_milliseconds_to_date_string(Utils.get_time())}\n"
+        receipt += f"Seed: {config['seed']}\n"
+        receipt += f"Regression Price Change Requirement: {config['regression_price_change_requirement']}%\n"
+        receipt += f"Idle Minutes On Position Close: {config['idle_minutes_on_position_close']}\n"
+
+        # Price Range
+        receipt += "\n\nPrice Range:\n"
+        receipt += f"Highest: {config['highest_price']}\n"
+        receipt += f"Lowest: {config['lowest_price']}\n"
+
+        # Epoch Date Range
+        receipt += "\n\nEpoch Range:\n"
+        receipt += f"Start: {Utils.from_milliseconds_to_date_string(config['start'])}\n"
+        receipt += f"End: {Utils.from_milliseconds_to_date_string(config['end'])}\n"
+
+        # Training Evaluation Date Range
+        receipt += "\nTraining Evaluation Range:\n"
+        receipt += f"Start: {Utils.from_milliseconds_to_date_string(config['training_evaluation_start'])}\n"
+        receipt += f"End: {Utils.from_milliseconds_to_date_string(config['training_evaluation_end'])}\n"
+
+        # Backtest Date Range
+        receipt += "\nBacktest Range:\n"
+        receipt += f"Start: {Utils.from_milliseconds_to_date_string(config['backtest_start'])}\n"
+        receipt += f"End: {Utils.from_milliseconds_to_date_string(config['backtest_end'])}"
+
+        # Finally, save the receipt
+        EpochFile.write(f"{config['id']}/{config['id']}_receipt.txt", receipt)
+
 
 
 
@@ -397,35 +476,36 @@ class Epoch:
             raise RuntimeError("The Epoch can only be initialized once.")
 
         # Load the configuration file
-        #config: IEpochConfig = EpochFile.get_epoch_config()
+        config: IEpochConfig = EpochFile.get_epoch_config()
 
         # Make sure the Epoch's directory also exists
-        #if not EpochFile.directory_exists(config["id"]):
-        #    raise RuntimeError(f"The Epochs directory does not exist {config['id']}.")
+        if not EpochFile.directory_exists(config["id"]):
+            raise RuntimeError(f"The Epochs directory does not exist {config['id']}.")
 
         # Populate epoch properties
-        #Epoch.ID = config["id"]
-        #Epoch.START = config["start"]
-        #Epoch.END = config["end"]
-        #Epoch.TRAINING_EVALUATION_START = config["training_evaluation_start"]
-        #Epoch.TRAINING_EVALUATION_END = config["training_evaluation_end"]
-        #Epoch.BACKTEST_START = config["backtest_start"]
-        #Epoch.BACKTEST_END = config["backtest_end"]
-        #Epoch.HIGHEST_PRICE = config["highest_price"]
-        #Epoch.LOWEST_PRICE = config["lowest_price"]
-        #Epoch.REGRESSION_PRICE_CHANGE_REQUIREMENT = config["regression_price_change_requirement"]
-        #Epoch.IDLE_MINUTES_ON_POSITION_CLOSE = config["idle_minutes_on_position_close"]
-        #Epoch.UT_CLASS_TRAINING_DATA_ID = config.get("ut_class_training_data_id")
-        #Epoch.TAKE_PROFIT = config.get("take_profit")
-        #Epoch.STOP_LOSS = config.get("stop_loss")
+        Epoch.SEED = config["seed"]
+        Epoch.ID = config["id"]
+        Epoch.START = config["start"]
+        Epoch.END = config["end"]
+        Epoch.TRAINING_EVALUATION_START = config["training_evaluation_start"]
+        Epoch.TRAINING_EVALUATION_END = config["training_evaluation_end"]
+        Epoch.BACKTEST_START = config["backtest_start"]
+        Epoch.BACKTEST_END = config["backtest_end"]
+        Epoch.HIGHEST_PRICE = config["highest_price"]
+        Epoch.LOWEST_PRICE = config["lowest_price"]
+        Epoch.REGRESSION_PRICE_CHANGE_REQUIREMENT = config["regression_price_change_requirement"]
+        Epoch.IDLE_MINUTES_ON_POSITION_CLOSE = config["idle_minutes_on_position_close"]
+        Epoch.UT_CLASS_TRAINING_DATA_ID = config.get("ut_class_training_data_id")
+        Epoch.TAKE_PROFIT = config.get("take_profit")
+        Epoch.STOP_LOSS = config.get("stop_loss")
 
         # Set a static seed on all required libraries
-        seed(Epoch.DEFAULTS["seed"])
-        npseed(Epoch.DEFAULTS["seed"])
-        tf_random.set_seed(Epoch.DEFAULTS["seed"])
+        seed(Epoch.SEED)
+        npseed(Epoch.SEED)
+        tf_random.set_seed(Epoch.SEED)
 
         # Initialize the File Instance
-        #Epoch.FILE = EpochFile(Epoch.ID)
+        Epoch.FILE = EpochFile(Epoch.ID)
         
         # Set the state of the Epoch as Initialized
         Epoch.INITIALIZED = True
@@ -489,7 +569,7 @@ class Epoch:
     @staticmethod
     def set_position_exit_combination(take_profit: float, stop_loss: float) -> None:
         """Updates the Epoch's Configuration File and sets the provided
-        position exit combination. This value will be used when generating the 
+        position exit combination. These values will be used when generating the 
         training data and evaluating classification models.
 
         Args:

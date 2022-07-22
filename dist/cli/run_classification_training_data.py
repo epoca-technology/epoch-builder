@@ -1,4 +1,3 @@
-from json import load
 from modules.types import ITrainingDataConfig
 from modules.epoch.Epoch import Epoch
 from modules.classification_training_data.ClassificationTrainingData import ClassificationTrainingData
@@ -27,7 +26,7 @@ from modules.classification_training_data.ClassificationTrainingData import Clas
 # TRAINING DATA PROCESS
 # The Training Data Instance will create a trading simulation environment similar to the Backtest. However, 
 # positions are not successful or unsuccessful, instead they determine wether the price has moved up or down.
-# Once the test completes, the results will be placed on the /training_data directory.
+# Once the test completes, the results will be placed in /model_assets/classification_training_data
 
 
 # Initialize the Epoch
@@ -36,8 +35,7 @@ Epoch.init()
 
 # TRAINING DATA CONFIGURATION
 # Opens and loads the configuration file that should be placed in the root of the project.
-config_file = open('config/ClassificationTrainingData.json')
-config: ITrainingDataConfig = load(config_file)
+config: ITrainingDataConfig = Epoch.FILE.get_classification_training_data_config()
 
 
 # TRAINING DATA INSTANCE

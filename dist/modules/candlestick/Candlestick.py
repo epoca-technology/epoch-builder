@@ -175,7 +175,7 @@ class Candlestick:
 
 
     @staticmethod
-    def _get_df(config: ICandlestickConfig, start: Union[int, None], end: Union[int, None]) -> DataFrame:
+    def _get_df(config: ICandlestickConfig, start: Union[int, None]=None, end: Union[int, None]=None) -> DataFrame:
         """ Retrieves the DataFrame for the candlesticks based on the start-end range. If no start or end
         are provided, it will load all the candlesticks.
 
@@ -374,8 +374,7 @@ class Candlestick:
         if isfile(Candlestick.PREDICTION_RANGE_INDEXER_PATH):
             Candlestick.PREDICTION_RANGE_INDEXER = load(open(Candlestick.PREDICTION_RANGE_INDEXER_PATH))
         else:
-            print("CandlesticksWarning: the lookback prediction range indexer file could not be found. Making use of the indexer\
-                improves performance significantly.")
+            print("CandlesticksWarning: the lookback prediction range indexer file could not be found. Making use of the indexer improves performance significantly.")
 
     
 

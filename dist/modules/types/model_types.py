@@ -183,6 +183,8 @@ IModelIDPrefix = Literal[
 ]
 
 
+# ModelType's Functions accept identifiers or prefixes.
+IPrefixOrID = Union[IModelIDPrefix, str]
 
 
 

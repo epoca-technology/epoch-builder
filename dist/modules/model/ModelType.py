@@ -1,5 +1,5 @@
-from typing import List, Union
-from modules.types import IModelType, ITrainableModelType, IModelIDPrefix
+from typing import List
+from modules.types import IModelType, ITrainableModelType, IModelIDPrefix, IPrefixOrID
 
 
 
@@ -89,21 +89,49 @@ def validate_id(model_type: IModelType, id: str) -> None:
 
 
 
-
-
-## Retrievers ##
-
+## Helpers ##
 
 
 
+def is_regression(model_id: IPrefixOrID) -> bool:
+    """Checks if a given model id belongs to any of the supported
+    regressions.
+
+    Args:
+        model_id: IPrefixOrID
+            The id of the model.
+
+    Returns:
+        bool
+    """
+    # Retrieve the prefix
+    prefix: IModelIDPrefix = get_prefix(model_id)
+
+    # Check if it is a regression
+    return prefix == "A" or prefix == "R_" or prefix == "XGBR_"
 
 
 
-def get_model_type(model_id: str) -> IModelType:
+
+
+
+
+
+
+
+## Core Retrievers ##
+
+
+
+
+
+
+
+def get_model_type(model_id: IPrefixOrID) -> IModelType:
     """Retrieves the model type based on provided ID.
 
     Args:
-        model_id: str
+        model_id: IPrefixOrID
             The ID of the model.
 
     Returns:
@@ -141,11 +169,11 @@ def get_model_type(model_id: str) -> IModelType:
 
 
 
-def get_trainable_model_type(model_id: str) -> ITrainableModelType:
+def get_trainable_model_type(model_id: IPrefixOrID) -> ITrainableModelType:
     """Retrieves the trainable model type based on provided ID.
 
     Args:
-        model_id: str
+        model_id: IPrefixOrID
             The ID of the model.
 
     Returns:
@@ -186,11 +214,11 @@ def get_trainable_model_type(model_id: str) -> ITrainableModelType:
 
 
 
-def get_prefix(prefix_or_id: Union[IModelIDPrefix, str]) -> IModelIDPrefix:
+def get_prefix(prefix_or_id: IPrefixOrID) -> IModelIDPrefix:
     """Returns the model's prefix based on a string.
 
     Args:
-        prefix_or_id: Union[IModelIDPrefix, str]
+        prefix_or_id: IPrefixOrID
             The prefix or ID of the model.
 
     Returns:

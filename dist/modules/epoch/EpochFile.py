@@ -3,8 +3,10 @@ from os import makedirs
 from os.path import exists, isfile, dirname, splitext
 from shutil import rmtree
 from json import load, dumps
+from dist.modules.types.backtest_types import IBacktestID
 from modules.types import IConfigPath, IBacktestAssetsPath, IModelAssetsPath, IEpochConfig, \
-    IBacktestConfig, IRegressionTrainingBatch, ITrainingDataConfig, IClassificationTrainingBatch
+    IBacktestConfig, IRegressionTrainingBatch, ITrainingDataConfig, IClassificationTrainingBatch,\
+        IBacktestResult, ITrainingDataFile
 from modules.model.ModelType import TRAINABLE_MODEL_TYPES
 from modules.utils.Utils import Utils
 from modules.epoch.PositionExitCombination import PositionExitCombination
@@ -67,7 +69,11 @@ class EpochFile:
 
 
     def __init__(self, epoch_id: str) -> None:
-        """
+        """Initializes the EpochFile instance.
+
+        Args:
+            epoch_id: str
+                The ID of the current epoch.
         """
         # Init the identifier
         self.epoch_id: str = epoch_id
@@ -77,7 +83,57 @@ class EpochFile:
 
 
 
-    ## Epoch Paths ##
+
+
+
+    ## Epoch Files Management ##
+
+
+
+
+
+
+
+    # Classification Training Data
+    # The classification training data is saved once the process is completed and then
+    # read in order to validate the integrity of the file.
+
+
+    def get_classification_training_data(self, id: str) -> ITrainingDataFile:
+        """Retrieves a Classification Training Data File.
+
+        Args:
+            id: str
+                The ID of the training data.
+
+        Returns:
+            ITrainingDataFile
+
+        Raises:
+            RuntimeError:
+                If the training data file does not exist.
+        """
+        # Initialize the path
+        path: str = self._p(f"{EpochFile.MODEL_PATH['classification_training_data']}/{id}.json")
+
+        # Return the results
+        return EpochFile.read(path)
+
+
+
+
+    def save_classification_training_data(self, training_data: ITrainingDataFile) -> None:
+        """Saves the training data file in the appropiate directory.
+
+        Args:
+            training_data: ITrainingDataFile
+                The training data file data.
+        """
+        # Init the path
+        path: str = self._p(f"{EpochFile.MODEL_PATH['classification_training_data']}/{training_data['id']}.json")
+
+        # Save the file
+        EpochFile.write(path, training_data)
 
 
 
@@ -87,7 +143,86 @@ class EpochFile:
 
 
 
-    def _path(self, path: str) -> str:
+    # Backtest Results Management
+    # The backtest results are saved once all the models within have completed. These results
+    # can also be read by modules such as RegressionSelection.
+
+
+
+
+    def get_backtest_results(self, backtest_id: IBacktestID, take_profit: float, stop_loss: float) -> List[IBacktestResult]:
+        """Retrieves all the results for a given backtest.
+
+        Args:
+            backtest_id: IBacktestID
+                The Id of the backtest.
+            take_profit: float
+            stop_loss: float
+                The position exit combination of the backtest.
+
+        Returns:
+            List[IBacktestResult]
+
+        Raises:
+            RuntimeError:
+                If the backtest result file does not exist.
+        """
+        # Initialize the path
+        path: str = self._p(
+            f"{EpochFile.BACKTEST_PATH['results']}/{PositionExitCombination.get_path(take_profit, stop_loss)}/{backtest_id}.json"
+        )
+
+        # Return the results
+        return EpochFile.read(path)
+
+
+
+
+
+
+    def save_backtest_results(self, results: List[IBacktestResult]) -> None:
+        """Saves a series of backtest results in the corresponding
+        directories. If the backtest is the unit test, it will save 
+        it in the root of the backtest results ignoring the position
+        exit combination.
+
+        Args:
+            results: List[IBacktestResult]
+                The list of backtest results to be stored.
+
+        Raises:
+            ValueError:
+                If the results list is empty.
+        """
+        # Make sure that at least 1 result has been provided
+        if len(results) == 0:
+            raise ValueError("Cannot save the backtest results because the provided list is empty.")
+
+        # Init values
+        path: str = self._p(EpochFile.BACKTEST_PATH['results'])
+        id: IBacktestID = results[0]["backtest"]["id"]
+        tp: float = results[0]["backtest"]["take_profit"]
+        sl: float = results[0]["backtest"]["stop_loss"]
+
+        # Check if it is the unit test
+        if len(results) == 0 and "unit_test" in id:
+            path = f"{path}/{id}.json"
+
+        # Otherwise, save the result based on the position exit combination
+        else:
+            path = f"{path}/{PositionExitCombination.get_path(tp, sl)}/{id}.json"
+
+        # Save the results
+        EpochFile.write(path, results)
+
+
+
+
+
+    # Misc Helpers
+
+
+    def _p(self, path: str) -> str:
         """Adds the Epoch's name to the beggining of a given path.
 
         Args:
@@ -113,6 +248,12 @@ class EpochFile:
 
 
 
+
+    # Epoch Directories
+    # For the Epoch to be able to operate in a scalable way, it needs to follow
+    # strict guidelines when storing configurations, results, models, etc.
+    # This function creates the entire skeleton for both, backtest and model 
+    # management.
 
 
     @staticmethod
@@ -140,6 +281,7 @@ class EpochFile:
         EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['classification_training_data_configs']}")
         EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['models']}")
         EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['models_bank']}")
+        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['models_bank']}/unit_tests")
         EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['keras_classification_training_configs']}")
         EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['keras_regression_training_configs']}")
         EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['xgb_classification_training_configs']}")
@@ -168,9 +310,11 @@ class EpochFile:
 
 
 
+
+
     # Epoch Configuration
-
-
+    # The Epoch Configuration File holds global configuration variables that are
+    # used by several modules.
 
     @staticmethod
     def get_epoch_config(allow_empty: bool = False) -> Union[IEpochConfig, None]:
@@ -187,9 +331,6 @@ class EpochFile:
         return EpochFile.read(EpochFile.CONFIG_PATH["epoch"], allow_empty=allow_empty)
 
 
-
-
-
     @staticmethod
     def update_epoch_config(new_config: IEpochConfig) -> None:
         """Updates the current Epoch Configuration.
@@ -203,15 +344,9 @@ class EpochFile:
 
 
 
-
-
-
-
-
-
     # Backtest Configuration
-
-
+    # The Backtest Configuration File holds the configuration that will be used
+    # to run the Backtest Process.
 
     def get_backtest_config(self) -> IBacktestConfig:
         """Retrieves the Backtest Configuration.
@@ -224,47 +359,9 @@ class EpochFile:
 
 
 
-
-
-
-
-
-    # Regression Training Configuration
-
-
-
-    
-    def get_regression_training_config(self) -> IRegressionTrainingBatch:
-        """Retrieves the RegressionTraining Configuration.
-
-        Returns:
-            IRegressionTrainingBatch
-        """
-        return EpochFile.read(EpochFile.CONFIG_PATH["regression_training"])
-
-
-
-
-    
-    def update_regression_training_config(self, new_config: IRegressionTrainingBatch) -> None:
-        """Updates the current Epoch Configuration.
-
-        Args:
-            new_config: IRegressionTrainingBatch
-                The new config to be set on the file
-        """
-        return EpochFile.write(EpochFile.CONFIG_PATH["regression_training"], data=new_config, indent=4)
-
-
-
-
-
-
-
-
     # Classification Training Data Configuration
-
-
+    # The configuration file holds the data that will be used to generate the Classification
+    # Training Data
 
 
     
@@ -278,77 +375,98 @@ class EpochFile:
 
 
 
+    # Keras Regression Training Configuration
+    # The configuration file holds the data that will be used to train Keras Regression Models.
+    
+    def get_keras_regression_training_config(self) -> IRegressionTrainingBatch:
+        """Retrieves the configuration for training Keras Regression Models.
 
-
-
-
-
-
-    # Classification Training Configuration
-
-
+        Returns:
+            IRegressionTrainingBatch
+        """
+        return EpochFile.read(EpochFile.CONFIG_PATH["keras_regression_training"])
 
     
-    def get_classification_training_config(self) -> IClassificationTrainingBatch:
-        """Retrieves the ClassificationTraining Configuration.
+    def update_keras_regression_training_config(self, new_config: IRegressionTrainingBatch) -> None:
+        """Updates the Keras Regression Training configuration.
+
+        Args:
+            new_config: IRegressionTrainingBatch
+                The new config to be set on the file
+        """
+        return EpochFile.write(EpochFile.CONFIG_PATH["keras_regression_training"], data=new_config, indent=4)
+
+
+
+
+    # Keras Classification Training Configuration
+    # The configuration file holds the data used to train Keras Classification Models.
+
+    def get_keras_classification_training_config(self) -> IClassificationTrainingBatch:
+        """Retrieves the KerasClassificationTraining Configuration.
 
         Returns:
             IClassificationTrainingBatch
         """
-        return EpochFile.read(EpochFile.CONFIG_PATH["classification_training"])
-
-
-
+        return EpochFile.read(EpochFile.CONFIG_PATH["keras_classification_training"])
 
    
-    def update_classification_training_config(self, new_config: IClassificationTrainingBatch) -> None:
-        """Updates the current ClassificationTraining Configuration.
+    def update_keras_classification_training_config(self, new_config: IClassificationTrainingBatch) -> None:
+        """Updates the current KerasClassificationTraining Configuration.
 
         Args:
             new_config: IClassificationTrainingBatch
                 The new config to be set on the file
         """
-        return EpochFile.write(EpochFile.CONFIG_PATH["classification_training"], data=new_config, indent=4)
+        return EpochFile.write(EpochFile.CONFIG_PATH["keras_classification_training"], data=new_config, indent=4)
 
 
 
 
+    # XGBoost Regression Training Configuration
+    # The configuration file holds the data that will be used to train XGB Regression Models.
+    
+    def get_xgb_regression_training_config(self) -> Any:
+        """Retrieves the configuration for training XGB Regression Models.
 
+        Returns:
+            ...
+        """
+        raise NotImplemented("XGBoost based models have not yet been implemented.")
 
-
-
-
-
-
-
-
-    ## Git Ignore File ##
-
-
-
-
-    @staticmethod
-    def add_epoch_to_gitignore_file(epoch_id: str) -> None:
-        """Loads the entire .gitignore file and appends the epoch's
-        id at the end of it.
+    
+    def update_xgb_regression_training_config(self, new_config: Any) -> None:
+        """Updates the XGB Regression Training configuration.
 
         Args:
-            epoch_id: str
-                The ID of the epoch to be added to the gitignore file.
+            new_config: ...
+                ...
         """
-        # Init the path of the file
-        path: str = ".gitignore"
+        raise NotImplemented("XGBoost based models have not yet been implemented.")
 
-        # Init the file
-        gitignore: str = EpochFile.read(path)
 
-        # Append the new Epoch
-        gitignore += f"\n{epoch_id}"
 
-        # Save the file
-        EpochFile.write(path, gitignore)
 
-        
+    # XGBoost Classification Training Configuration
+    # The configuration file holds the data used to train XGB Classification Models.
+
+    def get_xgb_classification_training_config(self) -> Any:
+        """Retrieves the XGBClassificationTraining Configuration.
+
+        Returns:
+            ...
+        """
+        raise NotImplemented("XGBoost based models have not yet been implemented.")
+
+   
+    def update_xgb_classification_training_config(self, new_config: Any) -> None:
+        """Updates the current XGBClassificationTraining Configuration.
+
+        Args:
+            new_config: ...
+                ...
+        """
+        raise NotImplemented("XGBoost based models have not yet been implemented.")
 
 
 
@@ -453,7 +571,7 @@ class EpochFile:
 
 
 
-    # JSON File Reading / Writting
+    # File Reading / Writting
 
 
 
@@ -480,7 +598,7 @@ class EpochFile:
         # Check if the file exists
         if EpochFile.file_exists(path):
             # Split the path into path name and extension
-            path_name, extension = splitext(path)
+            _, extension = splitext(path)
 
             # Read the file according to its format
             if extension == ".json":

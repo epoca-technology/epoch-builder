@@ -63,7 +63,7 @@ class KerasHyperparams:
 
     """
     # Default Batch Size
-    REGRESSION_BATCH_SIZE: int = 60
+    REGRESSION_BATCH_SIZE: int = 40
     CLASSIFICATION_BATCH_SIZE: int = 60
 
     # Optimizers

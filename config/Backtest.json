@@ -1,71 +1,90 @@
 {
-    "id": "keras_regression_05",
-    "description": "Backtest containing the best performing Keras Regression Models.",
-    "start": "1/10/2021",
-    "end": "22/04/2022",
-    "take_profit": 2.5,
-    "stop_loss": 2.5,
+    "id": "unit_test",
+    "description": "The purpose of this test is to make sure the Backtest Module can run any Model.",
+    "take_profit": 3,
+    "stop_loss": 3,
     "idle_minutes_on_position_close": 30,
     "models": [
         {
-            "id": "R_CLSTM_S4_4961b850-ec18-488e-abff-1794246a554c",
-            "regression_models": [{"regression_id": "R_CLSTM_S4_4961b850-ec18-488e-abff-1794246a554c", "interpreter": {"long": 0.5,"short": 0.5}}]
+            "id": "A212",
+            "arima_models": [
+                {
+                    "lookback": 300,
+                    "predictions": 10,
+                    "arima": {
+                        "p": 2,
+                        "d": 1,
+                        "q": 2
+                    },
+                    "interpreter": {
+                        "long": 0.05,
+                        "short": 0.05
+                    }
+                }
+            ]
         },
         {
-            "id": "R_LSTM_S3_5f4453bd-8884-464e-86e7-5055a456ed6b",
-            "regression_models": [{"regression_id": "R_LSTM_S3_5f4453bd-8884-464e-86e7-5055a456ed6b", "interpreter": {"long": 0.5,"short": 0.5}}]
+            "id": "R_UNIT_TEST",
+            "regression_models": [
+                {
+                    "regression_id": "R_UNIT_TEST",
+                    "interpreter": {
+                        "long": 0.5,
+                        "short": 0.5
+                    }
+                }
+            ]
         },
         {
-            "id": "R_DNN_S4_310362fe-651c-4a05-90ff-798205d18e98",
-            "regression_models": [{"regression_id": "R_DNN_S4_310362fe-651c-4a05-90ff-798205d18e98", "interpreter": {"long": 0.5,"short": 0.5}}]
+            "id": "C_UNIT_TEST",
+            "classification_models": [
+                {
+                    "classification_id": "C_UNIT_TEST",
+                    "interpreter": {
+                        "min_probability": 0.6
+                    }
+                }
+            ]
         },
         {
-            "id": "R_CLSTM_S4_68e09d89-616e-4f3b-9c27-4d4a3728fe4b",
-            "regression_models": [{"regression_id": "R_CLSTM_S4_68e09d89-616e-4f3b-9c27-4d4a3728fe4b", "interpreter": {"long": 0.5,"short": 0.5}}]
-        },
-        {
-            "id": "R_CLSTM_S4_MP_cce97354-840e-4c12-849e-b6f613936cc5",
-            "regression_models": [{"regression_id": "R_CLSTM_S4_MP_cce97354-840e-4c12-849e-b6f613936cc5", "interpreter": {"long": 0.5,"short": 0.5}}]
-        },
-        {
-            "id": "R_DNN_S2_e4ea7ae2-1b0e-4c49-aca8-51dcfee54170",
-            "regression_models": [{"regression_id": "R_DNN_S2_e4ea7ae2-1b0e-4c49-aca8-51dcfee54170", "interpreter": {"long": 0.5,"short": 0.5}}]
-        },
-        {
-            "id": "R_DNN_S2_1f209d72-d097-4fb3-8953-a00a1d788c3e",
-            "regression_models": [{"regression_id": "R_DNN_S2_1f209d72-d097-4fb3-8953-a00a1d788c3e", "interpreter": {"long": 0.5,"short": 0.5}}]
-        },
-        {
-            "id": "R_LSTM_S3_02940598-84ca-4870-a00a-78debde80db2",
-            "regression_models": [{"regression_id": "R_LSTM_S3_02940598-84ca-4870-a00a-78debde80db2", "interpreter": {"long": 0.5,"short": 0.5}}]
-        },
-        {
-            "id": "R_LSTM_S4_61d89d6a-466f-4f64-a9b4-62a4be84914a",
-            "regression_models": [{"regression_id": "R_LSTM_S4_61d89d6a-466f-4f64-a9b4-62a4be84914a", "interpreter": {"long": 0.5,"short": 0.5}}]
-        },
-        {
-            "id": "R_LSTM_S3_cee39cb6-b283-442b-8594-801421266075",
-            "regression_models": [{"regression_id": "R_LSTM_S3_cee39cb6-b283-442b-8594-801421266075", "interpreter": {"long": 0.5,"short": 0.5}}]
-        },
-        {
-            "id": "R_CLSTM_S4_MP_32fc90f7-8427-4aba-aac8-824dbdfbe6f4",
-            "regression_models": [{"regression_id": "R_CLSTM_S4_MP_32fc90f7-8427-4aba-aac8-824dbdfbe6f4", "interpreter": {"long": 0.5,"short": 0.5}}]
-        },
-        {
-            "id": "R_CLSTM_S4_2d2700ce-61e0-440d-8462-fb56985aa9b8",
-            "regression_models": [{"regression_id": "R_CLSTM_S4_2d2700ce-61e0-440d-8462-fb56985aa9b8", "interpreter": {"long": 0.5,"short": 0.5}}]
-        },
-        {
-            "id": "R_CLSTM_S4_MP_73a0f2d9-8576-4752-80c3-ab2aa2dbda6f",
-            "regression_models": [{"regression_id": "R_CLSTM_S4_MP_73a0f2d9-8576-4752-80c3-ab2aa2dbda6f", "interpreter": {"long": 0.5,"short": 0.5}}]
-        },
-        {
-            "id": "R_DNN_S4_e973681f-c499-4a2d-953a-b0a12d15520b",
-            "regression_models": [{"regression_id": "R_DNN_S4_e973681f-c499-4a2d-953a-b0a12d15520b", "interpreter": {"long": 0.5,"short": 0.5}}]
-        },
-        {
-            "id": "R_CLSTM_S4_4c25d38a-c095-48ce-bdae-af5c5cd646eb",
-            "regression_models": [{"regression_id": "R_CLSTM_S4_4c25d38a-c095-48ce-bdae-af5c5cd646eb", "interpreter": {"long": 0.5,"short": 0.5}}]
+            "id": "CON_UNIT_TEST",
+            "arima_models": [
+                {
+                    "lookback": 300,
+                    "predictions": 10,
+                    "arima": {
+                        "p": 2,
+                        "d": 1,
+                        "q": 2
+                    },
+                    "interpreter": {
+                        "long": 0.05,
+                        "short": 0.05
+                    }
+                }
+            ],
+            "regression_models": [
+                {
+                    "regression_id": "R_UNIT_TEST",
+                    "interpreter": {
+                        "long": 0.5,
+                        "short": 0.5
+                    }
+                }
+            ],
+            "classification_models": [
+                {
+                    "classification_id": "C_UNIT_TEST",
+                    "interpreter": {
+                        "min_probability": 0.6
+                    }
+                }
+            ],
+            "consensus_model": {
+                "interpreter": {
+                    "min_consensus": 2
+                }
+            }
         }
     ]
 }

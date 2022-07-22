@@ -29,7 +29,7 @@ def normalize_prediction_candlesticks(prediction_df: DataFrame) -> Tuple[float, 
     df["c"] = df[["c"]].apply(lambda x: (x - min) / (max - min))
 
     # Save the normalized df
-    df.to_csv(Candlestick.NORMALIZED_PREDICTION_CANDLESTICK_CONFIG["csv_file"])
+    df.to_csv(Candlestick.NORMALIZED_PREDICTION_CANDLESTICK_CONFIG["csv_file"], index=False)
 
     # Finally, return the highest and lowest prices
     return max, min

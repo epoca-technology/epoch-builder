@@ -10,9 +10,9 @@ from modules.epoch.EpochFile import EpochFile
 
 # Backtest Configuration Unit Test
 # This configuration will run the Backtest process on each model type and output the results.
-# _EPOCH/backtest_assets/configurations/UNIT_TEST.json
+# _EPOCH/backtest_assets/configurations/unit_test.json
 BACKTEST_CONFIG_UT: IBacktestConfig = {
-    "id": "UNIT_TEST",
+    "id": "unit_test",
     "description": "The purpose of this test is to make sure the Backtest Module can run any Model.",
     "take_profit": 3,
     "stop_loss": 3,
@@ -190,7 +190,7 @@ def create_default_files(epoch_id: str) -> None:
     """
     # Create the backtest unit test file
     EpochFile.write(
-        path=f"{epoch_id}/{EpochFile.BACKTEST_PATH['configurations']}/UNIT_TEST.json", 
+        path=f"{epoch_id}/{EpochFile.BACKTEST_PATH['configurations']}/unit_test.json", 
         data=BACKTEST_CONFIG_UT, 
         indent=4
     )

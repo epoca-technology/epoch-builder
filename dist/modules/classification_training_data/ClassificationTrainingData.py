@@ -1,18 +1,15 @@
 from typing import List, Dict, Tuple, Union
-from os import makedirs
-from os.path import exists
-from json import dumps, load
 from pandas import DataFrame, Series
 from math import ceil
 from tqdm import tqdm
 from modules.types import IModel, ITechnicalAnalysis, ITrainingDataConfig, ITrainingDataActivePosition,\
     ITrainingDataFile, ITrainingDataPriceActionsInsight, ITrainingDataPredictionInsight, ITechnicalAnalysisInsight
 from modules.utils.Utils import Utils
+from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
 from modules.model.ArimaModel import ArimaModel
 from modules.model.RegressionModel import RegressionModel
 from modules.model.RegressionModelFactory import RegressionModelFactory
-from modules.keras_models.KerasPath import KERAS_PATH
 from modules.technical_analysis.TechnicalAnalysis import TechnicalAnalysis
 from modules.classification_training_data.TrainingDataCompression import compress_training_data, decompress_training_data
 
@@ -131,7 +128,7 @@ class ClassificationTrainingData:
 
         # Initialize the candlesticks if not unit testing
         if not self.test_mode:
-            Candlestick.init(self.max_lookback, config.get("start"), config.get("end"))
+            Candlestick.init(self.max_lookback, Epoch.START, Epoch.END)
 
         # Init the start and end
         self.start: int = int(Candlestick.DF.iloc[0]["ot"])
@@ -302,7 +299,7 @@ class ClassificationTrainingData:
             progress_bar.update()
 
         # Save the results
-        self._save_training_data(execution_start)
+        Epoch.FILE.save_classification_training_data(self._build_file(execution_start))
 
         # Validate the integrity of the saved training data
         self._validate_integrity()
@@ -351,7 +348,7 @@ class ClassificationTrainingData:
             progress_bar.update()
 
         # Save the results
-        self._save_training_data(execution_start)
+        Epoch.FILE.save_classification_training_data(self._build_file(execution_start))
 
         # Validate the integrity of the saved training data
         self._validate_integrity()
@@ -546,23 +543,6 @@ class ClassificationTrainingData:
 
 
 
-    def _save_training_data(self, execution_start: int) -> None:
-        """Creates all the required directories and dumps the CSV and the Receipt File.
-
-        Args:
-            execution_start: int
-                The time in which the execution started.
-        """
-        # If the output directory doesn't exist, create it
-        if not exists(KERAS_PATH["classification_training_data"]):
-            makedirs(KERAS_PATH["classification_training_data"])
-
-        # Write the Training Data File
-        with open(f"{KERAS_PATH['classification_training_data']}/{self.id}.json", "w") as training_data_file:
-            training_data_file.write(dumps(self._build_file(execution_start)))
-
-
-
 
 
     def _build_file(self, execution_start: int) -> ITrainingDataFile:
@@ -571,8 +551,6 @@ class ClassificationTrainingData:
         Args:
             execution_start: int
                 The time in which the execution started.
-            current_time: int
-                The current time (used to create the output directory).
 
         Returns:
             ITrainingDataFile
@@ -718,8 +696,7 @@ class ClassificationTrainingData:
                     not identical to the original data.
         """
         # Open the file
-        td_file = open(f"{KERAS_PATH['classification_training_data']}/{self.id}.json")
-        td: ITrainingDataFile = load(td_file)
+        td: ITrainingDataFile = Epoch.FILE.get_classification_training_data(self.id)
 
         # Validate general values
         if td["regression_selection_id"] != self.regression_selection_id:

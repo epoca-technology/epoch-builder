@@ -5,11 +5,11 @@ from subprocess import Popen
 
 # Processes
 processes: Dict[str, str] = {
-    "Arima Combinations": "run_arima_combinations.py",
     "Backtest": "run_backtest.py",
     "Classification Training Data": "run_classification_training_data.py",
     "Classification Training": "run_classification_training.py",
     "Database Management": "run_db_management.py",
+    "Epoch Management": "run_epoch_management.py",
     "Hyperparams": "run_hyperparams.py",
     "Merge Training Certificates": "run_merge_training_certificates.py",
     "Regression Selection": "run_regression_selection.py",
