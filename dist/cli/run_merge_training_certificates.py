@@ -13,7 +13,7 @@ Epoch.init()
 
 
 # Welcome
-print("MERGE TRAINING CERTIFICATES")
+print("MERGE TRAINING CERTIFICATES\n\n")
 
 
 

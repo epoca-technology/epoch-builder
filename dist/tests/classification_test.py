@@ -1,9 +1,8 @@
 import unittest
 from typing import List
-from json import load
 from modules.types import ITrainingDataFile
 from modules.database.Database import Database
-from modules.keras_models.KerasPath import KERAS_PATH
+from modules.epoch.Epoch import Epoch
 from modules.classification.Classification import Classification
 
 
@@ -17,8 +16,7 @@ if not Database.TEST_MODE:
 
 
 # TRAINING DATA FILE
-FILE_ID: str = "5b0133d4-309b-44ae-93e9-c952e76dec34"
-TRAINING_DATA: ITrainingDataFile = load(open(f"{KERAS_PATH['classification_training_data']}/{FILE_ID}.json"))
+TRAINING_DATA: ITrainingDataFile = Epoch.FILE.get_classification_training_data(Epoch.UT_CLASS_TRAINING_DATA_ID)
 MODEL_ID: str = "C_UNIT_TEST"
 
 

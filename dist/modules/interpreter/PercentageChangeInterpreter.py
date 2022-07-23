@@ -47,18 +47,18 @@ class PercentageChangeInterpreter(InterpreterInterface):
                 If the short config is invalid.
         """
         # Validate the long configuration
-        if not isinstance(config['long'], (int, float)) or config['long'] < PercentageChangeInterpreter.MIN_CHANGE_VALUE:
+        if not isinstance(config["long"], (int, float)) or config["long"] < PercentageChangeInterpreter.MIN_CHANGE_VALUE:
             raise ValueError(f"The long config must be a valid float greater than {PercentageChangeInterpreter.MIN_CHANGE_VALUE}. \
                 Received: {str(config['long'])}")
 
         # Validate the short configuration
-        if not isinstance(config['short'], (int, float)) or config['short'] < PercentageChangeInterpreter.MIN_CHANGE_VALUE:
+        if not isinstance(config["short"], (int, float)) or config["short"] < PercentageChangeInterpreter.MIN_CHANGE_VALUE:
             raise ValueError(f"The short config must be a valid float greater than {PercentageChangeInterpreter.MIN_CHANGE_VALUE}. \
                 Received: {str(config['short'])}")
 
         # Initialize the instance properties
-        self.long: float = config['long']
-        self.short: float = config['short']
+        self.long: float = config["long"]
+        self.short: float = config["short"]
 
 
 
@@ -101,11 +101,11 @@ class PercentageChangeInterpreter(InterpreterInterface):
         
         # Return the packed results accordingly
         if change >= self.long:
-            return 1, 'long'
+            return 1, "long"
         elif change <= -(self.short):
-            return -1, 'short'
+            return -1, "short"
         else:
-            return 0, 'neutral'
+            return 0, "neutral"
 
 
 
@@ -126,4 +126,4 @@ class PercentageChangeInterpreter(InterpreterInterface):
         Returns:
             IPercentChangeInterpreterConfig
         """
-        return { 'long': self.long, 'short': self.short }
+        return { "long": self.long, "short": self.short }

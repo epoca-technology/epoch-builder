@@ -1,10 +1,8 @@
 import unittest
-from typing import List
 from copy import deepcopy
 from numpy import ndarray
 from modules.types import IKerasModelConfig, IRegressionTrainingConfig
 from modules.database.Database import Database
-from modules.keras_models.KerasPath import KERAS_PATH
 from modules.regression.RegressionTraining import RegressionTraining
 
 
@@ -71,7 +69,6 @@ class RegressionTrainingTestCase(unittest.TestCase):
         # Validate properties
         self.assertEqual(training.test_mode, True)
         self.assertEqual(training.id, config["id"])
-        self.assertEqual(training.model_path, f"{KERAS_PATH['models']}/{config['id']}")
         self.assertEqual(training.description, config["description"])
         self.assertEqual(training.autoregressive, config["autoregressive"])
         self.assertEqual(training.lookback, config["lookback"])

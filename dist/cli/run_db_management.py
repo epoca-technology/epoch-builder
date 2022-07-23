@@ -123,17 +123,17 @@ def _restore_db() -> None:
 
 
 ## CLI ##
-print("DATABASE MANAGEMENT")
+print("DATABASE MANAGEMENT\n\n")
 SUMMARY: str = "View Database Summary"
 BACKUP: str = "Backup Database"
 RESTORE: str = "Restore Database"
 questions = [InquirerList("action", message="Select an action to execute", choices=[SUMMARY, BACKUP, RESTORE])]
 answer: Dict[str, str] = prompt(questions)
-if answer['action'] == SUMMARY:
+if answer["action"] == SUMMARY:
     _display_db_summary()
-elif answer['action'] == BACKUP:
+elif answer["action"] == BACKUP:
     _backup_db()
-elif answer['action'] == RESTORE:
+elif answer["action"] == RESTORE:
     _restore_db()
 else:
     raise ValueError(f"The provided action could not be processed: {str(answer)}")

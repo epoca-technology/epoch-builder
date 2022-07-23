@@ -17,7 +17,7 @@ from modules.keras_models.NeuralNetworks.validator import validate
 # 1 units:       Dense_1
 # 1 activations: Dense_1
 def C_UNIT_TEST(m: IKerasModelConfig) -> Sequential:
-    validate(m, 'C_UNIT_TEST', units=1, activations=1)
+    validate(m, "C_UNIT_TEST", units=1, activations=1)
     return Sequential([
         Input(shape=(m["features_num"],), name="Input_1"),
         Dense(m["units"][0], activation=m["activations"][0], name="Dense_1"),

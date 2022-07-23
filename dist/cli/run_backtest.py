@@ -5,7 +5,7 @@ from modules.backtest.Backtest import Backtest
 
 
 
-# Initialize the Epoch
+# EPOCH INIT
 Epoch.init()
 
 
@@ -26,7 +26,7 @@ backtest: Backtest = Backtest(config)
 # Runs Backtests for each model, 1 by 1 as well as displaying the progress per instance. 
 # Results as saved when the Backtest Instances completes. If the test is interrupted before
 # completion, results will not be saved.
-print("BACKTEST RUNNING")
-print(f"\n{backtest.id} ({PositionExitCombination.get_id(backtest.take_profit, backtest.stop_loss)}):\n")
+print("BACKTEST RUNNING\n\n")
+print(f"{backtest.id} ({PositionExitCombination.get_id(backtest.take_profit, backtest.stop_loss)}):\n")
 backtest.run()
-print("\nBACKTEST COMPLETED")
+print("\n\nBACKTEST COMPLETED")

@@ -64,7 +64,7 @@ class ClassificationPredictionCache(PredictionCacheInterface):
         )
 
         # Return the prediction if any
-        return pred_snapshot[0]['p'] if len(pred_snapshot) == 1 else None
+        return pred_snapshot[0]["p"] if len(pred_snapshot) == 1 else None
 
 
 

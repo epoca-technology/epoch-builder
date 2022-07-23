@@ -40,9 +40,8 @@ def evaluate(model_config: IModel, price_change_requirement: float, progress_bar
     # Initialize the type of model
     model_type: str = type(model).__name__
 
-    # Init the test dataset
-    df: DataFrame = Candlestick.DF[Candlestick.DF["ot"] >= Epoch.TRAINING_EVALUATION_START]
-    df.reset_index(drop=True, inplace=True)
+    # Init the 1m candlesticks dataframe
+    df: DataFrame = _get_candlesticks_df(model.get_lookback())
 
     # Init evaluation data
     neutral_predictions: int = 0
@@ -171,6 +170,33 @@ def evaluate(model_config: IModel, price_change_requirement: float, progress_bar
         performance=performance
     )
 
+
+
+
+
+
+def _get_candlesticks_df(lookback: int) -> DataFrame:
+    """The models need data prior to the current time to perform predictions. Since the default candlesticks
+    will be used for simulating, the df needs to start from a point in which there are enough prediction
+    candlesticks in order to make a prediction. Once the subsetting is done, reset the indexes.
+
+    Args:
+        lookback: int
+            The number of prediction candlesticks the model requires in order to make
+            a prediction.
+
+    Returns:
+        DataFrame
+    """
+    # Subset the prediction candlesticks
+    pred_df: DataFrame = Candlestick.PREDICTION_DF[Candlestick.PREDICTION_DF["ot"] >= Epoch.TRAINING_EVALUATION_START].iloc[0:lookback]
+
+    # Init 1m candlesticks dataframe
+    df: DataFrame = Candlestick.DF[Candlestick.DF["ot"] >= pred_df.iloc[-1]["ot"]]
+    df.reset_index(drop=True, inplace=True)
+
+    # Finally, return the 1m candlesticks df
+    return df
 
 
 

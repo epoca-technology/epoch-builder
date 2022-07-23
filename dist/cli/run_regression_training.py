@@ -17,7 +17,7 @@ Epoch.init()
 
 
 # WELCOME
-print("REGRESSION TRAINING")
+print("REGRESSION TRAINING\n\n")
 model_type_answer: Dict[str, str] = prompt([InquirerList("type", message="Select the type of model", choices=TRAINABLE_REGRESSION_MODEL_TYPES)])
 model_type: ITrainableModelType = model_type_answer["type"]
 

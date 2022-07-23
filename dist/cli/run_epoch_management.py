@@ -5,8 +5,8 @@ from modules.epoch.Epoch import Epoch
 
 
 
-## Welcome ##
-print("EPOCH MANAGEMENT")
+## WELCOME ##
+print("EPOCH MANAGEMENT\n\n")
 action_answer: Dict[str, str] = prompt([InquirerList("action", message="Select an action to execute", choices=[ 
     "Create Epoch", 
     "Set Class. Training Data for Unit Tests",

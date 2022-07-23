@@ -1,5 +1,6 @@
-from typing import TypedDict, List
+from typing import TypedDict, List, Dict
 from modules.types.model_types import IModel
+from modules.types.epoch_types import IPositionExitCombinationID
 
 
 
@@ -30,6 +31,10 @@ class IModelResult(TypedDict):
     general_acc: float  # General Accuracy
 
 
+
+# Combined Results
+# A dict containing all model results based on their position exit combination.
+IModelResults = Dict[IPositionExitCombinationID, List[IModelResult]]
 
 
 

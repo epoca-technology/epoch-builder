@@ -1,24 +1,24 @@
 from typing import Dict
-from inquirer import Text, List as InquirerList, prompt
+from inquirer import Text, prompt
 from modules.epoch.Epoch import Epoch
 from modules.regression_selection.RegressionSelection import RegressionSelection
 
 
-# Initialize the Epoch
+# EPOCH INIT
 Epoch.init()
 
 
 
 # Configuration Input
-print("REGRESSION SELECTION")
-answers: Dict[str, str] = prompt([
-    Text("models_limit", "Number of models to be selected"),
-    InquirerList("clean_results_dir", message="Delete Backtest Result Files on completion?", choices=["No", "Yes"])
-])
+print("REGRESSION SELECTION\n\n")
+limit_answer: Dict[str, str] = prompt([Text("value", "Number of models to be selected")])
+if not limit_answer["value"].isdigit():
+    raise ValueError("The number of models to be selected must be a valid integer.")
+limit: int = int(limit_answer["value"])
 
 
 
 # Initialize the instance and execute the selection
-rs: RegressionSelection = RegressionSelection(int(answers["models_limit"]), answers["clean_results_dir"] == "Yes")
+rs: RegressionSelection = RegressionSelection(limit)
 rs.run()
-print("\nREGRESSION COMPLETED")
+print("\n\nREGRESSION SELECTION COMPLETED")

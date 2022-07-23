@@ -12,7 +12,7 @@ Epoch.init()
 
 
 # Welcome
-print("HYPERPARAMS\n")
+print("HYPERPARAMS\n\n")
 
 
 

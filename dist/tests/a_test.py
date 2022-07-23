@@ -9,7 +9,7 @@ Database.TEST_MODE = True
 Epoch.init()
 
 # Initialize the candlesticks
-Candlestick.init(300)
+Candlestick.init(300, Epoch.START, Epoch.END)
 
 # Notify the user
 print("PREDICTION BACKTESTING UNIT TESTS\n")

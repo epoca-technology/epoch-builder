@@ -44,7 +44,7 @@ def validate(
             If the provided configuration doesnt match the model's requirements in any way.
     """
     # Make sure the name matches
-    if config['name'] != name:
+    if config["name"] != name:
         raise ValueError(f"Model Name Missmatch. {config['name']} != {name}")
 
     # Make sure the autoregressive, lookback and predictions have been provided in case of a regression
@@ -60,22 +60,22 @@ def validate(
         raise ValueError(f"The provided features_num is not a valid integer. ({str(config.get('features_num'))})")
 
     # Validate the units
-    _validate_config_param(units, 'units', config.get('units'))
+    _validate_config_param(units, "units", config.get("units"))
 
     # Validate the required dropout rates
-    _validate_config_param(dropout_rates, 'dropout_rates', config.get('dropout_rates'))
+    _validate_config_param(dropout_rates, "dropout_rates", config.get("dropout_rates"))
 
     # Validate the required activations
-    _validate_config_param(activations, 'activations', config.get('activations'))
+    _validate_config_param(activations, "activations", config.get("activations"))
 
     # Validate the required filters
-    _validate_config_param(filters, 'filters', config.get('filters'))
+    _validate_config_param(filters, "filters", config.get("filters"))
 
     # Validate the required kernel_sizes
-    _validate_config_param(kernel_sizes, 'kernel_sizes', config.get('kernel_sizes'))
+    _validate_config_param(kernel_sizes, "kernel_sizes", config.get("kernel_sizes"))
 
     # Validate the required pool_sizes
-    _validate_config_param(pool_sizes, 'pool_sizes', config.get('pool_sizes'))
+    _validate_config_param(pool_sizes, "pool_sizes", config.get("pool_sizes"))
 
 
 

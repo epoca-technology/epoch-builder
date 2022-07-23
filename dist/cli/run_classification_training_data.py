@@ -3,7 +3,7 @@ from modules.epoch.Epoch import Epoch
 from modules.classification_training_data.ClassificationTrainingData import ClassificationTrainingData
 
 
-# Initialize the Epoch
+# EPOCH INIT
 Epoch.init()
 
 
@@ -24,7 +24,7 @@ training_data: ClassificationTrainingData = ClassificationTrainingData(config)
 # Runs the Training Data for all models simultaneously. 
 # Results as saved when the execution has completed. If the execution is interrupted before
 # completion, results will not be saved.
-print("TRAINING DATA RUNNING")
-print(f"\n{training_data.id}:\n")
+print("TRAINING DATA RUNNING\n\n")
+print(f"{training_data.id}:\n")
 training_data.run()
-print("\nTRAINING DATA COMPLETED")
+print("\n\nTRAINING DATA COMPLETED")

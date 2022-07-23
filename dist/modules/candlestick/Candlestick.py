@@ -31,8 +31,7 @@ class Candlestick:
         PREDICTION_DF: DataFrame 
             Prediction Candlesticks DataFrame with the following columns: ot, ct, o, h, l, c, v
         NORMALIZED_PREDICTION_DF: Union[DataFrame, None] 
-            Prediction Candlesticks DataFrame with the following columns normalized: o, h, l, c.
-            Only initialized when normalized is set to True
+            Normalized Prediction Candlesticks DataFrame with the following columns normalized: ot, ct, c.
         PREDICTION_RANGE_INDEXER_PATH: str
             The path in which the indexer should be stored.
         PREDICTION_RANGE_INDEXER: IPredictionRangeIndexer
@@ -112,24 +111,24 @@ class Candlestick:
         start: Union[int, None] = Candlestick._get_date_timestamp(start)
         end: Union[int, None] = Candlestick._get_date_timestamp(end)
 
-        # Init the Default & Forecast Candlestick DataFrames
+        # Init the Default & Prediction Candlestick DataFrames
         Candlestick.DF: DataFrame = Candlestick._get_df(Candlestick.DEFAULT_CANDLESTICK_CONFIG, start, end)
         Candlestick.PREDICTION_DF: DataFrame = Candlestick._get_df(Candlestick.PREDICTION_CANDLESTICK_CONFIG, start, end)
         Candlestick.NORMALIZED_PREDICTION_DF: DataFrame = Candlestick._get_df(Candlestick.NORMALIZED_PREDICTION_CANDLESTICK_CONFIG, start, end)
 
         # The models need data prior to the current time to perform predictions. Since the default candlesticks
-        # will be used for simulating, the df needs to start from a point in which there are enough forecast
+        # will be used for simulating, the df needs to start from a point in which there are enough prediction
         # candlesticks in order to make a prediction. Once the subsetting is done, reset the indexes.
         Candlestick.DF = Candlestick.DF[Candlestick.DF["ot"] >= Candlestick.PREDICTION_DF.iloc[max_lookback]["ot"]]
         Candlestick.DF.reset_index(drop=True, inplace=True)
 
-        # Both datasets should start at the same time. The first forecast candlestick must be selected based on
+        # Both datasets should start at the same time. The first prediction candlestick must be selected based on
         # the max_lookback
         if Candlestick.DF.iloc[0]["ot"] != Candlestick.PREDICTION_DF.iloc[max_lookback]["ot"]:
             raise ValueError(f"The candlestick dataframes dont start at the same time. \
                 {Candlestick.DF.iloc[0]['ot']} != {Candlestick.PREDICTION_DF.iloc[max_lookback]['ot']}")
         
-        # The default dataset must have more rows than the forecast dataset
+        # The default dataset must have more rows than the prediction dataset
         if Candlestick.DF.shape[0] <= Candlestick.PREDICTION_DF.shape[0]:
             raise ValueError(f"The default candlesticks dataframe must contain more rows than the prediction dataframe. \
                 {Candlestick.DF.shape[0]} <= {Candlestick.PREDICTION_DF.shape[0]}")
@@ -300,7 +299,7 @@ class Candlestick:
 
         Raises:
             ValueError:
-                If the subset forecast df has less or more rows than the provided lookback.
+                If the subset prediction df has less or more rows than the provided lookback.
         """
         return Candlestick.get_lookback_df(lookback, current_time)["c"]
 

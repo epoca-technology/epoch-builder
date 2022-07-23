@@ -1,11 +1,10 @@
 import unittest
 from typing import List
-from json import load
 from pandas import Series
 from modules.types import IRegressionConfig, IRegressionTrainingCertificate
 from modules.database.Database import Database
+from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
-from modules.keras_models.KerasPath import KERAS_PATH
 from modules.regression.Regression import Regression
 
 
@@ -20,7 +19,7 @@ if not Database.TEST_MODE:
 
 # TRAINING CERTIFICATE
 MODEL_ID: str = "R_UNIT_TEST"
-CERT: IRegressionTrainingCertificate = load(open(f"{KERAS_PATH['models']}/{MODEL_ID}/certificate.json"))
+CERT: IRegressionTrainingCertificate = Epoch.FILE.get_active_model_certificate(MODEL_ID)
 
 
 

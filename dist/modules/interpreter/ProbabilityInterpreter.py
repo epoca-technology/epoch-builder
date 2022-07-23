@@ -42,9 +42,9 @@ class ProbabilityInterpreter(InterpreterInterface):
                 If the min_probability config is invalid.
         """
         # Validate the min_probability configuration
-        if not isinstance(config['min_probability'], float) \
-            or config['min_probability'] < ProbabilityInterpreter.MIN_PROBABILITY_VALUE \
-                or config['min_probability'] >= ProbabilityInterpreter.MAX_PROBABILITY_VALUE:
+        if not isinstance(config["min_probability"], float) \
+            or config["min_probability"] < ProbabilityInterpreter.MIN_PROBABILITY_VALUE \
+                or config["min_probability"] >= ProbabilityInterpreter.MAX_PROBABILITY_VALUE:
             raise ValueError(f"The min_probability config must be a valid float greater than \
                 {ProbabilityInterpreter.MIN_PROBABILITY_VALUE} and smaller than {ProbabilityInterpreter.MAX_PROBABILITY_VALUE}. \
                 Received: {str(config['min_probability'])}")

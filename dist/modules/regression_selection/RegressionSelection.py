@@ -1,25 +1,25 @@
 from typing import List, Dict
-from os import makedirs, listdir, remove
-from os.path import exists, isfile, join
-from json import load, dumps
 from numpy import median, mean, arange
-from modules.types import IBacktestResult, IModelResult, ICombinationResult, IRegressionSelectionFile
+from modules.types import IBacktestResult, IModelResult, ICombinationResult, IRegressionSelectionFile,\
+    IPositionExitCombinationID, IModelResults, IBacktestID
 from modules.utils.Utils import Utils
-from modules.backtest.BacktestPath import BACKTEST_PATH
-
+from modules.epoch.Epoch import Epoch
+from modules.epoch.PositionExitCombination import PositionExitCombination
 
 
 
 class RegressionSelection:
     """RegressionSelection Class
 
-    This class takes any number of Backtest Results, organizes them by TakeProfit/StopLoss
-    combinations and selects the top performing models based on their points median. Once the 
+    This class takes any number of Backtest Results, organizes them by Position Exit 
+    Combinations and selects the top performing models based on their points median. Once the 
     process completes evaluating models, it will also evaluate TakeProfit/StopLoss combinations
     by the mean of the selected models' points median.
 
     Class Properties:
-        ...
+        BACKTEST_RESULTS: List[IBacktestID]
+            The list of backtest result files that will be extracted in order to build the
+            Regression Selection.
 
     Instance Properties
         models_limit: int
@@ -33,25 +33,29 @@ class RegressionSelection:
             The open timestamp of the first 1m candlestick (Extracted directly from the first backtest result).
         end: int
             The close timestamp of the last 1m candlestick (Extracted directly from the first backtest result).
-        backtest_result_file_names: List[str]
-            The list of backtest result files that were extracted. These files will be deleted on completion if
-            clean_results_dir is enabled.
     """
+    BACKTEST_RESULTS: List[IBacktestID] = [
+        # Arima Backtests
+        "arima_1", "arima_2", "arima_3", "arima_4", "arima_5", "arima_6", "arima_7", "arima_8", "arima_9",
+
+        # Keras Regression Backtests
+        "keras_regression",
+
+        # XGBoost Regression Backtests
+        #"xgb_regression"
+    ]
 
 
 
     ## Initialization ##
 
-    def __init__(self, models_limit: int, clean_results_dir: bool):
+    def __init__(self, models_limit: int):
         """Initializes the RegressionSelection Instance and prepares it
         to be executed.
 
         Args:
             models_limit: int
                 The number of models that will be selected per combination.
-            clean_results_dir: bool
-                If enabled, it will delete all the backtest files from the results directory on 
-                completion.
         
         Raises:
             ValueError:
@@ -63,7 +67,6 @@ class RegressionSelection:
 
         # Initialize the config args
         self.models_limit: int = models_limit
-        self.clean_results_dir: bool = clean_results_dir
 
         # Generate the ID
         self.id: str = Utils.generate_uuid4()
@@ -71,9 +74,6 @@ class RegressionSelection:
         # Initialize the date range to be populated once the backtest files are loaded
         self.start: int = 0
         self.end: int = 0
-
-        # Initialize the file names to be deleted at the end of the process (if enabled)
-        self.backtest_result_file_names: List[str] = []
 
 
         
@@ -99,25 +99,18 @@ class RegressionSelection:
                 If a file is not a valid Backtest Result.
                 If the backtest results don't share the same start and end.
         """
-        print(f"{self.id}:")
+        print(f"\n{self.id}:")
         # Extract all the backtest results
-        print("    1/4) Extracting Backtest Results...")
+        print("    1/3) Extracting Backtest Results...")
         backtests: List[IBacktestResult] = self._get_backtest_results()
 
         # Build the Regression Selection
-        print("    2/4) Building Selection...")
+        print("    2/3) Building Selection...")
         selection: IRegressionSelectionFile = self._build_regression_selection(backtests)
 
         # Save the Regression Selection
-        print("    3/4) Saving Selection...")
-        self._save_regression_selection(selection)
-
-        # Clean Backtest Result Files if enabled
-        if self.clean_results_dir:
-            print("    4/4) Deleting Backtest Results...")
-            self._delete_backtest_results()
-        else:
-            print("    4/4) Deleting Backtest Results Skipped")
+        print("    3/3) Saving Selection...")
+        Epoch.FILE.save_regression_selection(selection)
 
 
 
@@ -140,56 +133,47 @@ class RegressionSelection:
         """Extracts the backtests from the results directory and returns general data
         about them. It is also important to note that this method initializes the following
         args:
-            start, end & backtest_result_file_names
+            self.start, self.end
 
         Returns:
             List[IBacktestResult]
 
         Raises:
             RuntimeError:
-                If there are no backtest results in the directory.
+                If any of the backtest result files is missing.
                 If a file is not a valid Backtest Result.
                 If the backtest results don't share the same start and end.
         """
-        # If the backtest results dir doesnt exist, raise an error and provide instructions
-        if not exists(BACKTEST_PATH["results"]):
-            makedirs(BACKTEST_PATH["results"])
-            raise RuntimeError(f"The {BACKTEST_PATH['results']} directory must exist and contain backtest result files.")
+        # Init values
+        backtest_results: List[IBacktestResult] = []
 
-        # Build the list of file names, also make sure at least 1 file has been extracted
-        self.backtest_result_file_names = list(
-            filter(
-                lambda f: ".json" in f, [f for f in listdir(BACKTEST_PATH['results']) if isfile(join(BACKTEST_PATH['results'], f))]
-            )
-        )
-        if len(self.backtest_result_file_names) < 1:
-            raise RuntimeError("There must be at least 1 backtest file in the results directory.")
+        # Iterate over each position exit combination
+        for pe in PositionExitCombination.get_records():
+            # Iterate over each backtest result file
+            for backtest_id in RegressionSelection.BACKTEST_RESULTS:
+                # Extract the bactest result
+                backtest_results: List[IBacktestResult] = \
+                    Epoch.FILE.get_backtest_results(backtest_id, pe["take_profit"], pe["stop_loss"])
 
-        # Extract the files while validating their integrity
-        result_files: List[IBacktestResult] = []
-        for name in self.backtest_result_file_names:
-            # Load the file which contains a list of backtests
-            files: List[IBacktestResult] = load(open(f"{BACKTEST_PATH['results']}/{name}"))
+                # Iterate over each of the results
+                for result in backtest_results:
+                    # Make sure the file is valid
+                    self._is_backtest_result(backtest_id, result)
 
-            # Iterate over each file and validate its data and append it to the final list
-            for file in files:
-                # Make sure the file is valid
-                self._is_backtest_result(name, file)
+                    # Populate the date range in case it hasn't been
+                    if self.start == 0:
+                        self.start = result["backtest"]["start"]
+                        self.end = result["backtest"]["end"]
 
-                # Populate the date range in case it hasn't been
-                if self.start == 0:
-                    self.start = file["backtest"]["start"]
-                    self.end = file["backtest"]["end"]
+                    # The date ranges must be identical
+                    if result["backtest"]["start"] != self.start or result["backtest"]["end"] != self.end:
+                        raise RuntimeError(f"The file {backtest_id} date range is different to the previous files.")
 
-                # The date ranges must be identical
-                if file["backtest"]["start"] != self.start or file["backtest"]["end"] != self.end:
-                    raise RuntimeError(f"The file {name} date range is different to the previous files.")
+                    # Append the result to the list
+                    backtest_results.append(result)
 
-                # Append the file to the list
-                result_files.append(file)
-
-        # Finally, return the list of extracted files
-        return result_files
+        # Finally, return the results
+        return backtest_results
 
 
 
@@ -197,10 +181,12 @@ class RegressionSelection:
 
 
 
-    def _is_backtest_result(self, file_name: str, file: IBacktestResult) -> None:
+    def _is_backtest_result(self, backtest_id: IBacktestID, file: IBacktestResult) -> None:
         """Checks if an extracted dict is a Backtest Result.
 
         Args:
+            backtest_id: IBacktestID
+                The identifier of the broken backtest result
             file: IBacktestResult
                 The file to be checked.
 
@@ -212,7 +198,7 @@ class RegressionSelection:
             not isinstance(file["backtest"], dict) or \
                 not isinstance(file["model"], dict) or \
                     not isinstance(file["performance"], dict):
-                        raise RuntimeError(f"The file {file_name} is not a valid Backtest Result.")
+                        raise RuntimeError(f"The file {backtest_id} is not a valid Backtest Result.")
 
 
 
@@ -223,7 +209,8 @@ class RegressionSelection:
 
 
 
-    ## Regression Selection ## 
+
+    ## Regression Selection Building ## 
 
 
 
@@ -263,7 +250,7 @@ class RegressionSelection:
 
 
 
-    def _build_model_results(self, backtests: List[IBacktestResult]) -> Dict[str, List[IModelResult]]:
+    def _build_model_results(self, backtests: List[IBacktestResult]) -> IModelResults:
         """Builds a dict containing lists of model results based on their combination id.
         Note that the model results will be filtered and ordered by median based on the 
         models_limit provided.
@@ -273,15 +260,18 @@ class RegressionSelection:
                 The list of backtests that will be used to build the models' results.
 
         Returns:
-            Dict[str: List[IModelResult]]
+            IModelResults
         """
         # Init the model results
-        model_results: Dict[str, List[IModelResult]] = {}
+        model_results: IModelResults = {}
 
         # Iterate over each backtest
         for backtest in backtests:
             # Init the combination ID
-            id: str = self._get_combination_id(backtest["backtest"]["take_profit"], backtest["backtest"]["stop_loss"])
+            id: IPositionExitCombinationID = PositionExitCombination.get_id(
+                take_profit=backtest["backtest"]["take_profit"], 
+                stop_loss=backtest["backtest"]["stop_loss"]
+            )
 
             # Build the model result
             result: IModelResult = self._build_model_result(backtest)
@@ -299,6 +289,9 @@ class RegressionSelection:
 
         # Finally, return the sorted and filtered model results
         return model_results
+
+
+
 
 
 
@@ -340,12 +333,12 @@ class RegressionSelection:
 
 
 
-    def _build_combination_results(self, model_results: Dict[str, List[IModelResult]]) -> List[ICombinationResult]:
+    def _build_combination_results(self, model_results: IModelResults) -> List[ICombinationResult]:
         """Builds the combination results based on the model results. The final list is
         sorted by the mean of the model results medians by combination.
 
         Args:
-            model_results: Dict[str, List[IModelResult]]
+            model_results: IModelResults
         
         Returns:
             List[ICombinationResult]
@@ -364,66 +357,3 @@ class RegressionSelection:
 
         # Finally, sort the list by points mean
         return sorted(results, key=lambda d: d["points_mean"], reverse=True)
-
-
-
-
-
-
-
-
-    def _get_combination_id(self, take_profit: float, stop_loss: float) -> str:
-        """Builds a combination ID based on the take profit and stop loss combination.
-
-        Args:
-            take_profit: float
-            float, stop_loss: float
-        
-        Returns:
-            str
-        """
-        return f"TP{str(take_profit)}-SL{str(stop_loss)}"
-
-
-
-
-
-
-
-
-
-
-
-    ## File Helpers ## 
-
-
-
-
-
-    def _save_regression_selection(self, selection: IRegressionSelectionFile) -> None:
-        """Saves a given selection in the output path based on its id.
-
-        Args:
-            selection: IRegressionSelectionFile
-                The selection to be stored.
-        """
-        # If the results directory doesn't exist, create it
-        if not exists(BACKTEST_PATH["regression_selections"]):
-            makedirs(BACKTEST_PATH["regression_selections"])
-
-        # Write the results on a JSON File
-        with open(f"{BACKTEST_PATH['regression_selections']}/{self.id}.json", "w") as outfile:
-            outfile.write(dumps(selection))
-
-
-
-
-
-    
-
-
-    def _delete_backtest_results(self) -> None:
-        """Deletes all the backtest result files in the results directory.
-        """
-        for fn in self.backtest_result_file_names:
-            remove(f"{BACKTEST_PATH['results']}/{fn}")

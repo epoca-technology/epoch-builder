@@ -6,7 +6,7 @@ from json import load, dumps
 from modules.types import IConfigPath, IBacktestAssetsPath, IModelAssetsPath, IEpochConfig, \
     IBacktestConfig, IRegressionTrainingBatch, ITrainingDataConfig, IClassificationTrainingBatch,\
         IBacktestResult, ITrainingDataFile, IClassificationTrainingCertificate, IRegressionTrainingCertificate,\
-            ITrainableModelType, ITrainableModelExtension, IBacktestID
+            ITrainableModelType, ITrainableModelExtension, IBacktestID, IRegressionSelectionFile
 from modules.model.ModelType import TRAINABLE_MODEL_TYPES
 from modules.utils.Utils import Utils
 from modules.epoch.PositionExitCombination import PositionExitCombination
@@ -632,11 +632,26 @@ class EpochFile:
 
 
 
+
+
     # Regression Selection
     # This process is performed in order to find out what regression models and position
     # exit combinations perform best. 
 
 
+
+    def save_regression_selection(self, file: IRegressionSelectionFile) -> None:
+        """Saves a Regression Selection Result into the proper directory
+
+        Args:
+            file: IRegressionSelectionFile
+                The selection to be stored
+        """
+        # Init the path
+        path: str = self._p(f"{EpochFile.BACKTEST_PATH['regression_selection']}/{file['id']}.json")
+
+        # Save the file
+        EpochFile.write(path, file)
     
 
 
