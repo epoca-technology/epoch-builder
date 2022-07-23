@@ -24,7 +24,7 @@ training_data: ClassificationTrainingData = ClassificationTrainingData(config)
 # Runs the Training Data for all models simultaneously. 
 # Results as saved when the execution has completed. If the execution is interrupted before
 # completion, results will not be saved.
-print("TRAINING DATA RUNNING\n\n")
+print("TRAINING DATA RUNNING\n")
 print(f"{training_data.id}:\n")
 training_data.run()
 print("\n\nTRAINING DATA COMPLETED")

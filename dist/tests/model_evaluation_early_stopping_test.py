@@ -208,14 +208,14 @@ class ModelEvaluationEarlyStoppingTestCase(unittest.TestCase):
         self.assertEqual(es.checkpoint_2['passed'], True)
 
         # Passes the third checkpoint
-        es_motive = es.check(points=-6.9, current_index=56, longs_num=12, shorts_num=11)
+        es_motive = es.check(points=-6.9, current_index=56, longs_num=8, shorts_num=7)
         self.assertEqual(es_motive, None)
         self.assertEqual(es.checkpoint_1['passed'], True)
         self.assertEqual(es.checkpoint_2['passed'], True)
         self.assertEqual(es.checkpoint_3['passed'], True)
 
         # Fails on the fourth checkpoint
-        es_motive = es.check(points=-3.3, current_index=75, longs_num=13, shorts_num=13)
+        es_motive = es.check(points=-3.3, current_index=75, longs_num=9, shorts_num=13)
         self.assertEqual(es_motive, EarlyStopping.CHECKPOINT_4_MOTIVE)
         self.assertEqual(es.checkpoint_1['passed'], True)
         self.assertEqual(es.checkpoint_2['passed'], True)

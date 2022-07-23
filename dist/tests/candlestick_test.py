@@ -54,7 +54,7 @@ class CandlestickTestCase(unittest.TestCase):
         # Retrieve the lookback df
         df = Candlestick.get_lookback_df(100, default_candlestick['ot'], normalized=True)
         self.assertEqual(df.shape[0], 100)
-        self.assertEqual(df.shape[1], 1) # c
+        self.assertEqual(df.shape[1], 3) # ot, ct, c
         
         # The values should be normalized
         norm_df = df[(df['c'] >= 0) & (df['c'] <= 1)]

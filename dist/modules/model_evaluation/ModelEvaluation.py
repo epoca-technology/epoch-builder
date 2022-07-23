@@ -188,11 +188,11 @@ def _get_candlesticks_df(lookback: int) -> DataFrame:
     Returns:
         DataFrame
     """
-    # Subset the prediction candlesticks
-    pred_df: DataFrame = Candlestick.PREDICTION_DF[Candlestick.PREDICTION_DF["ot"] >= Epoch.TRAINING_EVALUATION_START].iloc[0:lookback]
+    # Calculate the real start time based on the model's lookback
+    real_start: int = Candlestick.PREDICTION_DF[Candlestick.PREDICTION_DF["ot"] >= Epoch.TRAINING_EVALUATION_START].iloc[lookback]["ot"]
 
     # Init 1m candlesticks dataframe
-    df: DataFrame = Candlestick.DF[Candlestick.DF["ot"] >= pred_df.iloc[-1]["ot"]]
+    df: DataFrame = Candlestick.DF[Candlestick.DF["ot"] >= real_start]
     df.reset_index(drop=True, inplace=True)
 
     # Finally, return the 1m candlesticks df

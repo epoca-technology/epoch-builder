@@ -54,8 +54,8 @@ class Regression(KerasModelInterface):
             self.id: str = model_file.attrs["id"]
             self.description: str = model_file.attrs["description"]
             self.autoregressive: bool = bool(model_file.attrs["autoregressive"]) # Downcast to bool
-            self.lookback: int = int(model_file.attrs['lookback'])          # Downcast to int
-            self.predictions: int = int(model_file.attrs['predictions'])    # Downcast to int
+            self.lookback: int = int(model_file.attrs["lookback"])          # Downcast to int
+            self.predictions: int = int(model_file.attrs["predictions"])    # Downcast to int
             self.model: Sequential = load_model_from_hdf5(model_file)
 
         # Make sure the IDs are identical

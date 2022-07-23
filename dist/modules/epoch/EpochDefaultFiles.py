@@ -99,7 +99,7 @@ CLASSIFICATION_TRAINING_DATA_CONFIG_UT: ITrainingDataConfig = {
     "down_percent_change": 3,
     "models": [
         {
-            "id": "101",
+            "id": "A101",
             "arima_models": [{
                 "lookback": 300,
                 "predictions": 10,
@@ -108,7 +108,7 @@ CLASSIFICATION_TRAINING_DATA_CONFIG_UT: ITrainingDataConfig = {
             }]
         },
         {
-            "id": "111",
+            "id": "A111",
             "arima_models": [{
                 "lookback": 300,
                 "predictions": 10,
@@ -117,7 +117,7 @@ CLASSIFICATION_TRAINING_DATA_CONFIG_UT: ITrainingDataConfig = {
             }]
         },
         {
-            "id": "112",
+            "id": "A112",
             "arima_models": [{
                 "lookback": 300,
                 "predictions": 10,
@@ -126,7 +126,7 @@ CLASSIFICATION_TRAINING_DATA_CONFIG_UT: ITrainingDataConfig = {
             }]
         },
         {
-            "id": "121",
+            "id": "A121",
             "arima_models": [{
                 "lookback": 300,
                 "predictions": 10,

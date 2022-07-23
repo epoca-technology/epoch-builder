@@ -123,7 +123,7 @@ def _restore_db() -> None:
 
 
 ## CLI ##
-print("DATABASE MANAGEMENT\n\n")
+print("DATABASE MANAGEMENT\n")
 SUMMARY: str = "View Database Summary"
 BACKUP: str = "Backup Database"
 RESTORE: str = "Restore Database"

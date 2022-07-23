@@ -333,4 +333,4 @@ class Utils:
         Returns:
             str
         """
-        return id if len(id) < 13 else f"{id[0:10]}..."
+        return id if len(id) < 23 else f"{id[0:20]}..."

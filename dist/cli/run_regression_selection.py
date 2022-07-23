@@ -10,7 +10,7 @@ Epoch.init()
 
 
 # Configuration Input
-print("REGRESSION SELECTION\n\n")
+print("REGRESSION SELECTION\n")
 limit_answer: Dict[str, str] = prompt([Text("value", "Number of models to be selected")])
 if not limit_answer["value"].isdigit():
     raise ValueError("The number of models to be selected must be a valid integer.")

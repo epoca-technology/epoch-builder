@@ -51,7 +51,7 @@ class KerasHyperparams:
 
     """
     # Default Batch Size
-    REGRESSION_BATCH_SIZE: int = 40
+    REGRESSION_BATCH_SIZE: int = 30
     CLASSIFICATION_BATCH_SIZE: int = 60
 
     # Optimizers
@@ -145,6 +145,7 @@ class KerasHyperparams:
         # Iterate over the networks
         for network_type, network_variations in self.networks.items():
             # Init the network's list of configs
+            print(f"Generating {network_type} Neural Networks...")
             configs: Union[List[IRegressionTrainingConfig], List[IClassificationTrainingConfig]] = []
 
             # Iterate over the variations
@@ -167,7 +168,6 @@ class KerasHyperparams:
                         )
 
             # Build batches and save the network configurations
-            print(f"Generating {network_type} Neural Networks...")
             models, batches = self._build_and_save_batches(network_type, configs)
             network_receipts.append({ "name": network_type, "models": models, "batches": batches})
 

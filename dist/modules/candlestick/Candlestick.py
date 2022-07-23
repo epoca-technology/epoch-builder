@@ -31,7 +31,7 @@ class Candlestick:
         PREDICTION_DF: DataFrame 
             Prediction Candlesticks DataFrame with the following columns: ot, ct, o, h, l, c, v
         NORMALIZED_PREDICTION_DF: Union[DataFrame, None] 
-            Normalized Prediction Candlesticks DataFrame with the following columns normalized: ot, ct, c.
+            Normalized Prediction Candlesticks DataFrame with the following columns: ot, ct, c.
         PREDICTION_RANGE_INDEXER_PATH: str
             The path in which the indexer should be stored.
         PREDICTION_RANGE_INDEXER: IPredictionRangeIndexer

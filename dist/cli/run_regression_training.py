@@ -17,7 +17,7 @@ Epoch.init()
 
 
 # WELCOME
-print("REGRESSION TRAINING\n\n")
+print("REGRESSION TRAINING\n")
 model_type_answer: Dict[str, str] = prompt([InquirerList("type", message="Select the type of model", choices=TRAINABLE_REGRESSION_MODEL_TYPES)])
 model_type: ITrainableModelType = model_type_answer["type"]
 
@@ -93,7 +93,7 @@ for index, model_config in enumerate(config["models"]):
 
     # Log the progress
     if index == 0:
-        print("\REGRESSION TRAINING RUNNING\n")
+        print("\nREGRESSION TRAINING RUNNING\n")
         print(f"{config['name']}\n")
     print(f"\n{index + 1}/{len(config['models'])}) {Utils.prettify_model_id(model_config['id'])}")
 

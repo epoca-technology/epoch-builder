@@ -617,7 +617,7 @@ class EpochFile:
         sl: float = results[0]["backtest"]["stop_loss"]
 
         # Check if it is the unit test
-        if len(results) == 0 and "unit_test" in id:
+        if "unit_test" in id:
             path = f"{path}/{id}.json"
 
         # Otherwise, save the result based on the position exit combination

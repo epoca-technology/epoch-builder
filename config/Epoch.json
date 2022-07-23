@@ -10,5 +10,6 @@
     "highest_price": 68633.69,
     "lowest_price": 4130.64,
     "regression_price_change_requirement": 3,
-    "idle_minutes_on_position_close": 30
+    "idle_minutes_on_position_close": 30,
+    "ut_class_training_data_id": "35cceb84-491a-4e93-be96-cb1e6918fefa"
 }

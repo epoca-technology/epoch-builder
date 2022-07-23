@@ -1,17 +1,18 @@
 from typing import Union, Tuple, List
 from numpy import ndarray, array
 from h5py import File as h5pyFile
+from pandas import DataFrame
 from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras import Sequential
 from keras.optimizers import adam_v2 as adam, rmsprop_v2 as rmsprop
 from keras.optimizer_v2.learning_rate_schedule import InverseTimeDecay
 from keras.losses import MeanSquaredError, MeanAbsoluteError
 from keras.callbacks import EarlyStopping, History
-from dist.modules.epoch.Epoch import Epoch
 from modules.types import IKerasTrainingTypeConfig, IKerasModelConfig, IKerasModelTrainingHistory,\
     IRegressionTrainingConfig, IRegressionTrainingCertificate, IModelEvaluation, IKerasOptimizer,\
         IKerasRegressionLoss, ITrainableModelType
 from modules.utils.Utils import Utils
+from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
 from modules.keras_models.KerasModel import KerasModel
 from modules.keras_models.LearningRateSchedule import LearningRateSchedule
@@ -240,6 +241,9 @@ class RegressionTraining:
             Tuple[ndarray, ndarray, ndarray, ndarray]
             (train_x, train_y, test_x, test_y)
         """
+        # Init the df, grabbing only the close prices
+        df: DataFrame = Candlestick.NORMALIZED_PREDICTION_DF[["c"]].copy()
+
         # Init the number of rows and the split that will be applied
         rows: int = Candlestick.NORMALIZED_PREDICTION_DF.shape[0]
         split: int = int(rows * RegressionTraining.TRAINING_CONFIG["train_split"])
@@ -252,13 +256,13 @@ class RegressionTraining:
         for i in range(lookback, rows):
             # If it is an autoregression, add only 1 price as the label
             if autoregressive:
-                features_raw.append(Candlestick.NORMALIZED_PREDICTION_DF["c"].iloc[i-lookback:i, 0])
-                labels_raw.append(Candlestick.NORMALIZED_PREDICTION_DF["c"].iloc[i, 0])
+                features_raw.append(df.iloc[i-lookback:i, 0])
+                labels_raw.append(df.iloc[i, 0])
 
             # If it is not an autoregression, add the labels based on the number of predictions
             elif not autoregressive and i < (rows-predictions):
-                features_raw.append(Candlestick.NORMALIZED_PREDICTION_DF["c"].iloc[i-lookback:i, 0])
-                labels_raw.append(Candlestick.NORMALIZED_PREDICTION_DF["c"].iloc[i:i+predictions, 0])
+                features_raw.append(df.iloc[i-lookback:i, 0])
+                labels_raw.append(df.iloc[i:i+predictions, 0])
 
         # Convert the features and labels into np arrays
         features = array(features_raw)

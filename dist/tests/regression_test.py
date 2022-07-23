@@ -61,7 +61,7 @@ class RegressionTestCase(unittest.TestCase):
 
         # Can generate a prediction for a random selected series
         close_prices: Series = Candlestick.get_lookback_df(r.lookback, Candlestick.DF.iloc[214554]["ot"], normalized=True)
-        preds: List[float] = r.predict(close_prices)
+        preds: List[float] = r.predict(close_prices["c"])
 
         # The predictions should match the model's properties
         self.assertEqual(len(preds), r.predictions)

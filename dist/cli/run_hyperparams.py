@@ -12,7 +12,7 @@ Epoch.init()
 
 
 # Welcome
-print("HYPERPARAMS\n\n")
+print("HYPERPARAMS\n")
 
 
 
@@ -53,7 +53,7 @@ if model_type == "keras_classification" or model_type == "xgb_classification":
 
 
 # Hyperparams Generation
-print("\n\HYPERPARAMS RUNNING\n")
+print("\n\nHYPERPARAMS RUNNING\n")
 
 
 # Keras Hyperparams
