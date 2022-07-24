@@ -1,7 +1,5 @@
-from typing import Union, Tuple, List
-from numpy import ndarray, array
+from typing import Union, List
 from h5py import File as h5pyFile
-from pandas import DataFrame
 from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras import Sequential
 from keras.optimizers import adam_v2 as adam, rmsprop_v2 as rmsprop
@@ -14,6 +12,7 @@ from modules.types import IKerasTrainingTypeConfig, IKerasModelConfig, IKerasMod
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
+from modules.regression_training_data.RegressionTrainingData import make_datasets
 from modules.keras_models.KerasModel import KerasModel
 from modules.keras_models.LearningRateSchedule import LearningRateSchedule
 from modules.keras_models.KerasModelSummary import get_summary
@@ -70,7 +69,7 @@ class RegressionTraining:
         "decay_rate": 0.85,
         "epochs": 50,
         "patience": 20,
-        "batch_size": 128
+        "batch_size": 16
     }
 
 
@@ -83,19 +82,12 @@ class RegressionTraining:
 
 
 
-    def __init__(
-        self, 
-        config: IRegressionTrainingConfig, 
-        datasets: Union[Tuple[ndarray, ndarray, ndarray, ndarray], None]=None,
-        test_mode: bool=False
-    ):
+    def __init__(self, config: IRegressionTrainingConfig, test_mode: bool=False):
         """Initializes the RegressionTraining Instance.
 
         Args:
             config: IRegressionTrainingConfig
                 The configuration that will be used to train the model.
-            datasets: Union[Tuple[ndarray, ndarray, ndarray, ndarray], None]
-                Can optionally pass the datasets in order to optimize training.    
             test_mode: bool
                 If running from unit tests, it won't check the model's directory.
 
@@ -139,17 +131,13 @@ class RegressionTraining:
         self.keras_model["lookback"] = self.lookback
         self.keras_model["predictions"] = self.predictions
 
-        # Make the datasets if they weren't provided
-        if datasets is None:
-            self.train_x, self.train_y, self.test_x, self.test_y = RegressionTraining.make_datasets(
-                lookback=self.lookback,
-                autoregressive=self.autoregressive,
-                predictions=self.predictions
-            )
-
-        # Otherwise, unpack the provided datasets
-        else:
-            self.train_x, self.train_y, self.test_x, self.test_y = datasets
+        # Make the datasets
+        self.train_x, self.train_y, self.test_x, self.test_y = make_datasets(
+            lookback=self.lookback,
+            autoregressive=self.autoregressive,
+            predictions=self.predictions,
+            train_split=RegressionTraining.TRAINING_CONFIG["train_split"]
+        )
 
         # Initialize the Dataset Sizes
         self.train_size: int = self.train_x.shape[0]
@@ -224,52 +212,6 @@ class RegressionTraining:
         else:
             raise ValueError(f"The loss function for {func_name} was not found.")
 
-
-
-
-
-
-
-
-    
-    @staticmethod
-    def make_datasets(lookback: int, autoregressive: bool, predictions: int) -> Tuple[ndarray, ndarray, ndarray, ndarray]:
-        """Builds a tuple containing the features and labels for the train and test datasets based
-        on the kind of regression. 
-
-        Returns:
-            Tuple[ndarray, ndarray, ndarray, ndarray]
-            (train_x, train_y, test_x, test_y)
-        """
-        # Init the df, grabbing only the close prices
-        df: DataFrame = Candlestick.NORMALIZED_PREDICTION_DF[["c"]].copy()
-
-        # Init the number of rows and the split that will be applied
-        rows: int = Candlestick.NORMALIZED_PREDICTION_DF.shape[0]
-        split: int = int(rows * RegressionTraining.TRAINING_CONFIG["train_split"])
-
-        # Init raw features and labels
-        features_raw: Union[List[List[float]], ndarray] = []
-        labels_raw: Union[List[List[float]], ndarray] = []
-
-        # Iterate over the normalized ds and build the features & labels
-        for i in range(lookback, rows):
-            # If it is an autoregression, add only 1 price as the label
-            if autoregressive:
-                features_raw.append(df.iloc[i-lookback:i, 0])
-                labels_raw.append(df.iloc[i, 0])
-
-            # If it is not an autoregression, add the labels based on the number of predictions
-            elif not autoregressive and i < (rows-predictions):
-                features_raw.append(df.iloc[i-lookback:i, 0])
-                labels_raw.append(df.iloc[i:i+predictions, 0])
-
-        # Convert the features and labels into np arrays
-        features = array(features_raw)
-        labels = array(labels_raw)
-
-        # Finally, return the split datasets
-        return features[:split], labels[:split], features[split:], labels[split:]
 
 
 

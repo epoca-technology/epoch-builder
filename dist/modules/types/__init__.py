@@ -7,6 +7,7 @@ from modules.types.keras_models_types import *
 from modules.types.model_types import *
 from modules.types.backtest_types import *
 from modules.types.model_evaluation_types import *
+from modules.types.regression_training_data_types import *
 from modules.types.regression_types import *
 from modules.types.regression_selection_types import *
 from modules.types.classification_training_data_types import *

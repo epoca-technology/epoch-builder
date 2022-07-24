@@ -1,5 +1,4 @@
-from typing import List, Tuple, Dict, Union, Any
-from numpy import ndarray
+from typing import List, Dict, Union, Any
 from inquirer import List as InquirerList, prompt
 from modules.types import IRegressionTrainingBatch, IRegressionTrainingCertificate, ITrainableModelType,\
     IRegressionTrainingConfig
@@ -35,28 +34,9 @@ else:
 
 
 
-# SHARED PROPERTIES
-# For performance reasons, the train and test datasets should be generated only once prior to training.
-# IMPORTANT: with this change in place, all models must have the same properties.
-lookback: int = config["models"][0]["lookback"]
-autoregressive: bool = config["models"][0]["autoregressive"]
-predictions: int = config["models"][0]["predictions"]
-
-
-
 # CANDLESTICK INITIALIZATION
-# Initialize the Candlesticks Module based on the regressions' lookback.
-Candlestick.init(lookback, Epoch.START, Epoch.END)
-
-
-
-# DATASETS
-# Initialize the train and test datasets for the entire batch of models that will be trained.
-datasets: Tuple[ndarray, ndarray, ndarray, ndarray] = RegressionTraining.make_datasets(
-    lookback=lookback, 
-    autoregressive=autoregressive,
-    predictions=predictions
-)
+# Initialize the Candlesticks Module based on the highest lookback.
+Candlestick.init(max([m["lookback"] for m in config["models"]]), Epoch.START, Epoch.END)
 
 
 
@@ -70,7 +50,7 @@ certificates: Union[List[IRegressionTrainingCertificate], List[Any]] = []
 # Returns the instance of a training class based on the selected model_type
 def get_trainer(model_config: Union[IRegressionTrainingConfig, Any]) -> Union[RegressionTraining, Any]:
     if model_type == "keras_regression":
-        return RegressionTraining(config=model_config, datasets=datasets)
+        return RegressionTraining(model_config)
     elif model_type == "xgb_regression":
         raise ValueError("XGBRegression Models cannot be trained as they have not been yet implemented.")
     else:

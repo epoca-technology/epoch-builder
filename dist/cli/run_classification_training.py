@@ -38,7 +38,7 @@ else:
 # Opens and loads the training_data file that will be used to train the models.
 # IMPORTANT: All classification training configs must have the "name" and 
 # "training_data_id" properties.
-training_data: ITrainingDataFile = Epoch.FILE.get_classification_training_data(config['training_data_id'])
+training_data: ITrainingDataFile = Epoch.FILE.get_classification_training_data(config["training_data_id"])
 
 
 

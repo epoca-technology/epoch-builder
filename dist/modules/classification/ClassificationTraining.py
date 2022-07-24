@@ -72,7 +72,7 @@ class ClassificationTraining:
         "decay_rate": 0.35,
         "epochs": 100,
         "patience": 40,
-        "batch_size": 32
+        "batch_size": 4
     }
 
 
