@@ -63,13 +63,13 @@ class RegressionTraining:
     """
     # Training Configuration
     TRAINING_CONFIG: IKerasTrainingTypeConfig = {
-        "train_split": 0.9,
+        "train_split": 0.85,
         "initial_lr": 0.01,
         "decay_steps": 1.5,
         "decay_rate": 0.85,
         "epochs": 50,
         "patience": 20,
-        "batch_size": 16
+        "batch_size": 64
     }
 
 
@@ -265,7 +265,7 @@ class RegressionTraining:
             epochs=RegressionTraining.TRAINING_CONFIG["epochs"],
             callbacks=[ early_stopping ],
             shuffle=True,
-            batch_size=RegressionTraining.TRAINING_CONFIG["batch_size"],
+            batch_size=8 if "DNN" in self.id else RegressionTraining.TRAINING_CONFIG["batch_size"],
             verbose=0
         )
 

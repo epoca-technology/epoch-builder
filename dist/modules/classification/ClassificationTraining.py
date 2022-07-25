@@ -66,7 +66,7 @@ class ClassificationTraining:
     """
     # Training Configuration
     TRAINING_CONFIG: IKerasTrainingTypeConfig = {
-        "train_split": 0.9,
+        "train_split": 0.85,
         "initial_lr": 0.01,
         "decay_steps": 1,
         "decay_rate": 0.35,

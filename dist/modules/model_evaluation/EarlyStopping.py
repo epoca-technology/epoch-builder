@@ -29,7 +29,7 @@ class EarlyStopping:
             The checkpoints in which it will be determined if the model should move forward or not.
     """
     # Early Stopping Moves
-    UNACCEPTABLE_POINTS_MOTIVE: str = "The model evaluation was stopped because the model reached -20 points."
+    UNACCEPTABLE_POINTS_MOTIVE: str = "The model evaluation was stopped because the model reached -35 points."
     CHECKPOINT_1_MOTIVE: str = "The model evaluation was stopped because the model had less than 1 long or short during the first checkpoint (15% of the dataset)."
     CHECKPOINT_2_MOTIVE: str = "The model evaluation was stopped because the model had less than 3 longs or shorts during the second checkpoint (30% of the dataset)."
     CHECKPOINT_3_MOTIVE: str = "The model evaluation was stopped because the model had less than 7 longs or shorts during the third checkpoint (50% of the dataset)."
@@ -112,7 +112,7 @@ class EarlyStopping:
             Union[str, None]
         """
         # Firstly, make sure the points are acceptable
-        if points <= -20:
+        if points <= -35:
             return EarlyStopping.UNACCEPTABLE_POINTS_MOTIVE
 
         # Evaluate the first checkpoint if applies

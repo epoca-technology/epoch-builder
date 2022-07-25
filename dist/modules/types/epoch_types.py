@@ -159,7 +159,7 @@ class IEpochConfig(TypedDict):
     id: str
 
     # The range of the Epoch. These values are used for:
-    # 1) Calculate the training evaluation range (epoch_width * 0.1)
+    # 1) Calculate the training evaluation range (epoch_width * 0.15)
     # 2) Calculate the backtest range (epoch_width * 0.2)
     start: int
     end: int
@@ -169,7 +169,7 @@ class IEpochConfig(TypedDict):
     # 2) Evaluate freshly trained Regression Models
     # 3) Backtest shortlisted RegressionModels in all position exit combinations
     # 4) Evaluate freshly trained Classification Models
-    # training_evaluation_range = epoch_width * 0.1
+    # training_evaluation_range = epoch_width * 0.15
     training_evaluation_start: int
     training_evaluation_end: int
 

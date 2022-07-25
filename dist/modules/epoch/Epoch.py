@@ -33,7 +33,7 @@ class Epoch:
         START: int
         END: int
             The range of the Epoch. These values are used for:
-            1) Calculate the training evaluation range (epoch_width * 0.1)
+            1) Calculate the training evaluation range (epoch_width * 0.15)
             2) Calculate the backtest range (epoch_width * 0.2)
         TRAINING_EVALUATION_START: int
         TRAINING_EVALUATION_END: int
@@ -42,7 +42,7 @@ class Epoch:
             2) Evaluate freshly trained Regression Models
             3) Backtest shortlisted RegressionModels in all position exit combinations
             4) Evaluate freshly trained Classification Models
-            training_evaluation_range = epoch_width * 0.1
+            training_evaluation_range = epoch_width * 0.15
         BACKTEST_START: int
         BACKTEST_END: int
             The backtest range is used for the following:
@@ -71,7 +71,7 @@ class Epoch:
 
     # Epoch Defaults
     DEFAULTS: IEpochDefaults = {
-        "epoch_width": 36,
+        "epoch_width": 24,
         "seed": 60184,
         "regression_price_change_requirement": 3,
         "idle_minutes_on_position_close": 30
@@ -183,7 +183,7 @@ class Epoch:
         print("2/10) Calculating the Epoch Range...")
         start: int = int(prediction_df.iloc[0]["ot"])
         end: int = int(prediction_df.iloc[-1]["ct"])
-        training_evaluation_start, training_evaluation_end = Epoch._calculate_date_range(prediction_df, ceil(epoch_width_days * 0.1))
+        training_evaluation_start, training_evaluation_end = Epoch._calculate_date_range(prediction_df, ceil(epoch_width_days * 0.15))
         backtest_start, backtest_end = Epoch._calculate_date_range(prediction_df, ceil(epoch_width_days * 0.2))
 
         # Check if the normalized prediction candlesticks csv needs to be created

@@ -133,7 +133,7 @@ class ModelEvaluationEarlyStoppingTestCase(unittest.TestCase):
         self.assertEqual(es_motive, None)
 
         # Should stop if -20 points are hit regardless of the checkpoints
-        es_motive = es.check(points=-20, current_index=13, longs_num=1, shorts_num=2)
+        es_motive = es.check(points=-35, current_index=13, longs_num=1, shorts_num=2)
         self.assertEqual(es_motive, EarlyStopping.UNACCEPTABLE_POINTS_MOTIVE)
 
 
