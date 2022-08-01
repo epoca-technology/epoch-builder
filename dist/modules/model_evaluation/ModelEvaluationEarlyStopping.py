@@ -1,5 +1,5 @@
 from typing import Union
-from modules.types import IEarlyStoppingCheckpoint
+from modules.types import IModelEvaluationEarlyStoppingCheckpoint
 
 
 
@@ -7,8 +7,8 @@ from modules.types import IEarlyStoppingCheckpoint
 
 
 # Class
-class EarlyStopping:
-    """EarlyStopping Class
+class ModelEvaluationEarlyStopping:
+    """ModelEvaluationEarlyStopping Class
 
     This class keeps track of a model's progress during an evaluation and determines if it should
     be stopped early.
@@ -47,39 +47,39 @@ class EarlyStopping:
                 evaluation.
         """
         # Init the Checkpoint 1
-        self.checkpoint_1: IEarlyStoppingCheckpoint = {
+        self.checkpoint_1: IModelEvaluationEarlyStoppingCheckpoint = {
             "index": int(candlesticks_num * 0.15),
             "passed": False,
             "required_longs": 1,
             "required_shorts": 1,
-            "motive": EarlyStopping.CHECKPOINT_1_MOTIVE,
+            "motive": ModelEvaluationEarlyStopping.CHECKPOINT_1_MOTIVE,
         }
 
         # Init the Checkpoint 2
-        self.checkpoint_2: IEarlyStoppingCheckpoint = {
+        self.checkpoint_2: IModelEvaluationEarlyStoppingCheckpoint = {
             "index": int(candlesticks_num * 0.3),
             "passed": False,
             "required_longs": 3,
             "required_shorts": 3,
-            "motive": EarlyStopping.CHECKPOINT_2_MOTIVE,
+            "motive": ModelEvaluationEarlyStopping.CHECKPOINT_2_MOTIVE,
         }
 
         # Init the Checkpoint 3
-        self.checkpoint_3: IEarlyStoppingCheckpoint = {
+        self.checkpoint_3: IModelEvaluationEarlyStoppingCheckpoint = {
             "index": int(candlesticks_num * 0.5),
             "passed": False,
             "required_longs": 7,
             "required_shorts": 7,
-            "motive": EarlyStopping.CHECKPOINT_3_MOTIVE,
+            "motive": ModelEvaluationEarlyStopping.CHECKPOINT_3_MOTIVE,
         }
 
         # Init the Checkpoint 4
-        self.checkpoint_4: IEarlyStoppingCheckpoint = {
+        self.checkpoint_4: IModelEvaluationEarlyStoppingCheckpoint = {
             "index": int(candlesticks_num * 0.7),
             "passed": False,
             "required_longs": 10,
             "required_shorts": 10,
-            "motive": EarlyStopping.CHECKPOINT_4_MOTIVE,
+            "motive": ModelEvaluationEarlyStopping.CHECKPOINT_4_MOTIVE,
         }
 
 
@@ -113,7 +113,7 @@ class EarlyStopping:
         """
         # Firstly, make sure the points are acceptable
         if points <= -35:
-            return EarlyStopping.UNACCEPTABLE_POINTS_MOTIVE
+            return ModelEvaluationEarlyStopping.UNACCEPTABLE_POINTS_MOTIVE
 
         # Evaluate the first checkpoint if applies
         if not self.checkpoint_1["passed"] and current_index >= self.checkpoint_1["index"]:
@@ -150,11 +150,11 @@ class EarlyStopping:
 
 
 
-    def _checkpoint_passed(self, checkpoint: IEarlyStoppingCheckpoint, longs_num: int, shorts_num: int) -> bool:
+    def _checkpoint_passed(self, checkpoint: IModelEvaluationEarlyStoppingCheckpoint, longs_num: int, shorts_num: int) -> bool:
         """Given a checkpoint, it will verify the model failed or can keep going.
 
         Args:
-            checkpoint: IEarlyStoppingCheckpoint
+            checkpoint: IModelEvaluationEarlyStoppingCheckpoint
                 The checkpoint to be evaluated.
             longs_num: int 
             shorts_num: int

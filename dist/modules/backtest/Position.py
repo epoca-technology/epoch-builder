@@ -1,4 +1,5 @@
 from typing import Tuple, List, Union
+from numpy import median
 from pandas import Series
 from modules.types import IPrediction, IBacktestPerformance, IBacktestPosition
 from modules.utils.Utils import Utils
@@ -42,8 +43,6 @@ class Position:
                 The list of positions that have been closed in the instance.
 
         Position Counters:
-            successful_num: int
-                The number of successful positions. Includes longs & shorts.
             long_num: int
                 The number of long positions.
             successful_long_num: int
@@ -89,7 +88,6 @@ class Position:
         self.positions: List[IBacktestPosition] = []
 
         # Position Counters
-        self.successful_num: int = 0
         self.long_num: int = 0
         self.successful_long_num: int = 0
         self.short_num: int = 0
@@ -233,7 +231,6 @@ class Position:
 
             # Handle successful counters if applies
             if outcome:
-                self.successful_num += 1
                 self.successful_long_num += 1
 
         # Update the short counters
@@ -243,7 +240,6 @@ class Position:
 
             # Handle successful counters if applies
             if outcome:
-                self.successful_num += 1
                 self.successful_short_num += 1
 
         # Add the active position to the list
@@ -313,10 +309,19 @@ class Position:
         return {
             "points": self.points[-1],
             "points_hist": self.points,
+            "points_median": median(self.points),
             "positions": self.positions,
             "long_num": self.long_num,
             "short_num": self.short_num,
-            "long_acc": Utils.get_percentage_out_of_total(self.successful_long_num, self.long_num if self.long_num > 0 else 1),
-            "short_acc": Utils.get_percentage_out_of_total(self.successful_short_num, self.short_num if self.short_num > 0 else 1),
-            "general_acc": Utils.get_percentage_out_of_total(self.successful_num, len(self.positions) if len(self.positions) > 0 else 1),
+            "long_outcome_num": self.successful_long_num + (self.short_num - self.successful_short_num),
+            "short_outcome_num": self.successful_short_num + (self.long_num - self.successful_long_num),
+            "long_acc": Utils.get_percentage_out_of_total(
+                self.successful_long_num, self.long_num if self.long_num > 0 else 1
+            ),
+            "short_acc": Utils.get_percentage_out_of_total(
+                self.successful_short_num, self.short_num if self.short_num > 0 else 1
+            ),
+            "general_acc": Utils.get_percentage_out_of_total(
+                self.successful_long_num + self.successful_short_num, len(self.positions) if len(self.positions) > 0 else 1
+            )
         }

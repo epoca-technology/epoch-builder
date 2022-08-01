@@ -1,7 +1,7 @@
 from typing import Union
 import unittest
 from modules.database.Database import Database
-from modules.model_evaluation.EarlyStopping import EarlyStopping
+from modules.model_evaluation.ModelEvaluationEarlyStopping import ModelEvaluationEarlyStopping
 
 
 
@@ -41,7 +41,7 @@ class ModelEvaluationEarlyStoppingTestCase(unittest.TestCase):
     # Can evaluate a model that passes every checkpoint
     def testPassingModel(self):
         # Init the instance
-        es: EarlyStopping = EarlyStopping(100)
+        es: ModelEvaluationEarlyStopping = ModelEvaluationEarlyStopping(100)
 
         # Run a check at 10%
         es_motive: Union[str, None] = es.check(points=5, current_index=10, longs_num=0, shorts_num=1)
@@ -124,7 +124,7 @@ class ModelEvaluationEarlyStoppingTestCase(unittest.TestCase):
     # An evaluation must be stopped the moment a model hits -20 points
     def testUnacceptablePoints(self):
         # Init the instance
-        es: EarlyStopping = EarlyStopping(100)
+        es: ModelEvaluationEarlyStopping = ModelEvaluationEarlyStopping(100)
 
         # Run a couple of checks
         es_motive = es.check(points=-3.3, current_index=5, longs_num=1, shorts_num=0)
@@ -134,16 +134,16 @@ class ModelEvaluationEarlyStoppingTestCase(unittest.TestCase):
 
         # Should stop if -20 points are hit regardless of the checkpoints
         es_motive = es.check(points=-35, current_index=13, longs_num=1, shorts_num=2)
-        self.assertEqual(es_motive, EarlyStopping.UNACCEPTABLE_POINTS_MOTIVE)
+        self.assertEqual(es_motive, ModelEvaluationEarlyStopping.UNACCEPTABLE_POINTS_MOTIVE)
 
 
 
 
     # An evaluation must be stopped if it fails the first checkpoint
     def testFailFirstCheckpoint(self):
-        es: EarlyStopping = EarlyStopping(100)
+        es: ModelEvaluationEarlyStopping = ModelEvaluationEarlyStopping(100)
         es_motive = es.check(points=-3.3, current_index=16, longs_num=1, shorts_num=0)
-        self.assertEqual(es_motive, EarlyStopping.CHECKPOINT_1_MOTIVE)
+        self.assertEqual(es_motive, ModelEvaluationEarlyStopping.CHECKPOINT_1_MOTIVE)
         self.assertEqual(es.checkpoint_1['passed'], False)
 
 
@@ -151,7 +151,7 @@ class ModelEvaluationEarlyStoppingTestCase(unittest.TestCase):
 
     # An evaluation must be stopped if it fails the second checkpoint
     def testFailSecondCheckpoint(self):
-        es: EarlyStopping = EarlyStopping(100)
+        es: ModelEvaluationEarlyStopping = ModelEvaluationEarlyStopping(100)
 
         # Passes the first checkpoint
         es_motive = es.check(points=-6.9, current_index=16, longs_num=1, shorts_num=1)
@@ -160,7 +160,7 @@ class ModelEvaluationEarlyStoppingTestCase(unittest.TestCase):
 
         # Fails on the second checkpoint
         es_motive = es.check(points=-3.3, current_index=30, longs_num=3, shorts_num=2)
-        self.assertEqual(es_motive, EarlyStopping.CHECKPOINT_2_MOTIVE)
+        self.assertEqual(es_motive, ModelEvaluationEarlyStopping.CHECKPOINT_2_MOTIVE)
         self.assertEqual(es.checkpoint_1['passed'], True)
         self.assertEqual(es.checkpoint_2['passed'], False)
 
@@ -169,7 +169,7 @@ class ModelEvaluationEarlyStoppingTestCase(unittest.TestCase):
 
     # An evaluation must be stopped if it fails the third checkpoint
     def testFailThirdCheckpoint(self):
-        es: EarlyStopping = EarlyStopping(100)
+        es: ModelEvaluationEarlyStopping = ModelEvaluationEarlyStopping(100)
 
         # Passes the first checkpoint
         es_motive = es.check(points=-6.9, current_index=16, longs_num=1, shorts_num=1)
@@ -184,7 +184,7 @@ class ModelEvaluationEarlyStoppingTestCase(unittest.TestCase):
 
         # Fails on the third checkpoint
         es_motive = es.check(points=-3.3, current_index=52, longs_num=6, shorts_num=7)
-        self.assertEqual(es_motive, EarlyStopping.CHECKPOINT_3_MOTIVE)
+        self.assertEqual(es_motive, ModelEvaluationEarlyStopping.CHECKPOINT_3_MOTIVE)
         self.assertEqual(es.checkpoint_1['passed'], True)
         self.assertEqual(es.checkpoint_2['passed'], True)
         self.assertEqual(es.checkpoint_3['passed'], False)
@@ -194,7 +194,7 @@ class ModelEvaluationEarlyStoppingTestCase(unittest.TestCase):
 
     # An evaluation must be stopped if it fails the fourth checkpoint
     def testFailFourthCheckpoint(self):
-        es: EarlyStopping = EarlyStopping(100)
+        es: ModelEvaluationEarlyStopping = ModelEvaluationEarlyStopping(100)
 
         # Passes the first checkpoint
         es_motive = es.check(points=-6.9, current_index=16, longs_num=1, shorts_num=1)
@@ -216,7 +216,7 @@ class ModelEvaluationEarlyStoppingTestCase(unittest.TestCase):
 
         # Fails on the fourth checkpoint
         es_motive = es.check(points=-3.3, current_index=75, longs_num=9, shorts_num=13)
-        self.assertEqual(es_motive, EarlyStopping.CHECKPOINT_4_MOTIVE)
+        self.assertEqual(es_motive, ModelEvaluationEarlyStopping.CHECKPOINT_4_MOTIVE)
         self.assertEqual(es.checkpoint_1['passed'], True)
         self.assertEqual(es.checkpoint_2['passed'], True)
         self.assertEqual(es.checkpoint_3['passed'], True)

@@ -44,7 +44,7 @@ IModelResults = Dict[IPositionExitCombinationID, List[IModelResult]]
 # The result issued by a TakeProfit/StopLoss Combination.
 class ICombinationResult(TypedDict):
     # Combination
-    combination_id: str
+    combination_id: IPositionExitCombinationID
 
     # The total number of models within the combination
     models_num: int

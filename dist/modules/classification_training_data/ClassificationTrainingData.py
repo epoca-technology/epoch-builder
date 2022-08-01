@@ -735,7 +735,7 @@ class ClassificationTrainingData:
         # Validate the models
         models: List[IModel] = [m.get_model() for m in self.models]
         for i in range(len(models) - 1):
-            if td["models"][i] != models[i]:
+            if td["models"][i]["id"] != models[i]["id"]:
                 print(td['models'][i])
                 print(models[i])
                 raise ValueError(f"There is a discrepancy in the models configurations.")

@@ -315,7 +315,7 @@ class RegressionSelection:
         # Return the results
         return {
             "model": backtest["model"],
-            "points_median": median(backtest["performance"]["points_hist"]),
+            "points_median": backtest["performance"]["points_median"],
             "points_median_hist": median_hist,
             "long_num": backtest["performance"]["long_num"],
             "short_num": backtest["performance"]["short_num"],

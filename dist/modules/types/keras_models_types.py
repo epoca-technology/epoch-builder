@@ -143,6 +143,8 @@ class IKerasModelTrainingHistory(TypedDict):
     # Classification Values
     categorical_accuracy: Union[List[float], None]
     val_categorical_accuracy: Union[List[float], None]
+    binary_accuracy: Union[List[float], None]
+    val_binary_accuracy: Union[List[float], None]
 
 
 

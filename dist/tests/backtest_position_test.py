@@ -118,7 +118,6 @@ class BacktestPositionTestCase(unittest.TestCase):
         self.assertEqual(p.points[-1], 0.9)
 
         # Check the counters
-        self.assertEqual(p.successful_num, 1)
         self.assertEqual(p.long_num, 1)
         self.assertEqual(p.successful_long_num, 1)
         self.assertEqual(p.short_num, 0)
@@ -166,7 +165,6 @@ class BacktestPositionTestCase(unittest.TestCase):
         self.assertEqual(p.points[-1], -1.1)
 
         # Check the counters
-        self.assertEqual(p.successful_num, 0)
         self.assertEqual(p.long_num, 1)
         self.assertEqual(p.successful_long_num, 0)
         self.assertEqual(p.short_num, 0)
@@ -223,7 +221,6 @@ class BacktestPositionTestCase(unittest.TestCase):
 
 
         # Check the counters
-        self.assertEqual(p.successful_num, 1)
         self.assertEqual(p.long_num, 0)
         self.assertEqual(p.successful_long_num, 0)
         self.assertEqual(p.short_num, 1)
@@ -269,7 +266,6 @@ class BacktestPositionTestCase(unittest.TestCase):
         self.assertEqual(p.points[-1], -4.28)
 
         # Check the counters
-        self.assertEqual(p.successful_num, 0)
         self.assertEqual(p.long_num, 0)
         self.assertEqual(p.successful_long_num, 0)
         self.assertEqual(p.short_num, 1)
@@ -331,10 +327,13 @@ class BacktestPositionTestCase(unittest.TestCase):
         perf = p.get_performance()
         self.assertEqual(perf['points'], 0.5)
         self.assertEqual(perf['points_hist'][-1], 0.5)
+        self.assertIsInstance(perf['points_median'], (float, int))
         self.assertEqual(len(perf['points_hist']), 5 + 1)
         self.assertEqual(len(perf['positions']), 5)
         self.assertEqual(perf['long_num'], 3)
         self.assertEqual(perf['short_num'], 2)
+        self.assertEqual(perf['long_outcome_num'], 3)
+        self.assertEqual(perf['short_outcome_num'], 2)
         self.assertEqual(perf['long_acc'], 66.67)
         self.assertEqual(perf['short_acc'], 50)
         self.assertEqual(perf['general_acc'], 60)

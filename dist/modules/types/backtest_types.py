@@ -49,8 +49,9 @@ class IBacktestPosition(TypedDict):
 # containing all the details.
 class IBacktestPerformance(TypedDict):
     # Points
-    points: float            # Total Points Accumulated
-    points_hist: List[float] # Historical fluctuation of points
+    points: float               # Total Points Accumulated
+    points_hist: List[float]    # Historical fluctuation of points
+    points_median: float        # The median of the points collected during the backtest
 
     # Positions List
     positions: List[IBacktestPosition]
@@ -58,6 +59,10 @@ class IBacktestPerformance(TypedDict):
     # Counts
     long_num: int     # Number of closed long positions
     short_num: int    # Number of closed short positions
+
+    # Outcome Counts
+    long_outcome_num: int   # Number of price increase outcomes
+    short_outcome_num: int  # Number of price decrease outcomes
 
     # Accuracy
     long_acc: float     # Longs Accuracy

@@ -1,6 +1,6 @@
-# PREDICTION BACKTESTING v0.1.0
+# EPOCH BUILDER v0.1.0
 
-Plutus' Prediction Backtesting is a project designed to experiment with different Prediction Models in order to optimize profits.
+The Epoch Builder is a cluster of machines designed to train and evaluate many Prediction Models. It also outputs an Epoch File that can be installed in Epoca's Platform.
 
 
 #
@@ -21,7 +21,7 @@ The dependencies are located in the **requirements.txt** file and can be install
 ## Structure
 
 ```
-prediction-backtesting
+epoch-builder
     │
     backtest_assets/
     ├───configurations/

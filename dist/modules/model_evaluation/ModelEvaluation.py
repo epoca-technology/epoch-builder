@@ -1,6 +1,6 @@
 from typing import Union, List
 from pandas import DataFrame
-from numpy import mean, median
+from numpy import mean
 from tqdm import tqdm
 from modules.types import IModel, IPrediction, IBacktestPerformance, IModelEvaluation
 from modules.utils.Utils import Utils
@@ -10,7 +10,7 @@ from modules.model.RegressionModel import RegressionModel
 from modules.model.ClassificationModel import ClassificationModel
 from modules.model.ModelFactory import ModelFactory
 from modules.backtest.Position import Position
-from modules.model_evaluation.EarlyStopping import EarlyStopping
+from modules.model_evaluation.ModelEvaluationEarlyStopping import ModelEvaluationEarlyStopping
 
 
 
@@ -49,8 +49,6 @@ def evaluate(model_config: IModel, price_change_requirement: float, progress_bar
     increase_successful: List[float] = []
     decrease: List[float] = []
     decrease_successful: List[float] = []
-    increase_outcomes: int = 0
-    decrease_outcomes: int = 0
 
     # Init the progress bar
     progress_bar = tqdm(bar_format='{l_bar}{bar:20}{r_bar}{bar:-20b}', total=df.shape[0])
@@ -69,7 +67,7 @@ def evaluate(model_config: IModel, price_change_requirement: float, progress_bar
     # Early Stopping
     # Init the values that will help evaluate if the model's evaluation should continue 
     # or be aborted in order to save time and resources.
-    es: EarlyStopping = EarlyStopping(df.shape[0])
+    es: ModelEvaluationEarlyStopping = ModelEvaluationEarlyStopping(df.shape[0])
     es_motive: Union[str, None] = None
 
     # Iterate over each 1 minute candlestick from the test dataset
@@ -97,9 +95,6 @@ def evaluate(model_config: IModel, price_change_requirement: float, progress_bar
                     # Check if the prediction was correct
                     if position.positions[-1]["o"]:
                         increase_successful.append(metadata_value)
-                        increase_outcomes += 1
-                    else:
-                        decrease_outcomes += 1
 
                 # Handle a decrease prediction
                 else:
@@ -109,9 +104,6 @@ def evaluate(model_config: IModel, price_change_requirement: float, progress_bar
                     # Check if the prediction was correct
                     if position.positions[-1]["o"]:
                         decrease_successful.append(metadata_value)
-                        decrease_outcomes += 1
-                    else:
-                        increase_outcomes += 1
 
                 # Enable the idle state
                 idle_until = Utils.add_minutes(candlestick['ct'], Epoch.IDLE_MINUTES_ON_POSITION_CLOSE)
@@ -165,8 +157,6 @@ def evaluate(model_config: IModel, price_change_requirement: float, progress_bar
         increase_successful=increase_successful,
         decrease=decrease,
         decrease_successful=decrease_successful,
-        increase_outcomes=increase_outcomes,
-        decrease_outcomes=decrease_outcomes,
         performance=performance
     )
 
@@ -249,9 +239,7 @@ def _build_evaluation_result(
     increase: List[float], 
     increase_successful: List[float], 
     decrease: List[float], 
-    decrease_successful: List[float], 
-    increase_outcomes: int,
-    decrease_outcomes: int,
+    decrease_successful: List[float],
     performance: IBacktestPerformance, 
 ) -> IModelEvaluation:
     """Outputs the model's evaluation result based on all the collected data.
@@ -269,10 +257,6 @@ def _build_evaluation_result(
             The list of decrease predictions' payloads.
         decrease_successful: List[float]
             The list of deccessful increase predictions' payloads.
-        increase_outcomes: int
-            The number of real increase outcomes.
-        decrease_outcomes: int
-            The number of real decrease outcomes.
         performance: IBacktestPerformance
             Performance details provided by the Position Class
 
@@ -295,7 +279,7 @@ def _build_evaluation_result(
         "positions": performance["positions"],
 
         # Points Median
-        "points_median": median(performance["points_hist"]),
+        "points_median": performance["points_median"],
 
         # Prediction counts
         "increase_num": performance["long_num"],
@@ -327,6 +311,6 @@ def _build_evaluation_result(
         "decrease_successful_mean": mean(decrease_successful if decrease_successful_num > 0 else [0]),
 
         # Outcomes
-        "increase_outcomes": increase_outcomes,
-        "decrease_outcomes": decrease_outcomes,
+        "increase_outcomes": performance["long_outcome_num"],
+        "decrease_outcomes": performance["short_outcome_num"],
     }
