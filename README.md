@@ -1,4 +1,4 @@
-# EPOCH BUILDER v0.1.0
+# EPOCH BUILDER v0.2.0
 
 The Epoch Builder is a cluster of machines designed to train and evaluate many Prediction Models. It also outputs an Epoch File that can be installed in Epoca's Platform.
 
