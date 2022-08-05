@@ -13,11 +13,11 @@ from modules.keras_models.NeuralNetworks.validator import validate
 #####################
 
 
-# C_UNIT_TEST 
+# KC_UNIT_TEST 
 # 1 units:       Dense_1
 # 1 activations: Dense_1
-def C_UNIT_TEST(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_UNIT_TEST", units=1, activations=1)
+def KC_UNIT_TEST(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_UNIT_TEST", units=1, activations=1)
     return Sequential([
         Input(shape=(m["features_num"],), name="Input_1"),
         Dense(m["units"][0], activation=m["activations"][0], name="Dense_1"),
@@ -39,11 +39,11 @@ def C_UNIT_TEST(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification DNN Stack 1
-# C_DNN_S1
+# KC_DNN_S1
 # 1 units:       Dense_1
 # 1 activations: Dense_1
-def C_DNN_S1(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_DNN_S1", units=1, activations=1)
+def KC_DNN_S1(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_DNN_S1", units=1, activations=1)
     return Sequential([
         Input(shape=(m["features_num"],), name="Input_1"),
         Dense(m["units"][0], activation=m["activations"][0], name="Dense_1"),
@@ -54,11 +54,11 @@ def C_DNN_S1(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification DNN Stack 2
-# C_DNN_S2 
+# KC_DNN_S2 
 # 2 units:          Dense_1, Dense_2
 # 2 activations:    Dense_1, Dense_2
-def C_DNN_S2(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_DNN_S2", units=2, activations=2)
+def KC_DNN_S2(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_DNN_S2", units=2, activations=2)
     return Sequential([
         Input(shape=(m["features_num"],), name="Input_1"),
         Dense(m["units"][0], activation=m["activations"][0], name="Dense_1"),
@@ -70,11 +70,11 @@ def C_DNN_S2(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification DNN Stack 3
-# C_DNN_S3
+# KC_DNN_S3
 # 3 units:          Dense_1, Dense_2, Dense_3
 # 3 activations:    Dense_1, Dense_2, Dense_3
-def C_DNN_S3(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_DNN_S3", units=3, activations=3)
+def KC_DNN_S3(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_DNN_S3", units=3, activations=3)
     return Sequential([
         Input(shape=(m["features_num"],), name="Input_1"),
         Dense(m["units"][0], activation=m["activations"][0], name="Dense_1"),
@@ -87,11 +87,11 @@ def C_DNN_S3(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification DNN Stack 4
-# C_DNN_S4
+# KC_DNN_S4
 # 4 units:          Dense_1, Dense_2, Dense_3, Dense_4
 # 4 activations:    Dense_1, Dense_2, Dense_3, Dense_4
-def C_DNN_S4(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_DNN_S4", units=4, activations=4)
+def KC_DNN_S4(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_DNN_S4", units=4, activations=4)
     return Sequential([
         Input(shape=(m["features_num"],), name="Input_1"),
         Dense(m["units"][0], activation=m["activations"][0], name="Dense_1"),
@@ -105,11 +105,11 @@ def C_DNN_S4(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification DNN Stack 5
-# C_DNN_S5
+# KC_DNN_S5
 # 5 units:          Dense_1, Dense_2, Dense_3, Dense_4, Dense_5
 # 5 activations:    Dense_1, Dense_2, Dense_3, Dense_4, Dense_5
-def C_DNN_S5(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_DNN_S5", units=5, activations=5)
+def KC_DNN_S5(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_DNN_S5", units=5, activations=5)
     return Sequential([
         Input(shape=(m["features_num"],), name="Input_1"),
         Dense(m["units"][0], activation=m["activations"][0], name="Dense_1"),
@@ -138,13 +138,13 @@ def C_DNN_S5(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification CNN Stack 1
-# C_CNN_S1
+# KC_CNN_S1
 # 1 filters:        Conv1D_1
 # 1 kernel_sizes:   Conv1D_1
 # 1 units:          Dense_1
 # 2 activations:    Conv1D_1, Dense_1
-def C_CNN_S1(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_CNN_S1", filters=1, kernel_sizes=1, units=1, activations=2)
+def KC_CNN_S1(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_CNN_S1", filters=1, kernel_sizes=1, units=1, activations=2)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -157,14 +157,14 @@ def C_CNN_S1(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification CNN Stack 1 with MaxPooling
-# C_CNN_S1_MP
+# KC_CNN_S1_MP
 # 1 filters:        Conv1D_1
 # 1 kernel_sizes:   Conv1D_1
 # 1 pool_sizes:     MaxPooling1D_1
 # 1 units:          Dense_1
 # 2 activations:    Conv1D_1, Dense_1
-def C_CNN_S1_MP(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_CNN_S1_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=1, activations=2)
+def KC_CNN_S1_MP(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_CNN_S1_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=1, activations=2)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -181,13 +181,13 @@ def C_CNN_S1_MP(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification CNN Stack 2
-# C_CNN_S2
+# KC_CNN_S2
 # 1 filters:        Conv1D_1, Conv1D_2
 # 1 kernel_sizes:   Conv1D_1
 # 2 units:          Dense_1, Dense_2
 # 3 activations:    Conv1D_1, Dense_1, Dense_2
-def C_CNN_S2(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_CNN_S2", filters=1, kernel_sizes=1, units=2, activations=3)
+def KC_CNN_S2(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_CNN_S2", filters=1, kernel_sizes=1, units=2, activations=3)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -201,14 +201,14 @@ def C_CNN_S2(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification CNN Stack 2 with MaxPooling
-# C_CNN_S2_MP
+# KC_CNN_S2_MP
 # 1 filters:        Conv1D_1
 # 1 kernel_sizes:   Conv1D_1
 # 1 pool_sizes:     MaxPooling1D_1
 # 2 units:          Dense_1, Dense_2
 # 3 activations:    Conv1D_1, Dense_1, Dense_2
-def C_CNN_S2_MP(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_CNN_S2_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=2, activations=3)
+def KC_CNN_S2_MP(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_CNN_S2_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=2, activations=3)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -226,13 +226,13 @@ def C_CNN_S2_MP(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification CNN Stack 3
-# C_CNN_S3
+# KC_CNN_S3
 # 1 filters:        Conv1D_1
 # 1 kernel_sizes:   Conv1D_1
 # 3 units:          Dense_1, Dense_2, Dense_3
 # 4 activations:    Conv1D_1, Dense_1, Dense_2, Dense_3
-def C_CNN_S3(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_CNN_S3", filters=1, kernel_sizes=1, units=3, activations=4)
+def KC_CNN_S3(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_CNN_S3", filters=1, kernel_sizes=1, units=3, activations=4)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -248,14 +248,14 @@ def C_CNN_S3(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification CNN Stack 3 with MaxPooling
-# C_CNN_S3_MP
+# KC_CNN_S3_MP
 # 1 filters:        Conv1D_1
 # 1 kernel_sizes:   Conv1D_1
 # 1 pool_sizes:     MaxPooling1D_1
 # 3 units:          Dense_1, Dense_2, Dense_3
 # 4 activations:    Conv1D_1, Dense_1, Dense_2, Dense_3
-def C_CNN_S3_MP(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_CNN_S3_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=3, activations=4)
+def KC_CNN_S3_MP(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_CNN_S3_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=3, activations=4)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -273,13 +273,13 @@ def C_CNN_S3_MP(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification CNN Stack 4
-# C_CNN_S4
+# KC_CNN_S4
 # 1 filters:        Conv1D_1
 # 1 kernel_sizes:   Conv1D_1
 # 4 units:          Dense_1, Dense_2, Dense_3, Dense_4
 # 5 activations:    Conv1D_1, Dense_1, Dense_2, Dense_3, Dense_4
-def C_CNN_S4(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_CNN_S4", filters=1, kernel_sizes=1, units=4, activations=5)
+def KC_CNN_S4(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_CNN_S4", filters=1, kernel_sizes=1, units=4, activations=5)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -295,14 +295,14 @@ def C_CNN_S4(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification CNN Stack 4 with MaxPooling
-# C_CNN_S4_MP
+# KC_CNN_S4_MP
 # 1 filters:        Conv1D_1
 # 1 kernel_sizes:   Conv1D_1
 # 1 pool_sizes:     MaxPooling1D_1
 # 4 units:          Dense_1, Dense_2, Dense_3, Dense_4
 # 5 activations:    Conv1D_1, Dense_1, Dense_2, Dense_3, Dense_4
-def C_CNN_S4_MP(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_CNN_S4_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=4, activations=5)
+def KC_CNN_S4_MP(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_CNN_S4_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=4, activations=5)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -322,13 +322,13 @@ def C_CNN_S4_MP(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification CNN Stack 5
-# C_CNN_S5
+# KC_CNN_S5
 # 1 filters:        Conv1D_1
 # 1 kernel_sizes:   Conv1D_1
 # 5 units:          Dense_1, Dense_2, Dense_3, Dense_4, Dense_5
 # 6 activations:    Conv1D_1, Dense_1, Dense_2, Dense_3, Dense_4, Dense_5
-def C_CNN_S5(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_CNN_S5", filters=1, kernel_sizes=1, units=5, activations=6)
+def KC_CNN_S5(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_CNN_S5", filters=1, kernel_sizes=1, units=5, activations=6)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -346,14 +346,14 @@ def C_CNN_S5(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification CNN Stack 5 with MaxPooling
-# C_CNN_S5_MP
+# KC_CNN_S5_MP
 # 1 filters:        Conv1D_1
 # 1 kernel_sizes:   Conv1D_1
 # 1 pool_sizes:     MaxPooling1D_1
 # 5 units:          Dense_1, Dense_2, Dense_3, Dense_4, Dense_5
 # 6 activations:    Conv1D_1, Dense_1, Dense_2, Dense_3, Dense_4, Dense_5
-def C_CNN_S5_MP(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_CNN_S5_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=5, activations=6)
+def KC_CNN_S5_MP(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_CNN_S5_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=5, activations=6)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -385,10 +385,10 @@ def C_CNN_S5_MP(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification LSTM Stack 1
-# C_LSTM_S1
+# KC_LSTM_S1
 # 1 units: LSTM_1
-def C_LSTM_S1(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_LSTM_S1", units=1)
+def KC_LSTM_S1(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_LSTM_S1", units=1)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -400,10 +400,10 @@ def C_LSTM_S1(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification LSTM Stack 2
-# C_LSTM_S2
+# KC_LSTM_S2
 # 2 units: LSTM_1, LSTM_2
-def C_LSTM_S2(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_LSTM_S2", units=2)
+def KC_LSTM_S2(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_LSTM_S2", units=2)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -416,10 +416,10 @@ def C_LSTM_S2(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification LSTM Stack 3
-# C_LSTM_S3
+# KC_LSTM_S3
 # 3 units: LSTM_1, LSTM_2, LSTM_3
-def C_LSTM_S3(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_LSTM_S3", units=3)
+def KC_LSTM_S3(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_LSTM_S3", units=3)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -432,10 +432,10 @@ def C_LSTM_S3(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification LSTM Stack 4
-# C_LSTM_S4
+# KC_LSTM_S4
 # 4 units: LSTM_1, LSTM_2, LSTM_3, LSTM_4
-def C_LSTM_S4(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_LSTM_S4", units=4)
+def KC_LSTM_S4(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_LSTM_S4", units=4)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -450,10 +450,10 @@ def C_LSTM_S4(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification LSTM Stack 5
-# C_LSTM_S5
+# KC_LSTM_S5
 # 5 units: LSTM_1, LSTM_2, LSTM_3, LSTM_4, LSTM_5
-def C_LSTM_S5(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_LSTM_S5", units=5)
+def KC_LSTM_S5(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_LSTM_S5", units=5)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -484,13 +484,13 @@ def C_LSTM_S5(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification CLSTM Stack 1
-# C_CLSTM_S1
+# KC_CLSTM_S1
 # 1 filters:        Conv1D_1
 # 1 kernel_sizes:   Conv1D_1
 # 1 units:          LSTM_1
 # 1 activations:    Conv1D_1
-def C_CLSTM_S1(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_CLSTM_S1", filters=1, kernel_sizes=1, units=1, activations=1)
+def KC_CLSTM_S1(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_CLSTM_S1", filters=1, kernel_sizes=1, units=1, activations=1)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -502,14 +502,14 @@ def C_CLSTM_S1(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification CLSTM Stack 1 with MaxPooling
-# C_CLSTM_S1_MP
+# KC_CLSTM_S1_MP
 # 1 filters:        Conv1D_1
 # 1 kernel_sizes:   Conv1D_1
 # 1 pool_sizes:     MaxPooling1D_1
 # 1 units:          LSTM_1
 # 1 activations:    Conv1D_1
-def C_CLSTM_S1_MP(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_CLSTM_S1_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=1, activations=1)
+def KC_CLSTM_S1_MP(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_CLSTM_S1_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=1, activations=1)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -524,13 +524,13 @@ def C_CLSTM_S1_MP(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification CLSTM Stack 2
-# C_CLSTM_S2
+# KC_CLSTM_S2
 # 1 filters:        Conv1D_1
 # 1 kernel_sizes:   Conv1D_1
 # 2 units:          LSTM_1, LSTM_2
 # 1 activations:    Conv1D_1
-def C_CLSTM_S2(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_CLSTM_S2", filters=1, kernel_sizes=1, units=2, activations=1)
+def KC_CLSTM_S2(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_CLSTM_S2", filters=1, kernel_sizes=1, units=2, activations=1)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -542,14 +542,14 @@ def C_CLSTM_S2(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification CLSTM Stack 2 with MaxPooling
-# C_CLSTM_S2_MP
+# KC_CLSTM_S2_MP
 # 1 filters:        Conv1D_1
 # 1 kernel_sizes:   Conv1D_1
 # 1 pool_sizes:     MaxPooling1D_1
 # 2 units:          LSTM_1, LSTM_2
 # 1 activations:    Conv1D_1
-def C_CLSTM_S2_MP(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_CLSTM_S2_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=2, activations=1)
+def KC_CLSTM_S2_MP(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_CLSTM_S2_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=2, activations=1)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -565,13 +565,13 @@ def C_CLSTM_S2_MP(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification CLSTM Stack 3
-# C_CLSTM_S3
+# KC_CLSTM_S3
 # 1 filters:        Conv1D_1
 # 1 kernel_sizes:   Conv1D_1
 # 3 units:          LSTM_1, LSTM_2, LSTM_3
 # 1 activations:    Conv1D_1
-def C_CLSTM_S3(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_CLSTM_S3", filters=1, kernel_sizes=1, units=3, activations=1)
+def KC_CLSTM_S3(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_CLSTM_S3", filters=1, kernel_sizes=1, units=3, activations=1)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -584,14 +584,14 @@ def C_CLSTM_S3(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification CLSTM Stack 3 with MaxPooling
-# C_CLSTM_S3_MP
+# KC_CLSTM_S3_MP
 # 1 filters:        Conv1D_1
 # 1 kernel_sizes:   Conv1D_1
 # 1 pool_sizes:     MaxPooling1D_1
 # 3 units:          LSTM_1, LSTM_2, LSTM_3
 # 1 activations:    Conv1D_1
-def C_CLSTM_S3_MP(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_CLSTM_S3_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=3, activations=1)
+def KC_CLSTM_S3_MP(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_CLSTM_S3_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=3, activations=1)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -608,13 +608,13 @@ def C_CLSTM_S3_MP(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification CLSTM Stack 4
-# C_CLSTM_S4
+# KC_CLSTM_S4
 # 1 filters:        Conv1D_1
 # 1 kernel_sizes:   Conv1D_1
 # 4 units:          LSTM_1, LSTM_2, LSTM_3, LSTM_4
 # 1 activations:    Conv1D_1
-def C_CLSTM_S4(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_CLSTM_S4", filters=1, kernel_sizes=1, units=4, activations=1)
+def KC_CLSTM_S4(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_CLSTM_S4", filters=1, kernel_sizes=1, units=4, activations=1)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -628,14 +628,14 @@ def C_CLSTM_S4(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification CLSTM Stack 4 with MaxPooling
-# C_CLSTM_S4_MP
+# KC_CLSTM_S4_MP
 # 1 filters:        Conv1D_1
 # 1 kernel_sizes:   Conv1D_1
 # 1 pool_sizes:     MaxPooling1D_1
 # 4 units:          LSTM_1, LSTM_2, LSTM_3, LSTM_4
 # 1 activations:    Conv1D_1
-def C_CLSTM_S4_MP(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_CLSTM_S4_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=4, activations=1)
+def KC_CLSTM_S4_MP(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_CLSTM_S4_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=4, activations=1)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -653,13 +653,13 @@ def C_CLSTM_S4_MP(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification CLSTM Stack 5
-# C_CLSTM_S5
+# KC_CLSTM_S5
 # 1 filters:        Conv1D_1
 # 1 kernel_sizes:   Conv1D_1
 # 5 units:          LSTM_1, LSTM_2, LSTM_3, LSTM_4, LSTM_5
 # 1 activations:    Conv1D_1
-def C_CLSTM_S5(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_CLSTM_S5", filters=1, kernel_sizes=1, units=5, activations=1)
+def KC_CLSTM_S5(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_CLSTM_S5", filters=1, kernel_sizes=1, units=5, activations=1)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),
@@ -675,14 +675,14 @@ def C_CLSTM_S5(m: IKerasModelConfig) -> Sequential:
 
 
 # Classification CLSTM Stack 5 with MaxPooling
-# C_CLSTM_S5_MP
+# KC_CLSTM_S5_MP
 # 1 filters:        Conv1D_1
 # 1 kernel_sizes:   Conv1D_1
 # 1 pool_sizes:     MaxPooling1D_1
 # 5 units:          LSTM_1, LSTM_2, LSTM_3, LSTM_4, LSTM_5
 # 1 activations:    Conv1D_1
-def C_CLSTM_S5_MP(m: IKerasModelConfig) -> Sequential:
-    validate(m, "C_CLSTM_S5_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=5, activations=1)
+def KC_CLSTM_S5_MP(m: IKerasModelConfig) -> Sequential:
+    validate(m, "KC_CLSTM_S5_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=5, activations=1)
     return Sequential([
         Input(shape=(m["features_num"],1), name="Input_1"),
         Reshape((m["features_num"],1,), name="Reshape_1"),

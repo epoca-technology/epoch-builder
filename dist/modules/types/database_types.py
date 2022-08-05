@@ -22,10 +22,10 @@ class IDatabaseConnectionConfig(TypedDict):
 
 
 # Database Table Names Input & Output
-IDatabaseTableNameInput = Literal["classification_predictions", "regression_predictions", "technical_analysis"]
+IDatabaseTableNameInput = Literal["features", "predictions", "technical_analysis"]
 IDatabaseTableName = Literal[
-    "classification_predictions", "regression_predictions", "technical_analysis",
-    "test_classification_predictions", "test_regression_predictions", "test_technical_analysis"
+    "features", "predictions", "technical_analysis",
+    "test_features", "test_predictions", "test_technical_analysis"
 ]
 
 

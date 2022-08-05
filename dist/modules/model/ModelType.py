@@ -8,8 +8,9 @@ from modules.types import IModelType, ITrainableModelType, IModelIDPrefix, IPref
 
 # Model Types
 MODEL_TYPES: List[IModelType] = [
-    "ArimaModel", "RegressionModel", "ClassificationModel", "XGBRegressionModel", 
-    "XGBClassificationModel", "ConsensusModel"
+    "KerasRegressionModel", "KerasClassificationModel", 
+    "XGBRegressionModel", "XGBClassificationModel", 
+    "ConsensusModel"
 ]
 
 
@@ -22,7 +23,7 @@ TRAINABLE_CLASSIFICATION_MODEL_TYPES: List[ITrainableModelType] = ["keras_classi
 
 
 # Model ID Prefixes
-MODEL_ID_PREFIXES: List[IModelIDPrefix] = ["A", "R_", "C_", "XGBR_", "XGBC_", "CON_"]
+MODEL_ID_PREFIXES: List[IModelIDPrefix] = ["KR_", "KC_", "XGBR_", "XGBC_", "CON_"]
 
 
 
@@ -61,17 +62,13 @@ def validate_id(model_type: IModelType, id: str) -> None:
     # Retrieve the prefix
     prefix: IModelIDPrefix = get_prefix(id)
 
-    # Validate an ArimaModel
-    if model_type == "ArimaModel" and prefix != "A":
-        raise ValueError(f"The ArimaModel ID contains an invalid prefix: {prefix}")
-
-    # Validate a RegressionModel
-    elif model_type == "RegressionModel" and prefix != "R_":
-        raise ValueError(f"The RegressionModel ID contains an invalid prefix: {prefix}")
+    # Validate a KerasRegressionModel
+    if model_type == "KerasRegressionModel" and prefix != "KR_":
+        raise ValueError(f"The KerasRegressionModel ID contains an invalid prefix: {prefix}")
 
     # Validate a ClassificationModel
-    elif model_type == "ClassificationModel" and prefix != "C_":
-        raise ValueError(f"The ClassificationModel ID contains an invalid prefix: {prefix}")
+    elif model_type == "KerasClassificationModel" and prefix != "KC_":
+        raise ValueError(f"The KerasClassificationModel ID contains an invalid prefix: {prefix}")
 
     # Validate a XGBRegressionModel
     elif model_type == "XGBRegressionModel" and prefix != "XGBR_":
@@ -85,32 +82,6 @@ def validate_id(model_type: IModelType, id: str) -> None:
     elif model_type == "ConsensusModel" and prefix != "CON_":
         raise ValueError(f"The ConsensusModel ID contains an invalid prefix: {prefix}")
 
-
-
-
-
-
-
-## Helpers ##
-
-
-
-def is_regression(model_id: IPrefixOrID) -> bool:
-    """Checks if a given model id belongs to any of the supported
-    regressions.
-
-    Args:
-        model_id: IPrefixOrID
-            The id of the model.
-
-    Returns:
-        bool
-    """
-    # Retrieve the prefix
-    prefix: IModelIDPrefix = get_prefix(model_id)
-
-    # Check if it is a regression
-    return prefix == "A" or prefix == "R_" or prefix == "XGBR_"
 
 
 
@@ -147,14 +118,11 @@ def get_model_type(model_id: IPrefixOrID) -> IModelType:
     prefix: IModelIDPrefix = get_prefix(model_id)
 
     # Return the model type based on the prefix
-    if prefix == "A":
-        return "ArimaModel"
+    if prefix == "KR_":
+        return "KerasRegressionModel"
 
-    elif prefix == "R_":
-        return "RegressionModel"
-
-    elif prefix == "C_":
-        return "ClassificationModel"
+    elif prefix == "KC_":
+        return "KerasClassificationModel"
 
     elif prefix == "XGBR_":
         return "XGBRegressionModel"
@@ -190,11 +158,11 @@ def get_trainable_model_type(model_id: IPrefixOrID) -> ITrainableModelType:
     prefix: IModelIDPrefix = get_prefix(model_id)
 
     # Check if it is a KerasRegression
-    if prefix == "R_":
+    if prefix == "KR_":
         return "keras_regression"
 
     # Check if it is a KerasClassification
-    elif prefix == "C_":
+    elif prefix == "KC_":
         return "keras_classification"
 
     # Check if it is a XGBRegression
@@ -228,9 +196,9 @@ def get_prefix_by_trainable_model_type(model_type: ITrainableModelType) -> IMode
             If no prefix is found.
     """
     if model_type == "keras_regression":
-        return "R_"
+        return "KR_"
     elif model_type == "keras_classification":
-        return "C_"
+        return "KC_"
     elif model_type == "xgb_regression":
         return "XGBR_"
     elif model_type == "xgb_classification":
@@ -260,17 +228,13 @@ def get_prefix(prefix_or_id: IPrefixOrID) -> IModelIDPrefix:
     # Init the length of the prefix or id
     str_len: int = len(prefix_or_id)
 
-    # Check if it is an ArimaModel
-    if str_len >= 1 and prefix_or_id[0] == "A":
-        return "A"
-
-    # Check if it is a RegressionModel
-    elif str_len >= 2 and prefix_or_id[0:2] == "R_":
-        return "R_"
+    # Check if it is a KerasRegressionModel
+    if str_len >= 3 and prefix_or_id[0:3] == "KR_":
+        return "KR_"
 
     # Check if it is a ClassificationModel
-    elif str_len >= 2 and prefix_or_id[0:2] == "C_":
-        return "C_"
+    elif str_len >= 3 and prefix_or_id[0:3] == "KC_":
+        return "KC_"
 
     # Check if it is a XGBRegressionModel
     elif str_len >= 5 and prefix_or_id[0:5] == "XGBR_":

@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 from inquirer import Text, prompt
 from modules.epoch.Epoch import Epoch
 from modules.regression_selection.RegressionSelection import RegressionSelection
@@ -11,14 +11,12 @@ Epoch.init()
 
 # Configuration Input
 print("REGRESSION SELECTION\n")
-limit_answer: Dict[str, str] = prompt([Text("value", "Number of models to be selected")])
-if not limit_answer["value"].isdigit():
-    raise ValueError("The number of models to be selected must be a valid integer.")
-limit: int = int(limit_answer["value"])
+selected_models: Dict[str, str] = prompt([Text("ids", "Enter the list of regression ids")])
+model_ids: List[str] = selected_models["ids"].split(",")
 
 
 
 # Initialize the instance and execute the selection
-rs: RegressionSelection = RegressionSelection(limit)
+rs: RegressionSelection = RegressionSelection(model_ids)
 rs.run()
 print("\n\nREGRESSION SELECTION COMPLETED")

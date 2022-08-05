@@ -34,7 +34,7 @@ class Epoch:
         END: int
             The range of the Epoch. These values are used for:
             1) Calculate the training evaluation range (epoch_width * 0.15)
-            2) Calculate the backtest range (epoch_width * 0.2)
+            2) Calculate the backtest range (epoch_width * 0.3)
         TRAINING_EVALUATION_START: int
         TRAINING_EVALUATION_END: int
             The training evaluation range is used for the following:
@@ -48,7 +48,7 @@ class Epoch:
             The backtest range is used for the following:
             1) Backtest shortlisted ClassificationModels
             2) Backtest generated ConsensusModels
-            backtest_range = epoch_width * 0.2
+            backtest_range = epoch_width * 0.3
         HIGHEST_PRICE: float
         LOWEST_PRICE: float
             Highest and lowest price within the Epoch. These values are stored as 
@@ -184,7 +184,7 @@ class Epoch:
         start: int = int(prediction_df.iloc[0]["ot"])
         end: int = int(prediction_df.iloc[-1]["ct"])
         training_evaluation_start, training_evaluation_end = Epoch._calculate_date_range(prediction_df, ceil(epoch_width_days * 0.15))
-        backtest_start, backtest_end = Epoch._calculate_date_range(prediction_df, ceil(epoch_width_days * 0.2))
+        backtest_start, backtest_end = Epoch._calculate_date_range(prediction_df, ceil(epoch_width_days * 0.3))
 
         # Check if the normalized prediction candlesticks csv needs to be created
         print("3/10) Creating the Normalized Prediction Candlesticks CSV...")

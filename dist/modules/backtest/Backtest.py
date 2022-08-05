@@ -1,16 +1,11 @@
-from typing import List, Union
+from typing import List
 from tqdm import tqdm
 from modules.types import IModel, IPrediction, IBacktestConfig, IBacktestPerformance, IBacktestResult
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
 from modules.backtest.Position import Position
-from modules.model.ArimaModel import ArimaModel
-from modules.model.RegressionModel import RegressionModel
-from modules.model.ClassificationModel import ClassificationModel
-from modules.model.ConsensusModel import ConsensusModel
-from modules.model.ModelFactory import ModelFactory
-from modules.model.ModelType import is_regression
+from modules.model.ModelFactory import ModelFactory, Model
 
 
 
@@ -47,7 +42,7 @@ class Backtest:
                 The number of minutes that the model will be idle when a position is closed.
 
         Models:
-            models: List[Union[ArimaModel, RegressionModel, ClassificationModel, ConsensusModel]]
+            models: List[Model]
                 The list of models that will be backtested
             results: List[IBacktestResult]
                 The list of results by model. This list will be sorted by points prior to outputting it
@@ -81,25 +76,16 @@ class Backtest:
         self.description: str = config["description"]
 
         # Initialize the models to be tested
-        self.models: List[Union[ArimaModel, RegressionModel, ClassificationModel, ConsensusModel]] = [
-            ModelFactory(m) for m in config["models"]
-        ]
+        self.models: List[Model] = [ModelFactory(m, True) for m in config["models"]]
 
         # Initialize the results
         self.results: List[IBacktestResult] = []
 
         # Candlesticks Initialization
-        # Initialize the candlesticks based on the type of models being trained. If there is a regression
-        # within the models, it will use the Training Evaluation Range. Otherwise, it will make use of 
-        # the Backtest Range.
+        # Initialize the candlesticks based on the epoch's configuration.
         # IMPORTANT: Candlesticks should not be initialized when running on test mode.
         if not self.test_mode:
-            lookbacks: List[int] = [m.get_lookback() for m in self.models]
-            regressions: List[IModel] = list(filter(lambda x: is_regression(x["id"]), config["models"]))
-            if len(regressions) > 0:
-                Candlestick.init(max(lookbacks), Epoch.TRAINING_EVALUATION_START, Epoch.TRAINING_EVALUATION_END)
-            else:
-                Candlestick.init(max(lookbacks), Epoch.BACKTEST_START, Epoch.BACKTEST_END)
+            Candlestick.init(max([m.get_lookback() for m in self.models]), Epoch.BACKTEST_START, Epoch.BACKTEST_END)
         
         # Init the start and end
         self.start: int = int(Candlestick.DF.iloc[0]["ot"])

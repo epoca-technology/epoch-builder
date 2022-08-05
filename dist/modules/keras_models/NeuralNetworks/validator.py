@@ -1,6 +1,6 @@
 from typing import Union, List
-from modules.types import IKerasModelConfig
-
+from modules.types import IKerasModelConfig, ITrainableModelType
+from modules.model.ModelType import get_trainable_model_type
 
 
 
@@ -47,16 +47,19 @@ def validate(
     if config["name"] != name:
         raise ValueError(f"Model Name Missmatch. {config['name']} != {name}")
 
+    # Retrieve the trainable model type
+    model_type: ITrainableModelType = get_trainable_model_type(config["name"])
+
     # Make sure the autoregressive, lookback and predictions have been provided in case of a regression
-    if config["name"][0:2] == "R_" and (not isinstance(config.get("autoregressive"), bool) \
+    if model_type == "keras_regression" and (not isinstance(config.get("autoregressive"), bool) \
         or not isinstance(config.get("lookback"), int) or not isinstance(config.get("predictions"), int)):
         print(config.get("autoregressive"))
         print(config.get("lookback"))
         print(config.get("predictions"))
-        raise ValueError(f"The provided regression config (autoregressive, lookback and/or predictions) are invalid.")
+        raise ValueError(f"The provided keras regression config (autoregressive, lookback and/or predictions) are invalid.")
 
     # Make sure the number of features has been provided in case of a classification
-    if config["name"][0:2] == "C_" and not isinstance(config.get("features_num"), int):
+    if model_type == "keras_classification" and not isinstance(config.get("features_num"), int):
         raise ValueError(f"The provided features_num is not a valid integer. ({str(config.get('features_num'))})")
 
     # Validate the units
@@ -76,9 +79,6 @@ def validate(
 
     # Validate the required pool_sizes
     _validate_config_param(pool_sizes, "pool_sizes", config.get("pool_sizes"))
-
-
-
 
 
 

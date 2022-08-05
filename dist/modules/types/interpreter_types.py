@@ -8,10 +8,10 @@ from typing import TypedDict
 
 # Percent Change Interpreter Configuration
 # The configuration used in order to interpret the model's predictions based on the 
-# percentual change from the first to the last prediction.
+# percentual change from the first to the last item.
 class IPercentChangeInterpreterConfig(TypedDict):
-    long: float
-    short: float
+    min_increase_change: float
+    min_decrease_change: float
 
 
 
@@ -29,7 +29,8 @@ class IPercentChangeInterpreterConfig(TypedDict):
 # The configuration used in order to interpret the model's predictions based on the 
 # up and down probability.
 class IProbabilityInterpreterConfig(TypedDict):
-    min_probability: float
+    min_increase_probability: float
+    min_decrease_probability: float
 
 
 

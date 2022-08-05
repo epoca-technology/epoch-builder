@@ -8,10 +8,8 @@ from modules.types import IKerasModelConfig, IKerasHyperparamsLoss, IKerasHyperp
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.keras_models.KerasModel import KerasModel
-from modules.model.RegressionModel import RegressionModel
 from modules.model.ModelType import get_prefix_by_trainable_model_type
-from modules.hyperparams.RegressionNeuralNetworks import REGRESSION_NEURAL_NETWORKS
-from modules.hyperparams.ClassificationNeuralNetworks import CLASSIFICATION_NEURAL_NETWORKS
+from modules.hyperparams.KerasNetworks import REGRESSION_NETWORKS, CLASSIFICATION_NETWORKS
 
 
 
@@ -28,6 +26,10 @@ class KerasHyperparams:
         REGRESSION_BATCH_SIZE: int
         CLASSIFICATION_BATCH_SIZE: int
             The maximum number of models per batch that will be used if none was provided.
+        DEFAULT_LOOKBACK
+            The number of candlesticks the regression needs to look into the past in order to generate a prediction
+        DEFAULT_PREDICTIONS
+            The number of predictions that will be generated (Only used by Regressions)
         OPTIMIZERS: List[IKerasOptimizer]
             The list of optimizers that will be used when compiling models.
         REGRESSION_LOSS_FUNCTIONS: List[IKerasHyperparamsLoss]
@@ -46,21 +48,31 @@ class KerasHyperparams:
             The list of networks supported by the model type.
         batch_size: int
             The max number of models that will go on each batch.
+        lookback: Union[int, None]
+            The number of candlesticks the regression needs to look into the past in order to generate a prediction
+        predictions: Union[int, None]
+            The number of predictions that will be generated (Only used by Regressions)
         training_data_id: Union[str, None]
             The identifier of the classification training data.
 
     """
-    # Default Batch Size
+    # Default Batch Sizes
     REGRESSION_BATCH_SIZE: int = 30
     CLASSIFICATION_BATCH_SIZE: int = 60
+
+    # The number of candlesticks the regression needs to look into the past in order to generate a prediction
+    DEFAULT_LOOKBACK: int = 100
+
+    # The number of predictions that will be generated (Only used by Regressions)
+    DEFAULT_PREDICTIONS: int = 30
 
     # Optimizers
     OPTIMIZERS: List[IKerasOptimizer] = [ "adam", "rmsprop" ]
 
     # Regression Loss Functions
     REGRESSION_LOSS_FUNCTIONS: List[IKerasHyperparamsLoss] = [ 
-        { "name": "mean_absolute_error", "metric": None },
-        #{ "name": "mean_squared_error", "metric": None }
+        { "name": "mean_absolute_error", "metric": "mean_squared_error" },
+        { "name": "mean_squared_error", "metric": "mean_absolute_error" }
     ]
 
     # Classification Loss Functions
@@ -89,6 +101,8 @@ class KerasHyperparams:
         self, 
         model_type: ITrainableModelType, 
         batch_size: int, 
+        lookback: Union[int, None] = None,
+        predictions: Union[int, None] = None,
         training_data_id: Union[str, None] = None
     ):
         """Initializes the KerasHyperparams instance based on the provided configuration.
@@ -98,6 +112,10 @@ class KerasHyperparams:
                 The type of model which hyperparams will be generated for.
             batch_size: int
                 The number of models that will go on each batch.
+            lookback: Union[int, None]
+                The number of candlesticks the regression needs to look into the past in order to generate a prediction
+            predictions: Union[int, None]
+                The number of predictions that will be generated (Only used by Regressions)
             training_data_id: Union[str, None]
                 The training data id that will be included in the model configurations. Notice
                 that this value is only used in classification models.
@@ -106,11 +124,16 @@ class KerasHyperparams:
         self.model_type: ITrainableModelType = model_type
 
         # Init the networks
-        self.networks = REGRESSION_NEURAL_NETWORKS if self.model_type == "keras_regression" \
-            else CLASSIFICATION_NEURAL_NETWORKS
+        self.networks = REGRESSION_NETWORKS if self.model_type == "keras_regression" else CLASSIFICATION_NETWORKS
 
         # Initialize the batch size
         self.batch_size: int = batch_size
+
+        # Initialize the lookback
+        self.lookback: Union[int, None] = lookback
+
+        # Initialize the predictions
+        self.predictions: Union[int, None] = predictions
 
         # Initialize the training data id
         self.training_data_id: Union[str, None] = training_data_id
@@ -298,7 +321,6 @@ class KerasHyperparams:
             keras_model_name=keras_model_name,
             optimizer=optimizer,
             loss=loss,
-            autoregressive=True,
             activations=c.get("activations"),
             units=c.get("units"),
             filters=c.get("filters"),
@@ -313,25 +335,21 @@ class KerasHyperparams:
 
         # Otherwise, add the autoregressive variation
         else:
-            #ar_configs: Union[List[IRegressionTrainingConfig], List[IClassificationTrainingConfig]] = [self._generate_model_config(
-            #    keras_model_name=keras_model_name,
-            #    optimizer=optimizer,
-            #    loss=loss,
-            #    autoregressive=True,
-            #    activations=c.get("activations"),
-            #    units=c.get("units"),
-            #    filters=c.get("filters"),
-            #    kernel_sizes=c.get("kernel_sizes"),
-            #    pool_sizes=c.get("pool_sizes"),
-            #    dropout_rates=c.get("dropout_rates"),
-            #) for c in keras_model_configs]
+            ar_configs: Union[List[IRegressionTrainingConfig], List[IClassificationTrainingConfig]] = [self._generate_model_config(
+                keras_model_name=keras_model_name,
+                optimizer=optimizer,
+                loss=loss,
+                autoregressive=True,
+                activations=c.get("activations"),
+                units=c.get("units"),
+                filters=c.get("filters"),
+                kernel_sizes=c.get("kernel_sizes"),
+                pool_sizes=c.get("pool_sizes"),
+                dropout_rates=c.get("dropout_rates"),
+            ) for c in keras_model_configs]
 
             # Finally, return the concatenated list
-            #return configs + ar_configs
-
-            # Single-Shot Regressions have been deprecated because of the high
-            # resource consumption and poor performance
-            return configs
+            return configs + ar_configs
 
 
 
@@ -421,10 +439,11 @@ class KerasHyperparams:
                 "id": id,
                 "description": description,
                 "autoregressive": autoregressive if isinstance(autoregressive, bool) else False,
-                "lookback": RegressionModel.DEFAULT_LOOKBACK,
-                "predictions": RegressionModel.DEFAULT_PREDICTIONS,
+                "lookback": self.lookback,
+                "predictions": self.predictions,
                 "optimizer": optimizer,
                 "loss": loss["name"],
+                "metric": loss["metric"],
                 "keras_model": keras_model
             }
 
@@ -452,8 +471,8 @@ class KerasHyperparams:
         # Add model type specific properties
         if self.model_type == "keras_regression":
             keras_model_val["autoregressive"] = autoregressive if isinstance(autoregressive, bool) else False
-            keras_model_val["lookback"] = RegressionModel.DEFAULT_LOOKBACK
-            keras_model_val["predictions"] = RegressionModel.DEFAULT_PREDICTIONS
+            keras_model_val["lookback"] = self.lookback
+            keras_model_val["predictions"] = self.predictions
         else:
             keras_model_val["features_num"] = 5 # Minimum number of features allowed
 
@@ -525,7 +544,6 @@ class KerasHyperparams:
             receipt += f"Batches: {net['batches']}\n"
 
             # Fillable Batches
-            receipt += "\n"
             for batch_number in range(1, net["batches"] + 1, 1):
                 receipt += f"{net['name']}_{batch_number}: \n"
 

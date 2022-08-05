@@ -12,7 +12,7 @@ class KerasModelInterface:
 
     # Retrieves the configuration of the Keras Model
     def get_config(self) -> Any:
-        raise NotImplementedError("Model.get_config has not been implemented.")
+        raise NotImplementedError("KerasModel.get_config has not been implemented.")
 
 
 

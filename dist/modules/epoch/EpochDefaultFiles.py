@@ -15,44 +15,17 @@ BACKTEST_CONFIG_UT: IBacktestConfig = {
     "idle_minutes_on_position_close": 30,
     "models": [
         {
-            "id": "A212",
-            "arima_models": [{
-                "lookback": 300,
-                "predictions": 10,
-                "arima": { "p": 2, "d": 1, "q": 2 },
-                "interpreter": { "long": 0.05, "short": 0.05 }
-            }]
+            "id": "KR_UNIT_TEST",
+            "regression_models": [{ "regression_id": "KR_UNIT_TEST" }]
         },
         {
-            "id": "R_UNIT_TEST",
-            "regression_models": [{
-                "regression_id": "R_UNIT_TEST", 
-                "interpreter": { "long": 0.5, "short": 0.5 }
-            }]
+            "id": "KC_UNIT_TEST",
+            "classification_models": [{ "classification_id": "KC_UNIT_TEST" }]
         },
         {
-            "id": "C_UNIT_TEST",
-            "classification_models": [{
-                "classification_id": "C_UNIT_TEST", 
-                "interpreter": { "min_probability": 0.6 }
-            }]
-        },
-        {
-            "id": "CON_UNIT_TEST",    
-            "arima_models": [{
-                "lookback": 300,
-                "predictions": 10,
-                "arima": { "p": 2, "d": 1, "q": 2 },
-                "interpreter": { "long": 0.05, "short": 0.05 }
-            }],
-            "regression_models": [{
-                "regression_id": "R_UNIT_TEST", 
-                "interpreter": { "long": 0.5, "short": 0.5 }
-            }],
-            "classification_models": [{
-                "classification_id": "C_UNIT_TEST", 
-                "interpreter": { "min_probability": 0.6 }
-            }],
+            "id": "CON_UNIT_TEST",
+            "regression_models": [{ "regression_id": "KR_UNIT_TEST" }],
+            "classification_models": [{ "classification_id": "KC_UNIT_TEST" }],
             "consensus_model": { "interpreter": { "min_consensus": 2 } }
         }
     ]
@@ -65,16 +38,17 @@ BACKTEST_CONFIG_UT: IBacktestConfig = {
 # This configuration trains the official unit test regression model for the current epoch.
 # _EPOCH/model_assets/keras_regression_training_configs/UNIT_TEST.json
 KERAS_REGRESSION_TRAINING_CONFIG_UT = {
-    "name": "R_UNIT_TEST",
+    "name": "KR_UNIT_TEST",
     "models": [
         {
-            "id": "R_UNIT_TEST",
+            "id": "KR_UNIT_TEST",
             "description": "Official Unit Test Regression Model.",
             "autoregressive": True,
             "lookback": 100,
             "predictions": 30,
             "optimizer": "adam",
             "loss": "mean_squared_error",
+            "metric": "mean_absolute_error",
             "keras_model": {
                 "name": "R_UNIT_TEST",
                 "units": [64],
@@ -98,49 +72,10 @@ CLASSIFICATION_TRAINING_DATA_CONFIG_UT: ITrainingDataConfig = {
     "up_percent_change": 3,
     "down_percent_change": 3,
     "models": [
-        {
-            "id": "A101",
-            "arima_models": [{
-                "lookback": 300,
-                "predictions": 10,
-                "arima": { "p": 1, "d": 0, "q": 1 },
-                "interpreter": { "long": 0.05, "short": 0.05 }
-            }]
-        },
-        {
-            "id": "A111",
-            "arima_models": [{
-                "lookback": 300,
-                "predictions": 10,
-                "arima": { "p": 1, "d": 1, "q": 1 },
-                "interpreter": { "long": 0.05, "short": 0.05 }
-            }]
-        },
-        {
-            "id": "A112",
-            "arima_models": [{
-                "lookback": 300,
-                "predictions": 10,
-                "arima": { "p": 1, "d": 1, "q": 2 },
-                "interpreter": { "long": 0.05, "short": 0.05 }
-            }]
-        },
-        {
-            "id": "A121",
-            "arima_models": [{
-                "lookback": 300,
-                "predictions": 10,
-                "arima": { "p": 1, "d": 2, "q": 1 },
-                "interpreter": { "long": 0.05, "short": 0.05 }
-            }]
-        },
-        { "id": "R_UNIT_TEST","regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": { "long": 0.5, "short": 0.5 }}] }
+        { "id": "KR_UNIT_TEST","regression_models": [{ "regression_id": "KR_UNIT_TEST" }] }
     ],
     "include_rsi": True,
-    "include_stoch": False,
-    "include_aroon": True,
-    "include_stc": False,
-    "include_mfi": False
+    "include_aroon": True
 }
 
 
@@ -153,17 +88,17 @@ CLASSIFICATION_TRAINING_DATA_CONFIG_UT: ITrainingDataConfig = {
 # This configuration trains the official unit test keras classification model for the current epoch.
 # _EPOCH/model_assets/keras_classification_training_configs/UNIT_TEST.json
 KERAS_CLASSIFICATION_TRAINING_CONFIG_UT = {
-    "name": "C_UNIT_TEST",
+    "name": "KC_UNIT_TEST",
     "training_data_id": "", # Must fill once the training data has been generated
     "models": [
         {
-            "id": "C_UNIT_TEST",
-            "description": "This is the official ClassificationModel for Unit Tests.",
+            "id": "KC_UNIT_TEST",
+            "description": "This is the official KerasClassificationModel for Unit Tests.",
             "optimizer": "adam",
             "loss": "binary_crossentropy",
             "metric": "binary_accuracy",
             "keras_model": {
-                "name": "C_UNIT_TEST",
+                "name": "KC_UNIT_TEST",
                 "units": [64],
                 "activations": ["relu"]
             }

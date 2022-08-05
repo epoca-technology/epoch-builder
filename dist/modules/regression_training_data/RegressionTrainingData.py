@@ -8,7 +8,7 @@ from modules.candlestick.Candlestick import Candlestick
 
 
 
-def make_datasets(lookback: int, autoregressive: bool, predictions: int, train_split: float = 0.9) -> IRegressionDatasets:
+def make_datasets(lookback: int, autoregressive: bool, predictions: int, train_split: float) -> IRegressionDatasets:
     """Builds a tuple containing the features and labels for the train and test datasets based
     on the kind of regression. 
 
@@ -26,8 +26,7 @@ def make_datasets(lookback: int, autoregressive: bool, predictions: int, train_s
         predictions: int
             The number of predictions the model will output in the end.
         train_split: float
-            The split that should be applied to the training / test datasets. Following the 
-            Epoch's ranges, this value should be 0.9
+            The split that should be applied to the training / test datasets.
 
     Returns:
         IRegressionDatasets

@@ -2,16 +2,14 @@ from typing import List, Dict, Tuple, Union
 from pandas import DataFrame, Series
 from math import ceil
 from tqdm import tqdm
-from modules.types import IModel, ITechnicalAnalysis, ITrainingDataConfig, ITrainingDataActivePosition,\
+from modules.types import ITechnicalAnalysis, ITrainingDataConfig, ITrainingDataActivePosition,\
     ITrainingDataFile, ITrainingDataPriceActionsInsight, ITrainingDataPredictionInsight, ITechnicalAnalysisInsight
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
-from modules.model.ArimaModel import ArimaModel
-from modules.model.RegressionModel import RegressionModel
-from modules.model.RegressionModelFactory import RegressionModelFactory
+from modules.model.RegressionModelFactory import RegressionModelFactory, RegressionModel
 from modules.technical_analysis.TechnicalAnalysis import TechnicalAnalysis
-from modules.classification_training_data.TrainingDataCompression import compress_training_data, decompress_training_data
+from modules.classification_training_data.TrainingDataCompression import compress_training_data
 
 
 
@@ -43,18 +41,12 @@ class ClassificationTrainingData:
             The percentage that needs to go up to close an up position
         down_percent_change: float
             The percentage that needs to go down to close a down position
-        models: List[Union[ArimaModel, RegressionModel]]
+        models: List[RegressionModel]
             The list of ArimaModels that will be used to generate the training data.
         include_rsi: bool
             If enabled, the RSI will be added as a feature with the column name "RSI".
-        include_stoch: bool
-            If enabled, the Stoch will be added as a feature with the column name "STOCH".
         include_aroon: bool
             If enabled, the Aroon will be added as a feature with the column name "AROON".
-        include_stc: bool
-            If enabled, the STC will be added as a feature with the column name "STC".
-        include_mfi: bool
-            If enabled, the MFI will be added as a feature with the column name "MFI".
         features_num: int
             The total number of features that will be used by the model to predict.
         df: DataFrame
@@ -88,9 +80,9 @@ class ClassificationTrainingData:
                 If a duplicate Model ID is found.
                 If a provided model isn't Arima or Regression
         """
-        # Make sure that at least 5 Regression Models were provided
-        if len(config["models"]) < 5:
-            raise ValueError(f"A minimum of 5 ArimaModels|RegressionModels are required in order to generate \
+        # Make sure that at least 1 Regression Models were provided
+        if len(config["models"]) < 1:
+            raise ValueError(f"A minimum of 1 RegressionModels are required in order to generate \
                 the classification training data. Received: {len(config['models'])}")
 
         # Initialize the type of execution
@@ -104,7 +96,7 @@ class ClassificationTrainingData:
 
         # Initialize the data that will be populated
         self.id: str = Utils.generate_uuid4()
-        self.models: List[Union[ArimaModel, RegressionModel]] = []
+        self.models: List[RegressionModel] = []
         df_data: Dict[str, List[float]] = {}
         ids: List[str] = []
         lookbacks: List[int] = []
@@ -116,7 +108,7 @@ class ClassificationTrainingData:
                 raise ValueError(f"Duplicate Model ID provided: {m['id']}")
 
             # Add the initialized model to the list
-            self.models.append(RegressionModelFactory(m))
+            self.models.append(RegressionModelFactory(m, True))
             
             # Populate helpers
             df_data[m["id"]] = []
@@ -143,10 +135,7 @@ class ClassificationTrainingData:
 
         # Init the Technical Analysis
         self.include_rsi: bool = config["include_rsi"]
-        self.include_stoch: bool = config["include_stoch"]
         self.include_aroon: bool = config["include_aroon"]
-        self.include_stc: bool = config["include_stc"]
-        self.include_mfi: bool = config["include_mfi"]
 
         # Init the number of features
         self.features_num: int = self._get_features_num()
@@ -176,20 +165,8 @@ class ClassificationTrainingData:
         if self.include_rsi:
             features_num += 1
 
-        # Check if the Stoch is enabled
-        if self.include_stoch:
-            features_num += 1
-
         # Check if Aroon is enabled
         if self.include_aroon:
-            features_num += 1
-
-        # Check if STC is enabled
-        if self.include_stc:
-            features_num += 1
-
-        # Check if MFI is enabled
-        if self.include_mfi:
             features_num += 1
 
         # Finally, return the final number
@@ -214,14 +191,8 @@ class ClassificationTrainingData:
         # Add the TA Features if any
         if self.include_rsi:
             df_data["RSI"] = []
-        if self.include_stoch:
-            df_data["STOCH"] = []
         if self.include_aroon:
             df_data["AROON"] = []
-        if self.include_stc:
-            df_data["STC"] = []
-        if self.include_mfi:
-            df_data["MFI"] = []
 
         # Add the labels
         df_data["up"] = []
@@ -301,9 +272,6 @@ class ClassificationTrainingData:
         # Save the results
         Epoch.FILE.save_classification_training_data(self._build_file(execution_start))
 
-        # Validate the integrity of the saved training data
-        self._validate_integrity()
-
 
 
 
@@ -350,9 +318,6 @@ class ClassificationTrainingData:
         # Save the results
         Epoch.FILE.save_classification_training_data(self._build_file(execution_start))
 
-        # Validate the integrity of the saved training data
-        self._validate_integrity()
-
 
 
 
@@ -379,7 +344,7 @@ class ClassificationTrainingData:
         up_price, down_price = self._get_position_range(candlestick["o"])
 
         # Build the features
-        features: Dict[str, Union[int, float]] = self._get_features(candlestick["ot"])
+        features: Dict[str, float] = self._get_features(candlestick["ot"])
 
         # Finally, populate the active position dict
         self.active = {
@@ -407,44 +372,25 @@ class ClassificationTrainingData:
 
         # Generate the Models' predictions
         features: Dict[str, Union[int, float]] = {
-            m.id: m.predict(
-                open_time, 
-                lookback_df=lookback_df,
-                enable_cache=not self.test_mode
-            )["r"] for m in self.models
+            m.id: m.predict(open_time, lookback_df=lookback_df)["r"] for m in self.models
         }
 
         # Check if any Technical Anlysis feature needs to be added
-        if self.include_rsi or self.include_stoch or self.include_aroon or self.include_stc or self.include_mfi:
+        if self.include_rsi or self.include_aroon:
             # Retrieve the technical analysis
             ta: ITechnicalAnalysis = TechnicalAnalysis.get_technical_analysis(
                 lookback_df,
                 include_rsi=self.include_rsi,
-                include_stoch=self.include_stoch,
-                include_aroon=self.include_aroon,
-                include_stc=self.include_stc,
-                include_mfi=self.include_mfi,
+                include_aroon=self.include_aroon
             )
 
             # Populate the RSI feature if enabled
             if self.include_rsi:
                 features["RSI"] = ta["rsi"]
 
-            # Populate the STOCH feature if enabled
-            if self.include_stoch:
-                features["STOCH"] = ta["stoch"]
-
             # Populate the Aroon feature if enabled
             if self.include_aroon:
                 features["AROON"] = ta["aroon"]
-
-            # Populate the STC feature if enabled
-            if self.include_stc:
-                features["STC"] = ta["stc"]
-
-            # Populate the MFI feature if enabled
-            if self.include_mfi:
-                features["MFI"] = ta["mfi"]
 
         # Finally, return the features
         return features
@@ -571,10 +517,7 @@ class ClassificationTrainingData:
             "down_percent_change": self.down_percent_change,
             "models": [m.get_model() for m in self.models],
             "include_rsi": self.include_rsi,
-            "include_stoch": self.include_stoch,
             "include_aroon": self.include_aroon,
-            "include_stc": self.include_stc,
-            "include_mfi": self.include_mfi,
             "features_num": self.features_num,
             "duration_minutes": Utils.from_milliseconds_to_minutes(current_time - execution_start),
             "price_actions_insight": self._get_price_actions_insight(),
@@ -641,7 +584,7 @@ class ClassificationTrainingData:
             ITechnicalAnalysisInsight
         """
         # Make sure at least 1 ta feature is enabled
-        if self.include_rsi or self.include_stoch or self.include_aroon or self.include_stc or self.include_mfi:
+        if self.include_rsi or self.include_aroon:
             # Initialize the insight dict
             insight: Dict[str, Dict[str, float]] = {}
 
@@ -649,21 +592,9 @@ class ClassificationTrainingData:
             if self.include_rsi:
                 insight["RSI"] = self.df["RSI"].describe().to_dict()
 
-            # Check if the STOCH is enabled
-            if self.include_stoch:
-                insight["STOCH"] = self.df["STOCH"].describe().to_dict()
-
             # Check if AROON is enabled
             if self.include_aroon:
                 insight["AROON"] = self.df["AROON"].describe().to_dict()
-
-            # Check if the STC is enabled
-            if self.include_stc:
-                insight["STC"] = self.df["STC"].describe().to_dict()
-
-            # Check if the MFI is enabled
-            if self.include_mfi:
-                insight["MFI"] = self.df["MFI"].describe().to_dict()
 
             # Finally, return the insight
             return insight
@@ -677,87 +608,3 @@ class ClassificationTrainingData:
 
     
 
-
-
-
-
-    ## Training Data Integrity Validation ##
-
-
-
-
-
-    def _validate_integrity(self) -> None:
-        """Makes sure that the data stored in the file is valid.
-
-        Raises:
-            ValueError:
-                If any of the properties or the decompressed training data is 
-                    not identical to the original data.
-        """
-        # Open the file
-        td: ITrainingDataFile = Epoch.FILE.get_classification_training_data(self.id)
-
-        # Validate general values
-        if td["regression_selection_id"] != self.regression_selection_id:
-            raise ValueError(f"Regr. Selection ID Discrepancy: {str(td['regression_selection_id'])} != {str(self.regression_selection_id)}")
-        if td["id"] != self.id:
-            raise ValueError(f"ID Discrepancy: {str(td['id'])} != {str(self.id)}")
-        if td["description"] != self.description:
-            raise ValueError(f"Description Discrepancy: {str(td['description'])} != {str(self.description)}")
-        if not isinstance(td["creation"], int):
-            raise ValueError(f"The creation timestamp is invalid: {str(td['creation'])}")
-        if not isinstance(td["start"], int):
-            raise ValueError(f"The start timestamp is invalid: {str(td['start'])}")
-        if not isinstance(td["end"], int):
-            raise ValueError(f"The end timestamp is invalid: {str(td['end'])}")
-        if not isinstance(td["duration_minutes"], int):
-            raise ValueError(f"The duration_minutes is invalid: {str(td['duration_minutes'])}")
-        if td["steps"] != self.steps:
-            raise ValueError(f"Steps Discrepancy: {str(td['steps'])} != {str(self.steps)}")
-        if td["up_percent_change"] != self.up_percent_change:
-            raise ValueError(f"Up Percent Change Discrepancy: {str(td['up_percent_change'])} != {str(self.up_percent_change)}")
-        if td["down_percent_change"] != self.down_percent_change:
-            raise ValueError(f"Down Percent Change Discrepancy: {str(td['down_percent_change'])} != {str(self.down_percent_change)}")
-        if td["include_rsi"] != self.include_rsi:
-            raise ValueError(f"Include RSI Discrepancy: {str(td['include_rsi'])} != {str(self.include_rsi)}")
-        if td["include_stoch"] != self.include_stoch:
-            raise ValueError(f"Include STOCH Discrepancy: {str(td['include_stoch'])} != {str(self.include_stoch)}")
-        if td["include_aroon"] != self.include_aroon:
-            raise ValueError(f"Include Aroon Discrepancy: {str(td['include_aroon'])} != {str(self.include_aroon)}")
-        if td["include_stc"] != self.include_stc:
-            raise ValueError(f"Include STC Discrepancy: {str(td['include_stc'])} != {str(self.include_stc)}")
-        if td["include_mfi"] != self.include_mfi:
-            raise ValueError(f"Include MFI Discrepancy: {str(td['include_mfi'])} != {str(self.include_mfi)}")
-        if td["features_num"] != self.features_num:
-            raise ValueError(f"Features Num Discrepancy: {str(td['features_num'])} != {str(self.features_num)}")
-
-        # Validate the models
-        models: List[IModel] = [m.get_model() for m in self.models]
-        for i in range(len(models) - 1):
-            if td["models"][i]["id"] != models[i]["id"]:
-                print(td['models'][i])
-                print(models[i])
-                raise ValueError(f"There is a discrepancy in the models configurations.")
-
-        # Validate the insights
-        price_actions_insight: ITrainingDataPriceActionsInsight = self._get_price_actions_insight()
-        if td["price_actions_insight"] != price_actions_insight:
-            raise ValueError(f"Price Action Insight Discrepancy: {str(td['price_actions_insight'])} != {str(price_actions_insight)}")
-        predictions_insight: ITrainingDataPredictionInsight = {m.id: self._get_prediction_insight_for_model(m.id) for m in self.models}
-        if td["predictions_insight"] != predictions_insight:
-            raise ValueError(f"Predictions Insight Discrepancy: {str(td['predictions_insight'])} != {str(predictions_insight)}")
-
-        # Validate the training data
-        decompressed: DataFrame = decompress_training_data(td["training_data"])
-        if not self.df.equals(decompressed):
-            print(self.df.head())
-            print(decompressed.head())
-            raise ValueError(f"There is a discrepancy in the training data that was loaded and decompressed.")
-
-
-            
-
-
-
-    

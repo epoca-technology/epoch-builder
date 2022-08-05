@@ -4,28 +4,30 @@ from modules.types import IModel, IPrediction, IPredictionMetaData, IPredictionR
 from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
 from modules.interpreter.ConsensusInterpreter import ConsensusInterpreter
-from modules.model.ModelType import validate_id
+from modules.model.ModelType import validate_id, IModelType
 from modules.model.Interface import ModelInterface
-from modules.model.ArimaModel import ArimaModel
-from modules.model.RegressionModel import RegressionModel
-from modules.model.ClassificationModel import ClassificationModel
+from modules.model.ClassificationModelFactory import ClassificationModelFactory, ClassificationModel
+
 
 
 
 class ConsensusModel(ModelInterface):
     """ConsensusModel Class
     
-    This class is responsible of handling interactions with any number of models except for itself.
+    This class combines the predictions of multiple Classifications and predicts based
+    on the provided interpreter's configuration.
 
     Instance Properties:
+        enable_cache: bool
+            The state of the cache. If False, the model won't interact with the db.
         id: str
             The identifier of the consensus model.
-        sub_models: List[Union[ArimaModel, RegressionModel, ClassificationModel]]
-            The instances of the single models that will generate predictions.
+        sub_models: List[ClassificationModel]
+            The instances of the classification models that will generate predictions.
         max_lookback: int
             The highest lookback among the models within.
         interpreter: ConsensusInterpreter
-            The Interpreter instance that will be used to interpret Single Model Predictions.
+            The Interpreter instance that will be used to interpret Classification Model Predictions.
     """
 
 
@@ -39,12 +41,15 @@ class ConsensusModel(ModelInterface):
 
 
 
-    def __init__(self, config: IModel):
+    def __init__(self, config: IModel, enable_cache: bool = False):
         """Initializes the instance properties, the regression model and the Interpreter's Instance.
 
         Args:
             config: IModel
                 The configuration to be used to initialize the model's instance
+            enable_cache: bool
+                Placeholder. The consensus model does not make use of the cache functionality. Moreover,
+                the classifications within use cache by default, as well as their inner regressions.
 
         Raises:
             ValueError:
@@ -52,34 +57,40 @@ class ConsensusModel(ModelInterface):
                 If there are less than 2 sub_models
                 If the min_consensus is lower than 51% of the total models
         """
+        # Init the cache state
+        self.enable_cache: bool = enable_cache
+
         # Make sure there is 1 Classification Model
-        if not isinstance(config["consensus_model"], dict):
-            raise ValueError(f"The provided consensus_model configuration is invalid.")
+        if not isinstance(config["consensus"], dict):
+            raise ValueError(f"The provided consensus configuration is invalid.")
 
         # Initialize the ID of the model
         validate_id("ConsensusModel", config["id"])
         self.id: str = config["id"]
 
         # Initialize the sub_models
-        self.sub_models: List[Union[ArimaModel, RegressionModel, ClassificationModel]] = self._get_sub_models(config)
+        self.sub_models: List[ClassificationModel] = self._get_sub_models(config)
 
         # Initialize the max lookback
         self.max_lookback: int = max([m.get_lookback() for m in self.sub_models])
 
         # Initialize the Interpreter Instance
-        self.interpreter: ConsensusInterpreter = ConsensusInterpreter(config["consensus_model"]["interpreter"])
+        self.interpreter: ConsensusInterpreter = ConsensusInterpreter(config["consensus"]["interpreter"])
 
 
 
 
 
 
-    def _get_sub_models(self, config: IModel) -> List[Union[ArimaModel, RegressionModel, ClassificationModel]]:
+    def _get_sub_models(self, config: IModel) -> List[ClassificationModel]:
         """Returns the list of model instances that will be used to generate predictions.
 
         Args:
             config: IModel
                 The configuration to be used to initialize the model's instance
+
+        Returns:
+            List[ClassificationModel]
 
         Raises:
             ValueError:
@@ -88,44 +99,29 @@ class ConsensusModel(ModelInterface):
                 If the minimum consensus represents less than 51% of the models total
         """
         # Init the list
-        models: List[Union[ArimaModel, RegressionModel, ClassificationModel]] = []
+        models: List[ClassificationModel] = []
 
-        # Check if there are any ArimaModels
-        if isinstance(config.get("arima_models"), list):
-            if len(config["arima_models"]) > 0:
-                for model_config in config["arima_models"]:
-                    models.append(ArimaModel({
-                        "id": f"A{model_config['arima']['p']}{model_config['arima']['d']}{model_config['arima']['q']}",
-                        "arima_models": [{
-                            "lookback": model_config["lookback"], 
-                            "predictions": model_config["predictions"], 
-                            "arima": model_config["arima"], 
-                            "interpreter": model_config["interpreter"]}]
-                    }))
-            else:
-                raise ValueError("Received an empty list in the arima_models configuration.")
-
-        # Check if there are any RegressionModels
-        if isinstance(config.get("regression_models"), list):
-            if len(config["regression_models"]) > 0:
-                for model_config in config["regression_models"]:
-                    models.append(RegressionModel({
-                        "id": model_config["regression_id"],
-                        "regression_models": [{"regression_id": model_config["regression_id"], "interpreter": model_config["interpreter"]}]
-                    }))
-            else:
-                raise ValueError("Received an empty list in the regression_models configuration.")
-
-        # Check if there are any ClassificationModels
-        if isinstance(config.get("classification_models"), list):
-            if len(config["classification_models"]) > 0:
-                for model_config in config["classification_models"]:
-                    models.append(ClassificationModel({
+        # Check if there are any KerasClassificationModels
+        if isinstance(config.get("keras_classifications"), list):
+            if len(config["keras_classifications"]) > 0:
+                for model_config in config["keras_classifications"]:
+                    models.append(ClassificationModelFactory({
                         "id": model_config["classification_id"],
-                        "classification_models": [{"classification_id": model_config["classification_id"], "interpreter": model_config["interpreter"]}]
+                        "keras_classifications": [{"classification_id": model_config["classification_id"]}]
                     }))
             else:
-                raise ValueError("Received an empty list in the classification_models configuration.")
+                raise ValueError("Received an empty list in the keras_classifications configuration.")
+
+        # Check if there are any XGBClassificationModels
+        if isinstance(config.get("xgb_classifications"), list):
+            if len(config["xgb_classifications"]) > 0:
+                for model_config in config["xgb_classifications"]:
+                    models.append(ClassificationModelFactory({
+                        "id": model_config["classification_id"],
+                        "xgb_classifications": [{"classification_id": model_config["classification_id"]}]
+                    }))
+            else:
+                raise ValueError("Received an empty list in the xgb_classifications configuration.")
 
         # Calculate the total models
         models_total: int = len(models)
@@ -153,12 +149,7 @@ class ConsensusModel(ModelInterface):
 
 
 
-    def predict(
-        self, 
-        current_timestamp: int, 
-        lookback_df: Union[DataFrame, None] = None, # Placeholder
-        enable_cache: bool = False # Placeholder
-    ) -> IPrediction:
+    def predict(self, current_timestamp: int, lookback_df: Union[DataFrame, None] = None) -> IPrediction:
         """Given the current time, it will perform a prediction and return it as 
         well as its metadata.
 
@@ -166,8 +157,6 @@ class ConsensusModel(ModelInterface):
             current_timestamp: int
                 The current time in milliseconds.
             lookback_df: Union[DataFrame, None]
-                PLACEHOLDER: Not used by the ConsensusModel.
-            enable_cache: bool
                 PLACEHOLDER: Not used by the ConsensusModel.
         
         Returns:
@@ -183,7 +172,7 @@ class ConsensusModel(ModelInterface):
         # Iterate over each sub model
         for model in self.sub_models:
             # Generate the prediction
-            pred: IPrediction = model.predict(current_timestamp, lookback_df=lookback, enable_cache=True)
+            pred: IPrediction = model.predict(current_timestamp, lookback_df=lookback)
 
             # Append the result and the metadata
             results.append(pred["r"])
@@ -236,8 +225,7 @@ class ConsensusModel(ModelInterface):
 
 
     def get_model(self) -> IModel:
-        """Dumps the model's data into a dictionary that will be used
-        to get the insights based on its performance.
+        """Dumps the model's data into a dictionary.
 
         Args:
             None
@@ -248,7 +236,7 @@ class ConsensusModel(ModelInterface):
         # Initialize the partial model
         model: IModel = {
             "id": self.id,
-            "consensus_model": {
+            "consensus": {
                 "sub_models": [],
                 "interpreter": self.interpreter.get_config()
             }
@@ -259,29 +247,25 @@ class ConsensusModel(ModelInterface):
             # Build the model's config
             config: IModel = sub_model.get_model()
             
-            # Append it to the consensus model configuration
-            model["consensus_model"]["sub_models"].append(config)
+            # Append it to the consensus sub models configuration
+            model["consensus"]["sub_models"].append(config)
 
-            # Append it to the ArimaModel configs if applies
-            if isinstance(sub_model, ArimaModel):
-                if isinstance(model.get("arima_models"), list):
-                    model["arima_models"].append(config["arima_models"][0])
-                else:
-                    model["arima_models"] = config["arima_models"]
+            # Initialize the type of model
+            model_type: IModelType = type(sub_model).__name__
 
-            # Append it to the RegressionModel configs if applies
-            elif isinstance(sub_model, RegressionModel):
-                if isinstance(model.get("regression_models"), list):
-                    model["regression_models"].append(config["regression_models"][0])
+            # Append it to the Keras Classifications Config if applies
+            if model_type == "KerasClassificationModel":
+                if isinstance(model.get("keras_classifications"), list):
+                    model["keras_classifications"].append(config["keras_classifications"][0])
                 else:
-                    model["regression_models"] = config["regression_models"]
+                    model["keras_classifications"] = config["keras_classifications"]
 
-            # Append it to the ClassificationModel configs if applies
-            elif isinstance(sub_model, ClassificationModel):
-                if isinstance(model.get("classification_models"), list):
-                    model["classification_models"].append(config["classification_models"][0])
+            # Append it to the XGB Classifications Config if applies
+            elif model_type == "XGBClassificationModel":
+                if isinstance(model.get("xgb_classifications"), list):
+                    model["xgb_classifications"].append(config["xgb_classifications"][0])
                 else:
-                    model["classification_models"] = config["classification_models"]
+                    model["xgb_classifications"] = config["xgb_classifications"]
 
         # Finally, return the model's configuration
         return model
@@ -302,8 +286,7 @@ class ConsensusModel(ModelInterface):
         Returns:
             bool
         """
-        return isinstance(model.get("consensus_model"), dict) and (
-            isinstance(model.get("arima_models"), list) or
-            isinstance(model.get("regression_models"), list) or
-            isinstance(model.get("classification_models"), list)
+        return isinstance(model.get("consensus"), dict) and (
+            isinstance(model.get("keras_classifications"), list) or
+            isinstance(model.get("xgb_classifications"), list)
         )

@@ -1,32 +1,37 @@
 from typing import Union
 from modules.types import IModel
-from modules.model.ArimaModel import ArimaModel
-from modules.model.RegressionModel import RegressionModel
+from modules.model.KerasRegressionModel import KerasRegressionModel
+from modules.model.XGBRegressionModel import XGBRegressionModel
 
 
+# Types of Regression Models
+RegressionModel = Union[KerasRegressionModel, XGBRegressionModel]
 
-# Autoregressive Regression Model Factory
-# Based on given configuration, it returns the appropiate Model Instance
-def RegressionModelFactory(config: IModel) -> Union[ArimaModel, RegressionModel]:
-    """Returns the instance of an ArimaModel or a RegressionModel based on the 
+
+# Regression Model Factory
+# Based on given configuration, it returns the appropiate Regression Model Instance
+def RegressionModelFactory(config: IModel, enable_cache: bool = False) -> RegressionModel:
+    """Returns the instance of an KerasRegressionModel or a XGBRegressionModel based on the 
     provided configuration.
 
     Args:
         config: IModel
-            The configuration of module to return the instance of.
+            The configuration of model to return the instance of.
+        enable_cache: bool
+            If enabled, the model will store predictions and features in the db.
 
     Returns:
-        Union[ArimaModel, RegressionModel]
+        RegressionModel
     """
-    # Check if it is an ArimaModel
-    if ArimaModel.is_config(config):
-        return ArimaModel(config)
+    # Check if it is an KerasRegressionModel
+    if KerasRegressionModel.is_config(config):
+        return KerasRegressionModel(config, enable_cache=enable_cache)
 
-    # Check if it is a RegressionModel
-    elif RegressionModel.is_config(config):
-        return RegressionModel(config)
+    # Check if it is a XGBRegressionModel
+    elif XGBRegressionModel.is_config(config):
+        return XGBRegressionModel(config, enable_cache=enable_cache)
 
     # Otherwise, the provided configuration is invalid
     else:
         print(config)
-        raise ValueError("Couldnt find an autoregressive regression instance for the provided model configuration.")
+        raise ValueError("Couldnt find a regression instance for the provided model configuration.")

@@ -7,7 +7,8 @@ from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
 from modules.model.ModelType import TRAINABLE_CLASSIFICATION_MODEL_TYPES
-from modules.classification.ClassificationTraining import ClassificationTraining
+from modules.classification_training_data.Datasets import make_datasets
+from modules.keras_classification.KerasClassificationTraining import KerasClassificationTraining
     
 
 # EPOCH INIT
@@ -25,10 +26,13 @@ model_type: ITrainableModelType = model_type_answer["type"]
 # CLASSIFICATION TRAINING CONFIGURATION
 # Opens and loads the configuration file that should be placed in the root of the project.
 config: Union[IClassificationTrainingBatch, Any]
+train_split: float
 if model_type == "keras_classification":
     config = Epoch.FILE.get_keras_classification_training_config()
+    train_split = KerasClassificationTraining.TRAINING_CONFIG["train_split"]
 elif model_type == "xgb_classification":
     config = Epoch.FILE.get_xgb_classification_training_config()
+    train_split = 0.00
 else:
     raise ValueError(f"The provided type of model could not be processed.")
 
@@ -44,15 +48,13 @@ training_data: ITrainingDataFile = Epoch.FILE.get_classification_training_data(c
 
 # CANDLESTICK INITIALIZATION
 # Initialize the Candlesticks Module based on the highest lookback among the models config.
-Candlestick.init(300, start=training_data["start"], end=training_data["end"])
+Candlestick.init(100, start=training_data["start"], end=training_data["end"])
 
 
 
 # DATASETS
 # Initialize the train and test datasets for the entire batch of models that will be trained.
-datasets: Tuple[DataFrame, DataFrame, DataFrame, DataFrame] = ClassificationTraining.make_datasets(
-    training_data=training_data["training_data"]
-)
+datasets: Tuple[DataFrame, DataFrame, DataFrame, DataFrame] = make_datasets(training_data["training_data"], train_split)
 
 
 
@@ -64,9 +66,9 @@ certificates: Union[List[IClassificationTrainingCertificate], List[Any]] = []
 
 # TRAINER INSTANCE
 # Returns the instance of a training class based on the selected model_type
-def get_trainer(model_config: Union[IClassificationTrainingConfig, Any]) -> Union[ClassificationTraining, Any]:
+def get_trainer(model_config: Union[IClassificationTrainingConfig, Any]) -> Union[KerasClassificationTraining, Any]:
     if model_type == "keras_classification":
-        return ClassificationTraining(training_data_file=training_data, config=model_config, datasets=datasets)
+        return KerasClassificationTraining(training_data_file=training_data, config=model_config, datasets=datasets)
     elif model_type == "xgb_classification":
         raise ValueError("XGBClassification Models cannot be trained as they have not been yet implemented.")
     else:
@@ -85,7 +87,7 @@ def get_trainer(model_config: Union[IClassificationTrainingConfig, Any]) -> Unio
 # corresponding Training Configuration File, leaving only the models that did not finish.
 for index, model_config in enumerate(config["models"]):
     # Initialize the instance of the trainer
-    trainer: Union[ClassificationTraining, Any] = get_trainer(model_config)
+    trainer: Union[KerasClassificationTraining, Any] = get_trainer(model_config)
 
     # Log the progress
     if index == 0:

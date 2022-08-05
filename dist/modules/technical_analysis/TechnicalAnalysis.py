@@ -1,8 +1,7 @@
 from typing import Union, List
 from pandas import DataFrame, Series
-from ta.momentum import rsi, stoch
-from ta.trend import AroonIndicator, stc
-from ta.volume import money_flow_index
+from ta.momentum import rsi
+from ta.trend import AroonIndicator
 from modules.types import ITechnicalAnalysis
 from modules.database.Database import Database
 
@@ -35,10 +34,7 @@ class TechnicalAnalysis:
     def get_technical_analysis(
         lookback_df: DataFrame, 
         include_rsi: bool=False, 
-        include_stoch: bool=False, 
-        include_aroon: bool=False,
-        include_stc: bool=False,
-        include_mfi: bool=False
+        include_aroon: bool=False
     ) -> ITechnicalAnalysis:
         """Builds the Technical Analysis Dictionary. The process checks for the results
         in the Database first. If any of the indicators are not found, they will be 
@@ -49,14 +45,8 @@ class TechnicalAnalysis:
                 The candlestick lookback that will be used to calculate the indicators.
             include_rsi: bool
                 If enabled, the normalized 'rsi' result will be included in the response.
-            include_stoch: bool
-                If enabled, the normalized 'stoch' result will be included in the response.
             include_aroon: bool
                 If enabled, the normalized 'aroon' result will be included in the response.
-            include_stc: bool
-                If enabled, the normalized 'stc' result will be included in the response.
-            include_mfi: bool
-                If enabled, the normalized 'mfi' result will be included in the response.
 
         Returns:
             ITechnicalAnalysis
@@ -81,24 +71,9 @@ class TechnicalAnalysis:
             ta["rsi"] = TechnicalAnalysis._calculate_rsi(lookback_df["c"])
             update = True if not create else False
 
-        # Handle the Stoch Indicator if it has to be included
-        if include_stoch and not isinstance(ta.get("stoch"), float):
-            ta["stoch"] = TechnicalAnalysis._calculate_stoch(lookback_df["h"], lookback_df["l"], lookback_df["c"])
-            update = True if not create else False
-
         # Handle the Aroon Indicator if it has to be included
         if include_aroon and not isinstance(ta.get("aroon"), float):
             ta["aroon"] = TechnicalAnalysis._calculate_aroon(lookback_df["c"])
-            update = True if not create else False
-
-        # Handle the STC Indicator if it has to be included
-        if include_stc and not isinstance(ta.get("stc"), float):
-            ta["stc"] = TechnicalAnalysis._calculate_stc(lookback_df["c"])
-            update = True if not create else False
-
-        # Handle the MFI Indicator if it has to be included
-        if include_mfi and not isinstance(ta.get("mfi"), float):
-            ta["mfi"] = TechnicalAnalysis._calculate_mfi(lookback_df["h"], lookback_df["l"], lookback_df["c"], lookback_df["v"])
             update = True if not create else False
 
         # Check if the TA needs to be saved
@@ -136,7 +111,7 @@ class TechnicalAnalysis:
         )
 
         # Return the prediction if any
-        return snap[0]['ta'] if len(snap) == 1 else None
+        return snap[0]["ta"] if len(snap) > 0 else None
 
 
 
@@ -232,32 +207,6 @@ class TechnicalAnalysis:
 
 
 
-    @staticmethod
-    def _calculate_stoch(high: Series, low: Series, close: Series) -> float:
-        """Returns the current Stoch value for a given series.
-
-        Args:
-            high: Series
-                The high price series that will be used by the indicator.
-            low: Series
-                The low price series that will be used by the indicator.
-            close: Series
-                The close price series that will be used by the indicator.
-        
-        Returns:
-            float
-        """
-        # Calculate the Stoch Series
-        result: Series = stoch(high, low, close, window=14, smooth_window=3)
-        
-        # Return the current item in a normalized format
-        return TechnicalAnalysis._normalize(result.iloc[-1], 0, 100)
-
-
-
-
-
-
 
     @staticmethod
     def _calculate_aroon(close: Series) -> float:
@@ -277,56 +226,6 @@ class TechnicalAnalysis:
         return TechnicalAnalysis._normalize(result.iloc[-1], -100, 100)
 
 
-
-
-
-
-    @staticmethod
-    def _calculate_stc(close: Series) -> float:
-        """Returns the current STC value for a given series.
-
-        Args:
-            close: Series
-                The close price series that will be used by the indicator.
-        
-        Returns:
-            float
-        """
-        # Calculate the STC Series
-        result: Series = stc(close, window_slow=50, window_fast=23, cycle=10, smooth1=3, smooth2=3)
-        
-        # Return the current item in a normalized format
-        return TechnicalAnalysis._normalize(result.iloc[-1], 0, 100)
-
-
-
-
-
-
-
-
-    @staticmethod
-    def _calculate_mfi(high: Series, low: Series, close: Series, volume: Series) -> float:
-        """Returns the current Stoch value for a given series.
-
-        Args:
-            high: Series
-                The high price series that will be used by the indicator.
-            low: Series
-                The low price series that will be used by the indicator.
-            close: Series
-                The close price series that will be used by the indicator.
-            volume: Series
-                The volume series that will be used by the indicator.
-        
-        Returns:
-            float
-        """
-        # Calculate the MFI Series
-        result: Series = money_flow_index(high, low, close, volume, window=14)
-        
-        # Return the current item in a normalized format
-        return TechnicalAnalysis._normalize(result.iloc[-1], 0, 100)
 
 
 

@@ -3,7 +3,7 @@ import unittest
 from modules.types import IModelType, ITrainableModelType, IModelIDPrefix
 from modules.database.Database import Database
 from modules.model.ModelType import validate_id, get_model_type, get_trainable_model_type, get_prefix,\
-    is_regression, get_prefix_by_trainable_model_type
+    get_prefix_by_trainable_model_type
 
 
 
@@ -27,49 +27,36 @@ class ITestItem(TypedDict):
     model_type: IModelType
     trainable_model_type: Union[ITrainableModelType, None]
     prefix: IModelIDPrefix
-    is_regression: bool
 ITEMS: List[ITestItem] = [
     {
-        "id": "A134",
-        "model_type": "ArimaModel",
-        "trainable_model_type": None,
-        "prefix": "A",
-        "is_regression": True
-    },
-    {
-        "id": "R_LSTM_S3_02940598-84ca-4870-a00a-78debde80db2",
-        "model_type": "RegressionModel",
+        "id": "KR_LSTM_S3_02940598-84ca-4870-a00a-78debde80db2",
+        "model_type": "KerasRegressionModel",
         "trainable_model_type": "keras_regression",
-        "prefix": "R_",
-        "is_regression": True
+        "prefix": "KR_"
     },
     {
-        "id": "C_DNN_S2_86a440e8-6a9c-4979-b866-8b4157ecbe9c",
-        "model_type": "ClassificationModel",
+        "id": "KC_DNN_S2_86a440e8-6a9c-4979-b866-8b4157ecbe9c",
+        "model_type": "KerasClassificationModel",
         "trainable_model_type": "keras_classification",
-        "prefix": "C_",
-        "is_regression": False
+        "prefix": "KC_"
     },
     {
         "id": "XGBR_SOME_MODEL_IDENTIFIER_02940598-84ca-4870-a00a-78debde80db2",
         "model_type": "XGBRegressionModel",
         "trainable_model_type": "xgb_regression",
-        "prefix": "XGBR_",
-        "is_regression": True
+        "prefix": "XGBR_"
     },
     {
         "id": "XGBC_SOME_MODEL_IDENTIFIER_02940598-84ca-4870-a00a-78debde80db2",
         "model_type": "XGBClassificationModel",
         "trainable_model_type": "xgb_classification",
-        "prefix": "XGBC_",
-        "is_regression": False
+        "prefix": "XGBC_"
     },
     {
         "id": "CON_3_5REG",
         "model_type": "ConsensusModel",
         "trainable_model_type": None,
-        "prefix": "CON_",
-        "is_regression": False
+        "prefix": "CON_"
     }
 ]
 
@@ -114,10 +101,6 @@ class ModelTypeTestCase(unittest.TestCase):
             # Extract the model type from the id or the prefix
             self.assertEqual(get_model_type(item["id"]), item["model_type"])
             self.assertEqual(get_model_type(item["prefix"]), item["model_type"])
-
-            # Can identify a regression
-            self.assertEqual(item["is_regression"], is_regression(item["id"]))
-            self.assertEqual(item["is_regression"], is_regression(item["prefix"]))
 
             # Can extract the trainable model type if applies
             if isinstance(item["trainable_model_type"], str):

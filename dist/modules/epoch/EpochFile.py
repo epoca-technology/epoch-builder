@@ -9,7 +9,6 @@ from modules.types import IConfigPath, IBacktestAssetsPath, IModelAssetsPath, IE
             ITrainableModelType, ITrainableModelExtension, IBacktestID, IRegressionSelectionFile
 from modules.model.ModelType import TRAINABLE_MODEL_TYPES
 from modules.utils.Utils import Utils
-from modules.epoch.PositionExitCombination import PositionExitCombination
 from modules.model.ModelType import get_trainable_model_type
 
 
@@ -562,15 +561,12 @@ class EpochFile:
 
 
 
-    def get_backtest_results(self, backtest_id: IBacktestID, take_profit: float, stop_loss: float) -> List[IBacktestResult]:
+    def get_backtest_results(self, backtest_id: IBacktestID) -> List[IBacktestResult]:
         """Retrieves all the results for a given backtest.
 
         Args:
             backtest_id: IBacktestID
                 The Id of the backtest.
-            take_profit: float
-            stop_loss: float
-                The position exit combination of the backtest.
 
         Returns:
             List[IBacktestResult]
@@ -579,13 +575,8 @@ class EpochFile:
             RuntimeError:
                 If the backtest result file does not exist.
         """
-        # Initialize the path
-        path: str = self._p(
-            f"{EpochFile.BACKTEST_PATH['results']}/{PositionExitCombination.get_path(take_profit, stop_loss)}/{backtest_id}.json"
-        )
+        return EpochFile.read(f"{EpochFile.BACKTEST_PATH['results']}/{backtest_id}.json")
 
-        # Return the results
-        return EpochFile.read(path)
 
 
 
@@ -611,18 +602,7 @@ class EpochFile:
             raise ValueError("Cannot save the backtest results because the provided list is empty.")
 
         # Init values
-        path: str = self._p(EpochFile.BACKTEST_PATH['results'])
-        id: IBacktestID = results[0]["backtest"]["id"]
-        tp: float = results[0]["backtest"]["take_profit"]
-        sl: float = results[0]["backtest"]["stop_loss"]
-
-        # Check if it is the unit test
-        if "unit_test" in id:
-            path = f"{path}/{id}.json"
-
-        # Otherwise, save the result based on the position exit combination
-        else:
-            path = f"{path}/{PositionExitCombination.get_path(tp, sl)}/{id}.json"
+        path: str = self._p(f"{EpochFile.BACKTEST_PATH['results']}/{results[0]['backtest']['id']}.json")
 
         # Save the results
         EpochFile.write(path, results)
@@ -888,9 +868,6 @@ class EpochFile:
         EpochFile.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['configurations']}")
         EpochFile.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['results']}")
         EpochFile.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['regression_selection']}")
-        for exit_combination in PositionExitCombination.get_records():
-            EpochFile.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['configurations']}/{exit_combination['path']}")
-            EpochFile.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['results']}/{exit_combination['path']}")
 
         # Create all the model asset directories
         EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['assets']}")
