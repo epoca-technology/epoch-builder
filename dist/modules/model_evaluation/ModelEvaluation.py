@@ -2,13 +2,11 @@ from typing import Union, List
 from pandas import DataFrame
 from numpy import mean
 from tqdm import tqdm
-from modules.types import IModel, IPrediction, IBacktestPerformance, IModelEvaluation
+from modules.types import IPrediction, IBacktestPerformance, IModelEvaluation, IModelType
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
-from modules.model.RegressionModel import RegressionModel
-from modules.model.ClassificationModel import ClassificationModel
-from modules.model.ModelFactory import ModelFactory
+from modules.model.ModelFactory import Model
 from modules.backtest.Position import Position
 from modules.model_evaluation.ModelEvaluationEarlyStopping import ModelEvaluationEarlyStopping
 
@@ -17,28 +15,33 @@ from modules.model_evaluation.ModelEvaluationEarlyStopping import ModelEvaluatio
 
 
 
-def evaluate(model_config: IModel, price_change_requirement: float, progress_bar_description: str) -> IModelEvaluation:
+def evaluate(
+    model: Model, 
+    price_change_requirement: float, 
+    progress_bar_description: str,
+    discovery_completed: bool
+) -> IModelEvaluation:
     """Performs an evaluation on a recently trained model. The evaluation works 
     similarly to the backtests and it is only performed on the test dataset to 
     ensure the model has not yet seen it.
 
     Args:
-        model: IModel
-            The model to be initialized and evaluated.
+        model: Model
+            The instance of the model to be evaluated
         price_change_requirement: float
             Percentage the price needs to increase or decrease in order for a position to be 
             closed.
         progress_bar_description: str
             The description that will be placed in the progress bar.
+        discovery_completed: bool
+            If the discovery didn't complete, it will not run the evaluation and instead
+            return blank results.
 
     Returns:
         IModelEvaluation
     """
-    # Initialize the model
-    model: Union[RegressionModel, ClassificationModel] = ModelFactory(model_config)
-
     # Initialize the type of model
-    model_type: str = type(model).__name__
+    model_type: IModelType = type(model).__name__
 
     # Init the 1m candlesticks dataframe
     df: DataFrame = _get_candlesticks_df(model.get_lookback())
@@ -70,81 +73,82 @@ def evaluate(model_config: IModel, price_change_requirement: float, progress_bar
     es: ModelEvaluationEarlyStopping = ModelEvaluationEarlyStopping(df.shape[0])
     es_motive: Union[str, None] = None
 
-    # Iterate over each 1 minute candlestick from the test dataset
-    for candlestick_index, candlestick in df.iterrows():
-        # Check if it is the last candlestick
-        is_last_candlestick: bool = candlestick_index == df.index[-1]
+    # Run the evaluation as long as the discovery completed successfully
+    if discovery_completed:
+        for candlestick_index, candlestick in df.iterrows():
+            # Check if it is the last candlestick
+            is_last_candlestick: bool = candlestick_index == df.index[-1]
 
-        # Active Position
-        # Check the active position against the new candlestick. If the position is closed,
-        # process the metrics
-        if position.active != None:
-            # Check the position against the new candlestick
-            closed_position: bool = position.check_position(candlestick)
+            # Active Position
+            # Check the active position against the new candlestick. If the position is closed,
+            # process the metrics
+            if position.active != None:
+                # Check the position against the new candlestick
+                closed_position: bool = position.check_position(candlestick)
 
-            # If the position has been closed, process the metrics and enable idle state
-            if closed_position:
-                # Extract the metadata value
-                metadata_value: float = _get_prediction_metadata_value(model_type, position.positions[-1]["p"])
+                # If the position has been closed, process the metrics and enable idle state
+                if closed_position:
+                    # Extract the metadata value
+                    metadata_value: float = _get_prediction_metadata_value(model_type, position.positions[-1]["p"])
 
-                # Handle an increase prediction
-                if position.positions[-1]["t"] == 1:
-                    # Append the increase prediction to the list
-                    increase.append(metadata_value)
+                    # Handle an increase prediction
+                    if position.positions[-1]["t"] == 1:
+                        # Append the increase prediction to the list
+                        increase.append(metadata_value)
 
-                    # Check if the prediction was correct
-                    if position.positions[-1]["o"]:
-                        increase_successful.append(metadata_value)
+                        # Check if the prediction was correct
+                        if position.positions[-1]["o"]:
+                            increase_successful.append(metadata_value)
 
-                # Handle a decrease prediction
-                else:
-                    # Append the decrease prediction to the list
-                    decrease.append(metadata_value)
-                    
-                    # Check if the prediction was correct
-                    if position.positions[-1]["o"]:
-                        decrease_successful.append(metadata_value)
+                    # Handle a decrease prediction
+                    else:
+                        # Append the decrease prediction to the list
+                        decrease.append(metadata_value)
+                        
+                        # Check if the prediction was correct
+                        if position.positions[-1]["o"]:
+                            decrease_successful.append(metadata_value)
 
-                # Enable the idle state
-                idle_until = Utils.add_minutes(candlestick['ct'], Epoch.IDLE_MINUTES_ON_POSITION_CLOSE)
+                    # Enable the idle state
+                    idle_until = Utils.add_minutes(candlestick["ct"], Epoch.IDLE_MINUTES_ON_POSITION_CLOSE)
 
-        # Inactive Position
-        # A new prediction will be generated if the following is met:
-        # 1) There isn't an active position
-        # 1) The model isnt idle 
-        # 2) It isn't the last candlestick
-        # 3) The current prediction range's close time is greater than the last one
-        elif (position.active == None) and (candlestick["ot"] > idle_until) and (not is_last_candlestick):
-            # Retrieve the current prediction range's close time
-            _, last_ct = Candlestick.get_lookback_prediction_range(100, candlestick["ot"])
+            # Inactive Position
+            # A new prediction will be generated if the following is met:
+            # 1) There isn't an active position
+            # 1) The model isnt idle 
+            # 2) It isn't the last candlestick
+            # 3) The current prediction range's close time is greater than the last one
+            elif (position.active == None) and (candlestick["ot"] > idle_until) and (not is_last_candlestick):
+                # Retrieve the current prediction range's close time
+                _, last_ct = Candlestick.get_lookback_prediction_range(100, candlestick["ot"])
 
-            # Only predict in new ranges
-            if last_ct > last_neutral_ct:
-                # Generate a prediction
-                pred: IPrediction = model.predict(candlestick['ot'], enable_cache=False)
+                # Only predict in new ranges
+                if last_ct > last_neutral_ct:
+                    # Generate a prediction
+                    pred: IPrediction = model.predict(candlestick["ot"])
 
-                # If the result isn't neutral, open a position
-                if pred['r'] != 0:
-                    position.open_position(candlestick, pred)
+                    # If the result isn't neutral, open a position
+                    if pred["r"] != 0:
+                        position.open_position(candlestick, pred)
 
-                # Otherwise, handle the neutrality
-                else:
-                    # Increase the neutral counter
-                    neutral_predictions += 1
+                    # Otherwise, handle the neutrality
+                    else:
+                        # Increase the neutral counter
+                        neutral_predictions += 1
 
-                    # Set the last_ct in the current range
-                    last_neutral_ct = last_ct
+                        # Set the last_ct in the current range
+                        last_neutral_ct = last_ct
 
-        # Perform the early stopping evaluation
-        es_motive = es.check(position.points[-1], candlestick_index, position.long_num, position.short_num)
+            # Perform the early stopping evaluation
+            es_motive = es.check(position.points[-1], candlestick_index, position.long_num, position.short_num)
 
-        # Check if the early stopping has been triggered
-        if isinstance(es_motive, str):
-            break
+            # Check if the early stopping has been triggered
+            if isinstance(es_motive, str):
+                break
 
-        # Otherwise, update the progress bar and move on to the next candlestick
-        else:
-            progress_bar.update()
+            # Otherwise, update the progress bar and move on to the next candlestick
+            else:
+                progress_bar.update()
 
     # Output the performance
     performance: IBacktestPerformance = position.get_performance()
@@ -208,11 +212,11 @@ def _get_prediction_metadata_value(model_type: str, pred: IPrediction) -> float:
         float
     """
     # Extract the data from a Regression Model
-    if model_type == "RegressionModel":
-        return Utils.get_percentage_change(pred["md"][0]["npl"][0], pred["md"][0]["npl"][-1])
+    if model_type == "KerasRegressionModel" or model_type == "XGBRegressionModel":
+        return Utils.get_percentage_change(pred["md"][0]["pl"][0], pred["md"][0]["pl"][-1])
 
     # Extract the data from a Classification Model
-    elif model_type == "ClassificationModel":
+    elif model_type == "KerasClassificationModel" or model_type == "XGBClassificationModel":
         if pred["r"] == 1:
             return pred["md"][0]["up"]
         else:
@@ -312,5 +316,5 @@ def _build_evaluation_result(
 
         # Outcomes
         "increase_outcomes": performance["long_outcome_num"],
-        "decrease_outcomes": performance["short_outcome_num"],
+        "decrease_outcomes": performance["short_outcome_num"]
     }

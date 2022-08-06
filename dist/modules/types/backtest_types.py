@@ -89,15 +89,6 @@ IBacktestID = Literal[
     # Unit Test
     "unit_test",
 
-    # Arima Backtests
-    "arima_1", "arima_2", "arima_3", "arima_4", "arima_5", "arima_6", "arima_7", "arima_8", "arima_9",
-
-    # Keras Regression Backtests
-    "keras_regression",
-
-    # XGBoost Regression Backtests
-    "xgb_regression",
-
     # Keras Classification Backtests
     "keras_classification",
 
@@ -148,7 +139,6 @@ class IBacktest(TypedDict):
     idle_minutes_on_position_close: int
     model_start: int        # The time in which the model started backtesting
     model_end: int          # The time in which the model ended backtesting
-    model_duration: int     # The model backtesting duration in minutes
 
     
 

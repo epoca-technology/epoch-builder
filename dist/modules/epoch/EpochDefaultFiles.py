@@ -1,4 +1,4 @@
-from modules.types import IBacktestConfig, ITrainingDataConfig
+from modules.types import IBacktestConfig, IKerasRegressionTrainingBatch, IKerasClassificationTrainingBatch
 from modules.epoch.EpochFile import EpochFile
 
 
@@ -16,17 +16,17 @@ BACKTEST_CONFIG_UT: IBacktestConfig = {
     "models": [
         {
             "id": "KR_UNIT_TEST",
-            "regression_models": [{ "regression_id": "KR_UNIT_TEST" }]
+            "keras_regressions": [{ "regression_id": "KR_UNIT_TEST" }]
         },
         {
             "id": "KC_UNIT_TEST",
-            "classification_models": [{ "classification_id": "KC_UNIT_TEST" }]
+            "keras_classifications": [{ "classification_id": "KC_UNIT_TEST" }]
         },
         {
             "id": "CON_UNIT_TEST",
-            "regression_models": [{ "regression_id": "KR_UNIT_TEST" }],
-            "classification_models": [{ "classification_id": "KC_UNIT_TEST" }],
-            "consensus_model": { "interpreter": { "min_consensus": 2 } }
+            "keras_regressions": [{ "regression_id": "KR_UNIT_TEST" }],
+            "keras_classifications": [{ "classification_id": "KC_UNIT_TEST" }],
+            "consensus": { "interpreter": { "min_consensus": 2 } }
         }
     ]
 }
@@ -37,12 +37,12 @@ BACKTEST_CONFIG_UT: IBacktestConfig = {
 # Keras Regression Training Configs Unit Test
 # This configuration trains the official unit test regression model for the current epoch.
 # _EPOCH/model_assets/keras_regression_training_configs/UNIT_TEST.json
-KERAS_REGRESSION_TRAINING_CONFIG_UT = {
+KERAS_REGRESSION_TRAINING_CONFIG_UT: IKerasRegressionTrainingBatch = {
     "name": "KR_UNIT_TEST",
     "models": [
         {
             "id": "KR_UNIT_TEST",
-            "description": "Official Unit Test Regression Model.",
+            "description": "This is the official KerasRegressionModel for Unit Tests.",
             "autoregressive": True,
             "lookback": 100,
             "predictions": 30,
@@ -61,33 +61,13 @@ KERAS_REGRESSION_TRAINING_CONFIG_UT = {
 
 
 
-# Classification Training Data Config Unit Test
-# This configuration generates the training data that will be used to train test classification
-# models.
-# _EPOCH/model_assets/classification_training_data_configs/UNIT_TEST.json
-CLASSIFICATION_TRAINING_DATA_CONFIG_UT: ITrainingDataConfig = {
-    "regression_selection_id": "e5a03686-7bb9-4e2f-ab2f-3058281f589f", # Place Holder
-    "description": "UNIT_TEST: DO NOT DELETE.",
-    "steps": 5,
-    "up_percent_change": 3,
-    "down_percent_change": 3,
-    "models": [
-        { "id": "KR_UNIT_TEST","regression_models": [{ "regression_id": "KR_UNIT_TEST" }] }
-    ],
-    "include_rsi": True,
-    "include_aroon": True
-}
-
-
-
-
 
 
 
 # Keras Classification Training Config Unit Test
 # This configuration trains the official unit test keras classification model for the current epoch.
 # _EPOCH/model_assets/keras_classification_training_configs/UNIT_TEST.json
-KERAS_CLASSIFICATION_TRAINING_CONFIG_UT = {
+KERAS_CLASSIFICATION_TRAINING_CONFIG_UT: IKerasClassificationTrainingBatch = {
     "name": "KC_UNIT_TEST",
     "training_data_id": "", # Must fill once the training data has been generated
     "models": [
@@ -130,13 +110,6 @@ def create_default_files(epoch_id: str) -> None:
     EpochFile.write(
         path=f"{epoch_id}/{EpochFile.MODEL_PATH['keras_regression_training_configs']}/UNIT_TEST.json", 
         data=KERAS_REGRESSION_TRAINING_CONFIG_UT, 
-        indent=4
-    )
-
-    # Create the classification training data unit test file
-    EpochFile.write(
-        path=f"{epoch_id}/{EpochFile.MODEL_PATH['classification_training_data_configs']}/UNIT_TEST.json", 
-        data=CLASSIFICATION_TRAINING_DATA_CONFIG_UT, 
         indent=4
     )
 

@@ -1,12 +1,13 @@
-from typing import List, Dict, Union, Any
+from typing import List, Dict, Union
 from inquirer import List as InquirerList, prompt
-from modules.types import IRegressionTrainingBatch, IRegressionTrainingCertificate, ITrainableModelType,\
-    IRegressionTrainingConfig
+from modules.types import IKerasRegressionTrainingBatch, IKerasRegressionTrainingCertificate, ITrainableModelType,\
+    IKerasRegressionTrainingConfig, IXGBRegressionTrainingBatch, IXGBRegressionTrainingCertificate, IXGBRegressionTrainingConfig
 from modules.epoch.Epoch import Epoch
 from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
 from modules.model.ModelType import TRAINABLE_REGRESSION_MODEL_TYPES
-from modules.regression.RegressionTraining import RegressionTraining
+from modules.keras_regression.KerasRegressionTraining import KerasRegressionTraining
+from modules.xgb_regression.XGBRegressionTraining import XGBRegressionTraining
 
 
 
@@ -24,7 +25,7 @@ model_type: ITrainableModelType = model_type_answer["type"]
 
 # TRAINING CONFIGURATION
 # Opens and loads the configuration file that should be placed in the root of the project.
-config: Union[IRegressionTrainingBatch, Any]
+config: Union[IKerasRegressionTrainingBatch, IXGBRegressionTrainingBatch]
 if model_type == "keras_regression":
     config = Epoch.FILE.get_keras_regression_training_config()
 elif model_type == "xgb_regression":
@@ -42,19 +43,22 @@ Candlestick.init(max([m["lookback"] for m in config["models"]]), Epoch.START, Ep
 
 # CERTIFICATES
 # This file will be used to create the certificates batch once all models finish training.
-certificates: Union[List[IRegressionTrainingCertificate], List[Any]] = []
+certificates: Union[List[IKerasRegressionTrainingCertificate], List[IXGBRegressionTrainingCertificate]] = []
 
 
 
 # TRAINER INSTANCE
 # Returns the instance of a training class based on the selected model_type
-def get_trainer(model_config: Union[IRegressionTrainingConfig, Any]) -> Union[RegressionTraining, Any]:
+def get_trainer(
+    model_config: Union[IKerasRegressionTrainingConfig, IXGBRegressionTrainingConfig]
+) -> Union[KerasRegressionTraining, XGBRegressionTraining]:
     if model_type == "keras_regression":
-        return RegressionTraining(model_config)
+        return KerasRegressionTraining(model_config)
     elif model_type == "xgb_regression":
-        raise ValueError("XGBRegression Models cannot be trained as they have not been yet implemented.")
+        return XGBRegressionTraining(model_config)
     else:
         raise ValueError(f"Could not find the training class for model_type: {model_type}")
+
 
 
 
@@ -69,7 +73,7 @@ def get_trainer(model_config: Union[IRegressionTrainingConfig, Any]) -> Union[Re
 # corresponding Training Configuration File, leaving only the models that did not finish.
 for index, model_config in enumerate(config["models"]):
     # Initialize the instance of the trainer
-    trainer: Union[RegressionTraining, Any] = get_trainer(model_config)
+    trainer: Union[KerasRegressionTraining, XGBRegressionTraining] = get_trainer(model_config)
 
     # Log the progress
     if index == 0:
@@ -78,7 +82,7 @@ for index, model_config in enumerate(config["models"]):
     print(f"\n{index + 1}/{len(config['models'])}) {Utils.prettify_model_id(model_config['id'])}")
 
     # Train the model
-    cert: Union[IRegressionTrainingCertificate, Any] = trainer.train()
+    cert: Union[IKerasRegressionTrainingCertificate, IXGBRegressionTrainingCertificate] = trainer.train()
 
     # Add the certificate to the list
     certificates.append(cert)

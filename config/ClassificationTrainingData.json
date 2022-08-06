@@ -127,8 +127,5 @@
         }
     ],
     "include_rsi": false,
-    "include_stoch": false,
-    "include_aroon": false,
-    "include_stc": false,
-    "include_mfi": false
+    "include_aroon": false
 }

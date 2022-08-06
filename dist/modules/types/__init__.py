@@ -3,6 +3,7 @@ from modules.types.database_types import *
 from modules.types.interpreter_types import *
 from modules.types.technical_analysis_types import *
 from modules.types.keras_models_types import *
+from modules.types.xgb_models_types import *
 from modules.types.model_types import *
 from modules.types.backtest_types import *
 from modules.types.model_evaluation_types import *

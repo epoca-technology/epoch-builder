@@ -1,11 +1,42 @@
-from typing import List, Dict, Union, Any
+from typing import List, Dict, Union
 from copy import deepcopy
 from inquirer import List as InquirerList, prompt
-from modules.types import IRegressionTrainingCertificate, IClassificationTrainingCertificate, \
-    ITrainableModelType, IRegressionTrainingBatch, IClassificationTrainingBatch,\
-        IRegressionTrainingConfig, IClassificationTrainingConfig
+from modules.types import IKerasRegressionTrainingCertificate, IKerasClassificationTrainingCertificate, \
+    ITrainableModelType, IKerasRegressionTrainingBatch, IKerasClassificationTrainingBatch,\
+        IKerasRegressionTrainingConfig, IKerasClassificationTrainingConfig, IXGBRegressionTrainingCertificate,\
+            IXGBClassificationTrainingCertificate, IXGBRegressionTrainingBatch, IXGBClassificationTrainingBatch,\
+                IXGBRegressionTrainingConfig, IXGBClassificationTrainingConfig
 from modules.epoch.Epoch import Epoch
 from modules.model.ModelType import TRAINABLE_MODEL_TYPES
+
+
+
+## Trainable Model Type Helpers ##
+
+
+# Training Config List
+ITrainingConfigList = Union[
+    List[IKerasRegressionTrainingConfig], 
+    List[IKerasClassificationTrainingConfig], 
+    List[IXGBRegressionTrainingConfig],
+    List[IXGBClassificationTrainingConfig]
+]
+
+# Training Batch
+ITrainingBatch = Union[
+    IKerasRegressionTrainingBatch, IKerasClassificationTrainingBatch, 
+    IXGBRegressionTrainingBatch, IXGBClassificationTrainingBatch
+]
+
+# Training Certificate Lists
+ITrainingCertificateList = Union[
+    List[IKerasRegressionTrainingCertificate], List[IKerasClassificationTrainingCertificate],
+    List[IXGBRegressionTrainingCertificate], List[IXGBClassificationTrainingCertificate]
+]
+
+
+
+
 
 
 # Initialize the Epoch
@@ -29,7 +60,7 @@ model_type: ITrainableModelType = model_type_answer["model_type"]
 # Load the original configuration file in order to extract the name of the batch
 # and be able to clear the models that have already been trained.
 print("\n1/6) Extracting the original configuration file...")
-original_config: Union[IRegressionTrainingBatch, IClassificationTrainingBatch, Any]
+original_config: ITrainingBatch
 if model_type == "keras_regression":
     original_config = Epoch.FILE.get_keras_regression_training_config()
 elif model_type == "keras_classification":
@@ -74,11 +105,7 @@ model_ids: List[str] = _get_model_ids()
 
 # Extract the certificates and place them in a list
 print("3/6) Extracting certificates...")
-certificates: Union[
-    List[IRegressionTrainingCertificate], 
-    List[IClassificationTrainingCertificate], 
-    List[Any]
-] = [Epoch.FILE.get_active_model_certificate(id) for id in model_ids]
+certificates:ITrainingCertificateList = [Epoch.FILE.get_active_model_certificate(id) for id in model_ids]
 
 
 
@@ -90,8 +117,8 @@ Epoch.FILE.save_training_certificate_batch(model_type, original_config["name"] +
 
 # Update the training configuration file leaving only the models that did not complete
 print("5/6) Updating the training configuration...")
-new_config: Union[IRegressionTrainingBatch, IClassificationTrainingBatch, Any] = deepcopy(original_config)
-remaining_models: Union[List[IRegressionTrainingConfig], List[IClassificationTrainingConfig], List[Any]] = []
+new_config: ITrainingBatch = deepcopy(original_config)
+remaining_models: ITrainingConfigList = []
 for model_config in new_config["models"]:
     if model_config["id"] not in model_ids:
         remaining_models.append(model_config)

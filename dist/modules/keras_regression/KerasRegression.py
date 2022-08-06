@@ -60,23 +60,23 @@ class KerasRegression(KerasModelInterface):
 
         # Make sure the IDs are identical
         if self.id != id:
-            raise ValueError(f"RegressionModel ID Missmatch: {self.id} != {id}")
+            raise ValueError(f"KerasRegressionModel ID Missmatch: {self.id} != {id}")
 
         # Make sure the description was extracted
         if not isinstance(self.description, str):
-            raise ValueError(f"RegressionModel Description is invalid: {str(self.description)}")
+            raise ValueError(f"KerasRegressionModel Description is invalid: {str(self.description)}")
         
         # Make sure the type of regression was extracted
         if not isinstance(self.autoregressive, bool):
-            raise ValueError(f"RegressionModel Autoregressive Arg is invalid: {str(self.autoregressive)}-{type(self.autoregressive)}")
+            raise ValueError(f"KerasRegressionModel Autoregressive Arg is invalid: {str(self.autoregressive)}-{type(self.autoregressive)}")
         
         # Make sure the lookback was extracted
         if not isinstance(self.lookback, int):
-            raise ValueError(f"RegressionModel Lookback is invalid: {str(self.lookback)}")
+            raise ValueError(f"KerasRegressionModel Lookback is invalid: {str(self.lookback)}")
 
         # Make sure the predictions were extracted
         if not isinstance(self.predictions, int):
-            raise ValueError(f"RegressionModel Predictions is invalid: {str(self.predictions)}")
+            raise ValueError(f"KerasRegressionModel Predictions is invalid: {str(self.predictions)}")
 
 
 
@@ -104,7 +104,7 @@ class KerasRegression(KerasModelInterface):
         # If the regression is autoregressive, generate 1 prediction at a time and re-use it for the next
         if self.autoregressive:
             # Iterate over the predictions range
-            for i in range(self.predictions):
+            for _ in range(self.predictions):
                 pred: float = self.model.predict(close[-self.lookback:].reshape((1, self.lookback)))[0]
                 close = append(close, pred)
 

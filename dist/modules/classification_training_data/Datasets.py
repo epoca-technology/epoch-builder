@@ -1,6 +1,6 @@
 from pandas import DataFrame, concat
 from modules.types import ICompressedTrainingData, IClassificationDatasets
-from modules.classification_training_data.TrainingDataCompression import decompress_training_data
+from modules.classification_training_data.ClassificationTrainingData import ClassificationTrainingData
 
 
 
@@ -17,7 +17,7 @@ def make_datasets(training_data: ICompressedTrainingData, train_split: float) ->
         (train_x, train_y, test_x, test_y)
     """
     # Decompress the training data
-    df: DataFrame = decompress_training_data(training_data)
+    df: DataFrame = ClassificationTrainingData.decompress_training_data(training_data)
     
     # Initialize the total rows and the split size
     rows: int = df.shape[0]

@@ -4,12 +4,44 @@ from os.path import exists, isfile, dirname, splitext
 from shutil import rmtree, move
 from json import load, dumps
 from modules.types import IConfigPath, IBacktestAssetsPath, IModelAssetsPath, IEpochConfig, \
-    IBacktestConfig, IRegressionTrainingBatch, ITrainingDataConfig, IClassificationTrainingBatch,\
-        IBacktestResult, ITrainingDataFile, IClassificationTrainingCertificate, IRegressionTrainingCertificate,\
-            ITrainableModelType, ITrainableModelExtension, IBacktestID, IRegressionSelectionFile
+    IBacktestConfig, IKerasRegressionTrainingBatch, ITrainingDataConfig, IKerasClassificationTrainingBatch,\
+        IBacktestResult, ITrainingDataFile, IKerasClassificationTrainingCertificate, IKerasRegressionTrainingCertificate,\
+            ITrainableModelType, ITrainableModelExtension, IBacktestID, IRegressionSelectionFile, \
+                IXGBClassificationTrainingBatch, IXGBRegressionTrainingBatch, IXGBClassificationTrainingCertificate,\
+                    IXGBRegressionTrainingCertificate
 from modules.model.ModelType import TRAINABLE_MODEL_TYPES
 from modules.utils.Utils import Utils
 from modules.model.ModelType import get_trainable_model_type
+
+
+
+
+
+
+
+## Trainable Model Type Helpers ##
+
+# Training Batch
+ITrainingBatch = Union[
+    IKerasRegressionTrainingBatch, IKerasClassificationTrainingBatch, 
+    IXGBRegressionTrainingBatch, IXGBClassificationTrainingBatch
+]
+
+# Training Certificate
+ITrainingCertificate = Union[
+    IKerasRegressionTrainingCertificate, IKerasClassificationTrainingCertificate,
+    IXGBRegressionTrainingCertificate, IXGBClassificationTrainingCertificate
+]
+
+# Training Certificate Lists
+ITrainingCertificateList = Union[
+    List[IKerasRegressionTrainingCertificate], List[IKerasClassificationTrainingCertificate],
+    List[IXGBRegressionTrainingCertificate], List[IXGBClassificationTrainingCertificate]
+]
+
+
+
+
 
 
 
@@ -47,8 +79,8 @@ class EpochFile:
     BACKTEST_PATH: IBacktestAssetsPath = {
         "assets":                                   "backtest_assets",
         "configurations":                           "backtest_assets/configurations",
-        "results":                                  "backtest_assets/results",
         "regression_selection":                     "backtest_assets/regression_selection",
+        "results":                                  "backtest_assets/results"
     }
 
     # Model Files' Paths
@@ -56,7 +88,6 @@ class EpochFile:
         "assets":                                   "model_assets",
         "batched_training_certificates":            "model_assets/batched_training_certificates",
         "classification_training_data":             "model_assets/classification_training_data",
-        "classification_training_data_configs":     "model_assets/classification_training_data_configs",
         "models":                                   "model_assets/models",
         "models_bank":                              "model_assets/models_bank",
         "keras_classification_training_configs":    "model_assets/keras_classification_training_configs",
@@ -84,8 +115,8 @@ class EpochFile:
 
 
 
-
     ## Epoch Files Management ##
+
 
 
 
@@ -102,14 +133,11 @@ class EpochFile:
 
 
 
-    def save_training_certificate(
-        self, 
-        certificate: Union[IClassificationTrainingCertificate, IRegressionTrainingCertificate, Any]
-    ) -> None:
+    def save_training_certificate(self, certificate: ITrainingCertificate) -> None:
         """Saves a training certificate batch into the proper directory.
 
         Args:
-            certificate: Union[IClassificationTrainingCertificate, IRegressionTrainingCertificate, Any]
+            certificate: ITrainingCertificate
                 The training certificate to be stored.
         """
         EpochFile.write(self.get_active_model_certificate_path(certificate["id"]), certificate)
@@ -123,7 +151,7 @@ class EpochFile:
         self, 
         trainable_model_type: ITrainableModelType, 
         batch_name: str, 
-        certificates: Union[List[IClassificationTrainingCertificate], List[IRegressionTrainingCertificate]]
+        certificates: ITrainingCertificateList
     ) -> None:
         """Saves a training certificate batch into the proper directory.
 
@@ -132,7 +160,7 @@ class EpochFile:
                 The type of models that are being trained.
             batch_name: str
                 The name of the training batch.
-            certificates: Union[List[IClassificationTrainingCertificate], List[IRegressionTrainingCertificate]]
+            certificates: ITrainingCertificateList
                 The certificates built on training completion.
         """
         # Init the path
@@ -153,18 +181,14 @@ class EpochFile:
 
 
 
-    def move_trained_models_to_bank(
-        self, 
-        model_type: ITrainableModelType, 
-        certificates: Union[List[IClassificationTrainingCertificate], List[IRegressionTrainingCertificate]]
-    ) -> None:
+    def move_trained_models_to_bank(self, model_type: ITrainableModelType, certificates: ITrainingCertificateList) -> None:
         """Given a list of training certificates, it will move all the models from
         the active directory into the bank.
 
         Args:
             model_type: ITrainableModelType, 
                 The type of the trainable model.
-            certificates: Union[List[IClassificationTrainingCertificate], List[IRegressionTrainingCertificate]]
+            certificates: ITrainingCertificateList
                 The list of certificates issued when training the models.
         """
         for cert in certificates:
@@ -172,6 +196,7 @@ class EpochFile:
                 source=self.get_active_model_dir_path(cert["id"]),
                 destination=self.get_banked_model_dir_path(cert["id"], model_type),
             )
+
 
 
 
@@ -204,6 +229,8 @@ class EpochFile:
         """
         return EpochFile.file_exists(self.get_active_model_path(model_id, model_type)) or\
             EpochFile.file_exists(self.get_banked_model_path(model_id, model_type))
+
+
 
 
 
@@ -278,7 +305,7 @@ class EpochFile:
 
 
 
-    def get_active_model_certificate(self, model_id: str) -> Union[IRegressionTrainingCertificate, IClassificationTrainingCertificate, Any]:
+    def get_active_model_certificate(self, model_id: str) -> ITrainingCertificate:
         """Retrieves the path of a model training certificate based on its type in the active directory (models).
 
         Args:
@@ -286,7 +313,7 @@ class EpochFile:
                 The identifier of the model.
 
         Returns:
-            Union[IRegressionTrainingCertificate, IClassificationTrainingCertificate, Any]
+            ITrainingCertificate
         
         Raises:
             RuntimeError:
@@ -447,11 +474,7 @@ class EpochFile:
             RuntimeError:
                 If the training data file does not exist.
         """
-        # Initialize the path
-        path: str = self._p(f"{EpochFile.MODEL_PATH['classification_training_data']}/{id}.json")
-
-        # Return the results
-        return EpochFile.read(path)
+        return EpochFile.read(self._p(f"{EpochFile.MODEL_PATH['classification_training_data']}/{id}.json"))
 
 
 
@@ -475,32 +498,37 @@ class EpochFile:
 
 
 
-    # Keras Hyperparams
-    # In order to find the best neural networks for the datasets, many different
-    # models need to be trained and evaluated. The Hyperparams module creates
-    # training configuration files for many different configurations.
+
+
+    # Hyperparams
+    # The Hyperparams Module builds many different models and saves the configurations in
+    # batches so the models can be trained by multiple machines within the cluster or in 
+    # any external environment.
+    # In order to find the best possible models, it is recommended to make use of several
+    # technologies. 
 
 
 
 
-    def save_keras_hyperparams_batch(
+    def save_hyperparams_batch(
         self, 
         model_type: ITrainableModelType,
-        network: str,
-        batch: Union[IRegressionTrainingBatch, IClassificationTrainingBatch]
+        batch_type: str,
+        batch: ITrainingBatch
     ) -> None:
         """Saves a Keras Hyperparams batch for a given network.
 
         Args:
             model_type: ITrainableModelType
                 The trainable type of the model.
-            network: str
-                The Keras Neural Network.
-            batch: Union[IRegressionTrainingBatch, IClassificationTrainingBatch]
+            batch_type: str
+                The type of batch. This value will be used to create the directory
+                in which the batches will be placed.
+            batch: ITrainingBatch
                 The configs batch to be saved.
         """
         # Init the path
-        path: str = f"{self.get_keras_hyperparams_dir_path(model_type)}/{network}/{batch['name']}.json"
+        path: str = f"{self.get_hyperparams_dir_path(model_type)}/{batch_type}/{batch['name']}.json"
 
         # Save the file
         EpochFile.write(path, batch, indent=4)
@@ -509,8 +537,8 @@ class EpochFile:
 
 
 
-    def save_keras_hyperparams_receipt(self, model_type: ITrainableModelType, receipt: str) -> None:
-        """Saves a Keras Hyperparams receipt that covers the recently generated 
+    def save_hyperparams_receipt(self, model_type: ITrainableModelType, receipt: str) -> None:
+        """Saves a Hyperparams receipt that covers the recently generated 
         configurations.
 
         Args:
@@ -520,7 +548,7 @@ class EpochFile:
                 The receipt to be stored.
         """
         # Init the path
-        path: str = f"{self.get_keras_hyperparams_dir_path(model_type)}/receipt.txt"
+        path: str = f"{self.get_hyperparams_dir_path(model_type)}/receipt.txt"
 
         # Save the file
         EpochFile.write(path, receipt)
@@ -529,8 +557,9 @@ class EpochFile:
 
 
 
-    def get_keras_hyperparams_dir_path(self, model_type: ITrainableModelType) -> str:
-        """Retrieves the path of a directory that holds the model and certificate files
+    def get_hyperparams_dir_path(self, model_type: ITrainableModelType) -> str:
+        """Retrieves the path of the directory that holds hyperparam configurations
+        by trainable model type.
 
         Args:
             model_type: ITrainableModelType
@@ -539,11 +568,27 @@ class EpochFile:
         Returns:
             str
         """
-        return self._p(
-            EpochFile.MODEL_PATH["keras_regression_training_configs"] \
-            if model_type == "keras_regression" else\
-            EpochFile.MODEL_PATH["keras_classification_training_configs"]
-        )
+        # Check if it is a Keras Regression
+        if model_type == "keras_regression":
+            return self._p(EpochFile.MODEL_PATH["keras_regression_training_configs"])
+
+        # Check if it is a Keras Classification
+        elif model_type == "keras_classification":
+            return self._p(EpochFile.MODEL_PATH["keras_classification_training_configs"])
+
+        # Check if it is an XGB Regression
+        elif model_type == "xgb_regression":
+            return self._p(EpochFile.MODEL_PATH["xgb_regression_training_configs"])
+
+        # Check if it is an XGB Classification
+        elif model_type == "xgb_classification":
+            return self._p(EpochFile.MODEL_PATH["xgb_classification_training_configs"])
+        
+        # Otherwise, raise an error
+        else:
+            raise ValueError(f"The provided model_type {model_type} is invalid.")
+
+
 
 
 
@@ -614,6 +659,8 @@ class EpochFile:
 
 
 
+
+
     # Regression Selection
     # This process is performed in order to find out what regression models and position
     # exit combinations perform best. 
@@ -633,6 +680,26 @@ class EpochFile:
         # Save the file
         EpochFile.write(path, file)
     
+
+
+
+    def get_regression_selection(self, id: str) -> IRegressionSelectionFile:
+        """Retrieves a regression selection file.
+
+        Args:
+            id: str
+                The identifier of the regression selection.
+
+        Returns:
+            IRegressionSelectionFile
+
+        Raises:
+            RuntimeError:
+                If the regression selection file does not exist.
+        """
+        return EpochFile.read(self._p(f"{EpochFile.BACKTEST_PATH['regression_selection']}/{id}.json"))
+
+
 
 
 
@@ -665,6 +732,9 @@ class EpochFile:
 
 
 
+
+
+
     ## Configuration Files Management ##
 
 
@@ -676,6 +746,7 @@ class EpochFile:
     # Epoch Configuration
     # The Epoch Configuration File holds global configuration variables that are
     # used by several modules.
+
 
     @staticmethod
     def get_epoch_config(allow_empty: bool = False) -> Union[IEpochConfig, None]:
@@ -692,6 +763,7 @@ class EpochFile:
         return EpochFile.read(EpochFile.CONFIG_PATH["epoch"], allow_empty=allow_empty)
 
 
+
     @staticmethod
     def update_epoch_config(new_config: IEpochConfig) -> None:
         """Updates the current Epoch Configuration.
@@ -700,7 +772,10 @@ class EpochFile:
             new_config: IEpochConfig
                 The new config to be set on the file
         """
-        return EpochFile.write(EpochFile.CONFIG_PATH["epoch"], data=new_config, indent=4)
+        EpochFile.write(EpochFile.CONFIG_PATH["epoch"], data=new_config, indent=4)
+
+
+
 
 
 
@@ -716,6 +791,11 @@ class EpochFile:
             IBacktestConfig
         """
         return EpochFile.read(EpochFile.CONFIG_PATH["backtest"])
+
+
+
+
+
 
 
 
@@ -736,26 +816,35 @@ class EpochFile:
 
 
 
+
+
+
+
     # Keras Regression Training Configuration
     # The configuration file holds the data that will be used to train Keras Regression Models.
     
-    def get_keras_regression_training_config(self) -> IRegressionTrainingBatch:
+
+    def get_keras_regression_training_config(self) -> IKerasRegressionTrainingBatch:
         """Retrieves the configuration for training Keras Regression Models.
 
         Returns:
-            IRegressionTrainingBatch
+            IKerasRegressionTrainingBatch
         """
         return EpochFile.read(EpochFile.CONFIG_PATH["keras_regression_training"])
 
     
-    def update_keras_regression_training_config(self, new_config: IRegressionTrainingBatch) -> None:
+
+
+    def update_keras_regression_training_config(self, new_config: IKerasRegressionTrainingBatch) -> None:
         """Updates the Keras Regression Training configuration.
 
         Args:
-            new_config: IRegressionTrainingBatch
+            new_config: IKerasRegressionTrainingBatch
                 The new config to be set on the file
         """
-        return EpochFile.write(EpochFile.CONFIG_PATH["keras_regression_training"], data=new_config, indent=4)
+        EpochFile.write(EpochFile.CONFIG_PATH["keras_regression_training"], data=new_config, indent=4)
+
+
 
 
 
@@ -763,23 +852,29 @@ class EpochFile:
     # Keras Classification Training Configuration
     # The configuration file holds the data used to train Keras Classification Models.
 
-    def get_keras_classification_training_config(self) -> IClassificationTrainingBatch:
+
+
+    def get_keras_classification_training_config(self) -> IKerasClassificationTrainingBatch:
         """Retrieves the KerasClassificationTraining Configuration.
 
         Returns:
-            IClassificationTrainingBatch
+            IKerasClassificationTrainingBatch
         """
         return EpochFile.read(EpochFile.CONFIG_PATH["keras_classification_training"])
 
    
-    def update_keras_classification_training_config(self, new_config: IClassificationTrainingBatch) -> None:
+
+
+    def update_keras_classification_training_config(self, new_config: IKerasClassificationTrainingBatch) -> None:
         """Updates the current KerasClassificationTraining Configuration.
 
         Args:
-            new_config: IClassificationTrainingBatch
+            new_config: IKerasClassificationTrainingBatch
                 The new config to be set on the file
         """
-        return EpochFile.write(EpochFile.CONFIG_PATH["keras_classification_training"], data=new_config, indent=4)
+        EpochFile.write(EpochFile.CONFIG_PATH["keras_classification_training"], data=new_config, indent=4)
+
+
 
 
 
@@ -787,23 +882,31 @@ class EpochFile:
     # XGBoost Regression Training Configuration
     # The configuration file holds the data that will be used to train XGB Regression Models.
     
-    def get_xgb_regression_training_config(self) -> Any:
+
+
+    def get_xgb_regression_training_config(self) -> IXGBRegressionTrainingBatch:
         """Retrieves the configuration for training XGB Regression Models.
 
         Returns:
-            ...
+            IXGBRegressionTrainingBatch
         """
-        raise NotImplemented("XGBoost based models have not yet been implemented.")
+        return EpochFile.read(EpochFile.CONFIG_PATH["xgb_regression_training"])
+
+
+
 
     
-    def update_xgb_regression_training_config(self, new_config: Any) -> None:
+    def update_xgb_regression_training_config(self, new_config: IXGBRegressionTrainingBatch) -> None:
         """Updates the XGB Regression Training configuration.
 
         Args:
-            new_config: ...
-                ...
+            new_config: IXGBRegressionTrainingBatch
+                The configuration to be set on the file.
         """
-        raise NotImplemented("XGBoost based models have not yet been implemented.")
+        EpochFile.write(EpochFile.CONFIG_PATH["xgb_regression_training"], data=new_config, indent=4)
+
+
+
 
 
 
@@ -811,23 +914,27 @@ class EpochFile:
     # XGBoost Classification Training Configuration
     # The configuration file holds the data used to train XGB Classification Models.
 
-    def get_xgb_classification_training_config(self) -> Any:
+
+    def get_xgb_classification_training_config(self) -> IXGBClassificationTrainingBatch:
         """Retrieves the XGBClassificationTraining Configuration.
 
         Returns:
-            ...
+            IXGBClassificationTrainingBatch
         """
-        raise NotImplemented("XGBoost based models have not yet been implemented.")
+        return EpochFile.read(EpochFile.CONFIG_PATH["xgb_classification_training"])
 
-   
-    def update_xgb_classification_training_config(self, new_config: Any) -> None:
+
+
+
+
+    def update_xgb_classification_training_config(self, new_config: IXGBClassificationTrainingBatch) -> None:
         """Updates the current XGBClassificationTraining Configuration.
 
         Args:
-            new_config: ...
-                ...
+            new_config: IXGBClassificationTrainingBatch
+                The configuration to be set on the file.
         """
-        raise NotImplemented("XGBoost based models have not yet been implemented.")
+        EpochFile.write(EpochFile.CONFIG_PATH["xgb_classification_training"], data=new_config, indent=4)
 
 
 
@@ -866,15 +973,14 @@ class EpochFile:
         # Create all the backtest asset directories
         EpochFile.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['assets']}")
         EpochFile.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['configurations']}")
-        EpochFile.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['results']}")
         EpochFile.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['regression_selection']}")
+        EpochFile.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['results']}")
 
         # Create all the model asset directories
         EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['assets']}")
         EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['batched_training_certificates']}")
         EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['batched_training_certificates']}/unit_tests")
         EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['classification_training_data']}")
-        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['classification_training_data_configs']}")
         EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['models']}")
         EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['models_bank']}")
         EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['keras_classification_training_configs']}")
@@ -910,7 +1016,7 @@ class EpochFile:
         Args:
             source: str
                 The path that will be moved to the destination.
-            destination: Any
+            destination: str
                 The path in which the source will be moved to.
         """
         # Firstly make sure the source exists

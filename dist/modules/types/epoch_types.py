@@ -37,14 +37,14 @@ class IBacktestAssetsPath(TypedDict):
     # Backtest Assets Root Directory
     assets: str
 
-    # Backtest Configurations grouped by position exit combination
+    # Backtest Configurations
     configurations: str
-
-    # Backtest Results grouped by position exit combination
-    results: str
 
     # Regression Selection Results
     regression_selection: str
+
+    # Backtest Results
+    results: str
 
 
 
@@ -60,9 +60,6 @@ class IModelAssetsPath(TypedDict):
 
     # Classification Training Data Files
     classification_training_data: str
-
-    # Configurations to generate Classification Training Data Files
-    classification_training_data_configs: str
 
     # Trained Models that can be used by the Software. Models that won't be exported
     # in the epoch should not be kept in this directory.

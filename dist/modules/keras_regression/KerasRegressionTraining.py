@@ -19,6 +19,7 @@ from modules.keras_models.LearningRateSchedule import LearningRateSchedule
 from modules.keras_models.KerasModelSummary import get_summary
 from modules.model_evaluation.ModelEvaluation import evaluate
 from modules.model.ModelType import validate_id
+from modules.model.KerasRegressionModel import KerasRegressionModel
 
 
 
@@ -300,15 +301,15 @@ class KerasRegressionTraining:
         )
 
         # Retrieve the Keras Model
-        print("    1/7) Initializing Model...")
+        print("    1/8) Initializing Model...")
         model: Sequential = KerasModel(config=self.keras_model)
 
         # Compile the model
-        print("    2/7) Compiling Model...")
+        print("    2/8) Compiling Model...")
         model.compile(optimizer=self.optimizer, loss=self.loss)
   
         # Train the model
-        print("    3/7) Training Model...")
+        print("    3/8) Training Model...")
         history_object: History = model.fit(
             self.train_x, 
             self.train_y, 
@@ -324,25 +325,33 @@ class KerasRegressionTraining:
         history: IKerasModelTrainingHistory = history_object.history
 
         # Evaluate the test dataset
-        print("    4/7) Evaluating Test Dataset...")
+        print("    4/8) Evaluating Test Dataset...")
         test_evaluation: List[float] = model.evaluate(self.test_x, self.test_y, verbose=0) # [loss, metric]
 
+        # Perform the regression discovery
+        # @TODO
+
         # Save the model
-        print("    5/7) Saving Model...")
+        print("    6/8) Saving Model...")
         self._save_model(model)
 
         # Perform the regression evaluation
-        regression_evaluation: IModelEvaluation = evaluate(
-            model_config={
+        regression_model: KerasRegressionModel = KerasRegressionModel(
+            config={
                 "id": self.id,
-                "regression_models": [ {"regression_id": self.id, "interpreter": { "long": 0.5, "short": 0.5 }} ]
+                "keras_regressions": [ { "regression_id": self.id } ]
             },
-            price_change_requirement=Epoch.REGRESSION_PRICE_CHANGE_REQUIREMENT,
-            progress_bar_description="    6/7) Evaluating RegressionModel"
+            enable_cache=False
+        )
+        regression_evaluation: IModelEvaluation = evaluate(
+            model=regression_model,
+            price_change_requirement=0,
+            progress_bar_description="    7/8) Evaluating KerasRegressionModel",
+            discovery_completed=False
         )
 
         # Save the certificate
-        print("    7/7) Saving Certificate...")
+        print("    8/8) Saving Certificate...")
         certificate: IKerasRegressionTrainingCertificate = self._save_certificate(
             start_time, 
             model, 

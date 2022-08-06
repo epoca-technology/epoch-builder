@@ -3,8 +3,8 @@ from functools import reduce
 from copy import deepcopy
 from math import ceil
 from modules.types import IKerasModelConfig, IKerasHyperparamsLoss, IKerasHyperparamsNetworkReceipt, \
-    IRegressionTrainingConfig, IRegressionTrainingBatch, IClassificationTrainingConfig, \
-    IClassificationTrainingBatch, IKerasOptimizer, IKerasActivation, ITrainableModelType, IModelIDPrefix
+    IKerasRegressionTrainingConfig, IKerasRegressionTrainingBatch, IKerasClassificationTrainingConfig, \
+    IKerasClassificationTrainingBatch, IKerasOptimizer, IKerasActivation, ITrainableModelType, IModelIDPrefix
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.keras_models.KerasModel import KerasModel
@@ -169,7 +169,7 @@ class KerasHyperparams:
         for network_type, network_variations in self.networks.items():
             # Init the network's list of configs
             print(f"Generating {network_type} Neural Networks...")
-            configs: Union[List[IRegressionTrainingConfig], List[IClassificationTrainingConfig]] = []
+            configs: Union[List[IKerasRegressionTrainingConfig], List[IKerasClassificationTrainingConfig]] = []
 
             # Iterate over the variations
             for variation_name, variations in network_variations.items():
@@ -205,7 +205,7 @@ class KerasHyperparams:
     def _build_and_save_batches(
         self, 
         network_type: str, 
-        configs: Union[List[IRegressionTrainingConfig], List[IClassificationTrainingConfig]]
+        configs: Union[List[IKerasRegressionTrainingConfig], List[IKerasClassificationTrainingConfig]]
     ) -> Tuple[int, int]:
         """Given a list of model configs, it will split them and save them based on the 
         provided batch size.
@@ -213,7 +213,7 @@ class KerasHyperparams:
         Args:
             network_type: str
                 The type of network the files belong to. F.e. DNN, CNN...
-            configs: Union[List[IRegressionTrainingConfig], List[IClassificationTrainingConfig]]
+            configs: Union[List[IKerasRegressionTrainingConfig], List[IKerasClassificationTrainingConfig]]
                 The list of configurations that were built for all variations.
 
         Returns:
@@ -225,7 +225,7 @@ class KerasHyperparams:
         batches: int = ceil(models / self.batch_size)
 
         # Init the batched training config file
-        training_config: Union[IRegressionTrainingBatch, IClassificationTrainingBatch] = {
+        training_config: Union[IKerasRegressionTrainingBatch, IKerasClassificationTrainingBatch] = {
             "name": "", # Placeholder
             "models": [] # Placeholder
         }
@@ -246,7 +246,7 @@ class KerasHyperparams:
             training_config["models"] = configs[slice_start:slice_end]
 
             # Save the batch
-            Epoch.FILE.save_keras_hyperparams_batch(self.model_type, network_type, training_config)
+            Epoch.FILE.save_hyperparams_batch(self.model_type, network_type, training_config)
 
             # Set the end of the slice as the new start
             slice_start = slice_end
@@ -268,7 +268,7 @@ class KerasHyperparams:
         keras_model_variations: List[IKerasModelConfig],
         optimizer: str,
         loss: IKerasHyperparamsLoss
-    ) -> Union[List[IRegressionTrainingConfig], List[IClassificationTrainingConfig]]:
+    ) -> Union[List[IKerasRegressionTrainingConfig], List[IKerasClassificationTrainingConfig]]:
         """Iterates over all the variations and adds all the possible combinations
         by network.
 
@@ -279,7 +279,7 @@ class KerasHyperparams:
             optimizer: str
             loss: IKerasHyperparamsLoss
         Returns:
-            Union[List[IRegressionTrainingConfig], List[IClassificationTrainingConfig]]
+            Union[List[IKerasRegressionTrainingConfig], List[IKerasClassificationTrainingConfig]]
         """
         # Init the Keras Models Configs
         keras_model_configs: List[IKerasModelConfig] = []
@@ -317,7 +317,7 @@ class KerasHyperparams:
                     })
 
         # Build the initial list of configs
-        configs: Union[List[IRegressionTrainingConfig], List[IClassificationTrainingConfig]] = [self._generate_model_config(
+        configs: Union[List[IKerasRegressionTrainingConfig], List[IKerasClassificationTrainingConfig]] = [self._generate_model_config(
             keras_model_name=keras_model_name,
             optimizer=optimizer,
             loss=loss,
@@ -335,7 +335,7 @@ class KerasHyperparams:
 
         # Otherwise, add the autoregressive variation
         else:
-            ar_configs: Union[List[IRegressionTrainingConfig], List[IClassificationTrainingConfig]] = [self._generate_model_config(
+            ar_configs: Union[List[IKerasRegressionTrainingConfig], List[IKerasClassificationTrainingConfig]] = [self._generate_model_config(
                 keras_model_name=keras_model_name,
                 optimizer=optimizer,
                 loss=loss,
@@ -370,7 +370,7 @@ class KerasHyperparams:
         kernel_sizes: Union[List[int], None]=None,
         pool_sizes: Union[List[int], None]=None,
         dropout_rates: Union[List[float], None]=None
-    ) -> Union[IRegressionTrainingConfig, IClassificationTrainingConfig]:
+    ) -> Union[IKerasRegressionTrainingConfig, IKerasClassificationTrainingConfig]:
         """Builds the configuration for a model ready to be trained and evaluated.
 
         Args:
@@ -386,7 +386,7 @@ class KerasHyperparams:
             dropout_rates: Union[List[float], None]
 
         Returns:
-            Union[IRegressionTrainingConfig, IClassificationTrainingConfig]
+            Union[IKerasRegressionTrainingConfig, IKerasClassificationTrainingConfig]
 
         Raises:
             ValueError:
@@ -474,7 +474,7 @@ class KerasHyperparams:
             keras_model_val["lookback"] = self.lookback
             keras_model_val["predictions"] = self.predictions
         else:
-            keras_model_val["features_num"] = 5 # Minimum number of features allowed
+            keras_model_val["features_num"] = 3 # Minimum number of features allowed
 
         # Initialize the KerasModel. If any value is invalid, this function will raise an error and
         # stop the execution.
@@ -548,4 +548,4 @@ class KerasHyperparams:
                 receipt += f"{net['name']}_{batch_number}: \n"
 
         # Finally, write the receipt in a text file
-        Epoch.FILE.save_keras_hyperparams_receipt(self.model_type, receipt)
+        Epoch.FILE.save_hyperparams_receipt(self.model_type, receipt)

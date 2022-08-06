@@ -173,7 +173,7 @@ class Backtest:
                     # Only predict in new ranges
                     if last_ct > last_neutral_ct:
                         # Perform a prediction
-                        pred: IPrediction = model.predict(candlestick["ot"], enable_cache=not self.test_mode)
+                        pred: IPrediction = model.predict(candlestick["ot"])
 
                         # If the result isn't neutral, open a position
                         if pred["r"] != 0:
@@ -226,8 +226,7 @@ class Backtest:
                 "stop_loss": self.stop_loss,
                 "idle_minutes_on_position_close": self.idle_minutes_on_position_close,
                 "model_start": model_start,
-                "model_end": model_end,
-                "model_duration": Utils.from_milliseconds_to_minutes(model_end - model_start)
+                "model_end": model_end
             },
             "model": model,
             "performance": performance
