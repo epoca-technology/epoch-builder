@@ -6,11 +6,11 @@ from math import ceil
 from pandas import DataFrame
 from modules._types import IEpochConfig, IEpochDefaults
 from modules.utils.Utils import Utils
+from modules.database.Database import Database
 from modules.candlestick.Candlestick import Candlestick
 from modules.epoch.EpochFile import EpochFile
 from modules.epoch.CandlestickNormalization import normalize_prediction_candlesticks
 from modules.epoch.PredictionRangeIndexer import create_indexer
-from modules.epoch.BacktestConfigFactory import BacktestConfigFactory
 from modules.epoch.EpochDefaultFiles import create_default_files
 
 
@@ -30,41 +30,38 @@ class Epoch:
             The set that will be used to set randomness in all required libs
         ID: str
             The ID of the Epoch.
+        TRAIN_SPLIT: float
+            The split that will be applied to the epoch_width in order to train models.
         START: int
         END: int
             The range of the Epoch. These values are used for:
-            1) Calculate the training evaluation range (epoch_width * 0.15)
-            2) Calculate the backtest range (epoch_width * 0.3)
+            1) Calculate the training evaluation range (1 - train_split)
+            2) Calculate the backtest range (epoch_width * backtest_split)
         TRAINING_EVALUATION_START: int
         TRAINING_EVALUATION_END: int
             The training evaluation range is used for the following:
-            1) Backtest ArimaModels in all position exit combinations
-            2) Evaluate freshly trained Regression Models
-            3) Backtest shortlisted RegressionModels in all position exit combinations
-            4) Evaluate freshly trained Classification Models
-            training_evaluation_range = epoch_width * 0.15
+            1) Evaluate freshly trained Regression Models
+            2) Evaluate freshly trained Classification Models
+            training_evaluation_range = 1 - train_split
         BACKTEST_START: int
         BACKTEST_END: int
             The backtest range is used for the following:
-            1) Backtest shortlisted ClassificationModels
-            2) Backtest generated ConsensusModels
-            backtest_range = epoch_width * 0.3
+            1) Discover Regressions & Classifications
+            2) Backtest shortlisted ClassificationModels
+            3) Backtest generated ConsensusModels
+            backtest_range = epoch_width * backtest_split
         HIGHEST_PRICE: float
         LOWEST_PRICE: float
             Highest and lowest price within the Epoch. These values are stored as 
             they are used to scale the prediction candlesticks for trainable models.
             If the price was to go above the highest or below the lowest price, trading should be
             stopped and a new epoch should be published once the market is "stable"
-        REGRESSION_PRICE_CHANGE_REQUIREMENT: float
-            This value is used to evaluate Keras & XGB Regression Models.
+        MODEL_DISCOVERY_STEPS: int
+            This value is used to discover Regressions and Classifications
         IDLE_MINUTES_ON_POSITION_CLOSE: int
             The number of minutes a model must remain idle once a position is closed.
-        UT_CLASS_TRAINING_DATA_ID: Union[str, None]
+        CLASSIFICATION_TRAINING_DATA_ID_UT: Union[str, None]
             The ID of the training data that will be used in the unit tests.
-        TAKE_PROFIT: Union[float, None]
-        STOP_LOSS: Union[float, None]
-            The Exit Combination that came victorious in the Regression Selection Process.
-            This value is set once the RegressionSelection has concluded.
     """
     # Initialization State
     INITIALIZED: bool = False
@@ -72,8 +69,10 @@ class Epoch:
     # Epoch Defaults
     DEFAULTS: IEpochDefaults = {
         "epoch_width": 24,
+        "train_split": 0.85,
+        "backtest_split": 0.3,
         "seed": 60184,
-        "regression_price_change_requirement": 3,
+        "model_discovery_steps": 3,
         "idle_minutes_on_position_close": 30
     }
 
@@ -82,6 +81,9 @@ class Epoch:
 
     # Identifier, must be preffixed with "_EPOCHNAME"
     ID: str
+
+    # Split used to train models
+    TRAIN_SPLIT: float
 
     # The date range of the Epoch
     START: int
@@ -99,18 +101,14 @@ class Epoch:
     HIGHEST_PRICE: float
     LOWEST_PRICE: float
 
-    # Regression Price Change Requirement
-    REGRESSION_PRICE_CHANGE_REQUIREMENT: float
+    # Steps used to discover models
+    MODEL_DISCOVERY_STEPS: int
 
     # Idle minutes on position close
     IDLE_MINUTES_ON_POSITION_CLOSE: int
 
     # The identifier of the classification training data for unit tests
-    UT_CLASS_TRAINING_DATA_ID: Union[str, None] = None
-
-    # Best Exit Combinations - Populated based on the Regression Selection Results
-    TAKE_PROFIT: Union[float, None] = None
-    STOP_LOSS: Union[float, None] = None
+    CLASSIFICATION_TRAINING_DATA_ID_UT: Union[str, None] = None
 
     # EpochFile Instance
     FILE: EpochFile
@@ -130,7 +128,9 @@ class Epoch:
         id: str, 
         epoch_width: int,
         seed: int,
-        regression_price_change_requirement: float,
+        train_split: float,
+        backtest_split: float,
+        model_discovery_steps: int,
         idle_minutes_on_position_close: int
     ) -> None:
         """Creates all the neccessary directories and files for the epoch
@@ -146,8 +146,12 @@ class Epoch:
                 is also used to calculate the Backtests' Date Range.
             seed: int
                 The random seed to be set on all required libs and machines.
-            regression_price_change_requirement: float
-                The best position exit combination known so far.
+            train_split: float
+                The split that will be applied to the epoch_width to train models.
+            backtest_split: float
+                The split that will be applied to the epoch_width to backtest models. 
+            model_discovery_steps: int
+                The steps that will be used during the model discovery process.
             idle_minutes_on_position_close: int
                 The number of minutes a model must remain idle after closing a position.
                 
@@ -158,17 +162,16 @@ class Epoch:
                 If the epoch directory already exists.
                 If the candlestick bundle is not in place
             ValueError:
-                If the id is invalid.
-                If the epoch_width is invalid.
-                If the regression_price_change_requirement is invalid.
-                If the idle_minutes_on_position_close is invalid.
+                If any of the provided values is invalid
         """
         # Make sure the epoch can be created
         Epoch._can_epoch_be_created(
             id=id,
             epoch_width=epoch_width,
             seed=seed,
-            regression_price_change_requirement=regression_price_change_requirement,
+            train_split=train_split,
+            backtest_split=backtest_split,
+            model_discovery_steps=model_discovery_steps,
             idle_minutes_on_position_close=idle_minutes_on_position_close
         )
 
@@ -183,15 +186,15 @@ class Epoch:
         print("2/10) Calculating the Epoch Range...")
         start: int = int(prediction_df.iloc[0]["ot"])
         end: int = int(prediction_df.iloc[-1]["ct"])
-        training_evaluation_start, training_evaluation_end = Epoch._calculate_date_range(prediction_df, ceil(epoch_width_days * 0.15))
-        backtest_start, backtest_end = Epoch._calculate_date_range(prediction_df, ceil(epoch_width_days * 0.3))
+        training_evaluation_start, training_evaluation_end = Epoch._calculate_date_range(prediction_df, ceil(epoch_width_days * (1 - train_split)))
+        backtest_start, backtest_end = Epoch._calculate_date_range(prediction_df, ceil(epoch_width_days * backtest_split))
 
         # Check if the normalized prediction candlesticks csv needs to be created
         print("3/10) Creating the Normalized Prediction Candlesticks CSV...")
         highest_price, lowest_price = normalize_prediction_candlesticks(prediction_df)
 
         # Initialize the candlesticks based on the prediction range lookbacks
-        lookbacks: List[int] = [ 100, 300 ]
+        lookbacks: List[int] = [ 100 ]
         Candlestick.init(max(lookbacks), start=start, end=end)
 
         # Check if the candlesticks' prediction range need to be indexed
@@ -204,19 +207,16 @@ class Epoch:
         print("5/10) Creating Directories...")
         EpochFile.create_epoch_directories(id)
 
-        # Generate Arima's Backtest Configurations
-        print("6/10) Generating Arima Backtest Configuration Files...")
-        BacktestConfigFactory.build_arima_backtest_configs(id, idle_minutes_on_position_close)
-
         # Create the Epoch's Default Files
-        print("7/10) Creating Default Files...")
+        print("6/10) Creating Default Files...")
         create_default_files(id)
 
         # Save the epoch's config file
-        print("8/10) Saving Epoch Configuration...")
+        print("7/10) Saving Epoch Configuration...")
         epoch_config: IEpochConfig = {
             "seed": seed,
             "id": id,
+            "train_split": train_split,
             "start": start,
             "end": end,
             "training_evaluation_start": training_evaluation_start,
@@ -225,18 +225,23 @@ class Epoch:
             "backtest_end": backtest_end,
             "highest_price": highest_price,
             "lowest_price": lowest_price,
-            "regression_price_change_requirement": regression_price_change_requirement,
+            "model_discovery_steps": model_discovery_steps,
             "idle_minutes_on_position_close": idle_minutes_on_position_close
         }
         EpochFile.update_epoch_config(epoch_config)
 
         # Add the Epoch's Directory to the gitignore file
-        print("9/10) Adding Epoch to .gitignore file...")
+        print("8/10) Adding Epoch to .gitignore file...")
         Epoch.add_epoch_to_gitignore_file(id)
 
         # Create the Epoch's Receipt
-        print("10/10) Creating receipt...")
+        print("9/10) Creating receipt...")
         Epoch._create_epoch_receipt(epoch_config)
+
+        # Initialize the Database
+        print("10/10) Initializing Database...")
+        Database.delete_tables()
+        Database.initialize_tables()
 
 
 
@@ -249,7 +254,9 @@ class Epoch:
         id: str, 
         epoch_width: int,
         seed: int,
-        regression_price_change_requirement: float,
+        train_split: float,
+        backtest_split: float,
+        model_discovery_steps: int,
         idle_minutes_on_position_close: int
     ) -> None:
         """Verifies if an Epoch can be created. Raises an error if any of the
@@ -259,7 +266,9 @@ class Epoch:
             id: str
             epoch_width: int
             seed: int
-            regression_price_change_requirement: float
+            train_split: float
+            backtest_split: float
+            model_discovery_steps: int
             idle_minutes_on_position_close: int
         Raises:
             RuntimeError:
@@ -268,10 +277,7 @@ class Epoch:
                 If the epoch directory already exists.
                 If the candlestick bundle is not in place
             ValueError:
-                If the id is invalid.
-                If the epoch_width is invalid.
-                If the regression_price_change_requirement is invalid.
-                If the idle_minutes_on_position_close is invalid.
+                If any of the provided values is invalid
         """
         # Make sure the epoch has not been initialized
         if Epoch.INITIALIZED:
@@ -289,9 +295,17 @@ class Epoch:
         if not isinstance(seed, int) or seed < 1 or seed > 100000000:
             raise ValueError(f"The provided seed is invalid {seed}. It must be an int ranging 1-100000000")
 
-        # Validate the provided regression_price_change_requirement
-        if not isinstance(regression_price_change_requirement, (int, float)) or regression_price_change_requirement < 1 or regression_price_change_requirement > 5:
-            raise ValueError(f"The provided regression_price_change_requirement is invalid {regression_price_change_requirement}. It must be a float ranging 1-5")
+        # Validate the provided train_split
+        if not isinstance(train_split, float) or train_split < 0.6 or train_split > 0.95:
+            raise ValueError(f"The provided train_split is invalid {train_split}. It must be an float ranging 0.6-0.95")
+
+        # Validate the provided backtest_split
+        if not isinstance(backtest_split, float) or backtest_split < 0.2 or train_split > 0.6:
+            raise ValueError(f"The provided backtest_split is invalid {backtest_split}. It must be an float ranging 0.2-0.6")
+
+        # Validate the provided model_discovery_steps
+        if not isinstance(model_discovery_steps, int) or model_discovery_steps < 1 or model_discovery_steps > 20:
+            raise ValueError(f"The provided model_discovery_steps is invalid {model_discovery_steps}. It must be an int ranging 1-20")
 
         # Validate the provided idle_minutes_on_position_close
         if not isinstance(idle_minutes_on_position_close, int) or idle_minutes_on_position_close < 0 or idle_minutes_on_position_close > 1000:
@@ -427,7 +441,8 @@ class Epoch:
         # General
         receipt += f"Creation: {Utils.from_milliseconds_to_date_string(Utils.get_time())}\n"
         receipt += f"Seed: {config['seed']}\n"
-        receipt += f"Regression Price Change Requirement: {config['regression_price_change_requirement']}%\n"
+        receipt += f"Train Split: {config['train_split']}\n"
+        receipt += f"Model Discovery Steps: {config['model_discovery_steps']}%\n"
         receipt += f"Idle Minutes On Position Close: {config['idle_minutes_on_position_close']}\n"
 
         # Price Range
@@ -485,6 +500,7 @@ class Epoch:
         # Populate epoch properties
         Epoch.SEED = config["seed"]
         Epoch.ID = config["id"]
+        Epoch.TRAIN_SPLIT = config["train_split"]
         Epoch.START = config["start"]
         Epoch.END = config["end"]
         Epoch.TRAINING_EVALUATION_START = config["training_evaluation_start"]
@@ -493,11 +509,9 @@ class Epoch:
         Epoch.BACKTEST_END = config["backtest_end"]
         Epoch.HIGHEST_PRICE = config["highest_price"]
         Epoch.LOWEST_PRICE = config["lowest_price"]
-        Epoch.REGRESSION_PRICE_CHANGE_REQUIREMENT = config["regression_price_change_requirement"]
+        Epoch.MODEL_DISCOVERY_STEPS = config["model_discovery_steps"]
         Epoch.IDLE_MINUTES_ON_POSITION_CLOSE = config["idle_minutes_on_position_close"]
-        Epoch.UT_CLASS_TRAINING_DATA_ID = config.get("ut_class_training_data_id")
-        Epoch.TAKE_PROFIT = config.get("take_profit")
-        Epoch.STOP_LOSS = config.get("stop_loss")
+        Epoch.CLASSIFICATION_TRAINING_DATA_ID_UT = config.get("classification_training_data_id_ut")
 
         # Set a static seed on all required libraries
         seed(Epoch.SEED)
@@ -524,7 +538,7 @@ class Epoch:
 
 
     @staticmethod
-    def set_ut_class_training_data_id(id: str) -> None:
+    def set_classification_training_data_id_ut(id: str) -> None:
         """Updates the Epoch's Configuration File and sets the provided
         classification training data id to be used in the unit tests.
 
@@ -550,60 +564,13 @@ class Epoch:
             raise ValueError(f"The training data file was not found in the path: {td_path}")
 
         # Set the id
-        config["ut_class_training_data_id"] = id
+        config["classification_training_data_id_ut"] = id
 
         # Update the file
         EpochFile.update_epoch_config(config)
 
 
 
-
-
-
-
-
-
-    ## Position Exit Combination ##
-
-
-    @staticmethod
-    def set_position_exit_combination(take_profit: float, stop_loss: float) -> None:
-        """Updates the Epoch's Configuration File and sets the provided
-        position exit combination. These values will be used when generating the 
-        training data and evaluating classification models.
-
-        Args:
-            take_profit: float
-            stop_loss: float
-                The position exit combination to be set on the epoch based on the 
-                Regression Selection's results.
-
-        Raises:
-            ValueError:
-                If the take_profit or stop_loss is invalid.
-            RuntimeError:
-                If the Classification Training Data for Unit Tests has not been set.
-        """
-        # Validate the provided take profit and stop loss
-        if not isinstance(take_profit, (int, float)) or take_profit < 1 or take_profit > 5:
-            raise ValueError(f"The take profit must be a valid float ranging 1-5. Instead, received: {take_profit}")
-        if not isinstance(stop_loss, (int, float)) or stop_loss < 1 or stop_loss > 5:
-            raise ValueError(f"The stop loss must be a valid float ranging 1-5. Instead, received: {stop_loss}")
-
-        # Retrieve the current configuration
-        config: IEpochConfig = EpochFile.get_epoch_config()
-
-        # Make sure the classification training data for unit tests has been set
-        td_id: Union[str, None] = config.get("ut_class_training_data_id")
-        if not isinstance(td_id, str) or not Utils.is_uuid4(td_id):
-            raise RuntimeError("The Classification Training Data for Unit Tests must be set prior to the position exit combination.")
-
-        # Set the combination
-        config["take_profit"] = take_profit
-        config["stop_loss"] = stop_loss
-
-        # Update the file
-        EpochFile.update_epoch_config(config)
 
 
 
@@ -664,12 +631,8 @@ class Epoch:
         """
         # Make sure the values that are meant to be set overtime have all been populated
         ut_class_training_data_id: int = config.get("ut_class_training_data_id")
-        take_profit: float = config.get("take_profit")
-        stop_loss: float = config.get("stop_loss")
         if not isinstance(ut_class_training_data_id, str):
             raise RuntimeError("The Classification Training Data for Unit Tests has not been set.")
-        if not isinstance(take_profit, (int, float)) or not isinstance(stop_loss, (int, float)):
-            raise RuntimeError("The Take Profit or the Stop Loss has not been set.")
 
         # Make sure the epoch's directory exists
         if not EpochFile.directory_exists(config["id"]):
