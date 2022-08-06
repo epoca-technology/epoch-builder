@@ -1,7 +1,7 @@
 from typing import List, Tuple, Dict, Union
 from pandas import DataFrame
 from inquirer import List as InquirerList, prompt
-from modules.types import IKerasClassificationTrainingBatch, IKerasClassificationTrainingCertificate, ITrainingDataFile,\
+from modules._types import IKerasClassificationTrainingBatch, IKerasClassificationTrainingCertificate, ITrainingDataFile,\
     ITrainableModelType, IKerasClassificationTrainingConfig, IXGBClassificationTrainingBatch, IXGBClassificationTrainingCertificate,\
         IXGBClassificationTrainingConfig
 from modules.utils.Utils import Utils

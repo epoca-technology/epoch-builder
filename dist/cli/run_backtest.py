@@ -1,4 +1,4 @@
-from modules.types import IBacktestConfig
+from modules._types import IBacktestConfig
 from modules.epoch.Epoch import Epoch
 from modules.backtest.Backtest import Backtest
 

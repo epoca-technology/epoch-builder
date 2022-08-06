@@ -2,7 +2,7 @@ from typing import Tuple, Union, List
 from os.path import isfile
 from json import load
 from pandas import DataFrame, Series, read_csv
-from modules.types import ICandlestickConfig, IPredictionRangeIndexer
+from modules._types import ICandlestickConfig, IPredictionRangeIndexer
 from modules.utils.Utils import Utils
 
 

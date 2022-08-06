@@ -1,5 +1,6 @@
 from typing import TypedDict, Union, List, Literal
-from modules.types.model_types import IPrediction, IModel
+from modules._types.prediction_types import IPrediction
+from modules._types.model_types import IModel
 
 
 

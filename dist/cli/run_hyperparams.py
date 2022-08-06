@@ -1,6 +1,6 @@
 from typing import Dict, Union
 from inquirer import Text, List as InquirerList, prompt
-from modules.types import ITrainableModelType
+from modules._types import ITrainableModelType
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.model.ModelType import TRAINABLE_MODEL_TYPES

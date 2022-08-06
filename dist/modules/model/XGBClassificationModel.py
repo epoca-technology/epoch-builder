@@ -1,11 +1,10 @@
 from typing import List, Union
 from pandas import DataFrame
-from modules.types import IModel, IPrediction, IPredictionMetaData, ITechnicalAnalysis
+from modules._types import IModel, IPrediction, IPredictionMetaData, ITechnicalAnalysis, ModelInterface
 from modules.candlestick.Candlestick import Candlestick
 from modules.interpreter.ProbabilityInterpreter import ProbabilityInterpreter
 from modules.prediction_cache.PredictionCache import PredictionCache
 from modules.model.ModelType import validate_id
-from modules.model.Interface import ModelInterface
 from modules.model.RegressionModelFactory import RegressionModelFactory, RegressionModel
 from modules.technical_analysis.TechnicalAnalysis import TechnicalAnalysis
 from modules.xgb_classification.XGBClassification import XGBClassification

@@ -2,7 +2,7 @@ from typing import Union, List, Tuple
 from functools import reduce
 from copy import deepcopy
 from math import ceil
-from modules.types import IKerasModelConfig, IKerasHyperparamsLoss, IKerasHyperparamsNetworkReceipt, \
+from modules._types import IKerasModelConfig, IKerasHyperparamsLoss, IKerasHyperparamsNetworkReceipt, \
     IKerasRegressionTrainingConfig, IKerasRegressionTrainingBatch, IKerasClassificationTrainingConfig, \
     IKerasClassificationTrainingBatch, IKerasOptimizer, IKerasActivation, ITrainableModelType, IModelIDPrefix
 from modules.utils.Utils import Utils

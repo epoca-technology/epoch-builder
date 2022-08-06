@@ -1,6 +1,6 @@
 from typing import List, Dict
 from numpy import median, mean, arange
-from modules.types import IKerasRegressionTrainingCertificate, IXGBRegressionTrainingCertificate
+from modules._types import IKerasRegressionTrainingCertificate, IXGBRegressionTrainingCertificate
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 

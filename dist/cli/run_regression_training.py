@@ -1,6 +1,6 @@
 from typing import List, Dict, Union
 from inquirer import List as InquirerList, prompt
-from modules.types import IKerasRegressionTrainingBatch, IKerasRegressionTrainingCertificate, ITrainableModelType,\
+from modules._types import IKerasRegressionTrainingBatch, IKerasRegressionTrainingCertificate, ITrainableModelType,\
     IKerasRegressionTrainingConfig, IXGBRegressionTrainingBatch, IXGBRegressionTrainingCertificate, IXGBRegressionTrainingConfig
 from modules.epoch.Epoch import Epoch
 from modules.utils.Utils import Utils

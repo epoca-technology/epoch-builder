@@ -1,5 +1,5 @@
 from typing import List
-from modules.types import IModelType, ITrainableModelType, IModelIDPrefix, IPrefixOrID
+from modules._types import IModelType, ITrainableModelType, IModelIDPrefix, IPrefixOrID
 
 
 

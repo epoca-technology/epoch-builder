@@ -1,11 +1,11 @@
 from typing import List, Union
 from pandas import DataFrame
-from modules.types import IModel, IPrediction, IPredictionMetaData, IPredictionResult
+from modules._types import IModel, IPrediction, IPredictionMetaData, IPredictionResult, ModelInterface,\
+    IModelType
 from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
 from modules.interpreter.ConsensusInterpreter import ConsensusInterpreter
-from modules.model.ModelType import validate_id, IModelType
-from modules.model.Interface import ModelInterface
+from modules.model.ModelType import validate_id
 from modules.model.ClassificationModelFactory import ClassificationModelFactory, ClassificationModel
 
 

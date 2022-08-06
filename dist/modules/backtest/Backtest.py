@@ -1,6 +1,6 @@
 from typing import List
 from tqdm import tqdm
-from modules.types import IModel, IPrediction, IBacktestConfig, IBacktestPerformance, IBacktestResult
+from modules._types import IModel, IPrediction, IBacktestConfig, IBacktestPerformance, IBacktestResult
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick

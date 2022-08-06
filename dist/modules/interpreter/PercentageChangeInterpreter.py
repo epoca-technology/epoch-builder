@@ -1,7 +1,6 @@
 from typing import List, Tuple
-from modules.types import IPercentChangeInterpreterConfig, IPredictionResult
+from modules._types import IPercentChangeInterpreterConfig, IPredictionResult, InterpreterInterface
 from modules.utils.Utils import Utils
-from modules.interpreter.Interface import InterpreterInterface
 
 
 

@@ -1,7 +1,7 @@
 from typing import Union, List
 from numpy import ndarray, array
 from pandas import DataFrame
-from modules.types import IRegressionDatasets
+from modules._types import IRegressionDatasets
 from modules.candlestick.Candlestick import Candlestick
 
 

@@ -1,5 +1,5 @@
 from pandas import DataFrame, concat
-from modules.types import ICompressedTrainingData, IClassificationDatasets
+from modules._types import ICompressedTrainingData, IClassificationDatasets
 from modules.classification_training_data.ClassificationTrainingData import ClassificationTrainingData
 
 

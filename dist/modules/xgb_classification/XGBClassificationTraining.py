@@ -1,6 +1,6 @@
 from typing import List
 from pandas import Series
-from modules.types import IXGBClassificationTrainingConfig, IXGBTrainingTypeConfig, IClassificationDatasets,\
+from modules._types import IXGBClassificationTrainingConfig, IXGBTrainingTypeConfig, IClassificationDatasets,\
     ITrainingDataFile
 
 

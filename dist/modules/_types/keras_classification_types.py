@@ -1,9 +1,9 @@
 from typing import TypedDict, List
-from modules.types.model_types import IKerasClassificationConfig
-from modules.types.keras_models_types import IKerasModelConfig, IKerasModelTrainingHistory, \
+from modules._types.model_types import IKerasClassificationConfig
+from modules._types.keras_models_types import IKerasModelConfig, IKerasModelTrainingHistory, \
     IKerasOptimizer, IKerasClassificationLoss, IKerasClassificationMetric, IKerasOptimizerName
-from modules.types.classification_training_data_types import ITrainingDataSummary
-from modules.types.model_evaluation_types import IModelEvaluation
+from modules._types.classification_training_data_types import ITrainingDataSummary
+from modules._types.model_evaluation_types import IModelEvaluation
 
 
 

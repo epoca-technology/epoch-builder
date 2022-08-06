@@ -4,9 +4,8 @@ from pandas import Series
 from h5py import File as h5pyFile
 from tensorflow.python.keras.saving.hdf5_format import load_model_from_hdf5
 from keras import Sequential
-from modules.types import IKerasRegressionConfig
+from modules._types import IKerasRegressionConfig, KerasModelInterface
 from modules.epoch.Epoch import Epoch
-from modules.keras_models.Interface import KerasModelInterface
 from modules.keras_models.KerasModelSummary import get_summary
 
 

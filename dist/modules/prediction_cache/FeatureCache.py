@@ -1,5 +1,5 @@
 from typing import Union, List, Dict
-from modules.types import IDatabaseTableName
+from modules._types import IDatabaseTableName
 from modules.database.Database import Database
 
 

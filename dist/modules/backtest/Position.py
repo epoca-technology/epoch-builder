@@ -1,7 +1,7 @@
 from typing import Tuple, List, Union
 from numpy import median
 from pandas import Series
-from modules.types import IPrediction, IBacktestPerformance, IBacktestPosition
+from modules._types import IPrediction, IBacktestPerformance, IBacktestPosition
 from modules.utils.Utils import Utils
 
 

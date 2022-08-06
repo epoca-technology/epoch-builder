@@ -1,7 +1,6 @@
 from typing import List
 from pandas import Series
-from modules.types import IXGBRegressionConfig
-from modules.xgb_models.Interface import XGBModelInterface
+from modules._types import IXGBRegressionConfig, XGBModelInterface
 
 
 

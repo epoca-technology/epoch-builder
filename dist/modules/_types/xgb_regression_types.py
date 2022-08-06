@@ -1,9 +1,6 @@
-from typing import List, Dict
-from modules.types.regression_types import IRegressionTrainingConfig, IRegressionTrainingBatch, IRegressionTrainingCertificate
-from modules.types.model_types import IKerasRegressionConfig
-from modules.types.keras_models_types import IKerasModelConfig, IKerasModelTrainingHistory, IKerasOptimizer, \
-    IKerasRegressionLoss, IKerasRegressionMetric, IKerasOptimizerName
-from modules.types.model_evaluation_types import IModelEvaluation
+from typing import List, TypedDict, Dict, Any
+from modules._types.model_types import IXGBRegressionConfig
+from modules._types.model_evaluation_types import IModelEvaluation
 
 
 
@@ -16,9 +13,9 @@ from modules.types.model_evaluation_types import IModelEvaluation
 
 
 
-# Keras Regression Training Configuration
+# XGBoost Regression Training Configuration
 # The configuration that will be used to initialize, train and save the model.
-class IKerasRegressionTrainingConfig(IRegressionTrainingConfig):
+class IXGBRegressionTrainingConfig(TypedDict):
     # The ID of the model.
     id: str
 
@@ -36,17 +33,7 @@ class IKerasRegressionTrainingConfig(IRegressionTrainingConfig):
     # The number of predictions to be generated
     predictions: int
 
-    # The optimizer to be used.
-    optimizer: IKerasOptimizer # 'adam'|'rmsprop'
-
-    # The loss function to be used
-    loss: IKerasRegressionLoss # 'mean_squared_error'|'mean_absolute_error'
-
-    # The metric function to be used
-    metric: IKerasRegressionMetric # 'mean_squared_error'|'mean_absolute_error'
-
-    # Keras Model Configuration
-    keras_model: IKerasModelConfig
+    # @TODO
 
 
 
@@ -55,15 +42,15 @@ class IKerasRegressionTrainingConfig(IRegressionTrainingConfig):
 
 
 
-# Keras Regression Training Batch
-# Keras Models and created and evaluated in batches. Moreover, multiple batches can be combined
+# XGBoost Regression Training Batch
+# XGBoost Models and created and evaluated in batches. Moreover, multiple batches can be combined
 # in the GUI.
-class IKerasRegressionTrainingBatch(IRegressionTrainingBatch):
+class IXGBRegressionTrainingBatch(TypedDict):
     # Descriptive name to easily identify the batch. Must be compatible with filesystems.
     name: str
 
     # The configurations for the models that will be trained within the batch.
-    models: List[IKerasRegressionTrainingConfig]
+    models: List[IXGBRegressionTrainingConfig]
 
 
 
@@ -72,10 +59,10 @@ class IKerasRegressionTrainingBatch(IRegressionTrainingBatch):
 
 
 
-# Keras Regression Training Certificate
+# XGBoost Regression Training Certificate
 # Once the training, saving and evaluation completes, a certificate containing all the
 # data is saved and issued for batching.
-class IKerasRegressionTrainingCertificate(IRegressionTrainingCertificate):
+class IXGBRegressionTrainingCertificate(TypedDict):
     # Identification
     id: str
     description: str
@@ -95,23 +82,16 @@ class IKerasRegressionTrainingCertificate(IRegressionTrainingCertificate):
     autoregressive: bool
     lookback: int
     predictions: int
-    optimizer: IKerasOptimizerName
-    loss: IKerasRegressionLoss
-    metric: IKerasRegressionMetric
-    keras_model_config: IKerasModelConfig
-
-    # Training
-    training_start: int     # Time in which the training started
-    training_end: int       # Time in which the training ended
+    # @TODO
 
     # Training performance by epoch
-    training_history: IKerasModelTrainingHistory
+    # @TODO
 
     # Result of the evaluation of the test dataset
-    test_evaluation: List[float] # [loss, loss_metric]
+    # @TODO
 
     # Regression Post-Training Evaluation
     regression_evaluation: IModelEvaluation
 
     # The configuration of the Regression
-    regression_config: IKerasRegressionConfig
+    regression_config: IXGBRegressionConfig

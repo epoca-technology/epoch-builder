@@ -1,7 +1,6 @@
 from typing import List, Tuple
 from collections import Counter
-from modules.types import IConsensusInterpreterConfig, IPredictionResult
-from modules.interpreter.Interface import InterpreterInterface
+from modules._types import IConsensusInterpreterConfig, IPredictionResult, InterpreterInterface
 
 
 

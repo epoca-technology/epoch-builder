@@ -1,7 +1,7 @@
 from typing import List, Dict, Union
 from copy import deepcopy
 from inquirer import List as InquirerList, prompt
-from modules.types import IKerasRegressionTrainingCertificate, IKerasClassificationTrainingCertificate, \
+from modules._types import IKerasRegressionTrainingCertificate, IKerasClassificationTrainingCertificate, \
     ITrainableModelType, IKerasRegressionTrainingBatch, IKerasClassificationTrainingBatch,\
         IKerasRegressionTrainingConfig, IKerasClassificationTrainingConfig, IXGBRegressionTrainingCertificate,\
             IXGBClassificationTrainingCertificate, IXGBRegressionTrainingBatch, IXGBClassificationTrainingBatch,\

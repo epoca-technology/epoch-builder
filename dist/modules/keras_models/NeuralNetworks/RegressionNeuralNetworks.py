@@ -1,6 +1,6 @@
 from keras import Sequential
 from keras.layers import Input, Reshape, Dense, Conv1D, MaxPooling1D, Flatten, LSTM
-from modules.types import IKerasModelConfig
+from modules._types import IKerasModelConfig
 from modules.keras_models.NeuralNetworks.validator import validate
 
 

@@ -1,4 +1,4 @@
-from modules.types import ITrainingDataConfig
+from modules._types import ITrainingDataConfig
 from modules.epoch.Epoch import Epoch
 from modules.classification_training_data.ClassificationTrainingData import ClassificationTrainingData
 

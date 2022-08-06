@@ -1,4 +1,4 @@
-from modules.types.hyperparams_types import IKerasHyperparamsNetworks
+from modules._types.hyperparams_types import IKerasHyperparamsNetworks
 from modules.hyperparams.KerasNetworks.Regression.DNN import DNN
 from modules.hyperparams.KerasNetworks.Regression.CNN import CNN
 from modules.hyperparams.KerasNetworks.Regression.LSTM import LSTM

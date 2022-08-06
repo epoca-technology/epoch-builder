@@ -1,5 +1,5 @@
 from keras import Sequential
-from modules.types import IKerasModelConfig
+from modules._types import IKerasModelConfig
 import modules.keras_models.NeuralNetworks.RegressionNeuralNetworks as KerasRegressionModels
 import modules.keras_models.NeuralNetworks.ClassificationNeuralNetworks as KerasClassificationModels
 
@@ -23,9 +23,9 @@ def KerasModel(config: IKerasModelConfig) -> Sequential:
             if the model configuration is invalid
     """
     # Build a Regression Model
-    if config["name"][0:2] == "R_":
+    if config["name"][0:3] == "KR_":
         return getattr(KerasRegressionModels, config["name"])(config)
-    elif config["name"][0:2] == "C_":
+    elif config["name"][0:3] == "KC_":
         return getattr(KerasClassificationModels, config["name"])(config)
     else:
         raise ValueError(f"The Keras Model Type could not be found for {config['name']}.")

@@ -1,5 +1,5 @@
 from typing import List
-from modules.types import IBacktestConfig, IModel, IBacktestID
+from modules._types import IBacktestConfig, IModel, IBacktestID
 from modules.epoch.EpochFile import EpochFile
 
 

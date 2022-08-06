@@ -1,6 +1,6 @@
 from typing import List
 from pandas import Series
-from modules.types import IXGBRegressionTrainingConfig
+from modules._types import IXGBRegressionTrainingConfig
 
 
 

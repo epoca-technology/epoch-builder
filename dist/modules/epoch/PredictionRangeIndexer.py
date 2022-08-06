@@ -1,6 +1,6 @@
 from typing import List
 from tqdm import tqdm
-from modules.types import IPredictionRangeIndexer
+from modules._types import IPredictionRangeIndexer
 from modules.candlestick.Candlestick import Candlestick
 from modules.epoch.EpochFile import EpochFile
 

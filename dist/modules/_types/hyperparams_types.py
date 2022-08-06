@@ -1,6 +1,6 @@
 from typing import TypedDict, Union, List, Literal, Dict
-from modules.types.model_types import ITrainableModelType
-from modules.types.keras_models_types import IKerasLoss, IKerasMetric, IKerasModelConfig
+from modules._types.model_types import ITrainableModelType
+from modules._types.keras_models_types import IKerasLoss, IKerasMetric, IKerasModelConfig
 
 
 

@@ -1,5 +1,5 @@
 from typing import Union, List
-from modules.types import IKerasModelConfig, ITrainableModelType
+from modules._types import IKerasModelConfig, ITrainableModelType
 from modules.model.ModelType import get_trainable_model_type
 
 

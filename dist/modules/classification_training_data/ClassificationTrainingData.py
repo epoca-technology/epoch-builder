@@ -2,7 +2,7 @@ from typing import List, Dict, Tuple, Union
 from pandas import DataFrame, Series
 from math import ceil
 from tqdm import tqdm
-from modules.types import ITechnicalAnalysis, ITrainingDataConfig, ITrainingDataActivePosition,\
+from modules._types import ITechnicalAnalysis, ITrainingDataConfig, ITrainingDataActivePosition,\
     ITrainingDataFile, ITrainingDataPriceActionsInsight, ITrainingDataPredictionInsight, ITechnicalAnalysisInsight,\
         ICompressedTrainingData, ITrainingDataSummary
 from modules.utils.Utils import Utils

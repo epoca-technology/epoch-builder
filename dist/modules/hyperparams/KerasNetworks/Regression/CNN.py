@@ -1,5 +1,5 @@
 from typing import List
-from modules.types import IKerasModelConfig, IKerasHyperparamsNetworkVariations
+from modules._types import IKerasModelConfig, IKerasHyperparamsNetworkVariations
 
 
 ##################################

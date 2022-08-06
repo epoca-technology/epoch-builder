@@ -8,7 +8,7 @@ from keras.optimizer_v2.learning_rate_schedule import InverseTimeDecay
 from keras.losses import CategoricalCrossentropy, BinaryCrossentropy
 from keras.metrics import CategoricalAccuracy, BinaryAccuracy
 from keras.callbacks import EarlyStopping, History
-from modules.types import IKerasTrainingTypeConfig, IKerasModelConfig, IKerasModelTrainingHistory, IModel,\
+from modules._types import IKerasTrainingTypeConfig, IKerasModelConfig, IKerasModelTrainingHistory, IModel,\
     ITrainingDataFile, IKerasClassificationTrainingConfig, ITrainingDataSummary, IKerasClassificationTrainingCertificate,\
          IModelEvaluation, IKerasOptimizer, IKerasClassificationLoss, IKerasClassificationMetric, ITrainableModelType,\
          IClassificationDatasets

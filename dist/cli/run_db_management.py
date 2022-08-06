@@ -3,7 +3,7 @@ from os import makedirs, listdir
 from os.path import exists, isfile, join
 from inquirer import List as InquirerList, prompt
 from subprocess import Popen
-from modules.types import IDatabaseSummary
+from modules._types import IDatabaseSummary
 from modules.epoch.Epoch import Epoch
 from modules.utils.Utils import Utils
 from modules.database.Database import Database, DB_CONNECTION_CONFIG

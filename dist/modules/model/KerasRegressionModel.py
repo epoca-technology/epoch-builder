@@ -1,13 +1,12 @@
 from typing import List, Union
 from pandas import DataFrame
-from modules.types import IModel, IPrediction, IPredictionMetaData
+from modules._types import IModel, IPrediction, IPredictionMetaData, RegressionModelInterface
 from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
 from modules.interpreter.PercentageChangeInterpreter import PercentageChangeInterpreter
 from modules.prediction_cache.FeatureCache import FeatureCache
 from modules.prediction_cache.PredictionCache import PredictionCache
 from modules.model.ModelType import validate_id
-from modules.model.Interface import RegressionModelInterface
 from modules.keras_regression.KerasRegression import KerasRegression
 
 

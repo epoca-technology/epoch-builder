@@ -1,4 +1,4 @@
-from modules.types import IBacktestConfig, IKerasRegressionTrainingBatch, IKerasClassificationTrainingBatch
+from modules._types import IBacktestConfig, IKerasRegressionTrainingBatch, IKerasClassificationTrainingBatch
 from modules.epoch.EpochFile import EpochFile
 
 

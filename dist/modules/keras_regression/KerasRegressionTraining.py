@@ -7,7 +7,7 @@ from keras.optimizer_v2.learning_rate_schedule import InverseTimeDecay
 from keras.losses import MeanSquaredError, MeanAbsoluteError
 from keras.metrics import MeanSquaredError as MeanSquaredErrorMetric, MeanAbsoluteError as MeanAbsoluteErrorMetric
 from keras.callbacks import EarlyStopping, History
-from modules.types import IKerasTrainingTypeConfig, IKerasModelConfig, IKerasModelTrainingHistory,\
+from modules._types import IKerasTrainingTypeConfig, IKerasModelConfig, IKerasModelTrainingHistory,\
     IKerasRegressionTrainingConfig, IKerasRegressionTrainingCertificate, IModelEvaluation, IKerasOptimizer,\
         IKerasRegressionLoss, IKerasRegressionMetric, ITrainableModelType
 from modules.utils.Utils import Utils

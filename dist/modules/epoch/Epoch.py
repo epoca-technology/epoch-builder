@@ -4,7 +4,7 @@ from numpy.random import seed as npseed
 from tensorflow import random as tf_random
 from math import ceil
 from pandas import DataFrame
-from modules.types import IEpochConfig, IEpochDefaults
+from modules._types import IEpochConfig, IEpochDefaults
 from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
 from modules.epoch.EpochFile import EpochFile

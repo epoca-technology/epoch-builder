@@ -1,5 +1,5 @@
 from typing import Union
-from modules.types import IModelEvaluationEarlyStoppingCheckpoint
+from modules._types import IModelEvaluationEarlyStoppingCheckpoint
 
 
 

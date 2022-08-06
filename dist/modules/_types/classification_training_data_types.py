@@ -1,6 +1,6 @@
 from typing import TypedDict, List, Union, Dict, Tuple
 from pandas import DataFrame
-from modules.types.model_types import IModel
+from modules._types.model_types import IModel
 
 
 

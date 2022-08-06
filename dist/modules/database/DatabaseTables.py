@@ -1,5 +1,5 @@
 from typing import List
-from modules.types import IDatabaseTable, IDatabaseTableName
+from modules._types import IDatabaseTable, IDatabaseTableName
 
 
 

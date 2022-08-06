@@ -2,7 +2,7 @@ from typing import Union, List
 from pandas import DataFrame, Series
 from ta.momentum import rsi
 from ta.trend import AroonIndicator
-from modules.types import ITechnicalAnalysis
+from modules._types import ITechnicalAnalysis
 from modules.database.Database import Database
 
 

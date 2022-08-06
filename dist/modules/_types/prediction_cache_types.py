@@ -1,5 +1,5 @@
 from typing import TypedDict
-from modules.types.model_types import IPrediction
+from modules._types.prediction_types import IPrediction
 
 
 

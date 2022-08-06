@@ -3,7 +3,7 @@ from os import makedirs, listdir
 from os.path import exists, isfile, dirname, splitext
 from shutil import rmtree, move
 from json import load, dumps
-from modules.types import IConfigPath, IBacktestAssetsPath, IModelAssetsPath, IEpochConfig, \
+from modules._types import IConfigPath, IBacktestAssetsPath, IModelAssetsPath, IEpochConfig, \
     IBacktestConfig, IKerasRegressionTrainingBatch, ITrainingDataConfig, IKerasClassificationTrainingBatch,\
         IBacktestResult, ITrainingDataFile, IKerasClassificationTrainingCertificate, IKerasRegressionTrainingCertificate,\
             ITrainableModelType, ITrainableModelExtension, IBacktestID, IRegressionSelectionFile, \

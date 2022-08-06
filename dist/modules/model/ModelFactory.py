@@ -1,5 +1,5 @@
 from typing import Union
-from modules.types import IModel
+from modules._types import IModel
 from modules.model.KerasRegressionModel import KerasRegressionModel
 from modules.model.XGBRegressionModel import XGBRegressionModel
 from modules.model.KerasClassificationModel import KerasClassificationModel
