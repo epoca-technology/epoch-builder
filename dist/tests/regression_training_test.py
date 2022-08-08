@@ -1,7 +1,7 @@
 import unittest
 from copy import deepcopy
 from numpy import ndarray
-from modules.types import IKerasModelConfig, IRegressionTrainingConfig
+from modules._types import IKerasModelConfig, IRegressionTrainingConfig
 from modules.database.Database import Database
 from modules.regression.RegressionTraining import RegressionTraining
 

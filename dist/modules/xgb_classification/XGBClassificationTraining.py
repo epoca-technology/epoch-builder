@@ -2,6 +2,7 @@ from typing import List
 from pandas import Series
 from modules._types import IXGBClassificationTrainingConfig, IXGBTrainingTypeConfig, IClassificationDatasets,\
     ITrainingDataFile
+from modules.epoch.Epoch import Epoch
 
 
 
@@ -18,7 +19,7 @@ class XGBClassificationTraining:
     """
     # Training Configuration
     TRAINING_CONFIG: IXGBTrainingTypeConfig = {
-        "train_split": 0.85,
+        "train_split": Epoch.TRAIN_SPLIT,
     }
 
 

@@ -1,7 +1,7 @@
 import unittest
 from typing import List
 from pandas import Series
-from modules.types import IRegressionConfig, IRegressionTrainingCertificate
+from modules._types import IRegressionConfig, IRegressionTrainingCertificate
 from modules.database.Database import Database
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick

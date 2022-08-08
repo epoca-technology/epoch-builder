@@ -3,6 +3,7 @@ from modules._types.model_types import IKerasClassificationConfig
 from modules._types.keras_models_types import IKerasModelConfig, IKerasModelTrainingHistory, \
     IKerasOptimizer, IKerasClassificationLoss, IKerasClassificationMetric, IKerasOptimizerName
 from modules._types.classification_training_data_types import ITrainingDataSummary
+from modules._types.discovery_types import IDiscoveryPayload
 from modules._types.model_evaluation_types import IModelEvaluation
 
 
@@ -95,6 +96,9 @@ class IKerasClassificationTrainingCertificate(TypedDict):
 
     # Result of the evaluation of the test dataset
     test_evaluation: List[float] # [loss, metric]
+
+    # Classification Discovery
+    discovery: IDiscoveryPayload
 
     # Classification Post-Training Evaluation
     classification_evaluation: IModelEvaluation

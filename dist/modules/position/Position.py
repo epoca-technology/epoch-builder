@@ -1,7 +1,8 @@
 from typing import Tuple, List, Union
 from numpy import median
 from pandas import Series
-from modules._types import IPrediction, IBacktestPerformance, IBacktestPosition
+from dist.modules._types.position_types import IPositionType
+from modules._types import IPrediction, IPosition, IPositionPerformance
 from modules.utils.Utils import Utils
 
 
@@ -36,7 +37,7 @@ class Position:
                 The history of how points have fluctuated during the process.
 
         Positions:
-            active: Union[IBacktestPosition, None]
+            active: Union[IPosition, None]
                 This property is populated when there is an active position. Otherwise,
                 new positions can be opened.
             positions: List[IBacktestPosition]
@@ -84,8 +85,8 @@ class Position:
         self.points: List[float] = [0]
 
         # Init Positions
-        self.active: Union[IBacktestPosition, None] = None
-        self.positions: List[IBacktestPosition] = []
+        self.active: Union[IPosition, None] = None
+        self.positions: List[IPosition] = []
 
         # Position Counters
         self.long_num: int = 0
@@ -130,17 +131,18 @@ class Position:
 
 
 
-    def _get_exit_prices(self, position_type: int, open_price: float) -> Tuple[float, float]:
+    def _get_exit_prices(self, position_type: IPositionType, open_price: float) -> Tuple[float, float]:
         """Calculates the take profit and the stop loss prices for a position about to be opened.
 
         Args:
-            position_type: int
+            position_type: IPositionType
                 The type of position based on the prediction. It can only be 1 or -1.
             open_price: float
                 The current candlestick's open price.
         
         Returns:
-            Tuple[float, float] (take_profit, stop_loss)
+            Tuple[float, float] 
+            (take_profit, stop_loss)
         """
         # Handle a long position
         if position_type == 1:
@@ -299,17 +301,17 @@ class Position:
 
 
 
-    def get_performance(self) -> IBacktestPerformance:
+    def get_performance(self) -> IPositionPerformance:
         """Returns the performance dictionary based on the instance
         data.
 
         Returns:
-            IBacktestPerformance
+            IPositionPerformance
         """
         return {
             "points": self.points[-1],
             "points_hist": self.points,
-            "points_median": median(self.points),
+            "points_median": round(median(self.points), 2),
             "positions": self.positions,
             "long_num": self.long_num,
             "short_num": self.short_num,

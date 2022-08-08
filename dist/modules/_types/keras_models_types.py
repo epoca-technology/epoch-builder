@@ -256,6 +256,10 @@ class IKerasModelSummary(TypedDict):
 # Regression and Classification implement the following interface
 # in order to ensure compatibility across any of the processes.
 class KerasModelInterface:
+    # Init
+    def __init__(self, id: str, discovery_config: Union[dict, None]):
+        raise NotImplementedError("KerasModel.__init__ has not been implemented.")
+
     # Performs a prediction based provided features
     def predict(self, *args,**kwargs) -> List[float]:
         raise NotImplementedError("KerasModel.predict has not been implemented.")

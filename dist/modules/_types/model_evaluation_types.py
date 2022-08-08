@@ -1,34 +1,5 @@
 from typing import TypedDict, List, Union
-from modules._types.backtest_types import IBacktestPosition
-
-
-
-
-# Early Stopping
-# The process of training and evaluating models creates a massive bottleneck as computing
-# resources are limited. In order to speed up the process, a Model Evaluation will stop early
-# if any of the following is met:
-# 1) The model reaches -35 points
-# 2) The model has less than 1 long or 1 short at the first early stopping checkpoint (15% of the dataset)
-# 3) The model has less than 3 longs or 3 shorts at the second early stopping checkpoint (30% of the dataset)
-# 4) The model has less than 7 longs or 7 shorts at the third early stopping checkpoint (50% of the dataset)
-# 5) The model has less than 10 longs or 10 shorts at the fourth early stopping checkpoint (70% of the dataset)
-
-# Checkpoint
-class IModelEvaluationEarlyStoppingCheckpoint(TypedDict):
-    # The candlestick index in which the checkpoint should be evaluated
-    index: int
-
-    # The state of the checkpoint
-    passed: bool
-
-    # The minimum required positions
-    required_longs: int
-    required_shorts: int
-
-    # The reason why the model's evaluation should be stopped early
-    motive: str
-
+from modules._types.position_types import IPosition
 
 
 
@@ -45,7 +16,7 @@ class IModelEvaluation(TypedDict):
     neutral_predictions: int
 
     # Positions
-    positions: List[IBacktestPosition]
+    positions: List[IPosition]
 
     # The median of the points collected during the evaluation
     points_median: float

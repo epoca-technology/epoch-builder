@@ -73,8 +73,8 @@ class KerasClassificationModel(ModelInterface):
 
         # Initialize the Interpreter Instance
         self.interpreter: ProbabilityInterpreter = ProbabilityInterpreter({
-            "min_increase_probability": 0,
-            "min_decrease_probability": 0
+            "min_increase_probability": self.classification.discovery["increase_successful_mean"],
+            "min_decrease_probability": self.classification.discovery["decrease_successful_mean"]
         })
 
         # Initialize the prediction cache instance

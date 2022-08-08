@@ -1,10 +1,10 @@
 from typing import List
 from tqdm import tqdm
-from modules._types import IModel, IPrediction, IBacktestConfig, IBacktestPerformance, IBacktestResult
+from modules._types import IModel, IPrediction, IBacktestConfig, IPositionPerformance, IBacktestResult
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
-from modules.backtest.Position import Position
+from modules.position.Position import Position
 from modules.model.ModelFactory import ModelFactory, Model
 
 
@@ -201,7 +201,7 @@ class Backtest:
 
 
 
-    def _append_result(self, model_start: int, model: IModel, performance: IBacktestPerformance) -> None:
+    def _append_result(self, model_start: int, model: IModel, performance: IPositionPerformance) -> None:
         """Appends the model's results to the list once it has completed backtesting.
 
         Args:
@@ -209,7 +209,7 @@ class Backtest:
                 The time in which the model's backtesting started.
             model: IModel
                 The model that went through the backtesting.
-            performance: IBacktestPerformance
+            performance: IPositionPerformance
                 The performance of the model.
         """
         # Init the end time

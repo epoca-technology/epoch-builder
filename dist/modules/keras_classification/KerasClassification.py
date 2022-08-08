@@ -3,7 +3,7 @@ from json import loads
 from h5py import File as h5pyFile
 from tensorflow.python.keras.saving.hdf5_format import load_model_from_hdf5
 from keras import Sequential
-from modules._types import IModel, IKerasClassificationConfig, KerasModelInterface
+from modules._types import IModel, IKerasClassificationConfig, KerasModelInterface, IDiscovery
 from modules.epoch.Epoch import Epoch
 from modules.keras_models.KerasModelSummary import get_summary
 
@@ -28,6 +28,9 @@ class KerasClassification(KerasModelInterface):
             Optional Technical Analysis Features
         features_num: int
             The total number of features that will be used by the model to predict
+        discovery: IDiscovery
+            The model's discovery information. If the model has not yet been saved, this
+            value will be an empty dict.
         model: Sequential
             The instance of the trained model.
     """
@@ -58,28 +61,33 @@ class KerasClassification(KerasModelInterface):
             self.include_aroon: bool = model_file.attrs.get("include_aroon") == True
             self.features_num: int = int(model_file.attrs["features_num"]) # Downcast to int
             self.regressions: List[IModel] = loads(model_file.attrs["models"])
+            self.discovery: IDiscovery = loads(model_file.attrs["discovery"])
             self.model: Sequential = load_model_from_hdf5(model_file)
         
         # Make sure the IDs are identical
         if self.id != id:
-            raise ValueError(f"KerasClassificationModel ID Missmatch: {self.id} != {id}")
+            raise ValueError(f"KerasClassification ID Missmatch: {self.id} != {id}")
 
         # Make sure the description was extracted
         if not isinstance(self.description, str):
-            raise ValueError(f"KerasClassificationModel Description is invalid: {str(self.description)}")
+            raise ValueError(f"KerasClassification Description is invalid: {str(self.description)}")
         
         # Make sure the training_data_id was extracted
         if not isinstance(self.training_data_id, str):
-            raise ValueError(f"KerasClassificationModel Training Data ID is invalid: {self.training_data_id}")
+            raise ValueError(f"KerasClassification Training Data ID is invalid: {self.training_data_id}")
         
         # Make sure the features_num was extracted
         if not isinstance(self.features_num, int):
-            raise ValueError(f"KerasClassificationModel features_num is invalid: {self.features_num}")
+            raise ValueError(f"KerasClassification features_num is invalid: {self.features_num}")
 
         # Make sure the regressions were extracted and initialized
         if not isinstance(self.regressions, list) or len(self.regressions) < 1:
             print(self.regressions)
-            raise ValueError(f"KerasClassificationModel Regressions are invalid.")
+            raise ValueError(f"KerasClassification Regressions are invalid.")
+
+        # Make sure the discovery was extracted
+        if not isinstance(self.discovery, dict):
+            raise ValueError(f"KerasClassification Discovery is invalid: {str(self.discovery)}")
 
 
 
@@ -126,5 +134,6 @@ class KerasClassification(KerasModelInterface):
             "include_rsi": self.include_rsi,
             "include_aroon": self.include_aroon,
             "features_num": self.features_num,
+            "discovery": self.discovery,
             "summary": get_summary(self.model),
         }

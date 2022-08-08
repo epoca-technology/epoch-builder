@@ -1,5 +1,5 @@
 import unittest
-from modules.types import IModel, IPrediction
+from modules._types import IModel, IPrediction
 from modules.database.Database import Database
 from modules.candlestick.Candlestick import Candlestick
 from modules.model.RegressionModel import RegressionModel

@@ -1,6 +1,6 @@
 import unittest
 from copy import deepcopy
-from modules.types import IKerasModelConfig, IClassificationTrainingConfig, ITrainingDataFile
+from modules._types import IKerasModelConfig, IClassificationTrainingConfig, ITrainingDataFile
 from modules.database.Database import Database
 from modules.epoch.Epoch import Epoch
 from modules.classification.ClassificationTraining import ClassificationTraining

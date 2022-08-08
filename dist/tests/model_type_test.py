@@ -1,6 +1,6 @@
 from typing import List, TypedDict, Union
 import unittest
-from modules.types import IModelType, ITrainableModelType, IModelIDPrefix
+from modules._types import IModelType, ITrainableModelType, IModelIDPrefix
 from modules.database.Database import Database
 from modules.model.ModelType import validate_id, get_model_type, get_trainable_model_type, get_prefix,\
     get_prefix_by_trainable_model_type

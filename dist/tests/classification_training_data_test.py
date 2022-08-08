@@ -2,7 +2,7 @@ import unittest
 from typing import List
 from copy import deepcopy
 from pandas import Series, DataFrame
-from modules.types import ITrainingDataConfig, ICompressedTrainingData, ITrainingDataFile
+from modules._types import ITrainingDataConfig, ICompressedTrainingData, ITrainingDataFile
 from modules.database.Database import Database
 from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick

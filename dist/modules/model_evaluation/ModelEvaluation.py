@@ -2,13 +2,13 @@ from typing import Union, List
 from pandas import DataFrame
 from numpy import mean
 from tqdm import tqdm
-from modules._types import IPrediction, IBacktestPerformance, IModelEvaluation, IModelType
+from modules._types import IPrediction, IPositionPerformance, IModelEvaluation, IModelType
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
 from modules.model.ModelFactory import Model
-from modules.backtest.Position import Position
-from modules.model_evaluation.ModelEvaluationEarlyStopping import ModelEvaluationEarlyStopping
+from modules.position.Position import Position
+from modules.process_early_stopping.ProcessEarlyStopping import ProcessEarlyStopping
 
 
 
@@ -70,7 +70,7 @@ def evaluate(
     # Early Stopping
     # Init the values that will help evaluate if the model's evaluation should continue 
     # or be aborted in order to save time and resources.
-    es: ModelEvaluationEarlyStopping = ModelEvaluationEarlyStopping(df.shape[0])
+    es: ProcessEarlyStopping = _get_early_stopping(df.shape[0])
     es_motive: Union[str, None] = None
 
     # Run the evaluation as long as the discovery completed successfully
@@ -140,7 +140,7 @@ def evaluate(
                         last_neutral_ct = last_ct
 
             # Perform the early stopping evaluation
-            es_motive = es.check(position.points[-1], candlestick_index, position.long_num, position.short_num)
+            es_motive = es.check(candlestick_index, position.long_num, position.short_num, position.points[-1])
 
             # Check if the early stopping has been triggered
             if isinstance(es_motive, str):
@@ -150,9 +150,6 @@ def evaluate(
             else:
                 progress_bar.update()
 
-    # Output the performance
-    performance: IBacktestPerformance = position.get_performance()
-
     # Finally, return the results
     return _build_evaluation_result(
         early_stopping=es_motive,
@@ -161,7 +158,7 @@ def evaluate(
         increase_successful=increase_successful,
         decrease=decrease,
         decrease_successful=decrease_successful,
-        performance=performance
+        performance=position.get_performance()
     )
 
 
@@ -192,6 +189,34 @@ def _get_candlesticks_df(lookback: int) -> DataFrame:
     # Finally, return the 1m candlesticks df
     return df
 
+
+
+
+
+
+
+
+def _get_early_stopping(candlesticks_num: int) -> ProcessEarlyStopping:
+    """Retrieves the Early Stopping Instance to be used on the evaluation.
+
+    Args:
+        candlesticks_num: int
+            The number of 1 minute candlesticks in the dataset.
+
+    Returns:
+        ProcessEarlyStopping
+    """
+    return ProcessEarlyStopping(
+        process_name="ModelEvaluation",
+        candlesticks_num=candlesticks_num,
+        checkpoints=[
+            { "required_longs": 1, "required_shorts": 1, "dataset_percent": 0.15 },
+            { "required_longs": 3, "required_shorts": 3, "dataset_percent": 0.3 },
+            { "required_longs": 7, "required_shorts": 7, "dataset_percent": 0.5 },
+            { "required_longs": 10, "required_shorts": 10, "dataset_percent": 0.7 },
+        ],
+        min_points=-35
+    )
 
 
 
@@ -244,7 +269,7 @@ def _build_evaluation_result(
     increase_successful: List[float], 
     decrease: List[float], 
     decrease_successful: List[float],
-    performance: IBacktestPerformance, 
+    performance: IPositionPerformance, 
 ) -> IModelEvaluation:
     """Outputs the model's evaluation result based on all the collected data.
 
@@ -261,7 +286,7 @@ def _build_evaluation_result(
             The list of decrease predictions' payloads.
         decrease_successful: List[float]
             The list of deccessful increase predictions' payloads.
-        performance: IBacktestPerformance
+        performance: IPositionPerformance
             Performance details provided by the Position Class
 
     Returns:
@@ -298,21 +323,21 @@ def _build_evaluation_result(
         
         # Predictions Overview 
         "increase_list": increase,
-        "increase_max": max(increase if performance["long_num"] > 0 else [0]),
-        "increase_min": min(increase if performance["long_num"] > 0 else [0]),
-        "increase_mean": mean(increase if performance["long_num"] > 0 else [0]),
+        "increase_max": round(max(increase if performance["long_num"] > 0 else [0]), 2),
+        "increase_min": round(min(increase if performance["long_num"] > 0 else [0]), 2),
+        "increase_mean": round(mean(increase if performance["long_num"] > 0 else [0]), 2),
         "increase_successful_list": increase_successful,
-        "increase_successful_max": max(increase_successful if increase_successful_num > 0 else [0]),
-        "increase_successful_min": min(increase_successful if increase_successful_num > 0 else [0]),
-        "increase_successful_mean": mean(increase_successful if increase_successful_num > 0 else [0]),
+        "increase_successful_max": round(max(increase_successful if increase_successful_num > 0 else [0]), 2),
+        "increase_successful_min": round(min(increase_successful if increase_successful_num > 0 else [0]), 2),
+        "increase_successful_mean": round(mean(increase_successful if increase_successful_num > 0 else [0]), 2),
         "decrease_list": decrease,
-        "decrease_max": max(decrease if performance["short_num"] > 0 else [0]),
-        "decrease_min": min(decrease if performance["short_num"] > 0 else [0]),
-        "decrease_mean": mean(decrease if performance["short_num"] > 0 else [0]),
+        "decrease_max": round(max(decrease if performance["short_num"] > 0 else [0]), 2),
+        "decrease_min": round(min(decrease if performance["short_num"] > 0 else [0]), 2),
+        "decrease_mean": round(mean(decrease if performance["short_num"] > 0 else [0]), 2),
         "decrease_successful_list": decrease_successful,
-        "decrease_successful_max": max(decrease_successful if decrease_successful_num > 0 else [0]),
-        "decrease_successful_min": min(decrease_successful if decrease_successful_num > 0 else [0]),
-        "decrease_successful_mean": mean(decrease_successful if decrease_successful_num > 0 else [0]),
+        "decrease_successful_max": round(max(decrease_successful if decrease_successful_num > 0 else [0]), 2),
+        "decrease_successful_min": round(min(decrease_successful if decrease_successful_num > 0 else [0]), 2),
+        "decrease_successful_mean": round(mean(decrease_successful if decrease_successful_num > 0 else [0]), 2),
 
         # Outcomes
         "increase_outcomes": performance["long_outcome_num"],

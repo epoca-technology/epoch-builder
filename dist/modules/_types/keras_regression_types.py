@@ -1,7 +1,9 @@
 from typing import List, Dict, TypedDict
+from keras import Sequential
 from modules._types.model_types import IKerasRegressionConfig
 from modules._types.keras_models_types import IKerasModelConfig, IKerasModelTrainingHistory, IKerasOptimizer, \
     IKerasRegressionLoss, IKerasRegressionMetric, IKerasOptimizerName
+from modules._types.discovery_types import IDiscoveryPayload
 from modules._types.model_evaluation_types import IModelEvaluation
 
 
@@ -70,6 +72,22 @@ class IKerasRegressionTrainingBatch(TypedDict):
 
 
 
+# Keras Regression Discovery Initialization
+# Once a Keras Model has been trained, it needs to be discovered prior to being evaluated.
+# Therefore, the instance of the KerasRegression must be initialized prior to existing.
+# When providing this configuration, the instance will use it instead of attempting to
+# load the model's file
+class IKerasRegressionDiscoveryInitConfig(TypedDict):
+    model: Sequential
+    autoregressive: bool
+    lookback: int
+    predictions: int
+
+
+
+
+
+
 
 # Keras Regression Training Certificate
 # Once the training, saving and evaluation completes, a certificate containing all the
@@ -108,6 +126,9 @@ class IKerasRegressionTrainingCertificate(TypedDict):
 
     # Result of the evaluation of the test dataset
     test_evaluation: List[float] # [loss, loss_metric]
+
+    # Regression Discovery
+    discovery: IDiscoveryPayload
 
     # Regression Post-Training Evaluation
     regression_evaluation: IModelEvaluation

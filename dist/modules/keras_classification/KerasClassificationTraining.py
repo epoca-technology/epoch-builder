@@ -68,12 +68,12 @@ class KerasClassificationTraining:
     """
     # Training Configuration
     TRAINING_CONFIG: IKerasTrainingTypeConfig = {
-        "train_split": 0.85,
+        "train_split": Epoch.TRAIN_SPLIT,
         "initial_lr": 0.01,
         "decay_steps": 1,
         "decay_rate": 0.35,
         "epochs": 100,
-        "patience": 15,
+        "patience": 10,
         "batch_size": 16
     }
 

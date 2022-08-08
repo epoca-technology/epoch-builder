@@ -1,5 +1,6 @@
 from typing import TypedDict, List, Union, Dict, Literal
 from pandas import DataFrame
+from modules._types.discovery_types import IDiscovery
 from modules._types.prediction_types import IPrediction
 from modules._types.interpreter_types import IPercentChangeInterpreterConfig, IProbabilityInterpreterConfig, \
     IConsensusInterpreterConfig
@@ -84,6 +85,9 @@ class IRegressionConfig(TypedDict):
     # The number of predictions it will generate
     predictions: int
 
+    # The discovery performed prior to saving the model
+    discovery: IDiscovery
+
 
 
 # Keras Regresion Configuration
@@ -129,6 +133,12 @@ class IClassificationConfig(TypedDict):
 
     # The total number of features that will be used by the model to predict
     features_num: int
+
+    # The percentage the price needs to change in order to be considered up or down
+    price_change_requirement: float
+
+    # The discovery performed prior to saving the model
+    discovery: IDiscovery
 
 
 

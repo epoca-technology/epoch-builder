@@ -66,8 +66,8 @@ class KerasRegressionModel(RegressionModelInterface):
 
         # Initialize the Interpreter Instance
         self.interpreter: PercentageChangeInterpreter = PercentageChangeInterpreter({
-            "min_increase_change": 0,
-            "min_decrease_change": 0
+            "min_increase_change": self.regression.discovery["increase_successful_mean"],
+            "min_decrease_change": self.regression.discovery["decrease_successful_mean"],
         })
 
         # Initialize the features cache instance

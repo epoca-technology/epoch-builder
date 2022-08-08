@@ -1,7 +1,7 @@
 from typing import List, TypedDict, Union
 from unittest import TestCase, main
 from copy import deepcopy
-from modules.types import IPrediction
+from modules._types import IPrediction
 from modules.database.Database import Database
 from modules.prediction_cache.RegressionPredictionCache import RegressionPredictionCache
 

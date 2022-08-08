@@ -1,6 +1,6 @@
 import unittest
 from typing import List
-from modules.types import ITrainingDataFile
+from modules._types import ITrainingDataFile
 from modules.database.Database import Database
 from modules.epoch.Epoch import Epoch
 from modules.classification.Classification import Classification

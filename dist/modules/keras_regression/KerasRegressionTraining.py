@@ -1,4 +1,5 @@
 from typing import Union, List
+from json import dumps
 from h5py import File as h5pyFile
 from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras import Sequential
@@ -7,6 +8,7 @@ from keras.optimizer_v2.learning_rate_schedule import InverseTimeDecay
 from keras.losses import MeanSquaredError, MeanAbsoluteError
 from keras.metrics import MeanSquaredError as MeanSquaredErrorMetric, MeanAbsoluteError as MeanAbsoluteErrorMetric
 from keras.callbacks import EarlyStopping, History
+from dist.modules._types.discovery_types import IDiscovery, IDiscoveryPayload
 from modules._types import IKerasTrainingTypeConfig, IKerasModelConfig, IKerasModelTrainingHistory,\
     IKerasRegressionTrainingConfig, IKerasRegressionTrainingCertificate, IModelEvaluation, IKerasOptimizer,\
         IKerasRegressionLoss, IKerasRegressionMetric, ITrainableModelType
@@ -19,8 +21,9 @@ from modules.keras_models.LearningRateSchedule import LearningRateSchedule
 from modules.keras_models.KerasModelSummary import get_summary
 from modules.model_evaluation.ModelEvaluation import evaluate
 from modules.model.ModelType import validate_id
+from modules.keras_regression.KerasRegression import KerasRegression
 from modules.model.KerasRegressionModel import KerasRegressionModel
-
+from modules.discovery.RegressionDiscovery import discover
 
 
 
@@ -70,12 +73,12 @@ class KerasRegressionTraining:
     """
     # Training Configuration
     TRAINING_CONFIG: IKerasTrainingTypeConfig = {
-        "train_split": 0.85,
+        "train_split": Epoch.TRAIN_SPLIT,
         "initial_lr": 0.01,
         "decay_steps": 1,
         "decay_rate": 0.35,
         "epochs": 100,
-        "patience": 15,
+        "patience": 10,
         "batch_size": 16
     }
 
@@ -329,11 +332,19 @@ class KerasRegressionTraining:
         test_evaluation: List[float] = model.evaluate(self.test_x, self.test_y, verbose=0) # [loss, metric]
 
         # Perform the regression discovery
-        # @TODO
+        discovery, discovery_payload = discover(
+            regression=KerasRegression(self.id, {
+                "model": model,
+                "autoregressive": self.autoregressive,
+                "lookback": self.lookback,
+                "predictions": self.predictions
+            }),
+            progress_bar_description="    5/8) Discovering KerasRegression...",
+        )
 
         # Save the model
         print("    6/8) Saving Model...")
-        self._save_model(model)
+        self._save_model(model, discovery)
 
         # Perform the regression evaluation
         regression_model: KerasRegressionModel = KerasRegressionModel(
@@ -345,9 +356,9 @@ class KerasRegressionTraining:
         )
         regression_evaluation: IModelEvaluation = evaluate(
             model=regression_model,
-            price_change_requirement=0,
+            price_change_requirement=discovery["successful_mean"],
             progress_bar_description="    7/8) Evaluating KerasRegressionModel",
-            discovery_completed=False
+            discovery_completed=discovery_payload["early_stopping"] == None
         )
 
         # Save the certificate
@@ -357,6 +368,8 @@ class KerasRegressionTraining:
             model, 
             history, 
             test_evaluation, 
+            discovery,
+            discovery_payload,
             regression_evaluation
         )
 
@@ -382,12 +395,14 @@ class KerasRegressionTraining:
 
 
 
-    def _save_model(self, model: Sequential) -> None:
+    def _save_model(self, model: Sequential, discovery: IDiscovery) -> None:
         """Saves a trained model in the output directory as well as the training certificate.
 
         Args:
             model: Sequential
                 The instance of the trained model.
+            discovery: IDiscovery
+                The result of the regression discovery.
         """
         # Create the model's directory
         Epoch.FILE.make_active_model_dir(self.id)
@@ -400,6 +415,7 @@ class KerasRegressionTraining:
             f.attrs["autoregressive"] = self.autoregressive
             f.attrs["lookback"] = self.lookback
             f.attrs["predictions"] = self.predictions
+            f.attrs["discovery"] = dumps(discovery)
 
 
 
@@ -413,6 +429,8 @@ class KerasRegressionTraining:
         model: Sequential, 
         training_history: IKerasModelTrainingHistory, 
         test_evaluation: List[float],
+        discovery: IDiscovery,
+        discovery_payload: IDiscoveryPayload,
         regression_evaluation: IModelEvaluation
     ) -> IKerasRegressionTrainingCertificate:
         """Saves a trained model in the output directory as well as the training certificate.
@@ -426,6 +444,9 @@ class KerasRegressionTraining:
                 The dictionary containing the training history.
             test_evaluation: List[float]
                 The results when evaluating the test dataset.
+            discovery: IDiscovery
+            discovery_payload: IDiscoveryPayload
+                The discovery and the payload of the regression.
             regression_evaluation: IModelEvaluation
                 The results of the regression post-training evaluation.
 
@@ -438,6 +459,8 @@ class KerasRegressionTraining:
             start_time, 
             training_history, 
             test_evaluation, 
+            discovery,
+            discovery_payload,
             regression_evaluation
         )
 
@@ -459,6 +482,8 @@ class KerasRegressionTraining:
         start_time: int, 
         training_history: IKerasModelTrainingHistory, 
         test_evaluation: List[float],
+        discovery: IDiscovery,
+        discovery_payload: IDiscoveryPayload,
         regression_evaluation: IModelEvaluation
     ) -> IKerasRegressionTrainingCertificate:
         """Builds the certificate that contains all the data regarding the training process
@@ -473,6 +498,9 @@ class KerasRegressionTraining:
                 The model's performance history during training.
             test_evaluation: List[float]
                 The evaluation performed on the test dataset.
+            discovery: IDiscovery
+            discovery_payload: IDiscoveryPayload
+                The discovery and the payload of the regression.
             regression_evaluation: IModelEvaluation
                 The results of the regression post-training evaluation.
 
@@ -505,6 +533,9 @@ class KerasRegressionTraining:
             "training_history": training_history,
             "test_evaluation": test_evaluation,
 
+            # Regression Discovery
+            "discovery": discovery_payload,
+
             # Post Training Evaluation
             "regression_evaluation": regression_evaluation,
 
@@ -515,6 +546,7 @@ class KerasRegressionTraining:
                 "autoregressive": self.autoregressive,
                 "lookback": self.lookback,
                 "predictions": self.predictions,
+                "discovery": discovery,
                 "summary": get_summary(model)
             }
         }

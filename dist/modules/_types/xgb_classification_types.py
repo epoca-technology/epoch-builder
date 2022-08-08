@@ -1,6 +1,7 @@
 from typing import TypedDict, List
 from modules._types.model_types import IXGBClassificationConfig
 from modules._types.classification_training_data_types import ITrainingDataSummary
+from modules._types.discovery_types import IDiscoveryPayload
 from modules._types.model_evaluation_types import IModelEvaluation
 
 
@@ -80,6 +81,9 @@ class IXGBClassificationTrainingCertificate(TypedDict):
 
     # Result of the evaluation of the test dataset
     # @TODO
+
+    # Classification Discovery
+    discovery: IDiscoveryPayload
 
     # Classification Post-Training Evaluation
     classification_evaluation: IModelEvaluation

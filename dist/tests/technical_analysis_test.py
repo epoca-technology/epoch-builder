@@ -1,7 +1,7 @@
 import unittest
 from typing import Union
 from pandas import Series, DataFrame
-from modules.types import ITechnicalAnalysis
+from modules._types import ITechnicalAnalysis
 from modules.database.Database import Database
 from modules.candlestick.Candlestick import Candlestick
 from modules.technical_analysis.TechnicalAnalysis import TechnicalAnalysis

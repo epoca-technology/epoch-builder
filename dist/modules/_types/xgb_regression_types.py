@@ -1,5 +1,6 @@
 from typing import List, TypedDict, Dict, Any
 from modules._types.model_types import IXGBRegressionConfig
+from modules._types.discovery_types import IDiscoveryPayload
 from modules._types.model_evaluation_types import IModelEvaluation
 
 
@@ -89,6 +90,9 @@ class IXGBRegressionTrainingCertificate(TypedDict):
 
     # Result of the evaluation of the test dataset
     # @TODO
+
+    # Regression Discovery
+    discovery: IDiscoveryPayload
 
     # Regression Post-Training Evaluation
     regression_evaluation: IModelEvaluation

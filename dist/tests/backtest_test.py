@@ -1,5 +1,5 @@
 import unittest
-from modules.types import IBacktestConfig
+from modules._types import IBacktestConfig
 from modules.database.Database import Database
 from modules.model.ArimaModel import ArimaModel
 from modules.model.RegressionModel import RegressionModel
