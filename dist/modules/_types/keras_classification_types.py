@@ -1,5 +1,6 @@
 from typing import TypedDict, List
-from modules._types.model_types import IKerasClassificationConfig
+from keras import Sequential
+from modules._types.model_types import IKerasClassificationConfig, IModel
 from modules._types.keras_models_types import IKerasModelConfig, IKerasModelTrainingHistory, \
     IKerasOptimizer, IKerasClassificationLoss, IKerasClassificationMetric, IKerasOptimizerName
 from modules._types.classification_training_data_types import ITrainingDataSummary
@@ -61,6 +62,23 @@ class IKerasClassificationTrainingBatch(TypedDict):
 
 
 
+
+
+
+
+# Keras Classification Discovery Initialization
+# Once a Keras Model has been trained, it needs to be discovered prior to being evaluated.
+# Therefore, the instance of the KerasClassification must be initialized prior to existing.
+# When providing this configuration, the instance will use it instead of attempting to
+# load the model's file
+class IKerasClassificationDiscoveryInitConfig(TypedDict):
+    model: Sequential
+    training_data_id: str
+    include_rsi: bool
+    include_aroon: bool
+    features_num: int
+    models: List[IModel]
+    price_change_requirement: float
 
 
 

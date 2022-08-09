@@ -11,7 +11,7 @@ from keras.callbacks import EarlyStopping, History
 from modules._types import IKerasTrainingTypeConfig, IKerasModelConfig, IKerasModelTrainingHistory, IModel,\
     ITrainingDataFile, IKerasClassificationTrainingConfig, ITrainingDataSummary, IKerasClassificationTrainingCertificate,\
          IModelEvaluation, IKerasOptimizer, IKerasClassificationLoss, IKerasClassificationMetric, ITrainableModelType,\
-         IClassificationDatasets
+         IClassificationDatasets, IDiscovery, IDiscoveryPayload
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.model.ModelType import validate_id
@@ -20,7 +20,9 @@ from modules.keras_models.LearningRateSchedule import LearningRateSchedule
 from modules.keras_models.KerasModelSummary import get_summary
 from modules.model_evaluation.ModelEvaluation import evaluate
 from modules.classification_training_data.ClassificationTrainingData import ClassificationTrainingData
+from modules.keras_classification.KerasClassification import KerasClassification
 from modules.model.KerasClassificationModel import KerasClassificationModel
+from modules.discovery.ClassificationDiscovery import discover
 
 
 
@@ -73,7 +75,7 @@ class KerasClassificationTraining:
         "decay_steps": 1,
         "decay_rate": 0.35,
         "epochs": 100,
-        "patience": 10,
+        "patience": 15,
         "batch_size": 16
     }
 
@@ -335,11 +337,22 @@ class KerasClassificationTraining:
         test_evaluation: List[float] = model.evaluate(self.test_x, self.test_y, verbose=0) # [loss, accuracy]
 
         # Perform the classification discovery
-        # @TODO
+        discovery, discovery_payload = discover(
+            classification=KerasClassification(self.id, {
+                "model": model,
+                "training_data_id": self.training_data_summary["id"],
+                "include_rsi": self.training_data_summary["include_rsi"],
+                "include_aroon": self.training_data_summary["include_aroon"],
+                "features_num": self.training_data_summary["features_num"],
+                "models": self.models,
+                "price_change_requirement": self.training_data_summary["price_change_requirement"]
+            }),
+            progress_bar_description="    5/8) Discovering KerasClassification...",
+        )
 
         # Save the model
         print("    6/8) Saving Model...")
-        self._save_model(model)
+        self._save_model(model, discovery)
 
         # Perform the Classification Evaluation
         classification_model: KerasClassificationModel = KerasClassificationModel(
@@ -351,9 +364,9 @@ class KerasClassificationTraining:
         )
         classification_evaluation: IModelEvaluation = evaluate(
             model=classification_model,
-            price_change_requirement=0,
+            price_change_requirement=self.training_data_summary["price_change_requirement"],
             progress_bar_description="    7/8) Evaluating KerasClassificationModel",
-            discovery_completed=False
+            discovery_completed=discovery_payload["early_stopping"] == None
         )
 
         # Save the certificate
@@ -363,6 +376,8 @@ class KerasClassificationTraining:
             model, 
             history, 
             test_evaluation,
+            discovery,
+            discovery_payload,
             classification_evaluation
         )
 
@@ -389,12 +404,14 @@ class KerasClassificationTraining:
 
 
 
-    def _save_model(self, model: Sequential) -> None:
+    def _save_model(self, model: Sequential, discovery: IDiscovery) -> None:
         """Saves a trained model in the output directory.
 
         Args:
             model: Sequential
                 The instance of the trained model.
+            discovery: IDiscovery
+                The result of the classification discovery.
         """
         # Create the model's directory
         Epoch.FILE.make_active_model_dir(self.id)
@@ -409,6 +426,8 @@ class KerasClassificationTraining:
             f.attrs["include_rsi"] = self.training_data_summary["include_rsi"]
             f.attrs["include_aroon"] = self.training_data_summary["include_aroon"]
             f.attrs["features_num"] = self.training_data_summary["features_num"]
+            f.attrs["price_change_requirement"] = self.training_data_summary["price_change_requirement"]
+            f.attrs["discovery"] = dumps(discovery)
 
 
 
@@ -422,6 +441,8 @@ class KerasClassificationTraining:
         model: Sequential, 
         training_history: IKerasModelTrainingHistory, 
         test_evaluation: List[float],
+        discovery: IDiscovery,
+        discovery_payload: IDiscoveryPayload,
         classification_evaluation: IModelEvaluation
     ) -> IKerasClassificationTrainingCertificate:
         """Saves the training certificate in the same directory as the model.
@@ -435,6 +456,9 @@ class KerasClassificationTraining:
                 The dictionary containing the training history.
             test_evaluation: List[float]
                 The results when evaluating the test dataset.
+            discovery: IDiscovery
+            discovery_payload: IDiscoveryPayload
+                The discovery and the payload of the regression.
             classification_evaluation: IModelEvaluation
                 The results of the classification evaluation.
 
@@ -447,6 +471,8 @@ class KerasClassificationTraining:
             start_time, 
             training_history, 
             test_evaluation,
+            discovery,
+            discovery_payload,
             classification_evaluation
         )
 
@@ -468,6 +494,8 @@ class KerasClassificationTraining:
         start_time: int, 
         training_history: IKerasModelTrainingHistory, 
         test_evaluation: List[float],
+        discovery: IDiscovery,
+        discovery_payload: IDiscoveryPayload,
         classification_evaluation: IModelEvaluation
     ) -> IKerasClassificationTrainingCertificate:
         """Builds the certificate that contains all the data regarding the training process
@@ -482,6 +510,9 @@ class KerasClassificationTraining:
                 The model's performance history during training.
             test_evaluation: List[float]
                 The evaluation performed on the test dataset.
+            discovery: IDiscovery
+            discovery_payload: IDiscoveryPayload
+                The discovery and the payload of the regression.
             classification_evaluation: IModelEvaluation
                 The results of the classification evaluation.
 
@@ -508,6 +539,9 @@ class KerasClassificationTraining:
             "training_history": training_history,
             "test_evaluation": test_evaluation,
 
+            # Classification Discovery
+            "discovery": discovery_payload,
+
             # Post Training Evaluation
             "classification_evaluation": classification_evaluation,
 
@@ -520,6 +554,7 @@ class KerasClassificationTraining:
                 "include_rsi": self.training_data_summary["include_rsi"],
                 "include_aroon": self.training_data_summary["include_aroon"],
                 "features_num": self.training_data_summary["features_num"],
+                "discovery": discovery,
                 "summary": get_summary(model)
             }
         }

@@ -8,6 +8,7 @@ from modules.prediction_cache.FeatureCache import FeatureCache
 from modules.prediction_cache.PredictionCache import PredictionCache
 from modules.model.ModelType import validate_id
 from modules.xgb_regression.XGBRegression import XGBRegression
+from modules.model.RegressionFeatureNormalization import normalize
 
 
 
@@ -160,25 +161,12 @@ class XGBRegressionModel(RegressionModelInterface):
 
         # Calculate the price change from the current price to the last prediction and return the
         # normalized feature.
-        return self._normalize_feature(Utils.get_percentage_change(norm_df["c"].iloc[-1], preds[-1]))
+        return normalize(Utils.get_percentage_change(norm_df["c"].iloc[-1], preds[-1]), self.regression.discovery)
 
 
 
 
 
-    def _normalize_feature(self, change: float) -> float:
-        """Given a price prediction change, it will normalize the value
-        to a -1 | 1 range based on the regression's properties.
-
-        Args:
-            change: float
-                The percentage change between the current price and 
-                the last predicted price.
-
-        Returns:
-            float
-        """
-        pass#@TODO
 
 
 

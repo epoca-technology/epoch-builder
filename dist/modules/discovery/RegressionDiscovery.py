@@ -41,7 +41,6 @@ def discover(regression: Union[KerasRegression, XGBRegression], progress_bar_des
     Returns:
         Tuple[IDiscovery, IDiscoveryPayload]
     """
-
     # Retrieve the Candlesticks Dataframe
     df: DataFrame = get_candlesticks_df(regression.lookback)
 
@@ -70,7 +69,7 @@ def discover(regression: Union[KerasRegression, XGBRegression], progress_bar_des
     # Iterate over the candlesticks based on the real steps
     for index in range(0, df.shape[0]-1, real_steps):
         # Generate a prediction
-        change: float = _predict_change(df.iloc[index]["ot"], regression)
+        change: float = _predict(df.iloc[index]["ot"], regression)
 
         # Check if it is a non-neutral prediction
         if change != 0:
@@ -131,13 +130,13 @@ def discover(regression: Union[KerasRegression, XGBRegression], progress_bar_des
         early_stopping=es_motive,
         neutral_num=neutral_num,
         increase_num=increase_num,
-        increase=increase,
+        increase=increase if increase_num > 0 else [MIN_INCREASE, MAX_INCREASE],
         increase_successful_num=increase_successful_num,
-        increase_successful=increase_successful if increase_successful_num > 0 else [MIN_INCREASE],
+        increase_successful=increase_successful if increase_successful_num > 0 else [MIN_INCREASE, MAX_INCREASE],
         decrease_num= decrease_num,
-        decrease=decrease,
+        decrease=decrease if decrease_num > 0 else [MIN_DECREASE, MAX_DECREASE],
         decrease_successful_num=decrease_successful_num,
-        decrease_successful=decrease_successful if decrease_successful_num > 0 else [MAX_DECREASE]
+        decrease_successful=decrease_successful if decrease_successful_num > 0 else [MIN_DECREASE, MAX_DECREASE]
     )
 
 
@@ -146,7 +145,7 @@ def discover(regression: Union[KerasRegression, XGBRegression], progress_bar_des
 
 
 
-def _predict_change(current_timestamp: int, regression: Union[KerasRegression, XGBRegression]) -> float:
+def _predict(current_timestamp: int, regression: Union[KerasRegression, XGBRegression]) -> float:
     """Performs a regression prediction and returns the adjusted change.
 
     Args:
@@ -168,13 +167,13 @@ def _predict_change(current_timestamp: int, regression: Union[KerasRegression, X
     change: float = Utils.get_percentage_change(df["c"].iloc[-1], preds[-1])
     
     # Return the adjusted change
-    if change >= MIN_INCREASE and change < MAX_INCREASE:
+    if change >= MIN_INCREASE and change <= MAX_INCREASE:
         return change
-    elif change >= MAX_INCREASE:
+    elif change > MAX_INCREASE:
         return MAX_INCREASE
-    elif change > MIN_DECREASE and change <= MAX_DECREASE:
+    elif change >= MIN_DECREASE and change <= MAX_DECREASE:
         return change
-    elif change <= MIN_DECREASE:
+    elif change < MIN_DECREASE:
         return MIN_DECREASE
     else:
         return 0

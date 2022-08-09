@@ -1,13 +1,13 @@
 from typing import List, Union
 from pandas import DataFrame
-from modules._types import IModel, IPrediction, IPredictionMetaData, ITechnicalAnalysis, ModelInterface
+from modules._types import IModel, IPrediction, IPredictionMetaData, ModelInterface
 from modules.candlestick.Candlestick import Candlestick
 from modules.interpreter.ProbabilityInterpreter import ProbabilityInterpreter
 from modules.prediction_cache.PredictionCache import PredictionCache
 from modules.model.ModelType import validate_id
 from modules.model.RegressionModelFactory import RegressionModelFactory, RegressionModel
-from modules.technical_analysis.TechnicalAnalysis import TechnicalAnalysis
 from modules.xgb_classification.XGBClassification import XGBClassification
+from modules.model.ClassificationFeatures import build_features
 
 
 
@@ -158,7 +158,14 @@ class XGBClassificationModel(ModelInterface):
             IPrediction
         """
         # Build the features
-        features: List[float] = self._get_features(current_timestamp, lookback_df)
+        features: List[float] = build_features(
+            current_timestamp=current_timestamp, 
+            regressions=self.regressions, 
+            max_lookback=self.max_lookback, 
+            include_rsi=self.classification.include_rsi,
+            include_aroon=self.classification.include_aroon,
+            lookback_df=lookback_df
+        )
 
         # Generate a prediction based on the features
         pred: List[float] = self.classification.predict(features)
@@ -175,59 +182,6 @@ class XGBClassificationModel(ModelInterface):
         
         # Finally, return the prediction results
         return { "r": result, "t": int(current_timestamp), "md": [ metadata ] }
-
-
-
-
-
-
-
-    def _get_features(self, current_timestamp: int, lookback_df: Union[DataFrame, None]) -> List[float]:
-        """Builds the list of features that will be used by the Classification to predict.
-        As well as dealing with Regression Predictions it will also build the TA values
-        if enabled.
-
-        Args:
-            current_timestamp: int
-                The open time of the current 1 minute candlestick.
-            lookback_df: Union[DataFrame, None]
-                ConsensusModels pass the lookback df for optimization reasons.
-
-        Returns:
-            List[float]
-        """
-        # Init the lookback_df
-        lookback: DataFrame = Candlestick.get_lookback_df(self.max_lookback, current_timestamp) \
-            if lookback_df is None else lookback_df
-
-        # Generate predictions with all the regression models within the classification
-        features: List[float] = [
-            r.predict(current_timestamp, lookback_df=lookback)["r"] for r in self.regressions
-        ]
-
-        # Check if any Technical Anlysis feature needs to be added
-        if self.classification.include_rsi or self.classification.include_aroon:
-            # Retrieve the technical analysis
-            ta: ITechnicalAnalysis = TechnicalAnalysis.get_technical_analysis(
-                lookback,
-                include_rsi=self.classification.include_rsi,
-                include_aroon=self.classification.include_aroon
-            )
-
-            # Populate the RSI feature if enabled
-            if self.classification.include_rsi:
-                features.append(ta["rsi"])
-
-            # Populate the Aroon feature if enabled
-            if self.classification.include_aroon:
-                features.append(ta["aroon"])
-
-        # Finally, return all the features
-        return features
-
-
-
-
 
 
 
