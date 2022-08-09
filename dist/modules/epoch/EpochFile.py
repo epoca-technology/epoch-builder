@@ -68,7 +68,6 @@ class EpochFile:
     CONFIG_PATH: IConfigPath = {
         "epoch":                                    "config/Epoch.json",
         "backtest":                                 "config/Backtest.json",
-        "classification_training_data":             "config/ClassificationTrainingData.json",
         "keras_classification_training":            "config/KerasClassificationTraining.json",
         "keras_regression_training":                "config/KerasRegressionTraining.json",
         "xgb_classification_training":              "config/XGBClassificationTraining.json",
@@ -306,7 +305,7 @@ class EpochFile:
 
 
     def get_active_model_certificate(self, model_id: str) -> ITrainingCertificate:
-        """Retrieves the path of a model training certificate based on its type in the active directory (models).
+        """Retrieves a model training certificate based on its type in the active directory (models).
 
         Args:
             model_id: str
@@ -385,6 +384,28 @@ class EpochFile:
 
 
     # Model Bank
+
+
+
+    def get_banked_model_certificate(self, model_id: str) -> ITrainingCertificate:
+        """Retrieves a model training certificate based on its type in the banked directory (models_bank).
+
+        Args:
+            model_id: str
+                The identifier of the model.
+
+        Returns:
+            ITrainingCertificate
+        
+        Raises:
+            RuntimeError:
+                If the certificate does not exist.
+        """
+        return EpochFile.read(f"{self.get_banked_model_dir_path(model_id)}/certificate.json")
+        
+
+
+
 
 
     def get_banked_model_dir_path(self, model_id: str, model_type: ITrainableModelType) -> str:
@@ -683,6 +704,25 @@ class EpochFile:
 
 
 
+
+    def list_regression_selections(self) -> List[str]:
+        """Retrieves the list of regression selection ids in the assets
+        directory.
+
+        Returns:
+            List[str]
+        """
+        # Retrieve the directory contents
+        _, files = EpochFile.get_directory_content(self._p(EpochFile.BACKTEST_PATH["regression_selection"]))
+
+        # Filter the directories and add only the ones related to the provided model type.
+        return list(filter(lambda x: ".json" in x, files))
+
+
+
+
+
+
     def get_regression_selection(self, id: str) -> IRegressionSelectionFile:
         """Retrieves a regression selection file.
 
@@ -793,26 +833,6 @@ class EpochFile:
         return EpochFile.read(EpochFile.CONFIG_PATH["backtest"])
 
 
-
-
-
-
-
-
-
-    # Classification Training Data Configuration
-    # The configuration file holds the data that will be used to generate the Classification
-    # Training Data
-
-
-    
-    def get_classification_training_data_config(self) -> ITrainingDataConfig:
-        """Retrieves the ClassificationTrainingData Configuration.
-
-        Returns:
-            ITrainingDataConfig
-        """
-        return EpochFile.read(EpochFile.CONFIG_PATH["classification_training_data"])
 
 
 
