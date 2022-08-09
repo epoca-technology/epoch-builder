@@ -125,7 +125,7 @@ class IClassificationConfig(TypedDict):
     training_data_id: str
 
     # The list of KerasRegressionModel|XGBRegressionModel attached to the Classification
-    models: List[Dict] # IModel does not exist yet
+    regressions: List[Dict] # IModel does not exist yet
 
     # Optional Technical Analysis Features
     include_rsi: bool       # Momentum

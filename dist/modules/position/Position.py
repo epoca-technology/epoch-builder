@@ -52,7 +52,6 @@ class Position:
                 The number of short positions.
             successful_short_num: int
                 The number of successful short positions.
-            
     """
     # Fee
     FEE: float = 10

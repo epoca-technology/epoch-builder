@@ -3,8 +3,7 @@ from pandas import DataFrame, Series
 from math import ceil
 from tqdm import tqdm
 from modules._types import ITechnicalAnalysis, ITrainingDataConfig, ITrainingDataActivePosition,\
-    ITrainingDataFile, ITrainingDataPriceActionsInsight, ITrainingDataPredictionInsight, ITechnicalAnalysisInsight,\
-        ICompressedTrainingData, ITrainingDataSummary
+    ITrainingDataFile, ICompressedTrainingData, ITrainingDataSummary
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
@@ -37,12 +36,10 @@ class ClassificationTrainingData:
             The close timestamp of the last 1m candlestick.
         steps: int
             The number of prediction candlestick steps that will be used in order to generate the data.
-        up_percent_change: float
-            The percentage that needs to go up to close an up position
-        down_percent_change: float
-            The percentage that needs to go down to close a down position
-        models: List[RegressionModel]
-            The list of ArimaModels that will be used to generate the training data.
+        price_change_requirement: float
+            Price change percentage that will determine if the price moved up or down after a position is opened
+        regressions: List[RegressionModel]
+            The list of RegressionModels that will be used to generate the training data.
         include_rsi: bool
             If enabled, the RSI will be added as a feature with the column name "RSI".
         include_aroon: bool
@@ -53,7 +50,7 @@ class ClassificationTrainingData:
             Pandas Dataframe containing all the features and labels populated every time a position
             is closed. This DF will be dumped as a csv once the process completes.
         active: Union[ITrainingDataActivePosition, None]
-            Dictionary containing all the Arima Model predictions as well as the up and down price
+            Dictionary containing all the RegressionModel predictions as well as the up and down price
             details.
     """
 
@@ -76,14 +73,14 @@ class ClassificationTrainingData:
 
         Raises:
             ValueError:
-                If less than 5 Models are provided.
+                If less than 1 RegressionModels are provided.
                 If a duplicate Model ID is found.
-                If a provided model isn't Arima or Regression
+                If a provided model isn't RegressionModel
         """
         # Make sure that at least 1 Regression Models were provided
-        if len(config["models"]) < 1:
+        if len(config["regressions"]) < 1:
             raise ValueError(f"A minimum of 1 RegressionModels are required in order to generate \
-                the classification training data. Received: {len(config['models'])}")
+                the classification training data. Received: {len(config['regressions'])}")
 
         # Initialize the type of execution
         self.test_mode: bool = test_mode
@@ -96,24 +93,24 @@ class ClassificationTrainingData:
 
         # Initialize the data that will be populated
         self.id: str = Utils.generate_uuid4()
-        self.models: List[RegressionModel] = []
+        self.regressions: List[RegressionModel] = []
         df_data: Dict[str, List[float]] = {}
         ids: List[str] = []
         lookbacks: List[int] = []
 
         # Iterate over each Arima Model
-        for m in config["models"]:
+        for m in config["regressions"]:
             # Make sure it isn"t a duplicate
             if m["id"] in ids:
                 raise ValueError(f"Duplicate Model ID provided: {m['id']}")
 
             # Add the initialized model to the list
-            self.models.append(RegressionModelFactory(m, True))
+            self.regressions.append(RegressionModelFactory(m, True))
             
             # Populate helpers
             df_data[m["id"]] = []
             ids.append(m["id"])
-            lookbacks.append(self.models[-1].get_lookback())
+            lookbacks.append(self.regressions[-1].get_lookback())
 
         # Initialize the max lookback
         self.max_lookback: int = max(lookbacks)
@@ -130,8 +127,7 @@ class ClassificationTrainingData:
         self.steps: int = config["steps"]
 
         # Postitions Up & Down percent change requirements
-        self.up_percent_change: float = config["up_percent_change"]
-        self.down_percent_change: float = config["down_percent_change"]
+        self.price_change_requirement: float = config["price_change_requirement"]
 
         # Init the Technical Analysis
         self.include_rsi: bool = config["include_rsi"]
@@ -153,13 +149,13 @@ class ClassificationTrainingData:
 
     def _get_features_num(self) -> int:
         """Calculates the total number of features that will be used by the
-        models trained with the data that will be generated.
+        regressions trained with the data that will be generated.
 
         Returns:
             int
         """
         # Init the base number of features
-        features_num: int = len(self.models)
+        features_num: int = len(self.regressions)
 
         # Check if the RSI is enabled
         if self.include_rsi:
@@ -236,7 +232,7 @@ class ClassificationTrainingData:
     # Iterates over stepped 1 minute candlesticks based on the prediction candlesticks' interval
     # minutes. The candlesticks between position open and close are not ignored. Instead, when
     # a position is closed, it goes back to where it left off.
-    # The purpose of this type of training data is to generate a larger dataset for models to 
+    # The purpose of this type of training data is to generate a larger dataset for regressions to 
     # understand the relationship between features better.
 
 
@@ -372,7 +368,7 @@ class ClassificationTrainingData:
 
         # Generate the Models' predictions
         features: Dict[str, Union[int, float]] = {
-            m.id: m.predict(open_time, lookback_df=lookback_df)["r"] for m in self.models
+            m.id: m.feature(open_time, lookback_df=lookback_df) for m in self.regressions
         }
 
         # Check if any Technical Anlysis feature needs to be added
@@ -413,8 +409,8 @@ class ClassificationTrainingData:
         Returns:
             Tuple[float, float] (up_price, down_price)
         """
-        return Utils.alter_number_by_percentage(open_price, self.up_percent_change), \
-            Utils.alter_number_by_percentage(open_price, -(self.down_percent_change))
+        return Utils.alter_number_by_percentage(open_price, self.price_change_requirement), \
+            Utils.alter_number_by_percentage(open_price, -(self.price_change_requirement))
 
 
 
@@ -504,25 +500,27 @@ class ClassificationTrainingData:
         # Initialize the current time
         current_time: int = Utils.get_time()
 
+        # Retrieve the price outcomes
+        increase_outcomes, decrease_outcomes = self._get_price_outcomes()
+
         # Return the File Data
         return {
             "regression_selection_id": self.regression_selection_id,
             "id": self.id,
             "description": self.description,
-            "creation": current_time,
+            "creation_start": execution_start,
+            "creation_end": current_time,
             "start": self.start,
             "end": self.end,
             "steps": self.steps,
-            "up_percent_change": self.up_percent_change,
-            "down_percent_change": self.down_percent_change,
-            "models": [m.get_model() for m in self.models],
+            "price_change_requirement": self.price_change_requirement,
+            "regressions": [m.get_model() for m in self.regressions],
             "include_rsi": self.include_rsi,
             "include_aroon": self.include_aroon,
             "features_num": self.features_num,
-            "duration_minutes": Utils.from_milliseconds_to_minutes(current_time - execution_start),
-            "price_actions_insight": self._get_price_actions_insight(),
-            "predictions_insight": {m.id: self._get_prediction_insight_for_model(m.id) for m in self.models},
-            "technical_analysis_insight": self._get_technical_analysis_insight(),
+            "increase_outcome_num": increase_outcomes,
+            "decrease_outcome_num": decrease_outcomes,
+            "dataset_summary": self.df.describe().to_dict(),
             "training_data": ClassificationTrainingData.compress_training_data(self.df)
         }
 
@@ -532,74 +530,24 @@ class ClassificationTrainingData:
 
 
 
-    def _get_price_actions_insight(self) -> ITrainingDataPriceActionsInsight:
-        """Retrieves the price action insight.
+    def _get_price_outcomes(self) -> Tuple[int, int]:
+        """Retrieves the number of increase and decrease outcomes
 
         Returns:
-            ITrainingDataPriceActionsInsight
+            Tuple[int, int]
+            (increase_outcomes, decrease_outcomes)
         """
         # Init the value counts
         up_count: Series = self.df["up"].value_counts()
         down_count: Series = self.df["down"].value_counts()
 
-        return {
-            "up": int(up_count[1]) if up_count.get(1) is not None else 0,
-            "down": int(down_count[1]) if down_count.get(1) is not None else 0
-        }
+        # Return the packed values
+        return int(up_count[1]) if up_count.get(1) is not None else 0,\
+            int(down_count[1]) if down_count.get(1) is not None else 0
 
 
 
 
-
-
-    def _get_prediction_insight_for_model(self, model_id: str) -> ITrainingDataPredictionInsight:
-        """Retrieves the prediction insight for a given model.
-
-        Args:
-            model_id: str
-                The ID of the model.
-        
-        Return:
-            ITrainingDataPredictionInsight
-        """
-        # Init the value counts
-        counts: Series = self.df[model_id].value_counts()
-
-        # Return the insights
-        return {
-            "long": int(counts[1]) if counts.get(1) is not None else 0,
-            "short": int(counts[-1]) if counts.get(-1) is not None else 0,
-            "neutral": int(counts[0]) if counts.get(0) is not None else 0
-        }
-
-
-
-
-
-    def _get_technical_analysis_insight(self) -> ITechnicalAnalysisInsight:
-        """Retrieves the summary for each of the technical analysis features that are enabled.
-        In case none is enabled, returns None.
-
-        Returns:
-            ITechnicalAnalysisInsight
-        """
-        # Make sure at least 1 ta feature is enabled
-        if self.include_rsi or self.include_aroon:
-            # Initialize the insight dict
-            insight: Dict[str, Dict[str, float]] = {}
-
-            # Check if the RSI is enabled
-            if self.include_rsi:
-                insight["RSI"] = self.df["RSI"].describe().to_dict()
-
-            # Check if AROON is enabled
-            if self.include_aroon:
-                insight["AROON"] = self.df["AROON"].describe().to_dict()
-
-            # Finally, return the insight
-            return insight
-        else:
-            return None
 
 
 
@@ -666,8 +614,7 @@ class ClassificationTrainingData:
             "train_size": train_size,
             "test_size": test_size,
             "steps": file["steps"],
-            "up_percent_change": file["up_percent_change"],
-            "down_percent_change": file["down_percent_change"],
+            "price_change_requirement": file["price_change_requirement"],
             "include_rsi": file["include_rsi"],
             "include_aroon": file["include_aroon"],
             "features_num": file["features_num"]

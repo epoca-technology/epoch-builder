@@ -45,7 +45,7 @@ class IBacktestConfig(TypedDict):
     # The number of minutes the model will remain idle after closing a position
     idle_minutes_on_position_close: int
 
-    # The list of Model & MultiModel instances that will be put through the backtesting process
+    # The list of Model instances that will be put through the backtesting process
     models: List[IModel]
 
 

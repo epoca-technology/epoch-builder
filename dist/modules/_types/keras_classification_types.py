@@ -77,7 +77,7 @@ class IKerasClassificationDiscoveryInitConfig(TypedDict):
     include_rsi: bool
     include_aroon: bool
     features_num: int
-    models: List[IModel]
+    regressions: List[IModel]
     price_change_requirement: float
 
 

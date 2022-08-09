@@ -287,6 +287,8 @@ class ConsensusModel(ModelInterface):
             bool
         """
         return isinstance(model.get("consensus"), dict) and (
-            isinstance(model.get("keras_classifications"), list) or
-            isinstance(model.get("xgb_classifications"), list)
+                isinstance(model.get("keras_classifications"), list) or
+                isinstance(model.get("xgb_classifications"), list)\
+                    and model.get("keras_regressions") == None\
+                        and model.get("xgb_regressions") == None
         )

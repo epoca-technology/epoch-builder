@@ -23,7 +23,7 @@ class KerasClassification(KerasModelInterface):
         training_data_id: str
             The ID of the training data that was used to train the model.
         regressions: List[IModel]
-            The list of regression models that will output the features.
+            The list of regression regressions that will output the features.
         include_rsi: bool
         include_aroon: bool
             Optional Technical Analysis Features
@@ -62,7 +62,7 @@ class KerasClassification(KerasModelInterface):
             self.include_rsi: bool = discovery_config["include_rsi"]
             self.include_aroon: bool = discovery_config["include_aroon"]
             self.features_num: int = discovery_config["features_num"]
-            self.regressions: List[IModel] = discovery_config["models"]
+            self.regressions: List[IModel] = discovery_config["regressions"]
             self.price_change_requirement: float = discovery_config["price_change_requirement"]
             self.discovery: IDiscovery = {}
             self.model: Sequential = discovery_config["model"]
@@ -77,7 +77,7 @@ class KerasClassification(KerasModelInterface):
                 self.include_rsi: bool = model_file.attrs.get("include_rsi") == True
                 self.include_aroon: bool = model_file.attrs.get("include_aroon") == True
                 self.features_num: int = int(model_file.attrs["features_num"]) # Downcast to int
-                self.regressions: List[IModel] = loads(model_file.attrs["models"])
+                self.regressions: List[IModel] = loads(model_file.attrs["regressions"])
                 self.price_change_requirement: float = float(model_file.attrs["price_change_requirement"]) # Downcast to float
                 self.discovery: IDiscovery = loads(model_file.attrs["discovery"])
                 self.model: Sequential = load_model_from_hdf5(model_file)
@@ -152,7 +152,7 @@ class KerasClassification(KerasModelInterface):
             "id": self.id,
             "description": self.description,
             "training_data_id": self.training_data_id,
-            "models": self.regressions,
+            "regressions": self.regressions,
             "include_rsi": self.include_rsi,
             "include_aroon": self.include_aroon,
             "features_num": self.features_num,

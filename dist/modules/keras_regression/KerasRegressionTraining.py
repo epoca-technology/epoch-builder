@@ -267,9 +267,9 @@ class KerasRegressionTraining:
             int
         """
         if "LSTM" in self.id:
-            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 2
+            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 3
         elif "CLSTM" in self.id:
-            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 2
+            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 3
         else:
             return KerasRegressionTraining.TRAINING_CONFIG["batch_size"]
 

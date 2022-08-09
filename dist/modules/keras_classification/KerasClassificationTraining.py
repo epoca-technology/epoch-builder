@@ -45,7 +45,7 @@ class KerasClassificationTraining:
             A descriptive identifier compatible with filesystems.
         description: str
             Important information regarding the model that will be trained.
-        models: List[IModel]
+        regressions: List[IModel]
             The list of ArimaModel|RegressionModel used to generate the training data.
         optimizer: Union[adam.Adam, rmsprop.RMSProp]                    "adam"|"rmsprop"
             The optimizer that will be used to train the model.
@@ -126,8 +126,8 @@ class KerasClassificationTraining:
         # Initialize the description
         self.description: str = config["description"]
 
-        # Initialize the models data as well as the regression instances
-        self.models: List[IModel] = training_data_file["models"]
+        # Initialize the regressions data as well as the regression instances
+        self.regressions: List[IModel] = training_data_file["regressions"]
 
         # Initialize the optimizer function
         self.optimizer: Union[adam.Adam, rmsprop.RMSProp] = self._get_optimizer(config["optimizer"])
@@ -263,9 +263,9 @@ class KerasClassificationTraining:
             int
         """
         if "LSTM" in self.id:
-            return KerasClassificationTraining.TRAINING_CONFIG["batch_size"] * 2
+            return KerasClassificationTraining.TRAINING_CONFIG["batch_size"] * 3
         elif "CLSTM" in self.id:
-            return KerasClassificationTraining.TRAINING_CONFIG["batch_size"] * 2
+            return KerasClassificationTraining.TRAINING_CONFIG["batch_size"] * 3
         else:
             return KerasClassificationTraining.TRAINING_CONFIG["batch_size"]
             
@@ -344,7 +344,7 @@ class KerasClassificationTraining:
                 "include_rsi": self.training_data_summary["include_rsi"],
                 "include_aroon": self.training_data_summary["include_aroon"],
                 "features_num": self.training_data_summary["features_num"],
-                "models": self.models,
+                "regressions": self.regressions,
                 "price_change_requirement": self.training_data_summary["price_change_requirement"]
             }),
             progress_bar_description="    5/8) Discovering KerasClassification...",
@@ -422,7 +422,7 @@ class KerasClassificationTraining:
             f.attrs["id"] = self.id
             f.attrs["description"] = self.description
             f.attrs["training_data_id"] = self.training_data_summary["id"]
-            f.attrs["models"] = dumps(self.models)
+            f.attrs["regressions"] = dumps(self.regressions)
             f.attrs["include_rsi"] = self.training_data_summary["include_rsi"]
             f.attrs["include_aroon"] = self.training_data_summary["include_aroon"]
             f.attrs["features_num"] = self.training_data_summary["features_num"]
@@ -550,7 +550,7 @@ class KerasClassificationTraining:
                 "id": self.id,
                 "description": self.description,
                 "training_data_id": self.training_data_summary["id"],
-                "models": self.models,
+                "regressions": self.regressions,
                 "include_rsi": self.training_data_summary["include_rsi"],
                 "include_aroon": self.training_data_summary["include_aroon"],
                 "features_num": self.training_data_summary["features_num"],
