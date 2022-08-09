@@ -28,13 +28,10 @@ model_type: ITrainableModelType = model_type_answer["type"]
 # CLASSIFICATION TRAINING CONFIGURATION
 # Opens and loads the configuration file that should be placed in the root of the project.
 config: Union[IKerasClassificationTrainingBatch, IXGBClassificationTrainingBatch]
-train_split: float
 if model_type == "keras_classification":
     config = Epoch.FILE.get_keras_classification_training_config()
-    train_split = KerasClassificationTraining.TRAINING_CONFIG["train_split"]
 elif model_type == "xgb_classification":
     config = Epoch.FILE.get_xgb_classification_training_config()
-    train_split = XGBClassificationTraining.TRAINING_CONFIG["train_split"]
 else:
     raise ValueError(f"The provided type of model could not be processed.")
 
@@ -56,7 +53,7 @@ Candlestick.init(100, start=training_data["start"], end=training_data["end"])
 
 # DATASETS
 # Initialize the train and test datasets for the entire batch of models that will be trained.
-datasets: Tuple[DataFrame, DataFrame, DataFrame, DataFrame] = make_datasets(training_data["training_data"], train_split)
+datasets: Tuple[DataFrame, DataFrame, DataFrame, DataFrame] = make_datasets(training_data["training_data"], Epoch.TRAIN_SPLIT)
 
 
 

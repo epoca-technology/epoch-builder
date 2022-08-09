@@ -18,9 +18,7 @@ class XGBClassificationTraining:
         ...
     """
     # Training Configuration
-    TRAINING_CONFIG: IXGBTrainingTypeConfig = {
-        "train_split": Epoch.TRAIN_SPLIT,
-    }
+    TRAINING_CONFIG: IXGBTrainingTypeConfig = {}
 
 
 

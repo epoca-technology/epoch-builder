@@ -17,6 +17,7 @@ from modules.epoch.Epoch import Epoch
 from modules.model.ModelType import validate_id
 from modules.keras_models.KerasModel import KerasModel
 from modules.keras_models.LearningRateSchedule import LearningRateSchedule
+from modules.keras_models.KerasTrainingProgressBar import KerasTrainingProgressBar
 from modules.keras_models.KerasModelSummary import get_summary
 from modules.model_evaluation.ModelEvaluation import evaluate
 from modules.classification_training_data.ClassificationTrainingData import ClassificationTrainingData
@@ -70,7 +71,6 @@ class KerasClassificationTraining:
     """
     # Training Configuration
     TRAINING_CONFIG: IKerasTrainingTypeConfig = {
-        "train_split": Epoch.TRAIN_SPLIT,
         "initial_lr": 0.01,
         "decay_steps": 1,
         "decay_rate": 0.35,
@@ -263,9 +263,9 @@ class KerasClassificationTraining:
             int
         """
         if "LSTM" in self.id:
-            return KerasClassificationTraining.TRAINING_CONFIG["batch_size"] * 3
+            return KerasClassificationTraining.TRAINING_CONFIG["batch_size"] * 2
         elif "CLSTM" in self.id:
-            return KerasClassificationTraining.TRAINING_CONFIG["batch_size"] * 3
+            return KerasClassificationTraining.TRAINING_CONFIG["batch_size"] * 2
         else:
             return KerasClassificationTraining.TRAINING_CONFIG["batch_size"]
             
@@ -317,14 +317,17 @@ class KerasClassificationTraining:
         model.compile(optimizer=self.optimizer, loss=self.loss, metrics=[self.metric])
   
         # Train the model
-        print("    3/8) Training Model...")
+        print("    3/8) Training Model")
         history_object: History = model.fit(
             self.train_x,
             self.train_y,
             validation_split=0.2,
             epochs=KerasClassificationTraining.TRAINING_CONFIG["epochs"],
             shuffle=True,
-            callbacks=[ early_stopping ],
+            callbacks=[ 
+                early_stopping, 
+                KerasTrainingProgressBar(KerasClassificationTraining.TRAINING_CONFIG["epochs"], "       ") 
+            ],
             batch_size=self.batch_size,
             verbose=0
         )
@@ -337,6 +340,7 @@ class KerasClassificationTraining:
         test_evaluation: List[float] = model.evaluate(self.test_x, self.test_y, verbose=0) # [loss, accuracy]
 
         # Perform the classification discovery
+        print("    5/8) Discovering KerasClassification")
         discovery, discovery_payload = discover(
             classification=KerasClassification(self.id, {
                 "model": model,
@@ -347,7 +351,7 @@ class KerasClassificationTraining:
                 "regressions": self.regressions,
                 "price_change_requirement": self.training_data_summary["price_change_requirement"]
             }),
-            progress_bar_description="    5/8) Discovering KerasClassification...",
+            progress_bar_description="       ",
         )
 
         # Save the model
@@ -355,6 +359,7 @@ class KerasClassificationTraining:
         self._save_model(model, discovery)
 
         # Perform the Classification Evaluation
+        print("    7/8) Evaluating KerasClassificationModel")
         classification_model: KerasClassificationModel = KerasClassificationModel(
             config={
                 "id": self.id,
@@ -365,7 +370,7 @@ class KerasClassificationTraining:
         classification_evaluation: IModelEvaluation = evaluate(
             model=classification_model,
             price_change_requirement=self.training_data_summary["price_change_requirement"],
-            progress_bar_description="    7/8) Evaluating KerasClassificationModel",
+            progress_bar_description="       ",
             discovery_completed=discovery_payload["early_stopping"] == None
         )
 

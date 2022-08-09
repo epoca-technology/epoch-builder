@@ -205,4 +205,4 @@ def _predict(
     elif pred[1] > MAX_PROB:
         return -1, MAX_PROB
     else:
-        return 0
+        return 0, 0.5

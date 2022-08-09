@@ -1,8 +1,7 @@
 from typing import Tuple, List, Union
 from numpy import median
 from pandas import Series
-from dist.modules._types.position_types import IPositionType
-from modules._types import IPrediction, IPosition, IPositionPerformance
+from modules._types import IPrediction, IPositionType, IPosition, IPositionPerformance
 from modules.utils.Utils import Utils
 
 

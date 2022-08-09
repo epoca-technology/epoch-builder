@@ -8,16 +8,16 @@ from keras.optimizer_v2.learning_rate_schedule import InverseTimeDecay
 from keras.losses import MeanSquaredError, MeanAbsoluteError
 from keras.metrics import MeanSquaredError as MeanSquaredErrorMetric, MeanAbsoluteError as MeanAbsoluteErrorMetric
 from keras.callbacks import EarlyStopping, History
-from dist.modules._types.discovery_types import IDiscovery, IDiscoveryPayload
 from modules._types import IKerasTrainingTypeConfig, IKerasModelConfig, IKerasModelTrainingHistory,\
     IKerasRegressionTrainingConfig, IKerasRegressionTrainingCertificate, IModelEvaluation, IKerasOptimizer,\
-        IKerasRegressionLoss, IKerasRegressionMetric, ITrainableModelType
+        IKerasRegressionLoss, IKerasRegressionMetric, ITrainableModelType, IDiscovery, IDiscoveryPayload
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
 from modules.regression_training_data.RegressionTrainingData import make_datasets
 from modules.keras_models.KerasModel import KerasModel
 from modules.keras_models.LearningRateSchedule import LearningRateSchedule
+from modules.keras_models.KerasTrainingProgressBar import KerasTrainingProgressBar
 from modules.keras_models.KerasModelSummary import get_summary
 from modules.model_evaluation.ModelEvaluation import evaluate
 from modules.model.ModelType import validate_id
@@ -73,13 +73,12 @@ class KerasRegressionTraining:
     """
     # Training Configuration
     TRAINING_CONFIG: IKerasTrainingTypeConfig = {
-        "train_split": Epoch.TRAIN_SPLIT,
         "initial_lr": 0.01,
         "decay_steps": 1,
         "decay_rate": 0.35,
         "epochs": 100,
         "patience": 10,
-        "batch_size": 16
+        "batch_size": 32
     }
 
 
@@ -151,7 +150,7 @@ class KerasRegressionTraining:
             lookback=self.lookback,
             autoregressive=self.autoregressive,
             predictions=self.predictions,
-            train_split=KerasRegressionTraining.TRAINING_CONFIG["train_split"]
+            train_split=Epoch.TRAIN_SPLIT
         )
 
         # Initialize the Dataset Sizes
@@ -267,9 +266,9 @@ class KerasRegressionTraining:
             int
         """
         if "LSTM" in self.id:
-            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 3
+            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 2
         elif "CLSTM" in self.id:
-            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 3
+            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 2
         else:
             return KerasRegressionTraining.TRAINING_CONFIG["batch_size"]
 
@@ -312,13 +311,16 @@ class KerasRegressionTraining:
         model.compile(optimizer=self.optimizer, loss=self.loss)
   
         # Train the model
-        print("    3/8) Training Model...")
+        print("    3/8) Training Model")
         history_object: History = model.fit(
             self.train_x, 
             self.train_y, 
             validation_split=0.2, 
             epochs=KerasRegressionTraining.TRAINING_CONFIG["epochs"],
-            callbacks=[ early_stopping ],
+            callbacks=[ 
+                early_stopping, 
+                KerasTrainingProgressBar(KerasRegressionTraining.TRAINING_CONFIG["epochs"], "       ") 
+            ],
             shuffle=True,
             batch_size=self.batch_size,
             verbose=0
@@ -332,6 +334,7 @@ class KerasRegressionTraining:
         test_evaluation: List[float] = model.evaluate(self.test_x, self.test_y, verbose=0) # [loss, metric]
 
         # Perform the regression discovery
+        print("    5/8) Discovering KerasRegression")
         discovery, discovery_payload = discover(
             regression=KerasRegression(self.id, {
                 "model": model,
@@ -339,7 +342,7 @@ class KerasRegressionTraining:
                 "lookback": self.lookback,
                 "predictions": self.predictions
             }),
-            progress_bar_description="    5/8) Discovering KerasRegression...",
+            progress_bar_description="       ",
         )
 
         # Save the model
@@ -347,6 +350,7 @@ class KerasRegressionTraining:
         self._save_model(model, discovery)
 
         # Perform the regression evaluation
+        print("    7/8) Evaluating KerasRegressionModel")
         regression_model: KerasRegressionModel = KerasRegressionModel(
             config={
                 "id": self.id,
@@ -357,7 +361,7 @@ class KerasRegressionTraining:
         regression_evaluation: IModelEvaluation = evaluate(
             model=regression_model,
             price_change_requirement=discovery["successful_mean"],
-            progress_bar_description="    7/8) Evaluating KerasRegressionModel",
+            progress_bar_description="       ",
             discovery_completed=discovery_payload["early_stopping"] == None
         )
 

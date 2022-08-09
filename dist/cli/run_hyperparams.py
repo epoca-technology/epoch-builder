@@ -1,7 +1,6 @@
-from typing import Dict, Union
+from typing import Dict, Union, List
 from inquirer import Text, List as InquirerList, prompt
 from modules._types import ITrainableModelType
-from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.model.ModelType import TRAINABLE_MODEL_TYPES
 from modules.hyperparams.KerasHyperparams import KerasHyperparams
@@ -64,10 +63,11 @@ if model_type == "keras_regression" or model_type == "xgb_regression":
 training_data_id: Union[str, None] = None
 if model_type == "keras_classification" or model_type == "xgb_classification":
     print(" ")
-    training_data: Dict[str, str] = prompt([Text("id", "Enter the Training Data ID")])
-    training_data_id = training_data["id"]
-    if not Utils.is_uuid4(training_data_id):
-        raise ValueError("The provided training data id is invalid.")
+    training_data_ids: List[str] = Epoch.FILE.list_classification_training_data_ids()
+    if len(training_data_ids) == 0:
+        raise RuntimeError("The Classification Training data assets directory is empty.")
+    training_data_answer: Dict[str, str] = prompt([InquirerList("id", message="Select the Classification Training data", choices=training_data_ids)])
+    training_data_id: str = training_data_answer["id"]
 
 
 

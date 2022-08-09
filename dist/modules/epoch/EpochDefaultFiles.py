@@ -47,12 +47,12 @@ KERAS_REGRESSION_TRAINING_CONFIG_UT: IKerasRegressionTrainingBatch = {
             "lookback": 100,
             "predictions": 30,
             "optimizer": "adam",
-            "loss": "mean_squared_error",
-            "metric": "mean_absolute_error",
+            "loss": "mean_absolute_error",
+            "metric": "mean_squared_error",
             "keras_model": {
-                "name": "R_UNIT_TEST",
-                "units": [64],
-                "activations": ["relu"]
+                "name": "KR_DNN_S3",
+                "units": [256, 128, 64],
+                "activations": ["relu", "relu", "relu"]
             }
         }
     ]
@@ -78,9 +78,9 @@ KERAS_CLASSIFICATION_TRAINING_CONFIG_UT: IKerasClassificationTrainingBatch = {
             "loss": "binary_crossentropy",
             "metric": "binary_accuracy",
             "keras_model": {
-                "name": "KC_UNIT_TEST",
-                "units": [64],
-                "activations": ["relu"]
+                "name": "KC_DNN_S3",
+                "units": [256, 128, 64],
+                "activations": ["relu", "relu", "relu"]
             }
         }
     ]

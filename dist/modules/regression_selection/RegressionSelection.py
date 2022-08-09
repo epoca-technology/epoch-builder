@@ -5,7 +5,7 @@ from modules._types import IKerasRegressionTrainingCertificate, IXGBRegressionTr
         IXGBRegressionConfig
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
-from modules.model.ModelType import get_model_type
+from modules.model.ModelType import get_model_type, get_trainable_model_type
 
 
 # Certificate Type Helper
@@ -91,7 +91,9 @@ class RegressionSelection:
         print(f"\n{self.id}:")
         # Extract all the training certificates
         print("    1/4) Extracting Certificates...")
-        certificates: List[ITrainingCertificate] = [ Epoch.FILE.get_banked_model_certificate(id) for id in self.model_ids ]
+        certificates: List[ITrainingCertificate] = [ 
+            Epoch.FILE.get_banked_model_certificate(id, get_trainable_model_type(id)) for id in self.model_ids 
+        ]
 
         # Build the Regression Selection
         print("    2/4) Building Selection...")

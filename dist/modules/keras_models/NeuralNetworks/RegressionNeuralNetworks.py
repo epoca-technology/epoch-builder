@@ -6,50 +6,9 @@ from modules.keras_models.NeuralNetworks.validator import validate
 
 
 
-
-
-#####################
-## UNIT TEST MODEL ##
-#####################
-
-
-# KR_UNIT_TEST 
-# 1 units:       Dense_1
-# 1 activations: Dense_1
-def KR_UNIT_TEST(m: IKerasModelConfig) -> Sequential:
-    validate(m, "KR_UNIT_TEST", units=1, activations=1)
-    return Sequential([
-        Input(shape=(m["lookback"],), name="Input_1"),
-        Dense(m["units"][0], activation=m["activations"][0], name="Dense_1"),
-        Dense(1 if m["autoregressive"] else m["predictions"], name="Dense_Output")
-    ])
-
-
-
-
-
-
-
-
-
-
 #########################
 ## Deep Neural Network ##
 #########################
-
-
-
-# Regression DNN Stack 1
-# KR_DNN_S1
-# 1 units:       Dense_1
-# 1 activations: Dense_1
-def KR_DNN_S1(m: IKerasModelConfig) -> Sequential:
-    validate(m, "KR_DNN_S1", units=1, activations=1)
-    return Sequential([
-        Input(shape=(m["lookback"],), name="Input_1"),
-        Dense(m["units"][0], activation=m["activations"][0], name="Dense_1"),
-        Dense(1 if m["autoregressive"] else m["predictions"], name="Dense_Output")
-    ])
 
 
 
@@ -139,47 +98,6 @@ def KR_DNN_S5(m: IKerasModelConfig) -> Sequential:
 ##################################
 ## Convolutional Neural Network ##
 ##################################
-
-
-
-# Regression CNN Stack 1
-# KR_CNN_S1
-# 1 filters:        Conv1D_1
-# 1 kernel_sizes:   Conv1D_1
-# 1 units:          Dense_1
-# 2 activations:    Conv1D_1, Dense_1
-def KR_CNN_S1(m: IKerasModelConfig) -> Sequential:
-    validate(m, "KR_CNN_S1", filters=1, kernel_sizes=1, units=1, activations=2)
-    return Sequential([
-        Input(shape=(m["lookback"],1), name="Input_1"),
-        Reshape((m["lookback"],1,), name="Reshape_1"),
-        Conv1D(m["filters"][0], kernel_size=(m["kernel_sizes"][0],), activation=m["activations"][0], name="Conv1D_1"),
-        Dense(m["units"][0], activation=m["activations"][1], name="Dense_1"),
-        Flatten(name="Flatten_1"),
-        Dense(1 if m["autoregressive"] else m["predictions"], name="Dense_Output")
-    ])
-
-
-
-
-# Regression CNN Stack 1 with MaxPooling
-# KR_CNN_S1_MP
-# 1 filters:        Conv1D_1
-# 1 kernel_sizes:   Conv1D_1
-# 1 pool_sizes:     MaxPooling1D_1
-# 1 units:          Dense_1
-# 2 activations:    Conv1D_1, Dense_1
-def KR_CNN_S1_MP(m: IKerasModelConfig) -> Sequential:
-    validate(m, "KR_CNN_S1_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=1, activations=2)
-    return Sequential([
-        Input(shape=(m["lookback"],1), name="Input_1"),
-        Reshape((m["lookback"],1,), name="Reshape_1"),
-        Conv1D(m["filters"][0], kernel_size=(m["kernel_sizes"][0],), activation=m["activations"][0], name="Conv1D_1"),
-        MaxPooling1D(m["pool_sizes"][0], name="MaxPooling1D_1"),
-        Dense(m["units"][0], activation=m["activations"][1], name="Dense_1"),
-        Flatten(name="Flatten_1"),
-        Dense(1 if m["autoregressive"] else m["predictions"], name="Dense_Output")
-    ])
 
 
 
@@ -397,18 +315,6 @@ def KR_CNN_S5_MP(m: IKerasModelConfig) -> Sequential:
 
 
 
-# Regression LSTM Stack 1
-# KR_LSTM_S1
-# 1 units: LSTM_1
-def KR_LSTM_S1(m: IKerasModelConfig) -> Sequential:
-    validate(m, "KR_LSTM_S1", units=1)
-    return Sequential([
-        Input(shape=(m["lookback"],1), name="Input_1"),
-        Reshape((m["lookback"],1,), name="Reshape_1"),
-        LSTM(m["units"][0], return_sequences=False, name="LSTM_1"),
-        Dense(1 if m["autoregressive"] else m["predictions"], name="Dense_Output")
-    ])
-
 
 
 # Regression LSTM Stack 2
@@ -487,45 +393,6 @@ def KR_LSTM_S5(m: IKerasModelConfig) -> Sequential:
 ###################################################################
 ## Convolutional Long Short-Term Memory Recurrent Neural Network ##
 ###################################################################
-
-
-
-
-# Regression CLSTM Stack 1
-# KR_CLSTM_S1
-# 1 filters:        Conv1D_1
-# 1 kernel_sizes:   Conv1D_1
-# 1 units:          LSTM_1
-# 1 activations:    Conv1D_1
-def KR_CLSTM_S1(m: IKerasModelConfig) -> Sequential:
-    validate(m, "KR_CLSTM_S1", filters=1, kernel_sizes=1, units=1, activations=1)
-    return Sequential([
-        Input(shape=(m["lookback"],1), name="Input_1"),
-        Reshape((m["lookback"],1,), name="Reshape_1"),
-        Conv1D(m["filters"][0], kernel_size=(m["kernel_sizes"][0],), activation=m["activations"][0], name="Conv1D_1"),
-        LSTM(m["units"][0], return_sequences=False, name="LSTM_1"),
-        Dense(1 if m["autoregressive"] else m["predictions"], name="Dense_Output")
-    ])
-
-
-
-# Regression CLSTM Stack 1 with MaxPooling
-# KR_CLSTM_S1_MP
-# 1 filters:        Conv1D_1
-# 1 kernel_sizes:   Conv1D_1
-# 1 pool_sizes:     MaxPooling1D_1
-# 1 units:          LSTM_1
-# 1 activations:    Conv1D_1
-def KR_CLSTM_S1_MP(m: IKerasModelConfig) -> Sequential:
-    validate(m, "KR_CLSTM_S1_MP", filters=1, kernel_sizes=1, pool_sizes=1, units=1, activations=1)
-    return Sequential([
-        Input(shape=(m["lookback"],1), name="Input_1"),
-        Reshape((m["lookback"],1,), name="Reshape_1"),
-        Conv1D(m["filters"][0], kernel_size=(m["kernel_sizes"][0],), activation=m["activations"][0], name="Conv1D_1"),
-        MaxPooling1D(m["pool_sizes"][0], name="MaxPooling1D_1"),
-        LSTM(m["units"][0], return_sequences=False, name="LSTM_1"),
-        Dense(1 if m["autoregressive"] else m["predictions"], name="Dense_Output")
-    ])
 
 
 

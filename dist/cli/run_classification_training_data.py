@@ -18,7 +18,7 @@ print("CLASSIFICATION TRAINING DATA\n")
 
 # Regression Selection
 print(" ")
-regression_selection_ids: List[str] = Epoch.FILE.list_regression_selections()
+regression_selection_ids: List[str] = Epoch.FILE.list_regression_selection_ids()
 if len(regression_selection_ids) == 0:
     raise RuntimeError("The Regression Selection assets directory is empty.")
 regression_selection_answer: Dict[str, str] = prompt([InquirerList("id", message="Select the Regression Selection", choices=regression_selection_ids)])
@@ -26,7 +26,6 @@ regression_selection: IRegressionSelectionFile = Epoch.FILE.get_regression_selec
 
 
 # Description
-print(" ")
 description_answer: Dict[str, str] = prompt([Text("content", f"Enter the description")])
 description: str = description_answer["content"]
 
@@ -34,7 +33,7 @@ description: str = description_answer["content"]
 # Steps
 print(" ")
 steps_answer: Dict[str, str] = prompt([Text("value", f"Enter the steps")])
-if not steps_answer["size"].isdigit():
+if not steps_answer["value"].isdigit():
     raise ValueError("The steps must be a valid integer.")
 steps: int = int(steps_answer["value"])
 
@@ -46,7 +45,6 @@ include_rsi: bool = include_rsi_answer["value"] == "Yes"
 
 
 # AROON
-print(" ")
 include_aroon_answer: Dict[str, str] = prompt([InquirerList("value", message="Include AROON", choices=["No", "Yes"])])
 include_aroon: bool = include_aroon_answer["value"] == "Yes"
 

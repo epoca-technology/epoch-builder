@@ -1,15 +1,16 @@
 {
     "seed": 60184,
     "id": "_ALPHA",
+    "train_split": 0.85,
     "start": 1588365000000,
     "end": 1650659639999,
-    "training_evaluation_start": 1641330000000,
+    "training_evaluation_start": 1641243600000,
     "training_evaluation_end": 1650659639999,
-    "backtest_start": 1638219600000,
+    "backtest_start": 1631991600000,
     "backtest_end": 1650659639999,
     "highest_price": 68633.69,
     "lowest_price": 8270.0,
-    "regression_price_change_requirement": 3,
+    "model_discovery_steps": 10,
     "idle_minutes_on_position_close": 30,
-    "ut_class_training_data_id": "5926be9e-884b-4a4a-9922-ecf877e71487"
+    "classification_training_data_id_ut": "2f955f4e-719a-4d49-9751-45eef6c2ede1"
 }

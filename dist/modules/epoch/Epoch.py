@@ -72,7 +72,7 @@ class Epoch:
         "train_split": 0.85,
         "backtest_split": 0.3,
         "seed": 60184,
-        "model_discovery_steps": 3,
+        "model_discovery_steps": 5,
         "idle_minutes_on_position_close": 30
     }
 
@@ -300,7 +300,7 @@ class Epoch:
             raise ValueError(f"The provided train_split is invalid {train_split}. It must be an float ranging 0.6-0.95")
 
         # Validate the provided backtest_split
-        if not isinstance(backtest_split, float) or backtest_split < 0.2 or train_split > 0.6:
+        if not isinstance(backtest_split, float) or backtest_split < 0.2 or backtest_split > 0.6:
             raise ValueError(f"The provided backtest_split is invalid {backtest_split}. It must be an float ranging 0.2-0.6")
 
         # Validate the provided model_discovery_steps

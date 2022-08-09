@@ -91,9 +91,6 @@ class IKerasModelConfig(TypedDict):
 # Based on the type of training (hyperparams|shortlist), different training settings will be used.
 # For more information regarding these args, view the KerasTraining.ipynb notebook.
 class IKerasTrainingTypeConfig(TypedDict):
-    # The split that will be applied to the dataset that will generate the train and test datasets
-    train_split: float
-
     # A scalar float32 or float64 Tensor or a Python number. The initial learning rate.
     initial_lr: float
 

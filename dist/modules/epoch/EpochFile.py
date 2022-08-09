@@ -387,7 +387,7 @@ class EpochFile:
 
 
 
-    def get_banked_model_certificate(self, model_id: str) -> ITrainingCertificate:
+    def get_banked_model_certificate(self, model_id: str, model_type: ITrainableModelType) -> ITrainingCertificate:
         """Retrieves a model training certificate based on its type in the banked directory (models_bank).
 
         Args:
@@ -401,7 +401,7 @@ class EpochFile:
             RuntimeError:
                 If the certificate does not exist.
         """
-        return EpochFile.read(f"{self.get_banked_model_dir_path(model_id)}/certificate.json")
+        return EpochFile.read(f"{self.get_banked_model_dir_path(model_id, model_type)}/certificate.json")
         
 
 
@@ -496,6 +496,29 @@ class EpochFile:
                 If the training data file does not exist.
         """
         return EpochFile.read(self._p(f"{EpochFile.MODEL_PATH['classification_training_data']}/{id}.json"))
+
+
+
+
+
+
+    def list_classification_training_data_ids(self) -> List[str]:
+        """Retrieves the list of classification training data ids in the assets
+        directory.
+
+        Returns:
+            List[str]
+        """
+        # Retrieve the directory contents
+        _, files = EpochFile.get_directory_content(self._p(EpochFile.MODEL_PATH["classification_training_data"]))
+
+        # Init the ids
+        ids: List[str] = list(filter(lambda x: ".json" in x, files))
+
+        # Remove the extension from the id
+        return [id.replace(".json", "") for id in ids]
+
+
 
 
 
@@ -705,7 +728,7 @@ class EpochFile:
 
 
 
-    def list_regression_selections(self) -> List[str]:
+    def list_regression_selection_ids(self) -> List[str]:
         """Retrieves the list of regression selection ids in the assets
         directory.
 
@@ -715,8 +738,11 @@ class EpochFile:
         # Retrieve the directory contents
         _, files = EpochFile.get_directory_content(self._p(EpochFile.BACKTEST_PATH["regression_selection"]))
 
-        # Filter the directories and add only the ones related to the provided model type.
-        return list(filter(lambda x: ".json" in x, files))
+        # Init the ids
+        ids: List[str] = list(filter(lambda x: ".json" in x, files))
+
+        # Remove the extension from the id
+        return [id.replace(".json", "") for id in ids]
 
 
 
