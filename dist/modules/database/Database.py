@@ -1,4 +1,5 @@
 from typing import Any, Optional, Tuple, List
+from os.path import exists, isfile
 from psycopg2 import connect
 from psycopg2.extras import RealDictCursor, Json
 from psycopg2.extensions import new_type, DECIMAL, register_type, register_adapter
@@ -58,8 +59,11 @@ register_adapter(dict, Json)
 # CONFIGURATION
 # This is the configuration that will be used to establish a connection with the
 # database.
+path: str = "config/host_ip.txt"
+if not exists("config") or not isfile(path):
+    raise RuntimeError("The host_ip.txt file was not found in the configuration directory.")
 DB_CONNECTION_CONFIG: IDatabaseConnectionConfig = {
-    "host_ip": "192.168.2.101",
+    "host_ip": open(path).read(),
     "user": "postgres",
     "password": "oPyjNQqeP8LewFFELIA2BuwoTi8RkYDLaAvhyvWT",
     "database": "postgres",

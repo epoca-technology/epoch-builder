@@ -1,7 +1,20 @@
 from typing import List, Dict
 import os
-from inquirer import List as InquirerList, prompt
+from inquirer import List as InquirerList, Text, prompt
 from subprocess import Popen
+
+
+# Host IP
+path: str = "config/host_ip.txt"
+if not os.path.exists("config"):
+    os.makedirs("config")
+if not os.path.isfile(path):
+    host_ip_answer: Dict[str, str] = prompt([Text("ip", f"Enter the Host IP")])
+    host_ip: str = host_ip_answer["ip"]
+    with open(path, "w") as file_wrapper:
+        file_wrapper.write(host_ip)
+
+
 
 # Processes
 processes: Dict[str, str] = {
