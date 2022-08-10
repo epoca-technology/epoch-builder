@@ -30,6 +30,9 @@ class KerasHyperparams:
             The number of candlesticks the regression needs to look into the past in order to generate a prediction
         DEFAULT_PREDICTIONS
             The number of predictions that will be generated (Only used by Regressions)
+        LEARNING_RATES: List[float]
+            The learning rates to be used during training. If the value is equals to -1 it will make
+            use of the InverseDecay instance.
         OPTIMIZERS: List[IKerasOptimizer]
             The list of optimizers that will be used when compiling models.
         REGRESSION_LOSS_FUNCTIONS: List[IKerasHyperparamsLoss]
@@ -65,6 +68,9 @@ class KerasHyperparams:
 
     # The number of predictions that will be generated (Only used by Regressions)
     DEFAULT_PREDICTIONS: int = 30
+
+    # Learning Rates
+    LEARNING_RATES: List[float] = [ -1, 0.01, 0.001, 0.0001 ]
 
     # Optimizers
     OPTIMIZERS: List[IKerasOptimizer] = [ "adam", "rmsprop" ]
@@ -174,21 +180,25 @@ class KerasHyperparams:
             # Iterate over the variations
             for variation_name, variations in network_variations.items():
 
-                # Iterate over the optimizers
-                for optimizer in KerasHyperparams.OPTIMIZERS:
+                # Iterate over the learning rates
+                for learning_rate in KerasHyperparams.LEARNING_RATES:
 
-                    # Iterate over the loss functions
-                    for loss in KerasHyperparams.REGRESSION_LOSS_FUNCTIONS if self.model_type == "keras_regression" \
-                        else KerasHyperparams.CLASSIFICATION_LOSS_FUNCTIONS:
+                    # Iterate over the optimizers
+                    for optimizer in KerasHyperparams.OPTIMIZERS:
 
-                        # Generate all the combinations for the variation and concatenate them
-                        configs = configs + self._get_variation_configs(
-                            network_type=network_type,
-                            keras_model_name= variation_name,
-                            keras_model_variations=variations,
-                            optimizer=optimizer,
-                            loss=loss
-                        )
+                        # Iterate over the loss functions
+                        for loss in KerasHyperparams.REGRESSION_LOSS_FUNCTIONS if self.model_type == "keras_regression" \
+                            else KerasHyperparams.CLASSIFICATION_LOSS_FUNCTIONS:
+
+                            # Generate all the combinations for the variation and concatenate them
+                            configs = configs + self._get_variation_configs(
+                                network_type=network_type,
+                                keras_model_name= variation_name,
+                                keras_model_variations=variations,
+                                learning_rate=learning_rate,
+                                optimizer=optimizer,
+                                loss=loss
+                            )
 
             # Build batches and save the network configurations
             models, batches = self._build_and_save_batches(network_type, configs)
@@ -266,6 +276,7 @@ class KerasHyperparams:
         network_type: str,
         keras_model_name: str,
         keras_model_variations: List[IKerasModelConfig],
+        learning_rate: float,
         optimizer: str,
         loss: IKerasHyperparamsLoss
     ) -> Union[List[IKerasRegressionTrainingConfig], List[IKerasClassificationTrainingConfig]]:
@@ -276,6 +287,7 @@ class KerasHyperparams:
             network_type: str
             keras_model_name: str
             keras_model_variations: List[IKerasModelConfig]
+            learning_rate: float
             optimizer: str
             loss: IKerasHyperparamsLoss
         Returns:
@@ -319,6 +331,7 @@ class KerasHyperparams:
         # Build the initial list of configs
         configs: Union[List[IKerasRegressionTrainingConfig], List[IKerasClassificationTrainingConfig]] = [self._generate_model_config(
             keras_model_name=keras_model_name,
+            learning_rate=learning_rate,
             optimizer=optimizer,
             loss=loss,
             activations=c.get("activations"),
@@ -337,6 +350,7 @@ class KerasHyperparams:
         else:
             ar_configs: Union[List[IKerasRegressionTrainingConfig], List[IKerasClassificationTrainingConfig]] = [self._generate_model_config(
                 keras_model_name=keras_model_name,
+                learning_rate=learning_rate,
                 optimizer=optimizer,
                 loss=loss,
                 autoregressive=True,
@@ -361,6 +375,7 @@ class KerasHyperparams:
     def _generate_model_config(
         self,
         keras_model_name: str,
+        learning_rate: float,
         optimizer: str,
         loss: IKerasHyperparamsLoss,
         autoregressive: Union[bool, None]=None,
@@ -375,6 +390,7 @@ class KerasHyperparams:
 
         Args:
             keras_model_name: str
+            learning_rate: str
             optimizer: str
             loss: IKerasHyperparamsLoss
             autoregressive: Union[bool, None]
@@ -429,6 +445,7 @@ class KerasHyperparams:
             return {
                 "id": id,
                 "description": description,
+                "learning_rate": learning_rate,
                 "optimizer": optimizer,
                 "loss": loss["name"],
                 "metric": loss["metric"],
@@ -441,6 +458,7 @@ class KerasHyperparams:
                 "autoregressive": autoregressive if isinstance(autoregressive, bool) else False,
                 "lookback": self.lookback,
                 "predictions": self.predictions,
+                "learning_rate": learning_rate,
                 "optimizer": optimizer,
                 "loss": loss["name"],
                 "metric": loss["metric"],

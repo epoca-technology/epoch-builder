@@ -2,7 +2,7 @@ from typing import List, Union
 from pandas import DataFrame
 from modules._types import ITechnicalAnalysis
 from modules.candlestick.Candlestick import Candlestick
-from modules.model.RegressionModelFactory import RegressionModel
+from modules.model.RegressionModelFactory import RegressionModelInstance
 from modules.technical_analysis.TechnicalAnalysis import TechnicalAnalysis
 
 
@@ -10,7 +10,7 @@ from modules.technical_analysis.TechnicalAnalysis import TechnicalAnalysis
 
 def build_features(
     current_timestamp: int, 
-    regressions: List[RegressionModel],
+    regressions: List[RegressionModelInstance],
     max_lookback: int,
     include_rsi: bool,
     include_aroon: bool,

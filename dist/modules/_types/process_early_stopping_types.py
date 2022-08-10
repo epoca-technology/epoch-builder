@@ -10,7 +10,7 @@ from typing import TypedDict, Literal
 
 
 # The names of the processes that make use of this module.
-IEarlyStoppingProcessName = Literal["RegressionDiscovery", "ClassificationDiscovery", "ModelEvaluation"]
+IEarlyStoppingProcessName = Literal["UnitTest", "RegressionDiscovery", "ClassificationDiscovery", "ModelEvaluation"]
 
 
 

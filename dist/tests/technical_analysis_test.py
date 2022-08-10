@@ -15,10 +15,10 @@ if not Database.TEST_MODE:
 
 
 # Start Candlestick
-START_CANDLESTICK: Series = Candlestick.DF.iloc[879956].copy()
+START_CANDLESTICK: Series = Candlestick.DF.iloc[59956].copy()
 
 # Lookback DF
-LOOKBACK_DF: DataFrame = Candlestick.get_lookback_df(300, START_CANDLESTICK["ot"])
+LOOKBACK_DF: DataFrame = Candlestick.get_lookback_df(100, START_CANDLESTICK["ot"])
 FIRST_OT: int = LOOKBACK_DF.iloc[0]["ot"]
 LAST_CT: int = LOOKBACK_DF.iloc[-1]["ct"]
 ID: str = TechnicalAnalysis._get_id(FIRST_OT, LAST_CT)
@@ -138,27 +138,22 @@ class TechnicalAnalysisTestCase(unittest.TestCase):
 
 
 
+
     # Can generate any number of indicators in one go
     def testGenerateSeveralInidicators(self):
         # Generate the indicators
         ta = TechnicalAnalysis.get_technical_analysis(
             LOOKBACK_DF, 
             include_rsi=True, 
-            include_stoch=True, 
-            include_aroon=True,
-            include_stc=True,
-            include_mfi=True
+            include_aroon=True
         )
 
         # Calculate the results
         rsi: float = TechnicalAnalysis._calculate_rsi(LOOKBACK_DF["c"])
-        stoch: float = TechnicalAnalysis._calculate_stoch(LOOKBACK_DF["h"], LOOKBACK_DF["l"], LOOKBACK_DF["c"])
         aroon = TechnicalAnalysis._calculate_aroon(LOOKBACK_DF["c"])
-        stc = TechnicalAnalysis._calculate_stc(LOOKBACK_DF["c"])
-        mfi = TechnicalAnalysis._calculate_mfi(LOOKBACK_DF["h"], LOOKBACK_DF["l"], LOOKBACK_DF["c"], LOOKBACK_DF["v"])
 
         # Initialize the expected TA
-        expected_ta: ITechnicalAnalysis = {"rsi": rsi, "stoch": stoch, "aroon": aroon, "stc": stc, "mfi": mfi}
+        expected_ta: ITechnicalAnalysis = {"rsi": rsi, "aroon": aroon}
 
         # Validate the ta
         self.assertDictEqual(ta, expected_ta)
@@ -188,15 +183,6 @@ class TechnicalAnalysisTestCase(unittest.TestCase):
 
 
 
-    # Can calculate the Stoch Indicator for a given series
-    def testCalculateStoch(self):
-        result: float = TechnicalAnalysis._calculate_stoch(LOOKBACK_DF["h"], LOOKBACK_DF["l"], LOOKBACK_DF["c"])
-        self.assertIsInstance(result, float)
-        self.assertLessEqual(result, 1)
-
-
-
-
     # Can calculate the Aroon Indicator for a given series
     def testCalculateAroon(self):
         aroon = TechnicalAnalysis._calculate_aroon(LOOKBACK_DF["c"])
@@ -207,24 +193,6 @@ class TechnicalAnalysisTestCase(unittest.TestCase):
 
 
 
-    # Can calculate the STC Indicator for a given series
-    def testCalculateSTC(self):
-        result = TechnicalAnalysis._calculate_stc(LOOKBACK_DF["c"])
-        self.assertIsInstance(result, float)
-        self.assertLessEqual(result, 1)
-        self.assertGreaterEqual(result, -1)
-
-
-
-
-
-
-    # Can calculate the MFI Indicator for a given series
-    def testCalculateMFI(self):
-        result = TechnicalAnalysis._calculate_mfi(LOOKBACK_DF["h"], LOOKBACK_DF["l"], LOOKBACK_DF["c"], LOOKBACK_DF["v"])
-        self.assertIsInstance(result, float)
-        self.assertLessEqual(result, 1)
-        self.assertGreaterEqual(result, -1)
 
 
 

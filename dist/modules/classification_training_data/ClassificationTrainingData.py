@@ -7,7 +7,7 @@ from modules._types import ITechnicalAnalysis, ITrainingDataConfig, ITrainingDat
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
-from modules.model.RegressionModelFactory import RegressionModelFactory, RegressionModel
+from modules.model.RegressionModelFactory import RegressionModelFactory, RegressionModelInstance
 from modules.technical_analysis.TechnicalAnalysis import TechnicalAnalysis
 
 
@@ -38,7 +38,7 @@ class ClassificationTrainingData:
             The number of prediction candlestick steps that will be used in order to generate the data.
         price_change_requirement: float
             Price change percentage that will determine if the price moved up or down after a position is opened
-        regressions: List[RegressionModel]
+        regressions: List[RegressionModelInstance]
             The list of RegressionModels that will be used to generate the training data.
         include_rsi: bool
             If enabled, the RSI will be added as a feature with the column name "RSI".
@@ -50,7 +50,7 @@ class ClassificationTrainingData:
             Pandas Dataframe containing all the features and labels populated every time a position
             is closed. This DF will be dumped as a csv once the process completes.
         active: Union[ITrainingDataActivePosition, None]
-            Dictionary containing all the RegressionModel predictions as well as the up and down price
+            Dictionary containing all the RegressionModelInstance predictions as well as the up and down price
             details.
     """
 
@@ -75,7 +75,7 @@ class ClassificationTrainingData:
             ValueError:
                 If less than 1 RegressionModels are provided.
                 If a duplicate Model ID is found.
-                If a provided model isn't RegressionModel
+                If a provided model isn't RegressionModelInstance
         """
         # Make sure that at least 1 Regression Models were provided
         if len(config["regressions"]) < 1:
@@ -93,7 +93,7 @@ class ClassificationTrainingData:
 
         # Initialize the data that will be populated
         self.id: str = Utils.generate_uuid4()
-        self.regressions: List[RegressionModel] = []
+        self.regressions: List[RegressionModelInstance] = []
         df_data: Dict[str, List[float]] = {}
         ids: List[str] = []
         lookbacks: List[int] = []

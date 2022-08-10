@@ -1,9 +1,9 @@
 import unittest
 from copy import deepcopy
 from numpy import ndarray
-from modules._types import IKerasModelConfig, IRegressionTrainingConfig
+from modules._types import IKerasModelConfig, IKerasRegressionTrainingConfig
 from modules.database.Database import Database
-from modules.regression.RegressionTraining import RegressionTraining
+from modules.keras_regression.KerasRegressionTraining import KerasRegressionTraining
 
 
 
@@ -16,18 +16,20 @@ if not Database.TEST_MODE:
 
 
 # Default Configuration
-CONFIG: IRegressionTrainingConfig = {
-    "id": "R_UNIT_TEST",
-    "description": "Regression Training Unit Test.",
-    "autoregressive": False,
+CONFIG: IKerasRegressionTrainingConfig = {
+    "id": "KR_UNIT_TEST",
+    "description": "This is the official KerasRegressionModel for Unit Tests.",
+    "autoregressive": True,
     "lookback": 100,
     "predictions": 30,
+    "learning_rate": 0.001,
     "optimizer": "adam",
-    "loss": "mean_squared_error",
+    "loss": "mean_absolute_error",
+    "metric": "mean_squared_error",
     "keras_model": {
-        "name": "R_UNIT_TEST",
-        "units": [64],
-        "activations": ["relu"]
+        "name": "KR_DNN_S3",
+        "units": [256, 128, 64],
+        "activations": ["relu", "relu", "relu"]
     }
 }
 
@@ -41,7 +43,7 @@ CONFIG: IRegressionTrainingConfig = {
 
 
 ## Test Class ##
-class RegressionTrainingTestCase(unittest.TestCase):
+class KerasRegressionTrainingTestCase(unittest.TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -58,10 +60,10 @@ class RegressionTrainingTestCase(unittest.TestCase):
     # Initialize an instance with valid data and validate the integrity
     def testInitialize(self):
         # Init the config
-        config: IRegressionTrainingConfig = deepcopy(CONFIG)
+        config: IKerasRegressionTrainingConfig = deepcopy(CONFIG)
 
         # Initialize the instance
-        training: RegressionTraining = RegressionTraining(
+        training: KerasRegressionTraining = KerasRegressionTraining(
             config=config,
             test_mode=True
         )
@@ -73,6 +75,7 @@ class RegressionTrainingTestCase(unittest.TestCase):
         self.assertEqual(training.autoregressive, config["autoregressive"])
         self.assertEqual(training.lookback, config["lookback"])
         self.assertEqual(training.predictions, config["predictions"])
+        self.assertEqual(training.learning_rate, config["learning_rate"])
         self.assertEqual(training.optimizer._name.lower(), config["optimizer"])
         self.assertEqual(training.loss.name, config["loss"])
         expected_keras_model: IKerasModelConfig = deepcopy(config["keras_model"])

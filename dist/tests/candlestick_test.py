@@ -13,7 +13,7 @@ if not Database.TEST_MODE:
     
 
 # Initialize the candlesticks
-LOOKBACK = 300
+LOOKBACK = 100
 
 
 
@@ -35,8 +35,8 @@ class CandlestickTestCase(unittest.TestCase):
         default_candlestick = Candlestick.DF.iloc[185255]
 
         # Retrieve the lookback df
-        df = Candlestick.get_lookback_df(300, default_candlestick['ot'])
-        self.assertEqual(df.shape[0], 300)
+        df = Candlestick.get_lookback_df(100, default_candlestick['ot'])
+        self.assertEqual(df.shape[0], 100)
         self.assertEqual(df.shape[1], len(Candlestick.PREDICTION_CANDLESTICK_CONFIG['columns']))
 
         # The values should not be normalized

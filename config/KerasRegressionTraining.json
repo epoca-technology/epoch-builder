@@ -7,13 +7,22 @@
             "autoregressive": true,
             "lookback": 100,
             "predictions": 30,
+            "learning_rate": 0.001,
             "optimizer": "adam",
             "loss": "mean_absolute_error",
             "metric": "mean_squared_error",
             "keras_model": {
                 "name": "KR_DNN_S3",
-                "units": [256, 128, 64],
-                "activations": ["relu", "relu", "relu"]
+                "units": [
+                    256,
+                    128,
+                    64
+                ],
+                "activations": [
+                    "relu",
+                    "relu",
+                    "relu"
+                ]
             }
         }
     ]

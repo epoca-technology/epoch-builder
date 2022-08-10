@@ -1,9 +1,6 @@
 import unittest
 from modules._types import IBacktestConfig
 from modules.database.Database import Database
-from modules.model.ArimaModel import ArimaModel
-from modules.model.RegressionModel import RegressionModel
-from modules.model.ClassificationModel import ClassificationModel
 from modules.backtest.Backtest import Backtest
 
 
@@ -16,42 +13,23 @@ if not Database.TEST_MODE:
 
 # Test Data
 CONFIG: IBacktestConfig = {
-    "id": "UNIT_TEST",
-    "description": "Backtest Unit Test",
-    "start": "1/10/2019",
-    "end": "22/04/2022",
-    "take_profit": 2.5,
-    "stop_loss": 2.9,
-    "idle_minutes_on_position_close": 120,
+    "id": "unit_test",
+    "description": "The purpose of this test is to make sure the Backtest Module can run any Model.",
+    "take_profit": 3,
+    "stop_loss": 3,
+    "idle_minutes_on_position_close": 30,
     "models": [
+        { "id": "KR_UNIT_TEST", "keras_regressions": [{ "regression_id": "KR_UNIT_TEST" }] },
+        #{ "id": "XGBR_UNIT_TEST", "xgb_regressions": [{ "regression_id": "XGBR_UNIT_TEST" }] },
+        { "id": "KC_UNIT_TEST", "keras_classifications": [{ "classification_id": "KC_UNIT_TEST" }] },
+        #{ "id": "XGBC_UNIT_TEST", "xgb_classifications": [{ "classification_id": "XGBC_UNIT_TEST" }] },
         {
-            "id": "A212",
-            "arima_models": [{
-                "lookback": ArimaModel.DEFAULT_LOOKBACK,
-                "predictions": ArimaModel.DEFAULT_PREDICTIONS,
-                "arima": {"p": 2,"d": 1,"q": 2},
-                "interpreter": ArimaModel.DEFAULT_INTERPRETER
-            }]
-        },
-        {
-            "id": "R_DNN_S3",
-            "regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": RegressionModel.DEFAULT_INTERPRETER}]
-        },
-        {
-            "id": "C_UNIT_TEST",
-            "classification_models": [{"classification_id": "C_UNIT_TEST", "interpreter": ClassificationModel.DEFAULT_INTERPRETER}]
-        },
-        {
-            "id": "CON_UNIT_TEST",    
-            "arima_models": [{
-                "lookback": ArimaModel.DEFAULT_LOOKBACK,
-                "predictions": ArimaModel.DEFAULT_PREDICTIONS,
-                "arima": {"p": 2,"d": 1,"q": 2},
-                "interpreter": ArimaModel.DEFAULT_INTERPRETER
-            }],
-            "regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": RegressionModel.DEFAULT_INTERPRETER}],
-            "classification_models": [{"classification_id": "C_UNIT_TEST", "interpreter": ClassificationModel.DEFAULT_INTERPRETER}],
-            "consensus_model": { "interpreter": { "min_consensus": 2 } }
+            "id": "CON_UNIT_TEST",
+            "keras_regressions": [{ "regression_id": "KR_UNIT_TEST" }],
+            #"xgb_regressions": [{ "regression_id": "XGBR_UNIT_TEST" }],
+            "keras_classifications": [{ "classification_id": "KC_UNIT_TEST" }],
+            #"xgb_classifications": [{ "classification_id": "XGBC_UNIT_TEST" }],
+            "consensus": { "interpreter": { "min_consensus": 2 } }
         }
     ]
 }

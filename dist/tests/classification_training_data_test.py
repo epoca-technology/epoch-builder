@@ -6,10 +6,10 @@ from modules._types import ITrainingDataConfig, ICompressedTrainingData, ITraini
 from modules.database.Database import Database
 from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
-from modules.model.ArimaModel import ArimaModel
-from modules.model.RegressionModel import RegressionModel
 from modules.classification_training_data.ClassificationTrainingData import ClassificationTrainingData
-from modules.classification_training_data.TrainingDataCompression import compress_training_data, decompress_training_data
+
+
+
 
 
 
@@ -26,55 +26,13 @@ if not Database.TEST_MODE:
 DEFAULT_CONFIG: ITrainingDataConfig = {
     "regression_selection_id": "e5a03686-7bb9-4e2f-ab2f-3058281f589f",
     "description": "UNIT_TEST: DO NOT DELETE.",
-    "start": "22/03/2022", 
-    "end": "22/04/2022", 
     "steps": 0,
-    'up_percent_change': 2, 
-    'down_percent_change': 2, 
-    'models': [
-        {
-            "id": "A101",
-            "arima_models": [{
-                "lookback": ArimaModel.DEFAULT_LOOKBACK,
-                "predictions": ArimaModel.DEFAULT_PREDICTIONS,
-                "arima": {"p": 1,"d": 0,"q": 1},
-                "interpreter": ArimaModel.DEFAULT_INTERPRETER
-            }]
-        },
-        {
-            "id": "A111",
-            "arima_models": [{
-                "lookback": ArimaModel.DEFAULT_LOOKBACK,
-                "predictions": ArimaModel.DEFAULT_PREDICTIONS,
-                "arima": {"p": 1,"d": 1,"q": 1},
-                "interpreter": ArimaModel.DEFAULT_INTERPRETER
-            }]
-        },
-        {
-            "id": "A112",
-            "arima_models": [{
-                "lookback": ArimaModel.DEFAULT_LOOKBACK,
-                "predictions": ArimaModel.DEFAULT_PREDICTIONS,
-                "arima": {"p": 1,"d": 1,"q": 2},
-                "interpreter": ArimaModel.DEFAULT_INTERPRETER
-            }]
-        },
-        {
-            "id": "A121",
-            "arima_models": [{
-                "lookback": ArimaModel.DEFAULT_LOOKBACK,
-                "predictions": ArimaModel.DEFAULT_PREDICTIONS,
-                "arima": {"p": 1,"d": 2,"q": 1},
-                "interpreter": ArimaModel.DEFAULT_INTERPRETER
-            }]
-        },
-        { "id": "R_UNIT_TEST", "regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": RegressionModel.DEFAULT_INTERPRETER}] }
+    'price_change_requirement': 2, 
+    'regressions': [
+        { "id": "KR_UNIT_TEST", "keras_regressions": [ {"regression_id": "KR_UNIT_TEST" } ] }
     ],
     "include_rsi": False,
-    "include_stoch": False,
-    "include_aroon": False,
-    "include_stc": False,
-    "include_mfi": False
+    "include_aroon": False
 }
 
 
@@ -130,6 +88,8 @@ class ClassificationTrainingDataTestCase(unittest.TestCase):
 
 
 
+
+
     ## Initialization ##
 
 
@@ -141,11 +101,11 @@ class ClassificationTrainingDataTestCase(unittest.TestCase):
         # Init the instance
         td: ClassificationTrainingData = ClassificationTrainingData(config, test_mode=True)
 
-        # Make sure the models have been initialized correctly
-        self.assertEqual(len(td.models), len(config['models']))
-        for i, m in enumerate(config['models']):
-            if m['id'] != td.models[i].id:
-                self.fail(f"Model ID Missmatch: {m['id']} != {td.models[i].id}")
+        # Make sure the regressions have been initialized correctly
+        self.assertEqual(len(td.regressions), len(config['regressions']))
+        for i, m in enumerate(config['regressions']):
+            if m['id'] != td.regressions[i].id:
+                self.fail(f"Model ID Missmatch: {m['id']} != {td.regressions[i].id}")
 
         # Make sure the ID and the description were initialized
         self.assertTrue(Utils.is_uuid4(td.id))
@@ -160,23 +120,24 @@ class ClassificationTrainingDataTestCase(unittest.TestCase):
         self.assertEqual(config['steps'], td.steps)
 
         # Make sure the position percentages have been set correctly
-        self.assertEqual(config['up_percent_change'], td.up_percent_change)
-        self.assertEqual(config['down_percent_change'], td.down_percent_change)
+        self.assertEqual(config['price_change_requirement'], td.price_change_requirement)
 
         # Make sure the TA has been set correctly
         self.assertEqual(config['include_rsi'], td.include_rsi)
         self.assertEqual(config['include_aroon'], td.include_aroon)
 
         # Make sure the Features number has been set correctly
-        self.assertEqual(len(config['models']), td.features_num)
+        self.assertEqual(len(config['regressions']), td.features_num)
 
         # Validate the integrity of the DF
         self.assertEqual(td.df.shape[0], 0)
-        self.assertEqual(td.df.shape[1], len(config['models']) + 2)
+        self.assertEqual(td.df.shape[1], len(config['regressions']) + 2)
         for i, column_name in enumerate(td.df.columns):
             if column_name != "up" and column_name != "down":
-                self.assertEqual(column_name, config["models"][i]["id"])
+                self.assertEqual(column_name, config["regressions"][i]["id"])
         
+
+
 
 
 
@@ -193,11 +154,11 @@ class ClassificationTrainingDataTestCase(unittest.TestCase):
         # Init the instance
         td: ClassificationTrainingData = ClassificationTrainingData(config, test_mode=True)
 
-        # Make sure the models have been initialized correctly
-        self.assertEqual(len(td.models), len(config['models']))
-        for i, m in enumerate(config['models']):
-            if m['id'] != td.models[i].id:
-                self.fail(f"Model ID Missmatch: {m['id']} != {td.models[i].id}")
+        # Make sure the regressions have been initialized correctly
+        self.assertEqual(len(td.regressions), len(config['regressions']))
+        for i, m in enumerate(config['regressions']):
+            if m['id'] != td.regressions[i].id:
+                self.fail(f"Model ID Missmatch: {m['id']} != {td.regressions[i].id}")
 
         # Make sure the ID and the description were initialized
         self.assertTrue(Utils.is_uuid4(td.id))
@@ -212,26 +173,28 @@ class ClassificationTrainingDataTestCase(unittest.TestCase):
         self.assertEqual(config['steps'], td.steps)
 
         # Make sure the position percentages have been set correctly
-        self.assertEqual(config['up_percent_change'], td.up_percent_change)
-        self.assertEqual(config['down_percent_change'], td.down_percent_change)
+        self.assertEqual(config['price_change_requirement'], td.price_change_requirement)
 
         # Make sure the TA has been set correctly
         self.assertEqual(config['include_rsi'], td.include_rsi)
         self.assertEqual(config['include_aroon'], td.include_aroon)
 
         # Make sure the Features number has been set correctly
-        self.assertEqual(len(config['models']) + 1, td.features_num)
+        self.assertEqual(len(config['regressions']) + 1, td.features_num)
 
         # Validate the integrity of the DF
         self.assertEqual(td.df.shape[0], 0)
-        self.assertEqual(td.df.shape[1], len(config['models']) + 1 + 2)
+        self.assertEqual(td.df.shape[1], len(config['regressions']) + 1 + 2)
         rsi_column_exists: bool = False
         for i, column_name in enumerate(td.df.columns):
             if column_name == "RSI":
                 rsi_column_exists = True
             if  column_name != "RSI" and column_name != "up" and column_name != "down":
-                self.assertEqual(column_name, config["models"][i]["id"])
+                self.assertEqual(column_name, config["regressions"][i]["id"])
         self.assertTrue(rsi_column_exists)
+
+
+
 
 
 
@@ -248,11 +211,11 @@ class ClassificationTrainingDataTestCase(unittest.TestCase):
         # Init the instance
         td: ClassificationTrainingData = ClassificationTrainingData(config, test_mode=True)
 
-        # Make sure the models have been initialized correctly
-        self.assertEqual(len(td.models), len(config['models']))
-        for i, m in enumerate(config['models']):
-            if m['id'] != td.models[i].id:
-                self.fail(f"Model ID Missmatch: {m['id']} != {td.models[i].id}")
+        # Make sure the regressions have been initialized correctly
+        self.assertEqual(len(td.regressions), len(config['regressions']))
+        for i, m in enumerate(config['regressions']):
+            if m['id'] != td.regressions[i].id:
+                self.fail(f"Model ID Missmatch: {m['id']} != {td.regressions[i].id}")
 
         # Make sure the ID and the description were initialized
         self.assertTrue(Utils.is_uuid4(td.id))
@@ -267,19 +230,18 @@ class ClassificationTrainingDataTestCase(unittest.TestCase):
         self.assertEqual(config['steps'], td.steps)
 
         # Make sure the position percentages have been set correctly
-        self.assertEqual(config['up_percent_change'], td.up_percent_change)
-        self.assertEqual(config['down_percent_change'], td.down_percent_change)
+        self.assertEqual(config['price_change_requirement'], td.price_change_requirement)
 
         # Make sure the TA has been set correctly
         self.assertEqual(config['include_rsi'], td.include_rsi)
         self.assertEqual(config['include_aroon'], td.include_aroon)
 
         # Make sure the Features number has been set correctly
-        self.assertEqual(len(config['models']) + 2, td.features_num)
+        self.assertEqual(len(config['regressions']) + 2, td.features_num)
 
         # Validate the integrity of the DF
         self.assertEqual(td.df.shape[0], 0)
-        self.assertEqual(td.df.shape[1], len(config['models']) + 2 + 2)
+        self.assertEqual(td.df.shape[1], len(config['regressions']) + 2 + 2)
         rsi_column_exists: bool = False
         aroon_column_exists: bool = False
         for i, column_name in enumerate(td.df.columns):
@@ -288,31 +250,10 @@ class ClassificationTrainingDataTestCase(unittest.TestCase):
             if column_name == "AROON":
                 aroon_column_exists = True
             if  column_name != "RSI" and column_name != "AROON" and column_name != "up" and column_name != "down":
-                self.assertEqual(column_name, config["models"][i]["id"])
+                self.assertEqual(column_name, config["regressions"][i]["id"])
         self.assertTrue(rsi_column_exists)
         self.assertTrue(aroon_column_exists)
 
-
-
-
-
-        
-
-
-    # Cannot initialize with less than 5 Models
-    def testInitializeWithLessThan5Models(self):
-        config: ITrainingDataConfig = deepcopy(DEFAULT_CONFIG)
-        config['models'] = config['models'][0:3]
-        with self.assertRaises(ValueError):
-            ClassificationTrainingData(config, test_mode=True)
-
-
-    # Cannot initialize with duplicate Models
-    def testInitializeWithDuplicateModels(self):
-        config: ITrainingDataConfig = deepcopy(DEFAULT_CONFIG)
-        config['models'][3] = config['models'][4]
-        with self.assertRaises(ValueError):
-            ClassificationTrainingData(config, test_mode=True)
 
 
 
@@ -337,10 +278,10 @@ class ClassificationTrainingDataTestCase(unittest.TestCase):
         up_price, down_price = td._get_position_range(price)
 
         # Validate the up price
-        self.assertEqual(up_price, Utils.alter_number_by_percentage(price, config["up_percent_change"]))
+        self.assertEqual(up_price, Utils.alter_number_by_percentage(price, config["price_change_requirement"]))
 
         # Validate the down price
-        self.assertEqual(down_price, Utils.alter_number_by_percentage(price, -config["down_percent_change"]))
+        self.assertEqual(down_price, Utils.alter_number_by_percentage(price, -config["price_change_requirement"]))
 
 
 
@@ -368,18 +309,18 @@ class ClassificationTrainingDataTestCase(unittest.TestCase):
         # Make sure the position was actually opened
         self.assertEqual(td.df.shape[0], 0)
         self.assertIsInstance(td.active, dict)
-        self.assertEqual(td.active["up_price"], Utils.alter_number_by_percentage(candlesticks[-1]["o"], config["up_percent_change"]))
-        self.assertEqual(td.active["down_price"], Utils.alter_number_by_percentage(candlesticks[-1]["o"], -config["down_percent_change"]))
+        self.assertEqual(td.active["up_price"], Utils.alter_number_by_percentage(candlesticks[-1]["o"], config["price_change_requirement"]))
+        self.assertEqual(td.active["down_price"], Utils.alter_number_by_percentage(candlesticks[-1]["o"], -config["price_change_requirement"]))
         self.assertIsInstance(td.active["row"], dict)
 
-        # A position check with a change that doesn't meet the up_percent_change does nothing
-        candlesticks.append(_get_next(candlesticks[-1], round(config["up_percent_change"]/2, 2)))
+        # A position check with a change that doesn't meet the price_change_requirement does nothing
+        candlesticks.append(_get_next(candlesticks[-1], round(config["price_change_requirement"]/2, 2)))
         td._check_position(candlesticks[-1])
         self.assertEqual(td.df.shape[0], 0)
         self.assertIsInstance(td.active, dict)
 
-        # Checking a position with a change that hits the up_percent_change the position will be closed as up
-        candlesticks.append(_get_next(candlesticks[-1], config["up_percent_change"]))
+        # Checking a position with a change that hits the price_change_requirement the position will be closed as up
+        candlesticks.append(_get_next(candlesticks[-1], config["price_change_requirement"]))
         td._check_position(candlesticks[-1])
         self.assertEqual(td.df.shape[0], 1)
         self.assertEqual(td.active, None)
@@ -393,18 +334,18 @@ class ClassificationTrainingDataTestCase(unittest.TestCase):
         # Make sure the position was actually opened
         self.assertEqual(td.df.shape[0], 1)
         self.assertIsInstance(td.active, dict)
-        self.assertEqual(td.active["up_price"], Utils.alter_number_by_percentage(candlesticks[-1]["o"], config["up_percent_change"]))
-        self.assertEqual(td.active["down_price"], Utils.alter_number_by_percentage(candlesticks[-1]["o"], -config["down_percent_change"]))
+        self.assertEqual(td.active["up_price"], Utils.alter_number_by_percentage(candlesticks[-1]["o"], config["price_change_requirement"]))
+        self.assertEqual(td.active["down_price"], Utils.alter_number_by_percentage(candlesticks[-1]["o"], -config["price_change_requirement"]))
         self.assertIsInstance(td.active["row"], dict)
 
-        # A position check with a change that doesn't meet the down_percent_change does nothing
-        candlesticks.append(_get_next(candlesticks[-1], -round(config["down_percent_change"]/2, 2)))
+        # A position check with a change that doesn't meet the price_change_requirement does nothing
+        candlesticks.append(_get_next(candlesticks[-1], -round(config["price_change_requirement"]/2, 2)))
         td._check_position(candlesticks[-1])
         self.assertEqual(td.df.shape[0], 1)
         self.assertIsInstance(td.active, dict)
 
-        # Checking a position with a change that hits the down_percent_change the position will be closed as down
-        candlesticks.append(_get_next(candlesticks[-1], -config["down_percent_change"]))
+        # Checking a position with a change that hits the price_change_requirement the position will be closed as down
+        candlesticks.append(_get_next(candlesticks[-1], -config["price_change_requirement"]))
         td._check_position(candlesticks[-1])
         self.assertEqual(td.df.shape[0], 2)
         self.assertEqual(td.active, None)
@@ -416,7 +357,7 @@ class ClassificationTrainingDataTestCase(unittest.TestCase):
         td._open_position(candlesticks[-1])
 
         # Close the position as up and make sure it was closed
-        candlesticks.append(_get_next(candlesticks[-1], round(config["up_percent_change"]*2, 2)))
+        candlesticks.append(_get_next(candlesticks[-1], round(config["price_change_requirement"]*2, 2)))
         td._check_position(candlesticks[-1])
         self.assertEqual(td.df.shape[0], 3)
         self.assertEqual(td.active, None)
@@ -429,24 +370,17 @@ class ClassificationTrainingDataTestCase(unittest.TestCase):
         # Validate basic values
         self.assertEqual(file["id"], td.id)
         self.assertEqual(file["description"], config["description"])
-        self.assertEqual(file["up_percent_change"], config["up_percent_change"])
-        self.assertEqual(file["down_percent_change"], config["down_percent_change"])
+        self.assertEqual(file["price_change_requirement"], config["price_change_requirement"])
 
-        # Validate the models
-        self.assertEqual(len(file["models"]), len(config["models"]))
-        for i, model in enumerate(config["models"]):
-            self.assertEqual(model["id"], file["models"][i]["id"])
+        # Validate the regressions
+        self.assertEqual(len(file["regressions"]), len(config["regressions"]))
+        for i, model in enumerate(config["regressions"]):
+            self.assertEqual(model["id"], file["regressions"][i]["id"])
 
         # Validate the price action insights
-        self.assertEqual(file["price_actions_insight"]["up"], 2)
-        self.assertEqual(file["price_actions_insight"]["down"], 1)
+        self.assertEqual(file["increase_outcome_num"], 2)
+        self.assertEqual(file["decrease_outcome_num"], 1)
 
-        # Validate the predictions insights
-        for model in config["models"]:
-            self.assertIsInstance(file["predictions_insight"][model["id"]], dict)
-            self.assertIsInstance(file["predictions_insight"][model["id"]]["long"], int)
-            self.assertIsInstance(file["predictions_insight"][model["id"]]["short"], int)
-            self.assertIsInstance(file["predictions_insight"][model["id"]]["neutral"], int)
 
         ## Validate the Training Data ##
 
@@ -455,10 +389,10 @@ class ClassificationTrainingDataTestCase(unittest.TestCase):
 
         # The columns list must include all features and labels
         self.assertIsInstance(file["training_data"]["columns"], list)
-        self.assertEqual(len(file["training_data"]["columns"]), len(config["models"]) + 2)
+        self.assertEqual(len(file["training_data"]["columns"]), len(config["regressions"]) + 2)
         self.assertListEqual(
             file["training_data"]["columns"],
-            [m["id"] for m in config["models"]] + ["up", "down"]
+            [m["id"] for m in config["regressions"]] + ["up", "down"]
         )
 
         # There should be 3 rows following the positions' outcomes (up, down, up) and predictions
@@ -469,7 +403,7 @@ class ClassificationTrainingDataTestCase(unittest.TestCase):
                 self.assertEqual(row[column_index], td.df.iloc[row_index][column])
 
         # Finally, decompress the training data and compare it to the original df
-        self.assertTrue(td.df.equals(decompress_training_data(file["training_data"])))
+        self.assertTrue(td.df.equals(ClassificationTrainingData.decompress_training_data(file["training_data"])))
 
 
 
@@ -496,33 +430,29 @@ class ClassificationTrainingDataTestCase(unittest.TestCase):
     def testCompressAndDecompressTrainingData(self):
         # Initialize the DataFrame
         df = DataFrame(data={
-            DEFAULT_CONFIG["models"][0]["id"]: [-1, 1, -1, 0, 1],
-            DEFAULT_CONFIG["models"][1]["id"]: [1, -1, 0, 0, -1],
-            DEFAULT_CONFIG["models"][2]["id"]: [-1, 1, 1, 1, 0],
-            DEFAULT_CONFIG["models"][3]["id"]: [1, -1, 1, 1, -1],
-            DEFAULT_CONFIG["models"][4]["id"]: [0, 0, -1, 1, -1],
-            "up":                              [1, 0, 0, 1, 1],
-            "down":                            [0, 1, 1, 0, 0],
+            DEFAULT_CONFIG["regressions"][0]["id"]: [-1.0, 0.054154, -0.581154, 0.75415, 1.0],
+            "up":                                   [1.0,  0.0,       0.0,      1.0,     1.0],
+            "down":                                 [0.0,  1.0,       1.0,      0.0,     0.0],
         })
 
         # Compress the training data and validate its integrity
-        compressed: ICompressedTrainingData = compress_training_data(df)
+        compressed: ICompressedTrainingData = ClassificationTrainingData.compress_training_data(df)
 
         # Validate the columns
-        columns: List[str] = [m["id"] for m in DEFAULT_CONFIG["models"]] + ["up", "down"]
+        columns: List[str] = [m["id"] for m in DEFAULT_CONFIG["regressions"]] + ["up", "down"]
         self.assertListEqual(compressed["columns"], columns)
 
         # Validate the rows
         self.assertListEqual(compressed["rows"], [
-            [-1, 1, -1, 1, 0, 1, 0],
-            [1, -1, 1, -1, 0, 0, 1],
-            [-1, 0, 1, 1, -1, 0, 1],
-            [0, 0, 1, 1, 1, 1, 0],
-            [1, -1, 0, -1 ,-1 ,1, 0]
+            [-1, 1, 0],
+            [0.054154, 0, 1],
+            [-0.581154, 0, 1],
+            [0.75415, 1, 0],
+            [1, 1, 0]
         ])
 
         # Decompress the data and validate its integrity
-        decompressed: DataFrame = decompress_training_data(compressed)
+        decompressed: DataFrame = ClassificationTrainingData.decompress_training_data(compressed)
         self.assertTrue(df.equals(decompressed))
 
 

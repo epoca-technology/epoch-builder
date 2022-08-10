@@ -1,11 +1,11 @@
 import unittest
 from typing import List
 from pandas import Series
-from modules._types import IRegressionConfig, IRegressionTrainingCertificate
+from modules._types import IRegressionConfig, IKerasRegressionTrainingCertificate
 from modules.database.Database import Database
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
-from modules.regression.Regression import Regression
+from modules.keras_regression.KerasRegression import KerasRegression
 
 
 
@@ -18,8 +18,8 @@ if not Database.TEST_MODE:
 
 
 # TRAINING CERTIFICATE
-MODEL_ID: str = "R_UNIT_TEST"
-CERT: IRegressionTrainingCertificate = Epoch.FILE.get_active_model_certificate(MODEL_ID)
+MODEL_ID: str = "KR_UNIT_TEST"
+CERT: IKerasRegressionTrainingCertificate = Epoch.FILE.get_active_model_certificate(MODEL_ID)
 
 
 
@@ -32,7 +32,7 @@ CERT: IRegressionTrainingCertificate = Epoch.FILE.get_active_model_certificate(M
 
 
 ## Test Class ##
-class RegressionTestCase(unittest.TestCase):
+class KerasRegressionTestCase(unittest.TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -48,7 +48,7 @@ class RegressionTestCase(unittest.TestCase):
     # Initialize an instance with valid data and validate the integrity
     def testInitialize(self):
         # Initialize the instance
-        r: Regression = Regression(MODEL_ID)
+        r: KerasRegression = KerasRegression(MODEL_ID)
 
         # Output the config and make sure everything matches
         config: IRegressionConfig = r.get_config()
@@ -57,10 +57,11 @@ class RegressionTestCase(unittest.TestCase):
         self.assertEqual(config["autoregressive"], CERT["autoregressive"])
         self.assertEqual(config["lookback"], CERT["lookback"])
         self.assertEqual(config["predictions"], CERT["predictions"])
+        self.assertIsInstance(config["discovery"], dict)
         self.assertIsInstance(config["summary"], dict)
 
         # Can generate a prediction for a random selected series
-        close_prices: Series = Candlestick.get_lookback_df(r.lookback, Candlestick.DF.iloc[214554]["ot"], normalized=True)
+        close_prices: Series = Candlestick.get_lookback_df(r.lookback, Candlestick.DF.iloc[91236]["ot"], normalized=True)
         preds: List[float] = r.predict(close_prices["c"])
 
         # The predictions should match the model's properties

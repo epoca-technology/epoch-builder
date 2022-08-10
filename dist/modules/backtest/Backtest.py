@@ -5,7 +5,7 @@ from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
 from modules.position.Position import Position
-from modules.model.ModelFactory import ModelFactory, Model
+from modules.model.ModelFactory import ModelFactory, ModelInstance
 
 
 
@@ -76,7 +76,7 @@ class Backtest:
         self.description: str = config["description"]
 
         # Initialize the models to be tested
-        self.models: List[Model] = [ModelFactory(m, True) for m in config["models"]]
+        self.models: List[ModelInstance] = [ModelFactory(m, True) for m in config["models"]]
 
         # Initialize the results
         self.results: List[IBacktestResult] = []

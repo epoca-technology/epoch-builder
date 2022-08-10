@@ -4,7 +4,7 @@ from pandas import Series
 from modules.database.Database import Database
 from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
-from modules.backtest.Position import Position
+from modules.position.Position import Position
 
 
 
@@ -57,7 +57,7 @@ START_CANDLESTICK['c'] = 40052.18
 
 
 ## Test Class ##
-class BacktestPositionTestCase(unittest.TestCase):
+class PositionTestCase(unittest.TestCase):
     # Before Tests
     def setUp(self):
         pass

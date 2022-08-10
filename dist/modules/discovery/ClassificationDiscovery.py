@@ -6,7 +6,7 @@ from modules._types import IDiscovery, IDiscoveryPayload, IPredictionResult
 from modules.candlestick.Candlestick import Candlestick
 from modules.keras_classification.KerasClassification import KerasClassification
 from modules.xgb_classification.XGBClassification import XGBClassification
-from modules.model.RegressionModelFactory import RegressionModelFactory, RegressionModel
+from modules.model.RegressionModelFactory import RegressionModelFactory, RegressionModelInstance
 from modules.model.ClassificationFeatures import build_features
 from modules.process_early_stopping.ProcessEarlyStopping import ProcessEarlyStopping
 from modules.discovery.Discovery import get_real_steps, get_candlesticks_df, get_early_stopping, calculate_exit_prices,\
@@ -39,7 +39,7 @@ def discover(classification: Union[KerasClassification, XGBClassification], prog
         Tuple[IDiscovery, IDiscoveryPayload]
     """
     # Initialize the regression models
-    regressions: List[RegressionModel] = [ RegressionModelFactory(m, True) for m in classification.regressions ]
+    regressions: List[RegressionModelInstance] = [ RegressionModelFactory(m, True) for m in classification.regressions ]
 
     # Initialize the max lookback
     max_lookback: int = max([m.get_lookback() for m in regressions])
@@ -161,7 +161,7 @@ def discover(classification: Union[KerasClassification, XGBClassification], prog
 def _predict(
     current_timestamp: int, 
     classification: Union[KerasClassification, XGBClassification],
-    regressions: List[RegressionModel],
+    regressions: List[RegressionModelInstance],
     max_lookback: int,
     include_rsi: bool,
     include_aroon: bool

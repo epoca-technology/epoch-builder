@@ -3,7 +3,7 @@ from typing import List
 from modules._types import ITrainingDataFile
 from modules.database.Database import Database
 from modules.epoch.Epoch import Epoch
-from modules.classification.Classification import Classification
+from modules.keras_classification.KerasClassification import KerasClassification
 
 
 
@@ -16,8 +16,8 @@ if not Database.TEST_MODE:
 
 
 # TRAINING DATA FILE
-TRAINING_DATA: ITrainingDataFile = Epoch.FILE.get_classification_training_data(Epoch.UT_CLASS_TRAINING_DATA_ID)
-MODEL_ID: str = "C_UNIT_TEST"
+TRAINING_DATA: ITrainingDataFile = Epoch.FILE.get_classification_training_data(Epoch.CLASSIFICATION_TRAINING_DATA_ID_UT)
+MODEL_ID: str = "KC_UNIT_TEST"
 
 
 
@@ -30,7 +30,7 @@ MODEL_ID: str = "C_UNIT_TEST"
 
 
 ## Test Class ##
-class ClassificationTestCase(unittest.TestCase):
+class KerasClassificationTestCase(unittest.TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -47,19 +47,17 @@ class ClassificationTestCase(unittest.TestCase):
     # Initialize an instance with valid data and validate the integrity
     def testInitialize(self):
         # Initialize the instance
-        c: Classification = Classification(MODEL_ID)
+        c: KerasClassification = KerasClassification(MODEL_ID)
 
         # Validate model properties
         self.assertEqual(c.id, MODEL_ID)
         self.assertEqual(c.training_data_id, TRAINING_DATA["id"])
         self.assertEqual(c.include_rsi, TRAINING_DATA["include_rsi"])
-        self.assertEqual(c.include_stoch, TRAINING_DATA["include_stoch"])
         self.assertEqual(c.include_aroon, TRAINING_DATA["include_aroon"])
-        self.assertEqual(c.include_stc, TRAINING_DATA["include_stc"])
-        self.assertEqual(c.include_mfi, TRAINING_DATA["include_mfi"])
         self.assertEqual(c.features_num, TRAINING_DATA["features_num"])
+        self.assertIsInstance(c.discovery, dict)
         for index, model in enumerate(c.regressions):
-            self.assertDictEqual(model, TRAINING_DATA["models"][index])
+            self.assertDictEqual(model, TRAINING_DATA["regressions"][index])
 
         # Can generate a prediction with some dummy features
         pred: List[float] = c.predict(features=[0]*c.features_num)

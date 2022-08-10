@@ -1,17 +1,26 @@
 {
     "name": "KC_UNIT_TEST",
-    "training_data_id": "2f955f4e-719a-4d49-9751-45eef6c2ede1",
+    "training_data_id": "eece6383-db98-4000-b04c-e11465006f65",
     "models": [
         {
             "id": "KC_UNIT_TEST",
             "description": "This is the official KerasClassificationModel for Unit Tests.",
+            "learning_rate": 0.001,
             "optimizer": "adam",
             "loss": "binary_crossentropy",
             "metric": "binary_accuracy",
             "keras_model": {
                 "name": "KC_DNN_S3",
-                "units": [256, 128, 64],
-                "activations": ["relu", "relu", "relu"]
+                "units": [
+                    256,
+                    128,
+                    64
+                ],
+                "activations": [
+                    "relu",
+                    "relu",
+                    "relu"
+                ]
             }
         }
     ]

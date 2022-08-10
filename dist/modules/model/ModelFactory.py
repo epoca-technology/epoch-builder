@@ -8,13 +8,13 @@ from modules.model.ConsensusModel import ConsensusModel
 
 
 # Types of Models
-Model = Union[KerasRegressionModel, XGBRegressionModel, KerasClassificationModel, XGBClassificationModel, ConsensusModel]
+ModelInstance = Union[KerasRegressionModel, XGBRegressionModel, KerasClassificationModel, XGBClassificationModel, ConsensusModel]
 
 
 
 # Model Factory
 # Based on given configuration, it returns the appropiate Model Instance
-def ModelFactory(config: IModel, enable_cache: bool = False) -> Model:
+def ModelFactory(config: IModel, enable_cache: bool = False) -> ModelInstance:
     """Returns the instance of a Model based on the provided configuration.
 
     Args:
@@ -24,7 +24,7 @@ def ModelFactory(config: IModel, enable_cache: bool = False) -> Model:
             The state of the cache. If False, the model won't interact with the db.
 
     Returns:
-        Model
+        ModelInstance
     """
     # Check if it is a Keras Regression Model
     if KerasRegressionModel.is_config(config):

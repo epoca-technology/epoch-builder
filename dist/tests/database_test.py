@@ -25,16 +25,16 @@ class DatabaseTestCase(unittest.TestCase):
         self.assertTrue(Database.TEST_MODE)
 
         # Since testmode is enabled, the table should be preffixed
-        self.assertEqual(Database.tn("regression_predictions"), "test_regression_predictions")
+        self.assertEqual(Database.tn("predictions"), "test_predictions")
 
         # The testmode can be disabled during runtime
         Database.TEST_MODE = False
         self.assertFalse(Database.TEST_MODE)
-        self.assertEqual(Database.tn("regression_predictions"), "regression_predictions")
+        self.assertEqual(Database.tn("predictions"), "predictions")
 
         # Renable testmode and make sure the tables are returned correctly
         Database.TEST_MODE = True
-        self.assertEqual(Database.tn("regression_predictions"), "test_regression_predictions")
+        self.assertEqual(Database.tn("predictions"), "test_predictions")
 
 
 

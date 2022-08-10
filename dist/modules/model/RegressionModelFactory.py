@@ -5,12 +5,12 @@ from modules.model.XGBRegressionModel import XGBRegressionModel
 
 
 # Types of Regression Models
-RegressionModel = Union[KerasRegressionModel, XGBRegressionModel]
+RegressionModelInstance = Union[KerasRegressionModel, XGBRegressionModel]
 
 
 # Regression Model Factory
 # Based on given configuration, it returns the appropiate Regression Model Instance
-def RegressionModelFactory(config: IModel, enable_cache: bool = False) -> RegressionModel:
+def RegressionModelFactory(config: IModel, enable_cache: bool = False) -> RegressionModelInstance:
     """Returns the instance of an KerasRegressionModel or a XGBRegressionModel based on the 
     provided configuration.
 
@@ -21,7 +21,7 @@ def RegressionModelFactory(config: IModel, enable_cache: bool = False) -> Regres
             If enabled, the model will store predictions and features in the db.
 
     Returns:
-        RegressionModel
+        RegressionModelInstance
     """
     # Check if it is an KerasRegressionModel
     if KerasRegressionModel.is_config(config):

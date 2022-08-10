@@ -37,6 +37,10 @@ class IKerasRegressionTrainingConfig(TypedDict):
     # The number of predictions to be generated
     predictions: int
 
+    # The learning rate that will be used to train the model. If the value is equals to -1, the system will
+    # use the InverseTimeDecay Class.
+    learning_rate: float
+
     # The optimizer to be used.
     optimizer: IKerasOptimizer # 'adam'|'rmsprop'
 
@@ -112,6 +116,7 @@ class IKerasRegressionTrainingCertificate(TypedDict):
     autoregressive: bool
     lookback: int
     predictions: int
+    learning_rate: float
     optimizer: IKerasOptimizerName
     loss: IKerasRegressionLoss
     metric: IKerasRegressionMetric

@@ -60,18 +60,18 @@ class PercentageChangeInterpreterTestCase(unittest.TestCase):
 
     # Can initialize an interpreter
     def testInitializeInterpreter(self):
-        i = PercentageChangeInterpreter({"long": 1.5, "short": 1.5})
-        self.assertEqual(i.long, 1.5)
-        self.assertEqual(i.short, 1.5)
+        i = PercentageChangeInterpreter({"min_increase_change": 1.5, "min_decrease_change": -1.5})
+        self.assertEqual(i.min_increase_change, 1.5)
+        self.assertEqual(i.min_decrease_change, -1.5)
 
 
 
     # Cannot initialize an interpreter with invalid configuration
     def testInitializeInterpreterWithInvalidConfig(self):
         with self.assertRaises(ValueError):
-            PercentageChangeInterpreter({"long": 0.001, "short": 1.5})
+            PercentageChangeInterpreter({"min_increase_change": 0.001, "min_decrease_change": 1.5})
         with self.assertRaises(ValueError):
-            PercentageChangeInterpreter({"long": 1.5, "short": 0.001})
+            PercentageChangeInterpreter({"min_increase_change": 1.5, "min_decrease_change": -0.001})
 
 
 
@@ -81,60 +81,52 @@ class PercentageChangeInterpreterTestCase(unittest.TestCase):
 
 
 
-    # Can interpret a basic long
+    # Can interpret a basic min_increase_change
     def testBasicLongInterpretation(self):
         # Init the interpreter
-        i = PercentageChangeInterpreter({"long": 0.5, "short": 0.5})
+        i = PercentageChangeInterpreter({"min_increase_change": 1, "min_decrease_change": -1})
 
-        # Can interpret a long position if the prediction change is equals
-        result, description = i.interpret(_get_preds(0.5))
+        # Can interpret a min_increase_change position if the prediction change is equals
+        result, description = i.interpret(_get_preds(1))
         self.assertEqual(result, 1)
         self.assertEqual(description, 'long')
 
-        # Can interpret a long position if the prediction change is greater
+        # Can interpret a min_increase_change position if the prediction change is greater
         result, description = i.interpret(_get_preds(2.5))
         self.assertEqual(result, 1)
         self.assertEqual(description, 'long')
 
         # If the change does not meet the requirement, it returns neutral
-        result, description = i.interpret(_get_preds(0.4))
+        result, description = i.interpret(_get_preds(0.9))
         self.assertEqual(result, 0)
         self.assertEqual(description, 'neutral')
 
 
 
 
-    # Can interpret a basic short
+    # Can interpret a basic min_decrease_change
     def testBasicShortInterpretation(self):
         # Init the interpreter
-        i = PercentageChangeInterpreter({"long": 0.5, "short": 0.5})
+        i = PercentageChangeInterpreter({"min_increase_change": 1, "min_decrease_change": -1})
 
-        # Can interpret a short position if the prediction change is equals
-        result, description = i.interpret(_get_preds(-0.5))
+        # Can interpret a min_decrease_change position if the prediction change is equals
+        result, description = i.interpret(_get_preds(-1))
         self.assertEqual(result, -1)
         self.assertEqual(description, 'short')
 
-        # Can interpret a short position if the prediction change is greater
+        # Can interpret a min_decrease_change position if the prediction change is greater
         result, description = i.interpret(_get_preds(-2.5))
         self.assertEqual(result, -1)
         self.assertEqual(description, 'short')
 
         # If the change does not meet the requirement, it returns neutral
-        result, description = i.interpret(_get_preds(-0.4))
+        result, description = i.interpret(_get_preds(-0.9))
         self.assertEqual(result, 0)
         self.assertEqual(description, 'neutral')
 
 
 
 
-
-
-    # Cannot interpret if invalid data is provided
-    def testInterpretWithInvalidData(self):
-        # Init the interpreter
-        i = PercentageChangeInterpreter({"long": 0.5, "short": 0.5})
-        with self.assertRaises(ValueError):
-            i.interpret([1, 2, 3, 4])
 
 
 

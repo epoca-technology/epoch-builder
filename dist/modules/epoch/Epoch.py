@@ -72,7 +72,7 @@ class Epoch:
         "train_split": 0.85,
         "backtest_split": 0.3,
         "seed": 60184,
-        "model_discovery_steps": 5,
+        "model_discovery_steps": 7,
         "idle_minutes_on_position_close": 30
     }
 
@@ -442,7 +442,7 @@ class Epoch:
         receipt += f"Creation: {Utils.from_milliseconds_to_date_string(Utils.get_time())}\n"
         receipt += f"Seed: {config['seed']}\n"
         receipt += f"Train Split: {config['train_split']}\n"
-        receipt += f"Model Discovery Steps: {config['model_discovery_steps']}%\n"
+        receipt += f"Model Discovery Steps: {config['model_discovery_steps']}\n"
         receipt += f"Idle Minutes On Position Close: {config['idle_minutes_on_position_close']}\n"
 
         # Price Range

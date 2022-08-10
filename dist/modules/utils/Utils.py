@@ -78,6 +78,10 @@ class Utils:
         Returns:
             float
         """
+        # If the old value is zero, the percentage change cannot be calculated
+        if old_value == 0:
+            return 0
+            
         # Init the change
         change: float = 0.0
 

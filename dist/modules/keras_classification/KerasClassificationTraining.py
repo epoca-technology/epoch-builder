@@ -48,6 +48,8 @@ class KerasClassificationTraining:
             Important information regarding the model that will be trained.
         regressions: List[IModel]
             The list of ArimaModel|RegressionModel used to generate the training data.
+        learning_rate: float
+            The learning rate that will be used to train the model.
         optimizer: Union[adam.Adam, rmsprop.RMSProp]                    "adam"|"rmsprop"
             The optimizer that will be used to train the model.
         loss: Union[CategoricalCrossentropy, BinaryCrossentropy]        "categorical_crossentropy"|"binary_crossentropy"
@@ -129,6 +131,9 @@ class KerasClassificationTraining:
         # Initialize the regressions data as well as the regression instances
         self.regressions: List[IModel] = training_data_file["regressions"]
 
+        # Initialize the learning rate
+        self.learning_rate: float = config["learning_rate"]
+
         # Initialize the optimizer function
         self.optimizer: Union[adam.Adam, rmsprop.RMSProp] = self._get_optimizer(config["optimizer"])
 
@@ -182,7 +187,8 @@ class KerasClassificationTraining:
                 If the function name does not match any function in the conditionings.
         """
         # Initialize the Learning Rate Schedule
-        lr_schedule: InverseTimeDecay = LearningRateSchedule(
+        lr_schedule: Union[InverseTimeDecay, float] = LearningRateSchedule(
+            learning_rate=self.learning_rate,
             initial_learning_rate=KerasClassificationTraining.TRAINING_CONFIG["initial_lr"],
             decay_steps=KerasClassificationTraining.TRAINING_CONFIG["decay_steps"],
             decay_rate=KerasClassificationTraining.TRAINING_CONFIG["decay_rate"]
@@ -533,6 +539,7 @@ class KerasClassificationTraining:
             "training_data_summary": self.training_data_summary,
 
             # Training Configuration
+            "learning_rate": self.learning_rate,
             "optimizer": self.optimizer._name,
             "loss": self.loss.name,
             "metric": self.metric.name,

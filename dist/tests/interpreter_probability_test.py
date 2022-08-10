@@ -34,17 +34,22 @@ class ProbabilityInterpreterTestCase(unittest.TestCase):
 
     # Can initialize an interpreter
     def testInitializeInterpreter(self):
-        i = ProbabilityInterpreter({"min_probability": 0.55})
-        self.assertEqual(i.min_probability, 0.55)
+        i = ProbabilityInterpreter({ "min_increase_probability": 0.55, "min_decrease_probability": 0.55 })
+        self.assertEqual(i.min_increase_probability, 0.55)
+        self.assertEqual(i.min_decrease_probability, 0.55)
 
 
 
     # Cannot initialize an interpreter with invalid configuration
     def testInitializeInterpreterWithInvalidConfig(self):
         with self.assertRaises(ValueError):
-            ProbabilityInterpreter({"min_probability": 0.4})
+            ProbabilityInterpreter({ "min_increase_probability": 0.4, "min_decrease_probability": 0.55 })
         with self.assertRaises(ValueError):
-            ProbabilityInterpreter({"min_probability": 1})
+            ProbabilityInterpreter({ "min_increase_probability": 0.55, "min_decrease_probability": 0.4 })
+        with self.assertRaises(ValueError):
+            ProbabilityInterpreter({ "min_increase_probability": 1, "min_decrease_probability": 0.55 })
+        with self.assertRaises(ValueError):
+            ProbabilityInterpreter({ "min_increase_probability": 0.55, "min_decrease_probability": 1 })
 
 
 
@@ -57,7 +62,7 @@ class ProbabilityInterpreterTestCase(unittest.TestCase):
     # Can interpret a basic long
     def testBasicLongInterpretation(self):
         # Init the interpreter
-        i = ProbabilityInterpreter({"min_probability": 0.55})
+        i = ProbabilityInterpreter({ "min_increase_probability": 0.55, "min_decrease_probability": 0.55 })
 
         # Can interpret a long position if the probability is equals
         result, description = i.interpret([0.55, 0.45])
@@ -80,7 +85,7 @@ class ProbabilityInterpreterTestCase(unittest.TestCase):
     # Can interpret a basic short
     def testBasicShortInterpretation(self):
         # Init the interpreter
-        i = ProbabilityInterpreter({"min_probability": 0.65})
+        i = ProbabilityInterpreter({ "min_increase_probability": 0.55, "min_decrease_probability": 0.65 })
 
         # Can interpret a short position if the probability is equals
         result, description = i.interpret([0.35, 0.65])
@@ -99,17 +104,6 @@ class ProbabilityInterpreterTestCase(unittest.TestCase):
 
 
 
-
-
-
-    # Cannot interpret if invalid data is provided
-    def testInterpretWithInvalidData(self):
-        # Init the interpreter
-        i = ProbabilityInterpreter({"min_probability": 0.55})
-        with self.assertRaises(ValueError):
-            i.interpret([1])
-        with self.assertRaises(ValueError):
-            i.interpret([1, 2, 3, 4])
 
 
 

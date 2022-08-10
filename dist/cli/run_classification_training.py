@@ -3,7 +3,7 @@ from pandas import DataFrame
 from inquirer import List as InquirerList, prompt
 from modules._types import IKerasClassificationTrainingBatch, IKerasClassificationTrainingCertificate, ITrainingDataFile,\
     ITrainableModelType, IKerasClassificationTrainingConfig, IXGBClassificationTrainingBatch, IXGBClassificationTrainingCertificate,\
-        IXGBClassificationTrainingConfig
+        IXGBClassificationTrainingConfig, IClassificationDatasets
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
@@ -53,7 +53,7 @@ Candlestick.init(100, start=training_data["start"], end=training_data["end"])
 
 # DATASETS
 # Initialize the train and test datasets for the entire batch of models that will be trained.
-datasets: Tuple[DataFrame, DataFrame, DataFrame, DataFrame] = make_datasets(training_data["training_data"], Epoch.TRAIN_SPLIT)
+datasets: IClassificationDatasets = make_datasets(training_data["training_data"], Epoch.TRAIN_SPLIT)
 
 
 

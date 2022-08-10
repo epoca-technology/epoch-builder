@@ -1,12 +1,12 @@
 from typing import List, Union
 from pandas import DataFrame
-from modules._types import IModel, IPrediction, IPredictionMetaData, IPredictionResult, ModelInterface,\
-    IModelType
+from modules._types import IModel, IPrediction, IPredictionMetaData, IPredictionResult, \
+    ModelInterface, IModelType
 from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
 from modules.interpreter.ConsensusInterpreter import ConsensusInterpreter
 from modules.model.ModelType import validate_id
-from modules.model.ClassificationModelFactory import ClassificationModelFactory, ClassificationModel
+from modules.model.SubModelFactory import SubModelFactory, SubModelInstance
 
 
 
@@ -22,8 +22,8 @@ class ConsensusModel(ModelInterface):
             The state of the cache. If False, the model won't interact with the db.
         id: str
             The identifier of the consensus model.
-        sub_models: List[ClassificationModel]
-            The instances of the classification models that will generate predictions.
+        sub_models: List[SubModelInstance]
+            The instances of the sub models that will generate predictions.
         max_lookback: int
             The highest lookback among the models within.
         interpreter: ConsensusInterpreter
@@ -60,7 +60,7 @@ class ConsensusModel(ModelInterface):
         # Init the cache state
         self.enable_cache: bool = enable_cache
 
-        # Make sure there is 1 Classification Model
+        # Make sure the Consensus configuration was provided
         if not isinstance(config["consensus"], dict):
             raise ValueError(f"The provided consensus configuration is invalid.")
 
@@ -69,7 +69,7 @@ class ConsensusModel(ModelInterface):
         self.id: str = config["id"]
 
         # Initialize the sub_models
-        self.sub_models: List[ClassificationModel] = self._get_sub_models(config)
+        self.sub_models: List[SubModelInstance] = self._get_sub_models(config)
 
         # Initialize the max lookback
         self.max_lookback: int = max([m.get_lookback() for m in self.sub_models])
@@ -82,7 +82,7 @@ class ConsensusModel(ModelInterface):
 
 
 
-    def _get_sub_models(self, config: IModel) -> List[ClassificationModel]:
+    def _get_sub_models(self, config: IModel) -> List[SubModelInstance]:
         """Returns the list of model instances that will be used to generate predictions.
 
         Args:
@@ -90,7 +90,7 @@ class ConsensusModel(ModelInterface):
                 The configuration to be used to initialize the model's instance
 
         Returns:
-            List[ClassificationModel]
+            List[SubModelInstance]
 
         Raises:
             ValueError:
@@ -99,27 +99,37 @@ class ConsensusModel(ModelInterface):
                 If the minimum consensus represents less than 51% of the models total
         """
         # Init the list
-        models: List[ClassificationModel] = []
+        models: List[SubModelInstance] = []
+
+        # Check if there are any KerasRegressionModels
+        if isinstance(config.get("keras_regressions"), list):
+            if len(config["keras_regressions"]) > 0:
+                for model_config in config["keras_regressions"]:
+                    models.append(SubModelFactory(model_config["regression_id"], True))
+            else:
+                raise ValueError("Received an empty list in the keras_regressions configuration.")
 
         # Check if there are any KerasClassificationModels
         if isinstance(config.get("keras_classifications"), list):
             if len(config["keras_classifications"]) > 0:
                 for model_config in config["keras_classifications"]:
-                    models.append(ClassificationModelFactory({
-                        "id": model_config["classification_id"],
-                        "keras_classifications": [{"classification_id": model_config["classification_id"]}]
-                    }))
+                    models.append(SubModelFactory(model_config["classification_id"], True))
             else:
                 raise ValueError("Received an empty list in the keras_classifications configuration.")
+
+        # Check if there are any XGBRegressionModels
+        if isinstance(config.get("xgb_regressions"), list):
+            if len(config["xgb_regressions"]) > 0:
+                for model_config in config["xgb_regressions"]:
+                    models.append(SubModelFactory(model_config["regression_id"], True))
+            else:
+                raise ValueError("Received an empty list in the xgb_regressions configuration.")
 
         # Check if there are any XGBClassificationModels
         if isinstance(config.get("xgb_classifications"), list):
             if len(config["xgb_classifications"]) > 0:
                 for model_config in config["xgb_classifications"]:
-                    models.append(ClassificationModelFactory({
-                        "id": model_config["classification_id"],
-                        "xgb_classifications": [{"classification_id": model_config["classification_id"]}]
-                    }))
+                    models.append(SubModelFactory(model_config["classification_id"], True))
             else:
                 raise ValueError("Received an empty list in the xgb_classifications configuration.")
 
@@ -131,7 +141,7 @@ class ConsensusModel(ModelInterface):
             raise ValueError("A minimum of 2 models must be provided to a ConsensusModel.")
 
         # Make sure the minimum consensus is correct
-        if Utils.get_percentage_out_of_total(config["consensus_model"]["interpreter"]["min_consensus"], models_total) < 51:
+        if Utils.get_percentage_out_of_total(config["consensus"]["interpreter"]["min_consensus"], models_total) < 51:
             raise ValueError("The minimum consensus must represent at least 51 percent of the total models.")
 
         # Finally, return the model instances
@@ -253,12 +263,26 @@ class ConsensusModel(ModelInterface):
             # Initialize the type of model
             model_type: IModelType = type(sub_model).__name__
 
+            # Append it to the Keras Regressions Config if applies
+            if model_type == "KerasRegressionModel":
+                if isinstance(model.get("keras_regressions"), list):
+                    model["keras_regressions"].append(config["keras_regressions"][0])
+                else:
+                    model["keras_regressions"] = config["keras_regressions"]
+
             # Append it to the Keras Classifications Config if applies
-            if model_type == "KerasClassificationModel":
+            elif model_type == "KerasClassificationModel":
                 if isinstance(model.get("keras_classifications"), list):
                     model["keras_classifications"].append(config["keras_classifications"][0])
                 else:
                     model["keras_classifications"] = config["keras_classifications"]
+
+            # Append it to the XGB Regressions Config if applies
+            elif model_type == "XGBRegressionModel":
+                if isinstance(model.get("xgb_regressions"), list):
+                    model["xgb_regressions"].append(config["xgb_regressions"][0])
+                else:
+                    model["xgb_regressions"] = config["xgb_regressions"]
 
             # Append it to the XGB Classifications Config if applies
             elif model_type == "XGBClassificationModel":
@@ -269,6 +293,8 @@ class ConsensusModel(ModelInterface):
 
         # Finally, return the model's configuration
         return model
+
+
 
 
 
@@ -287,8 +313,8 @@ class ConsensusModel(ModelInterface):
             bool
         """
         return isinstance(model.get("consensus"), dict) and (
+                isinstance(model.get("keras_regressions"), list) or
                 isinstance(model.get("keras_classifications"), list) or
-                isinstance(model.get("xgb_classifications"), list)\
-                    and model.get("keras_regressions") == None\
-                        and model.get("xgb_regressions") == None
+                isinstance(model.get("xgb_regressions"), list) or
+                isinstance(model.get("xgb_classifications"), list)
         )

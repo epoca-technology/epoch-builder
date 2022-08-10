@@ -27,6 +27,10 @@ class IKerasClassificationTrainingConfig(TypedDict):
     # Any relevant data that should be attached to the trained model.
     description: str
 
+    # The learning rate that will be used to train the model. If the value is equals to -1, the system will
+    # use the InverseTimeDecay Class.
+    learning_rate: float
+
     # The optimizer to be used.
     optimizer: IKerasOptimizer # 'adam'|'rmsprop'
 
@@ -100,6 +104,7 @@ class IKerasClassificationTrainingCertificate(TypedDict):
     training_data_summary: ITrainingDataSummary
 
     # Training Configuration
+    learning_rate: float
     optimizer: IKerasOptimizerName
     loss: IKerasClassificationLoss
     metric: IKerasClassificationMetric

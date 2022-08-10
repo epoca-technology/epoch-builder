@@ -6,7 +6,7 @@ from modules._types import IPrediction, IPositionPerformance, IModelEvaluation, 
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
-from modules.model.ModelFactory import Model
+from modules.model.ModelFactory import ModelInstance
 from modules.position.Position import Position
 from modules.process_early_stopping.ProcessEarlyStopping import ProcessEarlyStopping
 
@@ -16,7 +16,7 @@ from modules.process_early_stopping.ProcessEarlyStopping import ProcessEarlyStop
 
 
 def evaluate(
-    model: Model, 
+    model: ModelInstance, 
     price_change_requirement: float, 
     progress_bar_description: str,
     discovery_completed: bool
@@ -26,7 +26,7 @@ def evaluate(
     ensure the model has not yet seen it.
 
     Args:
-        model: Model
+        model: ModelInstance
             The instance of the model to be evaluated
         price_change_requirement: float
             Percentage the price needs to increase or decrease in order for a position to be 

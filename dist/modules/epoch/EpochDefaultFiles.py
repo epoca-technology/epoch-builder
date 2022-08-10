@@ -14,18 +14,16 @@ BACKTEST_CONFIG_UT: IBacktestConfig = {
     "stop_loss": 3,
     "idle_minutes_on_position_close": 30,
     "models": [
-        {
-            "id": "KR_UNIT_TEST",
-            "keras_regressions": [{ "regression_id": "KR_UNIT_TEST" }]
-        },
-        {
-            "id": "KC_UNIT_TEST",
-            "keras_classifications": [{ "classification_id": "KC_UNIT_TEST" }]
-        },
+        { "id": "KR_UNIT_TEST", "keras_regressions": [{ "regression_id": "KR_UNIT_TEST" }] },
+        #{ "id": "XGBR_UNIT_TEST", "xgb_regressions": [{ "regression_id": "XGBR_UNIT_TEST" }] },
+        { "id": "KC_UNIT_TEST", "keras_classifications": [{ "classification_id": "KC_UNIT_TEST" }] },
+        #{ "id": "XGBC_UNIT_TEST", "xgb_classifications": [{ "classification_id": "XGBC_UNIT_TEST" }] },
         {
             "id": "CON_UNIT_TEST",
             "keras_regressions": [{ "regression_id": "KR_UNIT_TEST" }],
+            #"xgb_regressions": [{ "regression_id": "XGBR_UNIT_TEST" }],
             "keras_classifications": [{ "classification_id": "KC_UNIT_TEST" }],
+            #"xgb_classifications": [{ "classification_id": "XGBC_UNIT_TEST" }],
             "consensus": { "interpreter": { "min_consensus": 2 } }
         }
     ]
@@ -46,6 +44,7 @@ KERAS_REGRESSION_TRAINING_CONFIG_UT: IKerasRegressionTrainingBatch = {
             "autoregressive": True,
             "lookback": 100,
             "predictions": 30,
+            "learning_rate": 0.001,
             "optimizer": "adam",
             "loss": "mean_absolute_error",
             "metric": "mean_squared_error",
@@ -74,6 +73,7 @@ KERAS_CLASSIFICATION_TRAINING_CONFIG_UT: IKerasClassificationTrainingBatch = {
         {
             "id": "KC_UNIT_TEST",
             "description": "This is the official KerasClassificationModel for Unit Tests.",
+            "learning_rate": 0.001,
             "optimizer": "adam",
             "loss": "binary_crossentropy",
             "metric": "binary_accuracy",

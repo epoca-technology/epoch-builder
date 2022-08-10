@@ -51,6 +51,8 @@ class KerasRegressionTraining:
             The number of prediction candlesticks that will be used to generate predictions.
         predictions: int
             The number of predictions to be generated.
+        learning_rate: float
+            The learning rate that will be used to train the model.
         optimizer: Union[adam.Adam, rmsprop.RMSProp]                    "adam"|"rmsprop"
             The optimizer that will be used to train the model.
         loss: Union[MeanSquaredError, MeanAbsoluteError]                "mean_squared_error"|"mean_absolute_error"
@@ -127,6 +129,9 @@ class KerasRegressionTraining:
         # Initialize the predictions output
         self.predictions: int = config["predictions"]
 
+        # Initialize the learning rate
+        self.learning_rate: float = config["learning_rate"]
+
         # Initialize the optimizer function
         self.optimizer: Union[adam.Adam, rmsprop.RMSProp] = self._get_optimizer(config["optimizer"])
 
@@ -184,7 +189,8 @@ class KerasRegressionTraining:
                 If the function name does not match any function in the conditionings.
         """
         # Initialize the Learning Rate Schedule
-        lr_schedule: InverseTimeDecay = LearningRateSchedule(
+        lr_schedule: Union[InverseTimeDecay, float] = LearningRateSchedule(
+            learning_rate=self.learning_rate,
             initial_learning_rate=KerasRegressionTraining.TRAINING_CONFIG["initial_lr"],
             decay_steps=KerasRegressionTraining.TRAINING_CONFIG["decay_steps"],
             decay_rate=KerasRegressionTraining.TRAINING_CONFIG["decay_rate"]
@@ -527,6 +533,7 @@ class KerasRegressionTraining:
             "autoregressive": self.autoregressive,
             "lookback": self.lookback,
             "predictions": self.predictions,
+            "learning_rate": self.learning_rate,
             "optimizer": self.optimizer._name,
             "loss": self.loss.name,
             "keras_model_config": self.keras_model,

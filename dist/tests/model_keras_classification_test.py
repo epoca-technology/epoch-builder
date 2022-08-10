@@ -2,7 +2,7 @@ import unittest
 from modules._types import IModel, IPrediction
 from modules.database.Database import Database
 from modules.candlestick.Candlestick import Candlestick
-from modules.model.ClassificationModel import ClassificationModel
+from modules.model.KerasClassificationModel import KerasClassificationModel
 
 
 
@@ -18,8 +18,8 @@ if not Database.TEST_MODE:
 
 # TRAINING DATA FILE
 CONFIG: IModel = {
-    "id": "C_UNIT_TEST",
-    "classification_models": [{"classification_id": "C_UNIT_TEST", "interpreter": { "min_probability": 0.51 }}]
+    "id": "KC_UNIT_TEST",
+    "keras_classifications": [ {"classification_id": "KC_UNIT_TEST"} ]
 }
 
 
@@ -29,7 +29,7 @@ CONFIG: IModel = {
 
 
 ## Test Class ##
-class ClassificationModelTestCase(unittest.TestCase):
+class KerasClassificationModelTestCase(unittest.TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -40,24 +40,23 @@ class ClassificationModelTestCase(unittest.TestCase):
 
 
 
-    ## Initialization ##
 
 
-    # Initialize an instance with valid data and validate the integrity
+    # Can initialize a model instance and make use of its functionalities
     def testInitialize(self):
         # Initialize the instance
-        model: ClassificationModel = ClassificationModel(CONFIG)
+        model: KerasClassificationModel = KerasClassificationModel(CONFIG, enable_cache=False)
 
         # Make sure the instance is recognized
-        self.assertIsInstance(model, ClassificationModel)
-        self.assertEqual(type(model).__name__, "ClassificationModel")
+        self.assertIsInstance(model, KerasClassificationModel)
+        self.assertEqual(type(model).__name__, "KerasClassificationModel")
 
         # Init the test candlestick time
-        time: int = Candlestick.DF.iloc[815655]["ot"]
+        time: int = Candlestick.DF.iloc[115655]["ot"]
         first_ot, last_ct = Candlestick.get_lookback_prediction_range(model.get_lookback(), time)
 
         # Perform a random prediction
-        pred: IPrediction = model.predict(time, enable_cache=False)
+        pred: IPrediction = model.predict(time)
         self.assertIsInstance(pred, dict)
         self.assertIsInstance(pred["r"], int)
         self.assertIsInstance(pred["t"], int)
@@ -68,13 +67,32 @@ class ClassificationModelTestCase(unittest.TestCase):
         # Make sure the prediction has not been cached
         self.assertEqual(model.cache.get(first_ot, last_ct), None)
 
-        # Perform a the same prediction with cache enabled
-        pred = model.predict(time, enable_cache=True)
+        # Retrieve the summary and make sure it is a dict
+        summary: IModel = model.get_model()
+        self.assertIsInstance(summary, dict)
+
+
+
+
+
+
+    # Can cache predictions and delete them afterwards
+    def testPredictionCache(self):
+        # Initialize the instance
+        model: KerasClassificationModel = KerasClassificationModel(CONFIG, enable_cache=True)
+
+        # Init the test candlestick time
+        time: int = Candlestick.DF.iloc[75655]["ot"]
+        first_ot, last_ct = Candlestick.get_lookback_prediction_range(model.get_lookback(), time)
+
+        # Perform a random prediction
+        pred: IPrediction = model.predict(time)
         self.assertIsInstance(pred, dict)
         self.assertIsInstance(pred["r"], int)
         self.assertIsInstance(pred["t"], int)
         self.assertIsInstance(pred["md"], list)
-        
+        self.assertEqual(len(pred["md"]), 1)
+
         # Make sure the prediction has been cached
         self.assertDictEqual(model.cache.get(first_ot, last_ct), pred)
 
@@ -82,12 +100,6 @@ class ClassificationModelTestCase(unittest.TestCase):
         model.cache.delete(first_ot, last_ct)
         cached_pred = model.cache.get(first_ot, last_ct)
         self.assertTrue(cached_pred == None)
-
-        # Retrieve the summary and make sure it is a dict
-        summary: IModel = model.get_model()
-        self.assertIsInstance(summary, dict)
-
-
 
 
 

@@ -18,11 +18,12 @@ if not Database.TEST_MODE:
 
 # TRAINING DATA FILE
 CONFIG: IModel = {
-    "id": "CON_UNIT_TEST",    
-    "arima_models": [{"lookback": 150,"predictions": 10,"arima": { "p": 2, "d": 1, "q": 2 },"interpreter": { "long": 0.5, "short": 0.5 }}],
-    "regression_models": [{"regression_id": "R_UNIT_TEST", "interpreter": { "long": 1, "short": 1 }}],
-    "classification_models": [{"classification_id": "C_UNIT_TEST", "interpreter": { "min_probability": 0.51 }}],
-    "consensus_model": { "interpreter": { "min_consensus": 2 } }
+    "id": "CON_UNIT_TEST",
+    "keras_regressions": [{ "regression_id": "KR_UNIT_TEST" }],
+    #"xgb_regressions": [{ "regression_id": "XGBR_UNIT_TEST" }],
+    "keras_classifications": [{ "classification_id": "KC_UNIT_TEST" }],
+    #"xgb_classifications": [{ "classification_id": "XGBC_UNIT_TEST" }],
+    "consensus": { "interpreter": { "min_consensus": 2 } }
 }
 
 
@@ -56,7 +57,7 @@ class ConsensusModelTestCase(unittest.TestCase):
         self.assertEqual(type(model).__name__, "ConsensusModel")
 
         # Init the test candlestick time
-        time: int = Candlestick.DF.iloc[655858]["ot"]
+        time: int = Candlestick.DF.iloc[55858]["ot"]
 
         # Perform a random prediction
         pred: IPrediction = model.predict(time)
@@ -64,16 +65,17 @@ class ConsensusModelTestCase(unittest.TestCase):
         self.assertIsInstance(pred["r"], int)
         self.assertIsInstance(pred["t"], int)
         self.assertIsInstance(pred["md"], list)
-        self.assertEqual(len(pred["md"]), 3)
+        self.assertEqual(len(pred["md"]), 2)
 
         # Retrieve the summary and make sure it is valid
         summary: IModel = model.get_model()
         self.assertIsInstance(summary, dict)
-        self.assertEqual(len(summary["arima_models"]), 1)
-        self.assertEqual(len(summary["regression_models"]), 1)
-        self.assertEqual(len(summary["classification_models"]), 1)
-        self.assertEqual(len(summary["consensus_model"]["sub_models"]), 3)
-        self.assertDictEqual(summary["consensus_model"]["interpreter"], CONFIG["consensus_model"]["interpreter"])
+        self.assertEqual(len(summary["keras_regressions"]), 1)
+        self.assertEqual(len(summary["keras_classifications"]), 1)
+        #self.assertEqual(len(summary["xgb_regressions"]), 1)
+        #self.assertEqual(len(summary["xgb_classifications"]), 1)
+        self.assertEqual(len(summary["consensus"]["sub_models"]), 2)
+        self.assertDictEqual(summary["consensus"]["interpreter"], CONFIG["consensus"]["interpreter"])
 
 
 
