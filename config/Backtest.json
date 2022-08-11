@@ -1,229 +1,43 @@
 {
-    "id": "keras_classification_lstm",
-    "description": "Backtesting of Keras Classification LSTMs",
-    "take_profit": 3,
-    "stop_loss": 3,
+    "id": "unit_test",
+    "description": "The purpose of this test is to make sure the Backtest Module can run any Model.",
+    "take_profit": 2.5,
+    "stop_loss": 2.5,
     "idle_minutes_on_position_close": 30,
     "models": [
         {
-            "id": "C_LSTM_S5_3e313705-2aef-43e3-ae86-9253d409b5e6",
-            "classification_models": [
+            "id": "KR_UNIT_TEST",
+            "keras_regressions": [
                 {
-                    "classification_id": "C_LSTM_S5_3e313705-2aef-43e3-ae86-9253d409b5e6",
-                    "interpreter": {
-                        "min_probability": 0.6
-                    }
+                    "regression_id": "KR_UNIT_TEST"
                 }
             ]
         },
         {
-            "id": "C_LSTM_S4_df5bd849-3f76-4d2a-95bf-6b2e8784c87c",
-            "classification_models": [
+            "id": "KC_UNIT_TEST",
+            "keras_classifications": [
                 {
-                    "classification_id": "C_LSTM_S4_df5bd849-3f76-4d2a-95bf-6b2e8784c87c",
-                    "interpreter": {
-                        "min_probability": 0.6
-                    }
+                    "classification_id": "KC_UNIT_TEST"
                 }
             ]
         },
         {
-            "id": "C_LSTM_S3_6deeea6d-884f-4ddf-b5ac-1a4e0c873e92",
-            "classification_models": [
+            "id": "CON_UNIT_TEST",
+            "keras_regressions": [
                 {
-                    "classification_id": "C_LSTM_S3_6deeea6d-884f-4ddf-b5ac-1a4e0c873e92",
-                    "interpreter": {
-                        "min_probability": 0.6
-                    }
+                    "regression_id": "KR_UNIT_TEST"
                 }
-            ]
-        },
-        {
-            "id": "C_LSTM_S2_b5a87a52-0cc3-4e1e-91c7-06c60bb71f35",
-            "classification_models": [
+            ],
+            "keras_classifications": [
                 {
-                    "classification_id": "C_LSTM_S2_b5a87a52-0cc3-4e1e-91c7-06c60bb71f35",
-                    "interpreter": {
-                        "min_probability": 0.6
-                    }
+                    "classification_id": "KC_UNIT_TEST"
                 }
-            ]
-        },
-        {
-            "id": "C_LSTM_S2_969fb45f-66a3-4854-9b19-8963a76c474a",
-            "classification_models": [
-                {
-                    "classification_id": "C_LSTM_S2_969fb45f-66a3-4854-9b19-8963a76c474a",
-                    "interpreter": {
-                        "min_probability": 0.6
-                    }
+            ],
+            "consensus": {
+                "interpreter": {
+                    "min_consensus": 2
                 }
-            ]
-        },
-        {
-            "id": "C_LSTM_S2_698373f4-06d9-46eb-82ee-b6ff18234d34",
-            "classification_models": [
-                {
-                    "classification_id": "C_LSTM_S2_698373f4-06d9-46eb-82ee-b6ff18234d34",
-                    "interpreter": {
-                        "min_probability": 0.6
-                    }
-                }
-            ]
-        },
-        {
-            "id": "C_LSTM_S2_605f186c-7c56-496f-a1b3-a847edb71aa4",
-            "classification_models": [
-                {
-                    "classification_id": "C_LSTM_S2_605f186c-7c56-496f-a1b3-a847edb71aa4",
-                    "interpreter": {
-                        "min_probability": 0.6
-                    }
-                }
-            ]
-        },
-        {
-            "id": "C_LSTM_S2_23772a51-aa33-4e53-99e4-7fb8e185cb1f",
-            "classification_models": [
-                {
-                    "classification_id": "C_LSTM_S2_23772a51-aa33-4e53-99e4-7fb8e185cb1f",
-                    "interpreter": {
-                        "min_probability": 0.6
-                    }
-                }
-            ]
-        },
-        {
-            "id": "C_LSTM_S3_74a1ebba-4b2e-4bcf-9178-be5f19d4c1ab",
-            "classification_models": [
-                {
-                    "classification_id": "C_LSTM_S3_74a1ebba-4b2e-4bcf-9178-be5f19d4c1ab",
-                    "interpreter": {
-                        "min_probability": 0.6
-                    }
-                }
-            ]
-        },
-        {
-            "id": "C_LSTM_S3_ef704f6a-9622-45dd-843c-fc27ddbc7562",
-            "classification_models": [
-                {
-                    "classification_id": "C_LSTM_S3_ef704f6a-9622-45dd-843c-fc27ddbc7562",
-                    "interpreter": {
-                        "min_probability": 0.6
-                    }
-                }
-            ]
-        },
-        {
-            "id": "C_LSTM_S2_28478168-e7f3-4d03-b102-7b0ca4447392",
-            "classification_models": [
-                {
-                    "classification_id": "C_LSTM_S2_28478168-e7f3-4d03-b102-7b0ca4447392",
-                    "interpreter": {
-                        "min_probability": 0.6
-                    }
-                }
-            ]
-        },
-        {
-            "id": "C_LSTM_S3_43011a09-9354-49cb-b7c7-4d26ec175819",
-            "classification_models": [
-                {
-                    "classification_id": "C_LSTM_S3_43011a09-9354-49cb-b7c7-4d26ec175819",
-                    "interpreter": {
-                        "min_probability": 0.6
-                    }
-                }
-            ]
-        },
-        {
-            "id": "C_LSTM_S3_197e1b9a-f6fc-4d99-a474-70229e055253",
-            "classification_models": [
-                {
-                    "classification_id": "C_LSTM_S3_197e1b9a-f6fc-4d99-a474-70229e055253",
-                    "interpreter": {
-                        "min_probability": 0.6
-                    }
-                }
-            ]
-        },
-        {
-            "id": "C_LSTM_S2_bb537893-42e0-41ce-93b4-da96be26e441",
-            "classification_models": [
-                {
-                    "classification_id": "C_LSTM_S2_bb537893-42e0-41ce-93b4-da96be26e441",
-                    "interpreter": {
-                        "min_probability": 0.6
-                    }
-                }
-            ]
-        },
-        {
-            "id": "C_LSTM_S3_427e9ca7-20e8-4c22-a806-2d5074e27c79",
-            "classification_models": [
-                {
-                    "classification_id": "C_LSTM_S3_427e9ca7-20e8-4c22-a806-2d5074e27c79",
-                    "interpreter": {
-                        "min_probability": 0.6
-                    }
-                }
-            ]
-        },
-        {
-            "id": "C_LSTM_S3_a04325f3-d287-425c-abac-4f61b0168f58",
-            "classification_models": [
-                {
-                    "classification_id": "C_LSTM_S3_a04325f3-d287-425c-abac-4f61b0168f58",
-                    "interpreter": {
-                        "min_probability": 0.6
-                    }
-                }
-            ]
-        },
-        {
-            "id": "C_LSTM_S2_c09fa539-34e0-45f5-b692-acb1f8992aac",
-            "classification_models": [
-                {
-                    "classification_id": "C_LSTM_S2_c09fa539-34e0-45f5-b692-acb1f8992aac",
-                    "interpreter": {
-                        "min_probability": 0.6
-                    }
-                }
-            ]
-        },
-        {
-            "id": "C_LSTM_S2_000f562b-e885-400d-906b-633e7ecef770",
-            "classification_models": [
-                {
-                    "classification_id": "C_LSTM_S2_000f562b-e885-400d-906b-633e7ecef770",
-                    "interpreter": {
-                        "min_probability": 0.6
-                    }
-                }
-            ]
-        },
-        {
-            "id": "C_LSTM_S3_54d22f69-3182-40eb-b87c-4baa5e1a9dd4",
-            "classification_models": [
-                {
-                    "classification_id": "C_LSTM_S3_54d22f69-3182-40eb-b87c-4baa5e1a9dd4",
-                    "interpreter": {
-                        "min_probability": 0.6
-                    }
-                }
-            ]
-        },
-        {
-            "id": "C_LSTM_S3_e625c89f-043d-4353-a864-c9caa49fea46",
-            "classification_models": [
-                {
-                    "classification_id": "C_LSTM_S3_e625c89f-043d-4353-a864-c9caa49fea46",
-                    "interpreter": {
-                        "min_probability": 0.6
-                    }
-                }
-            ]
+            }
         }
     ]
 }

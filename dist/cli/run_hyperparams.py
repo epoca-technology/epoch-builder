@@ -49,8 +49,10 @@ if model_type == "keras_regression" or model_type == "xgb_regression":
         default_lookback = KerasHyperparams.DEFAULT_LOOKBACK
         default_predictions = KerasHyperparams.DEFAULT_PREDICTIONS
     regression_config: Dict[str, str] = prompt(
-        [Text("lookback", f"Enter the lookback (Defaults to {default_lookback})")],
-        [Text("predictions", f"Enter the predictions (Defaults to {default_predictions})")]
+        [
+            Text("lookback", f"Enter the lookback (Defaults to {default_lookback})"),
+            Text("predictions", f"Enter the predictions (Defaults to {default_predictions})")
+        ]
     )
     lookback = int(regression_config["lookback"]) if regression_config["lookback"].isdigit() else default_lookback
     predictions = int(regression_config["predictions"]) if regression_config["predictions"].isdigit() else default_predictions

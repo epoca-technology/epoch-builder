@@ -74,8 +74,8 @@ class KerasClassification(KerasModelInterface):
                 self.id: str = model_file.attrs['id']
                 self.description: str = model_file.attrs["description"]
                 self.training_data_id: str = model_file.attrs["training_data_id"]
-                self.include_rsi: bool = model_file.attrs.get("include_rsi") == True
-                self.include_aroon: bool = model_file.attrs.get("include_aroon") == True
+                self.include_rsi: bool = bool(model_file.attrs.get("include_rsi") == True) # Downcast to bool
+                self.include_aroon: bool = bool(model_file.attrs.get("include_aroon") == True) # Downcast to bool
                 self.features_num: int = int(model_file.attrs["features_num"]) # Downcast to int
                 self.regressions: List[IModel] = loads(model_file.attrs["regressions"])
                 self.price_change_requirement: float = float(model_file.attrs["price_change_requirement"]) # Downcast to float

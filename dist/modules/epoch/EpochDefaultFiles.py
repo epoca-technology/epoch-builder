@@ -10,8 +10,8 @@ from modules.epoch.EpochFile import EpochFile
 BACKTEST_CONFIG_UT: IBacktestConfig = {
     "id": "unit_test",
     "description": "The purpose of this test is to make sure the Backtest Module can run any Model.",
-    "take_profit": 3,
-    "stop_loss": 3,
+    "take_profit": 2.5,
+    "stop_loss": 2.5,
     "idle_minutes_on_position_close": 30,
     "models": [
         { "id": "KR_UNIT_TEST", "keras_regressions": [{ "regression_id": "KR_UNIT_TEST" }] },
