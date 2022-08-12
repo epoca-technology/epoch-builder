@@ -1,5 +1,5 @@
 from typing import List, Union
-from numpy import median, mean, arange
+from numpy import mean
 from modules._types import IKerasRegressionTrainingCertificate, IXGBRegressionTrainingCertificate,\
     ISelectedRegression, IModel, IModelType, IPercentChangeInterpreterConfig, IKerasRegressionConfig, \
         IXGBRegressionConfig
@@ -131,19 +131,10 @@ class RegressionSelection:
             ValueError:
                 If the model config cannot be built for any reason
         """
-        # Build the points median history
-        points_hist: List[float] = [p["pts"] for p in certificate["regression_evaluation"]["positions"]]
-        median_hist: List[float] = []
-        for i in arange(0.1, 1.1, 0.1):
-            median_hist.append(round(median(points_hist[:int(len(points_hist) * i)]), 2))
-
-        # Finally, return the selection
         return {
             "id": certificate["id"],
             "model": self._build_model_config(certificate),
-            "discovery": certificate["discovery"],
-            "evaluation": certificate["regression_evaluation"],
-            "points_median_hist": median_hist
+            "discovery": certificate["discovery"]
         }
 
 

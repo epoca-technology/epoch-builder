@@ -41,10 +41,10 @@ KERAS_REGRESSION_TRAINING_CONFIG_UT: IKerasRegressionTrainingBatch = {
         {
             "id": "KR_UNIT_TEST",
             "description": "This is the official KerasRegressionModel for Unit Tests.",
-            "autoregressive": True,
+            "autoregressive": False,
             "lookback": 100,
             "predictions": 30,
-            "learning_rate": 0.001,
+            "learning_rate": -1,
             "optimizer": "adam",
             "loss": "mean_absolute_error",
             "metric": "mean_squared_error",
@@ -73,7 +73,7 @@ KERAS_CLASSIFICATION_TRAINING_CONFIG_UT: IKerasClassificationTrainingBatch = {
         {
             "id": "KC_UNIT_TEST",
             "description": "This is the official KerasClassificationModel for Unit Tests.",
-            "learning_rate": 0.001,
+            "learning_rate": -1,
             "optimizer": "adam",
             "loss": "binary_crossentropy",
             "metric": "binary_accuracy",

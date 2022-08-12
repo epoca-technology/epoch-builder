@@ -4,7 +4,6 @@ from modules._types.model_types import IKerasRegressionConfig
 from modules._types.keras_models_types import IKerasModelConfig, IKerasModelTrainingHistory, IKerasOptimizer, \
     IKerasRegressionLoss, IKerasRegressionMetric, IKerasOptimizerName
 from modules._types.discovery_types import IDiscoveryPayload
-from modules._types.model_evaluation_types import IModelEvaluation
 
 
 
@@ -134,9 +133,6 @@ class IKerasRegressionTrainingCertificate(TypedDict):
 
     # Regression Discovery
     discovery: IDiscoveryPayload
-
-    # Regression Post-Training Evaluation
-    regression_evaluation: IModelEvaluation
 
     # The configuration of the Regression
     regression_config: IKerasRegressionConfig

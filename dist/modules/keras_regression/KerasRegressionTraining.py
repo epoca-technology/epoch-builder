@@ -9,8 +9,8 @@ from keras.losses import MeanSquaredError, MeanAbsoluteError
 from keras.metrics import MeanSquaredError as MeanSquaredErrorMetric, MeanAbsoluteError as MeanAbsoluteErrorMetric
 from keras.callbacks import EarlyStopping, History
 from modules._types import IKerasTrainingTypeConfig, IKerasModelConfig, IKerasModelTrainingHistory,\
-    IKerasRegressionTrainingConfig, IKerasRegressionTrainingCertificate, IModelEvaluation, IKerasOptimizer,\
-        IKerasRegressionLoss, IKerasRegressionMetric, ITrainableModelType, IDiscovery, IDiscoveryPayload
+    IKerasRegressionTrainingConfig, IKerasRegressionTrainingCertificate, IKerasOptimizer, IKerasRegressionLoss, \
+        IKerasRegressionMetric, ITrainableModelType, IDiscovery, IDiscoveryPayload
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
@@ -22,8 +22,6 @@ from modules.keras_models.KerasModelSummary import get_summary
 from modules.model.ModelType import validate_id
 from modules.keras_regression.KerasRegression import KerasRegression
 from modules.discovery.RegressionDiscovery import discover
-from modules.model.KerasRegressionModel import KerasRegressionModel
-from modules.model_evaluation.ModelEvaluation import evaluate
 
 
 
@@ -59,6 +57,8 @@ class KerasRegressionTraining:
             The loss function that will be used for training.
         metric: Union[MeanSquaredErrorMetric, MeanAbsoluteErrorMetric]
             The metric function that will be used to evaluate the training.
+        batch_size: int
+            Number of samples per gradient update. Can be adjusted based on the network that will be trained.
         keras_model: IKerasModelConfig
             The configuration that will be used to build the Keras Model.
         train_x: ndarray
@@ -78,7 +78,7 @@ class KerasRegressionTraining:
         "decay_rate": 0.35,
         "epochs": 100,
         "patience": 10,
-        "batch_size": 32
+        "batch_size": 64
     }
 
 
@@ -138,6 +138,9 @@ class KerasRegressionTraining:
 
         # Initialize the metric function
         self.metric: Union[MeanSquaredErrorMetric, MeanAbsoluteErrorMetric] = self._get_metric(config["metric"])
+
+        # Initialize the batch size
+        self.batch_size: int = self._get_batch_size()
         
         # Initialize the Keras Model's Configuration and populate the lookback
         self.keras_model: IKerasModelConfig = config["keras_model"]
@@ -259,7 +262,28 @@ class KerasRegressionTraining:
 
 
 
+    def _get_batch_size(self) -> int:
+        """Retrieves the batch size that will be used to train the models based
+        on the network.
 
+        Returns:
+            int
+        """
+        if "DNN" in self.id:
+            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 2
+        elif "CNN" in self.id:
+            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 4
+        elif "LSTM" in self.id:
+            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 6
+        elif "CLSTM" in self.id:
+            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 8
+        else:
+            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"]
+        #return KerasRegressionTraining.TRAINING_CONFIG["batch_size"]
+
+
+
+    
 
 
 
@@ -288,15 +312,15 @@ class KerasRegressionTraining:
         )
 
         # Retrieve the Keras Model
-        print("    1/8) Initializing Model...")
+        print("    1/7) Initializing Model...")
         model: Sequential = KerasModel(config=self.keras_model)
 
         # Compile the model
-        print("    2/8) Compiling Model...")
+        print("    2/7) Compiling Model...")
         model.compile(optimizer=self.optimizer, loss=self.loss, metrics=[ self.metric ])
   
         # Train the model
-        print("    3/8) Training Model")
+        print("    3/7) Training Model")
         history_object: History = model.fit(
             self.train_x, 
             self.train_y, 
@@ -307,7 +331,7 @@ class KerasRegressionTraining:
                 KerasTrainingProgressBar(KerasRegressionTraining.TRAINING_CONFIG["epochs"], "       ") 
             ],
             shuffle=True,
-            batch_size=KerasRegressionTraining.TRAINING_CONFIG["batch_size"],
+            batch_size=self.batch_size,
             verbose=0
         )
 
@@ -315,11 +339,11 @@ class KerasRegressionTraining:
         history: IKerasModelTrainingHistory = history_object.history
 
         # Evaluate the test dataset
-        print("    4/8) Evaluating Test Dataset...")
+        print("    4/7) Evaluating Test Dataset...")
         test_evaluation: List[float] = model.evaluate(self.test_x, self.test_y, verbose=0) # [loss, metric]
 
         # Perform the regression discovery
-        print("    5/8) Discovering KerasRegression")
+        print("    5/7) Discovering KerasRegression")
         discovery, discovery_payload = discover(
             regression=KerasRegression(self.id, {
                 "model": model,
@@ -331,35 +355,18 @@ class KerasRegressionTraining:
         )
 
         # Save the model
-        print("    6/8) Saving Model...")
+        print("    6/7) Saving Model...")
         self._save_model(model, discovery)
 
-        # Perform the regression evaluation
-        print("    7/8) Evaluating KerasRegressionModel")
-        regression_model: KerasRegressionModel = KerasRegressionModel(
-            config={
-                "id": self.id,
-                "keras_regressions": [ { "regression_id": self.id } ]
-            },
-            enable_cache=False
-        )
-        regression_evaluation: IModelEvaluation = evaluate(
-            model=regression_model,
-            price_change_requirement=discovery["successful_mean"],
-            progress_bar_description="       ",
-            discovery_completed=discovery_payload["early_stopping"] == None
-        )
-
         # Save the certificate
-        print("    8/8) Saving Certificate...")
+        print("    7/7) Saving Certificate...")
         certificate: IKerasRegressionTrainingCertificate = self._save_certificate(
             start_time, 
             model, 
             history, 
             test_evaluation, 
             discovery,
-            discovery_payload,
-            regression_evaluation
+            discovery_payload
         )
 
         # Return it so it can be added to the batch
@@ -419,8 +426,7 @@ class KerasRegressionTraining:
         training_history: IKerasModelTrainingHistory, 
         test_evaluation: List[float],
         discovery: IDiscovery,
-        discovery_payload: IDiscoveryPayload,
-        regression_evaluation: IModelEvaluation
+        discovery_payload: IDiscoveryPayload
     ) -> IKerasRegressionTrainingCertificate:
         """Saves a trained model in the output directory as well as the training certificate.
 
@@ -436,8 +442,6 @@ class KerasRegressionTraining:
             discovery: IDiscovery
             discovery_payload: IDiscoveryPayload
                 The discovery and the payload of the regression.
-            regression_evaluation: IModelEvaluation
-                The results of the regression post-training evaluation.
 
         Returns:
             IKerasRegressionTrainingCertificate
@@ -449,8 +453,7 @@ class KerasRegressionTraining:
             training_history, 
             test_evaluation, 
             discovery,
-            discovery_payload,
-            regression_evaluation
+            discovery_payload
         )
 
         # Save the file
@@ -472,8 +475,7 @@ class KerasRegressionTraining:
         training_history: IKerasModelTrainingHistory, 
         test_evaluation: List[float],
         discovery: IDiscovery,
-        discovery_payload: IDiscoveryPayload,
-        regression_evaluation: IModelEvaluation
+        discovery_payload: IDiscoveryPayload
     ) -> IKerasRegressionTrainingCertificate:
         """Builds the certificate that contains all the data regarding the training process
         that will be saved alongside the model.
@@ -490,8 +492,6 @@ class KerasRegressionTraining:
             discovery: IDiscovery
             discovery_payload: IDiscoveryPayload
                 The discovery and the payload of the regression.
-            regression_evaluation: IModelEvaluation
-                The results of the regression post-training evaluation.
 
         Returns:
             IKerasRegressionTrainingCertificate
@@ -525,9 +525,6 @@ class KerasRegressionTraining:
 
             # Regression Discovery
             "discovery": discovery_payload,
-
-            # Post Training Evaluation
-            "regression_evaluation": regression_evaluation,
 
             # The configuration of the Regression
             "regression_config": {

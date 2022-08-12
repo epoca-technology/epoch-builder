@@ -1,6 +1,5 @@
 from typing import TypedDict, List
 from modules._types.discovery_types import IDiscoveryPayload
-from modules._types.model_evaluation_types import IModelEvaluation
 from modules._types.model_types import IModel
 
 
@@ -18,13 +17,6 @@ class ISelectedRegression(TypedDict):
 
     # The discovery of the Regression
     discovery: IDiscoveryPayload
-
-    # The evaluation of the Regression
-    evaluation: IModelEvaluation
-
-    # The history of the points median. It should be a list of 10 items representing
-    # 10%,20%,30%,40%,50%,60%,70%,80%,90% and 100% of the points_hist
-    points_median_hist: List[float]
 
 
 

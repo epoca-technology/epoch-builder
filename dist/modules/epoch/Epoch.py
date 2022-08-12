@@ -72,7 +72,7 @@ class Epoch:
         "train_split": 0.85,
         "backtest_split": 0.3,
         "seed": 60184,
-        "model_discovery_steps": 10,
+        "model_discovery_steps": 5,
         "idle_minutes_on_position_close": 30
     }
 
