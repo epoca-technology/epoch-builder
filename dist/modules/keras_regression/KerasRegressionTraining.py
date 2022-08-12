@@ -78,7 +78,7 @@ class KerasRegressionTraining:
         "decay_rate": 0.35,
         "epochs": 100,
         "patience": 10,
-        "batch_size": 64
+        "batch_size": 128
     }
 
 
@@ -270,16 +270,15 @@ class KerasRegressionTraining:
             int
         """
         if "DNN" in self.id:
-            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 2
+            return 128
         elif "CNN" in self.id:
-            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 4
+            return 512
         elif "LSTM" in self.id:
-            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 6
+            return 512
         elif "CLSTM" in self.id:
-            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 8
+            return 512
         else:
             return KerasRegressionTraining.TRAINING_CONFIG["batch_size"]
-        #return KerasRegressionTraining.TRAINING_CONFIG["batch_size"]
 
 
 
