@@ -261,8 +261,7 @@ class IConsensusModelConfig(TypedDict):
 
 # Model
 # The final state of a KerasRegressionModel|KerasClassificationModel|XGBRegressionModel|
-# XGBClassificationModel|ConsensusModel once an 
-# instance is initialized.
+# XGBClassificationModel|ConsensusModel once an instance is initialized.
 # The type of a model can be determined based on its configuration. Existing models are:
 # 1) KerasRegressionModel: a model with a single keras_regression.
 # 2) XGBRegressionModel: a model with a single xgb_regression.

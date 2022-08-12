@@ -192,6 +192,12 @@ def build_discovery(
     # Init helpers
     increase_successful_mean = round(mean(increase_successful), 2)
     decrease_successful_mean = round(mean(decrease_successful), 2)
+
+    # Calculate the total non neutral predictions
+    non_neutral_num: int = increase_num + decrease_num
+
+    # Calculate the total successful predictions
+    successful_num: int = increase_successful_num + decrease_successful_num
     
     # Build the discovery payload
     payload: IDiscoveryPayload = {
@@ -213,7 +219,7 @@ def build_discovery(
             decrease_successful_num, decrease_num if decrease_num > 0 else 1
         ),
         "accuracy": Utils.get_percentage_out_of_total(
-            increase_successful_num + decrease_successful_num, increase_num + decrease_num if increase_num + decrease_num > 0 else 1
+            successful_num, non_neutral_num if non_neutral_num > 0 else 1
         ),
 
         # Increase Predictions Details

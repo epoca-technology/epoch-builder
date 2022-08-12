@@ -271,10 +271,14 @@ class KerasRegressionTraining:
         Returns:
             int
         """
-        if "LSTM" in self.id:
+        if "DNN" in self.id:
+            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"]
+        elif "CNN" in self.id:
+            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"]
+        elif "LSTM" in self.id:
             return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 2
         elif "CLSTM" in self.id:
-            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 2
+            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 3
         else:
             return KerasRegressionTraining.TRAINING_CONFIG["batch_size"]
 
@@ -314,7 +318,7 @@ class KerasRegressionTraining:
 
         # Compile the model
         print("    2/8) Compiling Model...")
-        model.compile(optimizer=self.optimizer, loss=self.loss)
+        model.compile(optimizer=self.optimizer, loss=self.loss, metrics=[ self.metric ])
   
         # Train the model
         print("    3/8) Training Model")

@@ -47,7 +47,7 @@ class ITrainingDataConfig(TypedDict):
     # Price change percentage that will determine if the price moved up or down after a position is opened
     price_change_requirement: float
 
-    # The list of ArimaModels|RegressionModels that will be used to predict
+    # The list of Regression Models that will be used to generate features
     regressions: List[IModel]
 
     # Optional Technical Analysis Features

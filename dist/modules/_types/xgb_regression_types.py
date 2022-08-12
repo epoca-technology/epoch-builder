@@ -58,6 +58,20 @@ class IXGBRegressionTrainingBatch(TypedDict):
 
 
 
+# XGBoost Regression Discovery Initialization
+# Once a XGB Model has been trained, it needs to be discovered prior to being evaluated.
+# Therefore, the instance of the XGBRegression must be initialized prior to existing.
+# When providing this configuration, the instance will use it instead of attempting to
+# load the model's file
+class IXGBRegressionDiscoveryInitConfig(TypedDict):
+    model: Any
+    autoregressive: bool
+    lookback: int
+    predictions: int
+
+
+
+
 
 
 # XGBoost Regression Training Certificate

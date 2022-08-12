@@ -320,7 +320,7 @@ class KerasClassificationTraining:
 
         # Compile the model
         print("    2/8) Compiling Model...")
-        model.compile(optimizer=self.optimizer, loss=self.loss, metrics=[self.metric])
+        model.compile(optimizer=self.optimizer, loss=self.loss, metrics=[ self.metric ])
   
         # Train the model
         print("    3/8) Training Model")
