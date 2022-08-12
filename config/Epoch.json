@@ -10,7 +10,7 @@
     "backtest_end": 1650659639999,
     "highest_price": 68633.69,
     "lowest_price": 8270.0,
-    "model_discovery_steps": 5,
+    "model_discovery_steps": 10,
     "idle_minutes_on_position_close": 30,
     "classification_training_data_id_ut": "eece6383-db98-4000-b04c-e11465006f65"
 }

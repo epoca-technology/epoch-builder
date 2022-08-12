@@ -98,15 +98,8 @@ def calculate_exit_prices(open_price: float, price_change_requirement: float) ->
         Tuple[float, float] 
         (take_profit, stop_loss)
     """
-    # Handle a long position
-    if price_change_requirement > 0:
-        return Utils.alter_number_by_percentage(open_price, price_change_requirement), \
-            Utils.alter_number_by_percentage(open_price, -(price_change_requirement))
-    
-    # Handle a short position
-    else:
-        return Utils.alter_number_by_percentage(open_price, -(price_change_requirement)), \
-            Utils.alter_number_by_percentage(open_price, price_change_requirement)
+    return Utils.alter_number_by_percentage(open_price, price_change_requirement), \
+        Utils.alter_number_by_percentage(open_price, -(price_change_requirement))
 
 
 

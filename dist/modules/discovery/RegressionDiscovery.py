@@ -124,8 +124,6 @@ def discover(regression: Union[KerasRegression, XGBRegression], progress_bar_des
     # Init the successful prediction counts
     increase_successful_num: int = len(increase_successful)
     decrease_successful_num: int = len(decrease_successful)
-    print(increase_successful)
-    print(decrease_successful)
 
     # Finally, return the discovery and the payload
     return build_discovery(

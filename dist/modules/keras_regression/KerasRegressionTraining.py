@@ -19,11 +19,11 @@ from modules.keras_models.KerasModel import KerasModel
 from modules.keras_models.LearningRateSchedule import LearningRateSchedule
 from modules.keras_models.KerasTrainingProgressBar import KerasTrainingProgressBar
 from modules.keras_models.KerasModelSummary import get_summary
-from modules.model_evaluation.ModelEvaluation import evaluate
 from modules.model.ModelType import validate_id
 from modules.keras_regression.KerasRegression import KerasRegression
-from modules.model.KerasRegressionModel import KerasRegressionModel
 from modules.discovery.RegressionDiscovery import discover
+from modules.model.KerasRegressionModel import KerasRegressionModel
+from modules.model_evaluation.ModelEvaluation import evaluate
 
 
 
@@ -59,8 +59,6 @@ class KerasRegressionTraining:
             The loss function that will be used for training.
         metric: Union[MeanSquaredErrorMetric, MeanAbsoluteErrorMetric]
             The metric function that will be used to evaluate the training.
-        batch_size: int
-            Number of samples per gradient update. Can be adjusted based on the network that will be trained.
         keras_model: IKerasModelConfig
             The configuration that will be used to build the Keras Model.
         train_x: ndarray
@@ -140,9 +138,6 @@ class KerasRegressionTraining:
 
         # Initialize the metric function
         self.metric: Union[MeanSquaredErrorMetric, MeanAbsoluteErrorMetric] = self._get_metric(config["metric"])
-
-        # Initialize the batch size
-        self.batch_size: int = self._get_batch_size()
         
         # Initialize the Keras Model's Configuration and populate the lookback
         self.keras_model: IKerasModelConfig = config["keras_model"]
@@ -264,27 +259,7 @@ class KerasRegressionTraining:
 
 
 
-    def _get_batch_size(self) -> int:
-        """Retrieves the batch size that will be used to train the models based
-        on the network.
 
-        Returns:
-            int
-        """
-        if "DNN" in self.id:
-            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"]
-        elif "CNN" in self.id:
-            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"]
-        elif "LSTM" in self.id:
-            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 2
-        elif "CLSTM" in self.id:
-            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"] * 3
-        else:
-            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"]
-
-
-
-    
 
 
 
@@ -332,7 +307,7 @@ class KerasRegressionTraining:
                 KerasTrainingProgressBar(KerasRegressionTraining.TRAINING_CONFIG["epochs"], "       ") 
             ],
             shuffle=True,
-            batch_size=self.batch_size,
+            batch_size=KerasRegressionTraining.TRAINING_CONFIG["batch_size"],
             verbose=0
         )
 

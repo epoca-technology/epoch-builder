@@ -19,11 +19,11 @@ from modules.keras_models.KerasModel import KerasModel
 from modules.keras_models.LearningRateSchedule import LearningRateSchedule
 from modules.keras_models.KerasTrainingProgressBar import KerasTrainingProgressBar
 from modules.keras_models.KerasModelSummary import get_summary
-from modules.model_evaluation.ModelEvaluation import evaluate
 from modules.classification_training_data.ClassificationTrainingData import ClassificationTrainingData
 from modules.keras_classification.KerasClassification import KerasClassification
-from modules.model.KerasClassificationModel import KerasClassificationModel
 from modules.discovery.ClassificationDiscovery import discover
+from modules.model.KerasClassificationModel import KerasClassificationModel
+from modules.model_evaluation.ModelEvaluation import evaluate
 
 
 
@@ -56,8 +56,6 @@ class KerasClassificationTraining:
             The loss function that will be used for training.
         metric: Union[CategoricalAccuracy, BinaryAccuracy]              "categorical_accuracy"|"binary_accuracy" 
             The metric function that will be used for training.
-        batch_size: int
-            Number of samples per gradient update. Can be adjusted based on the network that will be trained.
         keras_model: IKerasModelConfig
             The configuration that will be used to build the Keras Model.
         train_x: DataFrame
@@ -142,9 +140,6 @@ class KerasClassificationTraining:
 
         # Initialize the metric function
         self.metric: Union[CategoricalAccuracy, BinaryAccuracy] = self._get_metric(config["metric"])
-
-        # Initialize the batch size
-        self.batch_size: int = self._get_batch_size()
 
         # Unpack the provided datasets
         self.train_x, self.train_y, self.test_x, self.test_y = datasets
@@ -261,27 +256,6 @@ class KerasClassificationTraining:
 
 
 
-    def _get_batch_size(self) -> int:
-        """Retrieves the batch size that will be used to train the models based
-        on the network.
-
-        Returns:
-            int
-        """
-        if "LSTM" in self.id:
-            return KerasClassificationTraining.TRAINING_CONFIG["batch_size"] * 2
-        elif "CLSTM" in self.id:
-            return KerasClassificationTraining.TRAINING_CONFIG["batch_size"] * 2
-        else:
-            return KerasClassificationTraining.TRAINING_CONFIG["batch_size"]
-            
-
-
-
-
-
-
-
 
 
     
@@ -334,7 +308,7 @@ class KerasClassificationTraining:
                 early_stopping, 
                 KerasTrainingProgressBar(KerasClassificationTraining.TRAINING_CONFIG["epochs"], "       ") 
             ],
-            batch_size=self.batch_size,
+            batch_size=KerasClassificationTraining.TRAINING_CONFIG["batch_size"],
             verbose=0
         )
 
