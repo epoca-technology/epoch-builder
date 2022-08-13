@@ -1,4 +1,4 @@
-import unittest
+from unittest import TestCase, main
 from modules._types import IBacktestConfig
 from modules.database.Database import Database
 from modules.backtest.Backtest import Backtest
@@ -41,7 +41,7 @@ CONFIG: IBacktestConfig = {
 
 
 ## Test Class ##
-class BacktestTestCase(unittest.TestCase):
+class BacktestTestCase(TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -76,4 +76,4 @@ class BacktestTestCase(unittest.TestCase):
 
 # Test Execution
 if __name__ == '__main__':
-    unittest.main()
+    main()

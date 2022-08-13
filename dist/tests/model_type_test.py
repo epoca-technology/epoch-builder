@@ -1,5 +1,5 @@
 from typing import List, TypedDict, Union
-import unittest
+from unittest import TestCase, main
 from modules._types import IModelType, ITrainableModelType, IModelIDPrefix
 from modules.database.Database import Database
 from modules.model.ModelType import validate_id, get_model_type, get_trainable_model_type, get_prefix,\
@@ -73,7 +73,7 @@ INVALID_LIST: List[str] = [
 
 
 ## Test Class ##
-class ModelTypeTestCase(unittest.TestCase):
+class ModelTypeTestCase(TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -155,4 +155,4 @@ class ModelTypeTestCase(unittest.TestCase):
 
 # Test Execution
 if __name__ == '__main__':
-    unittest.main()
+    main()

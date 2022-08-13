@@ -9,7 +9,7 @@ Database.TEST_MODE = True
 Epoch.init()
 
 # Initialize the candlesticks
-Candlestick.init(100, Epoch.START, Epoch.END)
+Candlestick.init(Epoch.REGRESSION_LOOKBACK, Epoch.START, Epoch.END)
 
 # Notify the user
 print("EPOCH BUILDER UNIT TESTS\n")

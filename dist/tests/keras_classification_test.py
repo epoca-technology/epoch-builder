@@ -1,5 +1,5 @@
-import unittest
 from typing import List
+from unittest import TestCase, main
 from modules._types import ITrainingDataFile
 from modules.database.Database import Database
 from modules.epoch.Epoch import Epoch
@@ -30,7 +30,7 @@ MODEL_ID: str = "KC_UNIT_TEST"
 
 
 ## Test Class ##
-class KerasClassificationTestCase(unittest.TestCase):
+class KerasClassificationTestCase(TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -72,4 +72,4 @@ class KerasClassificationTestCase(unittest.TestCase):
 
 # Test Execution
 if __name__ == '__main__':
-    unittest.main()
+    main()

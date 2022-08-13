@@ -1,13 +1,14 @@
-import unittest
 from typing import List
+from unittest import TestCase, main
 from copy import deepcopy
 from pandas import Series, DataFrame
 from modules._types import ITrainingDataConfig, ICompressedTrainingData, ITrainingDataFile
-from modules.database.Database import Database
 from modules.utils.Utils import Utils
+from modules.database.Database import Database
 from modules.candlestick.Candlestick import Candlestick
+from modules.epoch.Epoch import Epoch
 from modules.classification_training_data.ClassificationTrainingData import ClassificationTrainingData
-
+from modules.classification_training_data.Datasets import make_datasets
 
 
 
@@ -77,7 +78,7 @@ START_CANDLESTICK['c'] = 40052.18
 
 
 ## Test Class ##
-class ClassificationTrainingDataTestCase(unittest.TestCase):
+class ClassificationTrainingDataTestCase(TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -461,6 +462,28 @@ class ClassificationTrainingDataTestCase(unittest.TestCase):
 
 
 
+
+
+
+
+
+    ## Datasets ##
+
+
+
+    # Can make valid datasets for training classifications
+    def testMakeDatasets(self):
+        pass
+
+
+
+
+
+
+
+
+
+
 # Test Execution
 if __name__ == '__main__':
-    unittest.main()
+    main()

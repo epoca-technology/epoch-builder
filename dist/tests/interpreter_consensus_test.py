@@ -1,4 +1,4 @@
-import unittest
+from unittest import TestCase, main
 from modules.database.Database import Database
 from modules.interpreter.ConsensusInterpreter import ConsensusInterpreter
 
@@ -14,7 +14,7 @@ if not Database.TEST_MODE:
 
 
 # Test Class
-class ConsensusInterpreterTestCase(unittest.TestCase):
+class ConsensusInterpreterTestCase(TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -271,4 +271,4 @@ class ConsensusInterpreterTestCase(unittest.TestCase):
 
 # Test Execution
 if __name__ == '__main__':
-    unittest.main()
+    main()

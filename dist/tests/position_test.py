@@ -1,4 +1,4 @@
-import unittest
+from unittest import TestCase, main
 from typing import List
 from pandas import Series
 from modules.database.Database import Database
@@ -57,7 +57,7 @@ START_CANDLESTICK['c'] = 40052.18
 
 
 ## Test Class ##
-class PositionTestCase(unittest.TestCase):
+class PositionTestCase(TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -435,4 +435,4 @@ class PositionTestCase(unittest.TestCase):
 
 # Test Execution
 if __name__ == '__main__':
-    unittest.main()
+    main()

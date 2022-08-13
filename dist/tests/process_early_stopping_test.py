@@ -1,5 +1,5 @@
 from typing import Union, List
-import unittest
+from unittest import TestCase, main
 from modules._types import IProcessEarlyStoppingCheckpointConfig
 from modules.database.Database import Database
 from modules.process_early_stopping.ProcessEarlyStopping import ProcessEarlyStopping
@@ -31,7 +31,7 @@ CHECKPOINTS: List[IProcessEarlyStoppingCheckpointConfig] = [
 
 
 ## Test Class ##
-class ProcessEarlyStoppingTestCase(unittest.TestCase):
+class ProcessEarlyStoppingTestCase(TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -238,4 +238,4 @@ class ProcessEarlyStoppingTestCase(unittest.TestCase):
 
 # Test Execution
 if __name__ == '__main__':
-    unittest.main()
+    main()

@@ -1,5 +1,4 @@
-from typing import List, Tuple, Dict, Union
-from pandas import DataFrame
+from typing import List, Dict, Union
 from inquirer import List as InquirerList, prompt
 from modules._types import IKerasClassificationTrainingBatch, IKerasClassificationTrainingCertificate, ITrainingDataFile,\
     ITrainableModelType, IKerasClassificationTrainingConfig, IXGBClassificationTrainingBatch, IXGBClassificationTrainingCertificate,\
@@ -47,7 +46,7 @@ training_data: ITrainingDataFile = Epoch.FILE.get_classification_training_data(c
 
 # CANDLESTICK INITIALIZATION
 # Initialize the Candlesticks Module based on the highest lookback among the models config.
-Candlestick.init(100, start=training_data["start"], end=training_data["end"])
+Candlestick.init(Epoch.REGRESSION_LOOKBACK, start=training_data["start"], end=training_data["end"])
 
 
 

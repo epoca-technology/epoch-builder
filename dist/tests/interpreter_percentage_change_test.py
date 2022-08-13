@@ -1,5 +1,5 @@
 from typing import List
-import unittest
+from unittest import TestCase, main
 from modules.database.Database import Database
 from modules.utils.Utils import Utils
 from modules.interpreter.PercentageChangeInterpreter import PercentageChangeInterpreter
@@ -40,7 +40,7 @@ def _get_preds(change: float, base: float = BASE) -> List[float]:
 
 
 # Test Class
-class PercentageChangeInterpreterTestCase(unittest.TestCase):
+class PercentageChangeInterpreterTestCase(TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -135,4 +135,4 @@ class PercentageChangeInterpreterTestCase(unittest.TestCase):
 
 # Test Execution
 if __name__ == '__main__':
-    unittest.main()
+    main()

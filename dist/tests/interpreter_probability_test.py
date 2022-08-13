@@ -1,4 +1,4 @@
-import unittest
+from unittest import TestCase, main
 from modules.database.Database import Database
 from modules.interpreter.ProbabilityInterpreter import ProbabilityInterpreter
 
@@ -14,7 +14,7 @@ if not Database.TEST_MODE:
 
 
 # Test Class
-class ProbabilityInterpreterTestCase(unittest.TestCase):
+class ProbabilityInterpreterTestCase(TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -112,4 +112,4 @@ class ProbabilityInterpreterTestCase(unittest.TestCase):
 
 # Test Execution
 if __name__ == '__main__':
-    unittest.main()
+    main()

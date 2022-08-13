@@ -28,6 +28,11 @@ def normalize_prediction_candlesticks(prediction_df: DataFrame) -> Tuple[float, 
     # Normalize the close prices
     df["c"] = df[["c"]].apply(lambda x: (x - min) / (max - min))
 
+    # When the dataset normalization takes place, the lowest price is converted to 0.
+    # This value can bring negative impacts to the model's training process and therefore,
+    # it should be replaced with the second lowest price recorded.
+    df.loc[df["c"].nsmallest(1).index, "c"] = df["c"].nsmallest(2).iloc[-1]
+
     # Save the normalized df
     df.to_csv(Candlestick.NORMALIZED_PREDICTION_CANDLESTICK_CONFIG["csv_file"], index=False)
 

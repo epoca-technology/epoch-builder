@@ -1,4 +1,5 @@
 from typing import TypedDict, List, Dict, Tuple
+from numpy import ndarray
 from pandas import DataFrame
 from modules._types.model_types import IModel
 
@@ -6,7 +7,7 @@ from modules._types.model_types import IModel
 
 # Datasets to train and test a Trainable Classification Model
 # (train_x, train_y, test_x, test_y)
-IClassificationDatasets = Tuple[DataFrame, DataFrame, DataFrame, DataFrame]
+IClassificationDatasets = Tuple[ndarray, ndarray, ndarray, ndarray]
 
 
 

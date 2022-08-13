@@ -56,6 +56,12 @@ class Epoch:
             they are used to scale the prediction candlesticks for trainable models.
             If the price was to go above the highest or below the lowest price, trading should be
             stopped and a new epoch should be published once the market is "stable"
+        REGRESSION_LOOKBACK: int
+        REGRESSION_PREDICTIONS: int
+            The values that represent the input and the ouput of a regression.
+            The lookback stands for the number of candlesticks from the past it needs to look at
+            in order to generate a prediction.
+            The predictions stand for the number of predictions the regressions will generate.
         MODEL_DISCOVERY_STEPS: int
             This value is used to discover Regressions and Classifications
         IDLE_MINUTES_ON_POSITION_CLOSE: int
@@ -72,6 +78,8 @@ class Epoch:
         "train_split": 0.85,
         "backtest_split": 0.3,
         "seed": 60184,
+        "regression_lookback": 128,
+        "regression_predictions": 32,
         "model_discovery_steps": 5,
         "idle_minutes_on_position_close": 30
     }
@@ -100,6 +108,10 @@ class Epoch:
     # Normalization Price Range
     HIGHEST_PRICE: float
     LOWEST_PRICE: float
+
+    # Regression Parameters
+    REGRESSION_LOOKBACK: int
+    REGRESSION_PREDICTIONS: int
 
     # Steps used to discover models
     MODEL_DISCOVERY_STEPS: int
@@ -130,6 +142,8 @@ class Epoch:
         seed: int,
         train_split: float,
         backtest_split: float,
+        regression_lookback: int,
+        regression_predictions: int,
         model_discovery_steps: int,
         idle_minutes_on_position_close: int
     ) -> None:
@@ -150,6 +164,11 @@ class Epoch:
                 The split that will be applied to the epoch_width to train models.
             backtest_split: float
                 The split that will be applied to the epoch_width to backtest models. 
+            regression_lookback: int
+                The number of candlesticks from the past regressions will look at in order
+                to generate predictions.
+            regression_predictions: int
+                The number of predictions regressions will generate.
             model_discovery_steps: int
                 The steps that will be used during the model discovery process.
             idle_minutes_on_position_close: int
@@ -171,6 +190,8 @@ class Epoch:
             seed=seed,
             train_split=train_split,
             backtest_split=backtest_split,
+            regression_lookback=regression_lookback,
+            regression_predictions=regression_predictions,
             model_discovery_steps=model_discovery_steps,
             idle_minutes_on_position_close=idle_minutes_on_position_close
         )
@@ -194,7 +215,7 @@ class Epoch:
         highest_price, lowest_price = normalize_prediction_candlesticks(prediction_df)
 
         # Initialize the candlesticks based on the prediction range lookbacks
-        lookbacks: List[int] = [ 100 ]
+        lookbacks: List[int] = [ regression_lookback ]
         Candlestick.init(max(lookbacks), start=start, end=end)
 
         # Check if the candlesticks' prediction range need to be indexed
@@ -209,7 +230,7 @@ class Epoch:
 
         # Create the Epoch's Default Files
         print("6/10) Creating Default Files...")
-        create_default_files(id)
+        create_default_files(id, regression_lookback=regression_lookback, regression_predictions=regression_predictions)
 
         # Save the epoch's config file
         print("7/10) Saving Epoch Configuration...")
@@ -225,6 +246,8 @@ class Epoch:
             "backtest_end": backtest_end,
             "highest_price": highest_price,
             "lowest_price": lowest_price,
+            "regression_lookback": regression_lookback,
+            "regression_predictions": regression_predictions,
             "model_discovery_steps": model_discovery_steps,
             "idle_minutes_on_position_close": idle_minutes_on_position_close
         }
@@ -256,6 +279,8 @@ class Epoch:
         seed: int,
         train_split: float,
         backtest_split: float,
+        regression_lookback: int,
+        regression_predictions: int,
         model_discovery_steps: int,
         idle_minutes_on_position_close: int
     ) -> None:
@@ -303,6 +328,14 @@ class Epoch:
         if not isinstance(backtest_split, float) or backtest_split < 0.2 or backtest_split > 0.6:
             raise ValueError(f"The provided backtest_split is invalid {backtest_split}. It must be an float ranging 0.2-0.6")
 
+        # Validate the provided regression_lookback
+        if not isinstance(regression_lookback, int) or regression_lookback < 32 or regression_lookback > 512:
+            raise ValueError(f"The provided regression_lookback is invalid {regression_lookback}. It must be an int ranging 32-512")
+
+        # Validate the provided regression_predictions
+        if not isinstance(regression_predictions, int) or regression_predictions < 32 or regression_predictions > 256:
+            raise ValueError(f"The provided regression_predictions is invalid {regression_predictions}. It must be an int ranging 32-256")
+
         # Validate the provided model_discovery_steps
         if not isinstance(model_discovery_steps, int) or model_discovery_steps < 1 or model_discovery_steps > 20:
             raise ValueError(f"The provided model_discovery_steps is invalid {model_discovery_steps}. It must be an int ranging 1-20")
@@ -346,10 +379,14 @@ class Epoch:
             DataFrame
         """
         # Extract the entire csv
-        df: DataFrame = Candlestick._get_df(Candlestick.PREDICTION_CANDLESTICK_CONFIG)
+        raw_df: DataFrame = Candlestick._get_df(Candlestick.PREDICTION_CANDLESTICK_CONFIG)
 
         # Subset the rows that are part of the epoch
-        return df.iloc[-(Epoch._calculate_candlesticks_in_range(epoch_width_days)):]
+        df: DataFrame = raw_df.iloc[-(Epoch._calculate_candlesticks_in_range(epoch_width_days)):]
+        df.reset_index(drop=True, inplace=True)
+
+        # Finally, return the DF
+        return df
 
 
 
@@ -442,6 +479,8 @@ class Epoch:
         receipt += f"Creation: {Utils.from_milliseconds_to_date_string(Utils.get_time())}\n"
         receipt += f"Seed: {config['seed']}\n"
         receipt += f"Train Split: {config['train_split']}\n"
+        receipt += f"Regression Lookback: {config['regression_lookback']}\n"
+        receipt += f"Regression Predictions: {config['regression_predictions']}\n"
         receipt += f"Model Discovery Steps: {config['model_discovery_steps']}\n"
         receipt += f"Idle Minutes On Position Close: {config['idle_minutes_on_position_close']}\n"
 
@@ -509,6 +548,8 @@ class Epoch:
         Epoch.BACKTEST_END = config["backtest_end"]
         Epoch.HIGHEST_PRICE = config["highest_price"]
         Epoch.LOWEST_PRICE = config["lowest_price"]
+        Epoch.REGRESSION_LOOKBACK = config["regression_lookback"]
+        Epoch.REGRESSION_PREDICTIONS = config["regression_predictions"]
         Epoch.MODEL_DISCOVERY_STEPS = config["model_discovery_steps"]
         Epoch.IDLE_MINUTES_ON_POSITION_CLOSE = config["idle_minutes_on_position_close"]
         Epoch.CLASSIFICATION_TRAINING_DATA_ID_UT = config.get("classification_training_data_id_ut")
@@ -545,23 +586,9 @@ class Epoch:
         Args:
             id: str
                 The identifier of the training data.
-
-        Raises:
-            ValueError:
-                If the id is invalid.
-                If the training data file is not in the correct directory.
         """
-        # Make sure the provided id is valid
-        if not Utils.is_uuid4(id):
-            raise ValueError(f"The provided id {id} does not meet the uuid4 requirements.")
-
         # Retrieve the current configuration
         config: IEpochConfig = EpochFile.get_epoch_config()
-
-        # Make sure the training data file is in the right directory
-        td_path: str = f"{config['id']}/{EpochFile.MODEL_PATH['classification_training_data']}/{id}.json"
-        if not EpochFile.file_exists(td_path):
-            raise ValueError(f"The training data file was not found in the path: {td_path}")
 
         # Set the id
         config["classification_training_data_id_ut"] = id

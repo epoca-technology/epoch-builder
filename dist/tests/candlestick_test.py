@@ -1,8 +1,9 @@
-import unittest
+from unittest import TestCase, main
 from pandas import Series
+from modules.utils.Utils import Utils
 from modules.database.Database import Database
 from modules.candlestick.Candlestick import Candlestick
-from modules.utils.Utils import Utils
+from modules.epoch.Epoch import Epoch
 
 
 
@@ -13,12 +14,12 @@ if not Database.TEST_MODE:
     
 
 # Initialize the candlesticks
-LOOKBACK = 100
+LOOKBACK = Epoch.REGRESSION_LOOKBACK
 
 
 
 # Test Class
-class CandlestickTestCase(unittest.TestCase):
+class CandlestickTestCase(TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -35,8 +36,8 @@ class CandlestickTestCase(unittest.TestCase):
         default_candlestick = Candlestick.DF.iloc[185255]
 
         # Retrieve the lookback df
-        df = Candlestick.get_lookback_df(100, default_candlestick['ot'])
-        self.assertEqual(df.shape[0], 100)
+        df = Candlestick.get_lookback_df(LOOKBACK, default_candlestick['ot'])
+        self.assertEqual(df.shape[0], LOOKBACK)
         self.assertEqual(df.shape[1], len(Candlestick.PREDICTION_CANDLESTICK_CONFIG['columns']))
 
         # The values should not be normalized
@@ -52,13 +53,13 @@ class CandlestickTestCase(unittest.TestCase):
         default_candlestick = Candlestick.DF.iloc[185255]
 
         # Retrieve the lookback df
-        df = Candlestick.get_lookback_df(100, default_candlestick['ot'], normalized=True)
-        self.assertEqual(df.shape[0], 100)
+        df = Candlestick.get_lookback_df(LOOKBACK, default_candlestick['ot'], normalized=True)
+        self.assertEqual(df.shape[0], LOOKBACK)
         self.assertEqual(df.shape[1], 3) # ot, ct, c
         
         # The values should be normalized
         norm_df = df[(df['c'] >= 0) & (df['c'] <= 1)]
-        self.assertEqual(norm_df.shape[0], 100)
+        self.assertEqual(norm_df.shape[0], LOOKBACK)
 
 
 
@@ -104,4 +105,4 @@ class CandlestickTestCase(unittest.TestCase):
 
 # Test Execution
 if __name__ == '__main__':
-    unittest.main()
+    main()

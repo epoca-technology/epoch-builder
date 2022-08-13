@@ -1,4 +1,4 @@
-import unittest
+from unittest import TestCase, main
 from modules._types import IModel, IPrediction
 from modules.database.Database import Database
 from modules.candlestick.Candlestick import Candlestick
@@ -33,7 +33,7 @@ CONFIG: IModel = {
 
 
 ## Test Class ##
-class ConsensusModelTestCase(unittest.TestCase):
+class ConsensusModelTestCase(TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -86,4 +86,4 @@ class ConsensusModelTestCase(unittest.TestCase):
 
 # Test Execution
 if __name__ == '__main__':
-    unittest.main()
+    main()

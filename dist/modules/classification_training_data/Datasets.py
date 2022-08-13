@@ -32,4 +32,4 @@ def make_datasets(training_data: ICompressedTrainingData, train_split: float) ->
     test_y: DataFrame = concat([test_x.pop(x) for x in ["up", "down"]], axis=1)
 
     # Return the packed dfs
-    return train_x, train_y, test_x, test_y
+    return train_x.to_numpy(), train_y.to_numpy(), test_x.to_numpy(), test_y.to_numpy()

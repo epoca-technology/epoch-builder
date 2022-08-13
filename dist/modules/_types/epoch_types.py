@@ -144,6 +144,14 @@ class IEpochConfig(TypedDict):
     highest_price: float
     lowest_price: float
 
+    # Regression Parameters
+    # The values that represent the input and the ouput of a regression.
+    # The lookback stands for the number of candlesticks from the past it needs to look at
+    # in order to generate a prediction.
+    # The predictions stand for the number of predictions the regressions will generate.
+    regression_lookback: int
+    regression_predictions: int
+
     # Model Discovery Steps
     # Similar to the Classification Training Data, when discovering Classifications or Regressions,
     # the process iterates over the prediction candlesticks based on the model_discovery_steps and
@@ -167,5 +175,7 @@ class IEpochDefaults(TypedDict):
     train_split: float
     backtest_split: float
     epoch_width: int # Number of months that will comprise the Epoch
+    regression_lookback: int
+    regression_predictions: int
     model_discovery_steps: int
     idle_minutes_on_position_close: int

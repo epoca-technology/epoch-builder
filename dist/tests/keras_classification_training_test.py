@@ -1,4 +1,4 @@
-import unittest
+from unittest import TestCase, main
 from copy import deepcopy
 from modules._types import IKerasModelConfig, IKerasClassificationTrainingConfig, ITrainingDataFile,\
     IClassificationDatasets
@@ -45,7 +45,7 @@ CONFIG: IKerasClassificationTrainingConfig = {
 
 
 ## Test Class ##
-class ClassificationTrainingTestCase(unittest.TestCase):
+class ClassificationTrainingTestCase(TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -104,4 +104,4 @@ class ClassificationTrainingTestCase(unittest.TestCase):
 
 # Test Execution
 if __name__ == '__main__':
-    unittest.main()
+    main()

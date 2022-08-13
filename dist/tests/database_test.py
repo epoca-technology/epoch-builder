@@ -1,4 +1,4 @@
-import unittest
+from unittest import TestCase, main
 from modules.database.Database import Database
 
 
@@ -9,7 +9,7 @@ if not Database.TEST_MODE:
     
 
 # Test Class
-class DatabaseTestCase(unittest.TestCase):
+class DatabaseTestCase(TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -45,4 +45,4 @@ class DatabaseTestCase(unittest.TestCase):
 
 # Test Execution
 if __name__ == '__main__':
-    unittest.main()
+    main()

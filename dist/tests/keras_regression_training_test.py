@@ -1,8 +1,9 @@
-import unittest
+from unittest import TestCase, main
 from copy import deepcopy
 from numpy import ndarray
 from modules._types import IKerasModelConfig, IKerasRegressionTrainingConfig
 from modules.database.Database import Database
+from modules.epoch.Epoch import Epoch
 from modules.keras_regression.KerasRegressionTraining import KerasRegressionTraining
 
 
@@ -20,8 +21,8 @@ CONFIG: IKerasRegressionTrainingConfig = {
     "id": "KR_UNIT_TEST",
     "description": "This is the official KerasRegressionModel for Unit Tests.",
     "autoregressive": True,
-    "lookback": 100,
-    "predictions": 30,
+    "lookback": Epoch.REGRESSION_LOOKBACK,
+    "predictions": Epoch.REGRESSION_PREDICTIONS,
     "learning_rate": 0.001,
     "optimizer": "adam",
     "loss": "mean_absolute_error",
@@ -43,7 +44,7 @@ CONFIG: IKerasRegressionTrainingConfig = {
 
 
 ## Test Class ##
-class KerasRegressionTrainingTestCase(unittest.TestCase):
+class KerasRegressionTrainingTestCase(TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -99,4 +100,4 @@ class KerasRegressionTrainingTestCase(unittest.TestCase):
 
 # Test Execution
 if __name__ == '__main__':
-    unittest.main()
+    main()

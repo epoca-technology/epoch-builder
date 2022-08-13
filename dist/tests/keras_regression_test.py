@@ -1,6 +1,6 @@
-import unittest
 from typing import List
-from pandas import Series
+from unittest import TestCase, main
+from pandas import DataFrame
 from modules._types import IRegressionConfig, IKerasRegressionTrainingCertificate
 from modules.database.Database import Database
 from modules.epoch.Epoch import Epoch
@@ -32,7 +32,7 @@ CERT: IKerasRegressionTrainingCertificate = Epoch.FILE.get_active_model_certific
 
 
 ## Test Class ##
-class KerasRegressionTestCase(unittest.TestCase):
+class KerasRegressionTestCase(TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -61,13 +61,13 @@ class KerasRegressionTestCase(unittest.TestCase):
         self.assertIsInstance(config["summary"], dict)
 
         # Can generate a prediction for a random selected series
-        close_prices: Series = Candlestick.get_lookback_df(r.lookback, Candlestick.DF.iloc[91236]["ot"], normalized=True)
+        close_prices: DataFrame = Candlestick.get_lookback_df(r.lookback, Candlestick.DF.iloc[91236]["ot"], normalized=True)
         preds: List[float] = r.predict(close_prices["c"])
 
         # The predictions should match the model's properties
         self.assertEqual(len(preds), r.predictions)
         self.assertTrue(all(isinstance(x, float) for x in preds))
-        self.assertTrue(all(list(map(lambda x: x >= 0 and x <= 1, preds))))
+        self.assertTrue(all(list(map(lambda x: x > 0 and x <= 1, preds))))
 
 
 
@@ -78,4 +78,4 @@ class KerasRegressionTestCase(unittest.TestCase):
 
 # Test Execution
 if __name__ == '__main__':
-    unittest.main()
+    main()

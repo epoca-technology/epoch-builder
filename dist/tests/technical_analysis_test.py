@@ -1,9 +1,10 @@
-import unittest
 from typing import Union
+from unittest import TestCase, main
 from pandas import Series, DataFrame
 from modules._types import ITechnicalAnalysis
 from modules.database.Database import Database
 from modules.candlestick.Candlestick import Candlestick
+from modules.epoch.Epoch import Epoch
 from modules.technical_analysis.TechnicalAnalysis import TechnicalAnalysis
 
 
@@ -18,7 +19,7 @@ if not Database.TEST_MODE:
 START_CANDLESTICK: Series = Candlestick.DF.iloc[59956].copy()
 
 # Lookback DF
-LOOKBACK_DF: DataFrame = Candlestick.get_lookback_df(100, START_CANDLESTICK["ot"])
+LOOKBACK_DF: DataFrame = Candlestick.get_lookback_df(Epoch.REGRESSION_LOOKBACK, START_CANDLESTICK["ot"])
 FIRST_OT: int = LOOKBACK_DF.iloc[0]["ot"]
 LAST_CT: int = LOOKBACK_DF.iloc[-1]["ct"]
 ID: str = TechnicalAnalysis._get_id(FIRST_OT, LAST_CT)
@@ -27,7 +28,7 @@ ID: str = TechnicalAnalysis._get_id(FIRST_OT, LAST_CT)
 
 
 ## Test Class ##
-class TechnicalAnalysisTestCase(unittest.TestCase):
+class TechnicalAnalysisTestCase(TestCase):
     # Before Tests
     def setUp(self):
         TechnicalAnalysis._delete(ID)
@@ -221,4 +222,4 @@ class TechnicalAnalysisTestCase(unittest.TestCase):
 
 # Test Execution
 if __name__ == '__main__':
-    unittest.main()
+    main()

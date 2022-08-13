@@ -1,5 +1,5 @@
-import unittest
 from typing import List, Any
+from unittest import TestCase, main
 import time
 from modules.database.Database import Database
 from modules.utils.Utils import Utils
@@ -12,7 +12,7 @@ if not Database.TEST_MODE:
 
 
 # Test Class
-class UtilsTestCase(unittest.TestCase):
+class UtilsTestCase(TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -186,4 +186,4 @@ class UtilsTestCase(unittest.TestCase):
 
 # Test Execution
 if __name__ == '__main__':
-    unittest.main()
+    main()

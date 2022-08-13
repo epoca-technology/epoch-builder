@@ -3,8 +3,6 @@ import os
 from inquirer import List as InquirerList, Text, prompt
 from subprocess import Popen
 
-
-
 # Welcome
 os.system("cls" if os.name == "nt" else "clear")
 print("EPOCH BUILDER\n")
@@ -34,14 +32,25 @@ processes: Dict[str, str] = {
     "Merge Training Certificates": "run_merge_training_certificates.py",
     "Regression Selection": "run_regression_selection.py",
     "Regression Training": "run_regression_training.py",
-    "Update Host IP": "run_update_host_ip.py"
+    "Update Host IP": "run_update_host_ip.py",
+    "Unit Tests": ""
 }
 processes_answer: List[Dict[str, str]] = prompt([
     InquirerList("process", message="Select the process to run", choices=processes.keys())
 ])
 
 
-# Execute the process
+# Init the process
 os.system("cls" if os.name == "nt" else "clear")
-proc = Popen(f"python3 dist/cli/{processes[processes_answer['process']]}", shell=True)
+proc: Popen
+
+# Execute a CLI Script
+if processes_answer["process"] != "Unit Tests":
+    proc = Popen(f"python3 dist/cli/{processes[processes_answer['process']]}", shell=True)
+
+# Otherwise, execute the Unit Tests
+else:
+    proc = Popen("python3 -m unittest discover -s dist/tests -p '*_test.py'", shell=True)
+
+# Wait for the process to complete
 proc.wait()

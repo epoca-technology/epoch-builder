@@ -38,28 +38,6 @@ batch_size: int = int(batch_size_answer["size"]) if batch_size_answer["size"].is
 
 
 
-# Lookback and Predictions - Only applies to Regressions
-lookback: Union[int, None] = None
-predictions: Union[int, None] = None
-if model_type == "keras_regression" or model_type == "xgb_regression":
-    print(" ")
-    default_lookback: Union[int, None] = None
-    default_predictions: Union[int, None] = None
-    if model_type == "keras_regression":
-        default_lookback = KerasHyperparams.DEFAULT_LOOKBACK
-        default_predictions = KerasHyperparams.DEFAULT_PREDICTIONS
-    regression_config: Dict[str, str] = prompt(
-        [
-            Text("lookback", f"Enter the lookback (Defaults to {default_lookback})"),
-            Text("predictions", f"Enter the predictions (Defaults to {default_predictions})")
-        ]
-    )
-    lookback = int(regression_config["lookback"]) if regression_config["lookback"].isdigit() else default_lookback
-    predictions = int(regression_config["predictions"]) if regression_config["predictions"].isdigit() else default_predictions
-
-
-
-
 
 # Training Data ID - Only applies to Classifications
 training_data_id: Union[str, None] = None
@@ -82,7 +60,7 @@ print("\n\nHYPERPARAMS RUNNING\n")
 # Keras Hyperparams
 if model_type == "keras_regression" or model_type == "keras_classification":
     # Initialize the Hyperparams Instance
-    hyperparams: KerasHyperparams = KerasHyperparams(model_type, batch_size, lookback, predictions, training_data_id)
+    hyperparams: KerasHyperparams = KerasHyperparams(model_type, batch_size, training_data_id)
 
     # Generate the configurations
     hyperparams.generate()

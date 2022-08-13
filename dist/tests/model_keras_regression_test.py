@@ -1,4 +1,4 @@
-import unittest
+from unittest import TestCase, main
 from modules._types import IModel, IPrediction
 from modules.database.Database import Database
 from modules.candlestick.Candlestick import Candlestick
@@ -27,7 +27,7 @@ CONFIG: IModel = {
 
 
 ## Test Class ##
-class KerasRegressionModelTestCase(unittest.TestCase):
+class KerasRegressionModelTestCase(TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -167,4 +167,4 @@ class KerasRegressionModelTestCase(unittest.TestCase):
 
 # Test Execution
 if __name__ == '__main__':
-    unittest.main()
+    main()

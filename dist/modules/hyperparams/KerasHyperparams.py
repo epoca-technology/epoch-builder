@@ -26,10 +26,6 @@ class KerasHyperparams:
         REGRESSION_BATCH_SIZE: int
         CLASSIFICATION_BATCH_SIZE: int
             The maximum number of models per batch that will be used if none was provided.
-        DEFAULT_LOOKBACK
-            The number of candlesticks the regression needs to look into the past in order to generate a prediction
-        DEFAULT_PREDICTIONS
-            The number of predictions that will be generated (Only used by Regressions)
         LEARNING_RATES: List[float]
             The learning rates to be used during training. If the value is equals to -1 it will make
             use of the InverseDecay instance.
@@ -51,9 +47,9 @@ class KerasHyperparams:
             The list of networks supported by the model type.
         batch_size: int
             The max number of models that will go on each batch.
-        lookback: Union[int, None]
+        lookback: int
             The number of candlesticks the regression needs to look into the past in order to generate a prediction
-        predictions: Union[int, None]
+        predictions: int
             The number of predictions that will be generated (Only used by Regressions)
         training_data_id: Union[str, None]
             The identifier of the classification training data.
@@ -62,12 +58,6 @@ class KerasHyperparams:
     # Default Batch Sizes
     REGRESSION_BATCH_SIZE: int = 30
     CLASSIFICATION_BATCH_SIZE: int = 60
-
-    # The number of candlesticks the regression needs to look into the past in order to generate a prediction
-    DEFAULT_LOOKBACK: int = 100
-
-    # The number of predictions that will be generated (Only used by Regressions)
-    DEFAULT_PREDICTIONS: int = 30
 
     # Learning Rates
     LEARNING_RATES: List[float] = [ -1, 0.01, 0.001, 0.0001 ]
@@ -107,8 +97,6 @@ class KerasHyperparams:
         self, 
         model_type: ITrainableModelType, 
         batch_size: int, 
-        lookback: Union[int, None] = None,
-        predictions: Union[int, None] = None,
         training_data_id: Union[str, None] = None
     ):
         """Initializes the KerasHyperparams instance based on the provided configuration.
@@ -118,10 +106,6 @@ class KerasHyperparams:
                 The type of model which hyperparams will be generated for.
             batch_size: int
                 The number of models that will go on each batch.
-            lookback: Union[int, None]
-                The number of candlesticks the regression needs to look into the past in order to generate a prediction
-            predictions: Union[int, None]
-                The number of predictions that will be generated (Only used by Regressions)
             training_data_id: Union[str, None]
                 The training data id that will be included in the model configurations. Notice
                 that this value is only used in classification models.
@@ -136,10 +120,10 @@ class KerasHyperparams:
         self.batch_size: int = batch_size
 
         # Initialize the lookback
-        self.lookback: Union[int, None] = lookback
+        self.lookback: int = Epoch.REGRESSION_LOOKBACK
 
         # Initialize the predictions
-        self.predictions: Union[int, None] = predictions
+        self.predictions: int = Epoch.REGRESSION_PREDICTIONS
 
         # Initialize the training data id
         self.training_data_id: Union[str, None] = training_data_id

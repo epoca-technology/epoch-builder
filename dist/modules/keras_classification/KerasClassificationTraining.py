@@ -60,14 +60,14 @@ class KerasClassificationTraining:
             Number of samples per gradient update. Can be adjusted based on the network that will be trained.
         keras_model: IKerasModelConfig
             The configuration that will be used to build the Keras Model.
-        train_x: DataFrame
-            The train features df
-        train_y: DataFrame
-            The train labels df
-        test_x: DataFrame
-            The test features df
-        test_y: DataFrame
-            The test labels df
+        train_x: ndarray
+            The train features array
+        train_y: ndarray
+            The train labels array
+        test_x: ndarray
+            The test features array
+        test_y: ndarray
+            The test labels array
         training_data_summary: ITrainingDataSummary
             The summary of the training data that will be attached to the training certificate
     """
@@ -78,7 +78,7 @@ class KerasClassificationTraining:
         "decay_rate": 0.35,
         "epochs": 100,
         "patience": 15,
-        "batch_size": 32
+        "batch_size": 64
     }
 
 
@@ -268,16 +268,17 @@ class KerasClassificationTraining:
         Returns:
             int
         """
-        if "DNN" in self.id:
-            return 32
-        elif "CNN" in self.id:
-            return 64
-        elif "LSTM" in self.id:
-            return 128
-        elif "CLSTM" in self.id:
-            return 256
-        else:
-            return KerasClassificationTraining.TRAINING_CONFIG["batch_size"]
+        #if "DNN" in self.id:
+        #    return 32
+        #elif "CNN" in self.id:
+        #    return 64
+        #elif "LSTM" in self.id:
+        #    return 128
+        #elif "CLSTM" in self.id:
+        #    return 256
+        #else:
+        #    return KerasClassificationTraining.TRAINING_CONFIG["batch_size"]
+        return KerasClassificationTraining.TRAINING_CONFIG["batch_size"]
             
 
 
