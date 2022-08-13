@@ -1,6 +1,7 @@
 from typing import List
 from unittest import TestCase, main
 from copy import deepcopy
+from numpy import concatenate, ndarray
 from pandas import Series, DataFrame
 from modules._types import ITrainingDataConfig, ICompressedTrainingData, ITrainingDataFile
 from modules.utils.Utils import Utils
@@ -473,7 +474,39 @@ class ClassificationTrainingDataTestCase(TestCase):
 
     # Can make valid datasets for training classifications
     def testMakeDatasets(self):
-        pass
+        # Retrieve the training data file
+        training_data: ITrainingDataFile = Epoch.FILE.get_classification_training_data(Epoch.CLASSIFICATION_TRAINING_DATA_ID_UT)
+
+        # Make the datasets 
+        train_x, train_y, test_x, test_y = make_datasets(training_data["training_data"], Epoch.TRAIN_SPLIT)
+
+        # Make sure the features and the labels have the same number of items
+        self.assertEqual(train_x.shape[0], train_y.shape[0])
+        self.assertEqual(test_x.shape[0], test_y.shape[0])
+
+        # Decompress the data
+        df: DataFrame = ClassificationTrainingData.decompress_training_data(training_data["training_data"])
+
+        # Validate the size of the datasets
+        train_size: int = int(df.shape[0] * Epoch.TRAIN_SPLIT)
+        test_size: int = int(df.shape[0] * (1 - Epoch.TRAIN_SPLIT))
+        self.assertAlmostEqual(train_x.shape[0], train_size, delta=1)
+        self.assertAlmostEqual(test_x.shape[0], test_size, delta=1)
+
+        # Concate the datasets into features and labels
+        features = concatenate((train_x, test_x))
+        labels = concatenate((train_y, test_y))
+
+        # Iterate over each row
+        for i, row in df.iterrows():
+            expected: ndarray = row.to_numpy()
+            received: ndarray = concatenate((features[i], labels[i]))
+            if not (expected == received).all():
+                print(f"Expected: {expected}")
+                print(f"Received: {received}")
+                print(f"Len: {len(expected)} == {len(received)}")
+                self.fail(f"Classification Dataset Discrepancy on index: {i}")
+
 
 
 

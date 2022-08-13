@@ -4,7 +4,7 @@ from numpy import ndarray, concatenate
 from modules.database.Database import Database
 from modules.candlestick.Candlestick import Candlestick
 from modules.epoch.Epoch import Epoch
-from modules.regression_training_data.RegressionTrainingData import make_datasets
+from modules.regression_training_data.Datasets import make_datasets
 
 
 
@@ -133,8 +133,10 @@ class RegressionTrainingDataTestCase(TestCase):
         train_size, test_size = calculate_dataset_estimated_sizes()
 
         # Make sure the dataset split was applied correctly
-        self.assertAlmostEqual(train_x.shape[0], train_size, delta=200)
-        self.assertAlmostEqual(test_x.shape[0], test_size, delta=200)
+        # There could be a slight difference due to how the features and labels
+        # are put together.
+        self.assertAlmostEqual(train_x.shape[0], train_size, delta=300)
+        self.assertAlmostEqual(test_x.shape[0], test_size, delta=300)
 
         # Finally, validate the entire dataset
         validate_dataset(features=concatenate((train_x, test_x)), labels=concatenate((train_y, test_y)), autoregressive=True)

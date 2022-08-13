@@ -14,7 +14,7 @@ from modules._types import IKerasTrainingTypeConfig, IKerasModelConfig, IKerasMo
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
-from modules.regression_training_data.RegressionTrainingData import make_datasets
+from modules.regression_training_data.Datasets import make_datasets
 from modules.keras_models.KerasModel import KerasModel
 from modules.keras_models.LearningRateSchedule import LearningRateSchedule
 from modules.keras_models.KerasTrainingProgressBar import KerasTrainingProgressBar
