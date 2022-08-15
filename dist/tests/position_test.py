@@ -324,12 +324,13 @@ class PositionTestCase(TestCase):
         self.assertEqual(p.active, None)
 
         # Validate the integrity of the performance
-        perf = p.get_performance()
+        perf = p.get_performance(neutral_num=10)
         self.assertEqual(perf['points'], 0.5)
         self.assertEqual(perf['points_hist'][-1], 0.5)
         self.assertIsInstance(perf['points_median'], (float, int))
         self.assertEqual(len(perf['points_hist']), 5 + 1)
         self.assertEqual(len(perf['positions']), 5)
+        self.assertEqual(perf['neutral_num'], 10)
         self.assertEqual(perf['long_num'], 3)
         self.assertEqual(perf['short_num'], 2)
         self.assertEqual(perf['long_outcome_num'], 3)
@@ -424,7 +425,7 @@ class PositionTestCase(TestCase):
         self.assertEqual(len(p.points), 8)
 
         # Retrieve the performance and make sure the points list matches
-        perf = p.get_performance()
+        perf = p.get_performance(neutral_num=1)
         self.assertEqual(perf['points'], 0.3)
         self.assertEqual(len(perf['points_hist']), 8)
 

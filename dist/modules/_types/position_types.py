@@ -55,8 +55,9 @@ class IPositionPerformance(TypedDict):
     positions: List[IPosition]
 
     # Counts
-    long_num: int     # Number of closed long positions
-    short_num: int    # Number of closed short positions
+    neutral_num: int    # The number of neutral predictions generated
+    long_num: int       # Number of closed long positions
+    short_num: int      # Number of closed short positions
 
     # Outcome Counts
     long_outcome_num: int   # Number of price increase outcomes

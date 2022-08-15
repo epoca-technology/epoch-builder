@@ -9,7 +9,7 @@ from modules.keras_regression.KerasRegression import KerasRegression
 from modules.xgb_regression.XGBRegression import XGBRegression
 from modules.process_early_stopping.ProcessEarlyStopping import ProcessEarlyStopping
 from modules.discovery.Discovery import get_real_steps, get_candlesticks_df, get_early_stopping, calculate_exit_prices,\
-    check_position, build_discovery
+    check_position, build_discovery, TRAINING_FAILED_ES
 
 
 
@@ -26,7 +26,11 @@ MAX_DECREASE: float = -1
 
 
 
-def discover(regression: Union[KerasRegression, XGBRegression], progress_bar_description: str) -> Tuple[IDiscovery, IDiscoveryPayload]:
+def discover(
+    regression: Union[KerasRegression, XGBRegression], 
+    progress_bar_description: str,
+    training_passed: bool
+) -> Tuple[IDiscovery, IDiscoveryPayload]:
     """Performs a discovery on a regression in order to find its optimal parameters 
     prior to evaluating it. If the model shows poor performance, the discovery
     process will be stopped and the motive will be provided in the 
@@ -37,6 +41,9 @@ def discover(regression: Union[KerasRegression, XGBRegression], progress_bar_des
             The regression to be discovered.
         progress_bar_description: str
             The description to be set on the progress bar.
+        training_passed: bool
+            The discovery is only performed on models that complete at least
+            50% of the training
 
     Returns:
         Tuple[IDiscovery, IDiscoveryPayload]
@@ -66,60 +73,66 @@ def discover(regression: Union[KerasRegression, XGBRegression], progress_bar_des
     decrease: List[float] = []
     decrease_successful: List[float] = []
 
-    # Iterate over the candlesticks based on the real steps
-    for index in range(0, df.shape[0]-1, real_steps):
-        # Generate a prediction
-        change: float = _predict(df.iloc[index]["ot"], regression)
+    # Execute the discovery only if training passed
+    if training_passed:
+        # Iterate over the candlesticks based on the real steps
+        for index in range(0, df.shape[0]-1, real_steps):
+            # Generate a prediction
+            change: float = _predict(df.iloc[index]["ot"], regression)
 
-        # Check if it is a non-neutral prediction
-        if change != 0:
-            # Init the position exit prices
-            take_profit, stop_loss = calculate_exit_prices(df.iloc[index]["o"], change)
-            
-            # Iterate until the position's outcome has been determined
-            outcome_index: int = index + 1
-            close_price: Union[float, None] = None
-            while close_price == None and outcome_index < df.shape[0]:
-                # Check the position
-                close_price = check_position(1 if change > 0 else -1, df.iloc[outcome_index], take_profit, stop_loss)
+            # Check if it is a non-neutral prediction
+            if change != 0:
+                # Init the position exit prices
+                take_profit, stop_loss = calculate_exit_prices(df.iloc[index]["o"], change)
+                
+                # Iterate until the position's outcome has been determined
+                outcome_index: int = index + 1
+                close_price: Union[float, None] = None
+                while close_price == None and outcome_index < df.shape[0]:
+                    # Check the position
+                    close_price = check_position(1 if change > 0 else -1, df.iloc[outcome_index], take_profit, stop_loss)
 
-                # Increment the index
-                outcome_index += 1
+                    # Increment the index
+                    outcome_index += 1
 
-            # Check if the model predicted an increase
-            if change > 0:
-                # Process increase prediction
-                increase_num += 1
-                increase.append(change)
+                # Check if the model predicted an increase
+                if change > 0:
+                    # Process increase prediction
+                    increase_num += 1
+                    increase.append(change)
 
-                # Check if it was successful
-                if take_profit == close_price:
-                    increase_successful.append(change)
+                    # Check if it was successful
+                    if take_profit == close_price:
+                        increase_successful.append(change)
 
-            # Check if the model predicted a decrease
+                # Check if the model predicted a decrease
+                else:
+                    # Process decrease prediction
+                    decrease_num += 1
+                    decrease.append(change)
+
+                    # Check if it was successful
+                    if take_profit == close_price:
+                        decrease_successful.append(change)
+
+            # Otherwise, handle the neutral prediction
             else:
-                # Process decrease prediction
-                decrease_num += 1
-                decrease.append(change)
+                neutral_num += 1
 
-                # Check if it was successful
-                if take_profit == close_price:
-                    decrease_successful.append(change)
+            # Perform the early stopping evaluation
+            es_motive = es.check(index, increase_num, decrease_num)
 
-        # Otherwise, handle the neutral prediction
-        else:
-            neutral_num += 1
+            # Check if the early stopping has been triggered
+            if isinstance(es_motive, str):
+                break
 
-        # Perform the early stopping evaluation
-        es_motive = es.check(index, increase_num, decrease_num)
-
-        # Check if the early stopping has been triggered
-        if isinstance(es_motive, str):
-            break
-
-        # Otherwise, update the progress bar and move on to the next candlestick
-        else:
-            progress_bar.update()
+            # Otherwise, update the progress bar and move on to the next candlestick
+            else:
+                progress_bar.update()
+    
+    # Otherwise, abort the discovery and mark it as early stopped
+    else:
+        es_motive = TRAINING_FAILED_ES
 
     # Init the successful prediction counts
     increase_successful_num: int = len(increase_successful)

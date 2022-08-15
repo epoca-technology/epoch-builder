@@ -17,7 +17,7 @@ from modules.candlestick.Candlestick import Candlestick
 from modules.regression_training_data.Datasets import make_datasets
 from modules.keras_models.KerasModel import KerasModel
 from modules.keras_models.LearningRateSchedule import LearningRateSchedule
-from modules.keras_models.KerasTrainingProgressBar import KerasTrainingProgressBar
+from modules.keras_models.KerasTrainingProgress import KerasTrainingProgressBar, training_passed
 from modules.keras_models.KerasModelSummary import get_summary
 from modules.model.ModelType import validate_id
 from modules.keras_regression.KerasRegression import KerasRegression
@@ -78,7 +78,7 @@ class KerasRegressionTraining:
         "decay_rate": 0.35,
         "epochs": 100,
         "patience": 10,
-        "batch_size": 512
+        "batch_size": 128
     }
 
 
@@ -352,6 +352,7 @@ class KerasRegressionTraining:
                 "predictions": self.predictions
             }),
             progress_bar_description="       ",
+            training_passed=training_passed(history, KerasRegressionTraining.TRAINING_CONFIG["epochs"])
         )
 
         # Save the model

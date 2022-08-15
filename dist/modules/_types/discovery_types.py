@@ -1,4 +1,4 @@
-from typing import TypedDict, Union
+from typing import TypedDict, Union, List
 
 
 
@@ -52,17 +52,23 @@ class IDiscoveryPayload(TypedDict):
     accuracy: float
 
     # Details of the increase predictions
+    increase_list: List[float]
     increase_min: float
     increase_max: float
     increase_mean: float
 
     # Details of the decrease predictions
+    decrease_list: List[float]
     decrease_min: float
     decrease_max: float
     decrease_mean: float
 
-    # Details of the successful predictions
+    # Details of the successful increase predictions
+    increase_successful_list: List[float]
     increase_successful_mean: float
+
+    # Details of the successful decrease predictions
+    decrease_successful_list: List[float]
     decrease_successful_mean: float
 
     # The mean of the successful increase and decrease means

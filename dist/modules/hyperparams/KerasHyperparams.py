@@ -60,7 +60,7 @@ class KerasHyperparams:
     CLASSIFICATION_BATCH_SIZE: int = 60
 
     # Learning Rates
-    LEARNING_RATES: List[float] = [ -1, 0.01, 0.001, 0.0001 ]
+    LEARNING_RATES: List[float] = [ -1, 0.001 ] # Reduced from [ -1, 0.01, 0.001, 0.0001 ]
 
     # Optimizers
     OPTIMIZERS: List[IKerasOptimizer] = [ "adam", "rmsprop" ]

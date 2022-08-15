@@ -143,6 +143,9 @@ class Backtest:
             # multiple times in the same prediction range.
             last_neutral_ct: int = 0
 
+            # The number of neutral predictions
+            neutral_num: int = 0
+
             # Iterate over each 1 minute candlestick
             for candlestick_index, candlestick in Candlestick.DF.iterrows():
                 # Check if it is the last candlestick
@@ -182,12 +185,13 @@ class Backtest:
                         # Otherwise, handle the neutrality
                         else:
                             last_neutral_ct = last_ct
+                            neutral_num += 1
 
                 # Update the progress bar
                 progress_bar.update()
 
             # Append the Model's Results
-            self._append_result(model_start, model.get_model(), position.get_performance())
+            self._append_result(model_start, model.get_model(), position.get_performance(neutral_num=neutral_num))
         
         # Save the results
         Epoch.FILE.save_backtest_results(self.results)

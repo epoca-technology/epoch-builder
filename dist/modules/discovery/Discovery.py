@@ -9,6 +9,9 @@ from modules.process_early_stopping.ProcessEarlyStopping import ProcessEarlyStop
 
 
 
+# Training Failed Early Stopping
+TRAINING_FAILED_ES: str = "The discovery was skipped because the training was stopped too early."
+
 
 
 
@@ -216,17 +219,23 @@ def build_discovery(
         ),
 
         # Increase Predictions Details
+        "increase_list": increase,
         "increase_max": round(max(increase if increase_num > 0 else [0]), 2),
         "increase_min": round(min(increase if increase_num > 0 else [0]), 2),
         "increase_mean": round(mean(increase if increase_num > 0 else [0]), 2),
 
         # Decrease Predictions Details
+        "decrease_list": decrease,
         "decrease_max": round(max(decrease if decrease_num > 0 else [0]), 2),
         "decrease_min": round(min(decrease if decrease_num > 0 else [0]), 2),
         "decrease_mean": round(mean(decrease if decrease_num > 0 else [0]), 2),
 
-        # Successful Predictions Details
+        # Details of the successful increase predictions
+        "increase_successful_list": increase_successful,
         "increase_successful_mean": increase_successful_mean,
+
+        # Details of the successful decrease predictions
+        "decrease_successful_list": decrease_successful,
         "decrease_successful_mean": decrease_successful_mean,
 
         # The mean of the successful increase and decrease means

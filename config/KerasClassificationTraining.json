@@ -1,6 +1,6 @@
 {
     "name": "KC_UNIT_TEST",
-    "training_data_id": "ad47335e-fa5c-4635-9341-9261ed1112ef",
+    "training_data_id": "ea998c4d-9142-435f-8cc9-c5804ed5c1e8",
     "models": [
         {
             "id": "KC_UNIT_TEST",
@@ -13,8 +13,8 @@
                 "name": "KC_DNN_S3",
                 "units": [
                     256,
-                    128,
-                    64
+                    256,
+                    256
                 ],
                 "activations": [
                     "relu",

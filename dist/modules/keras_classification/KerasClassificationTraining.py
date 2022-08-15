@@ -17,7 +17,7 @@ from modules.epoch.Epoch import Epoch
 from modules.model.ModelType import validate_id
 from modules.keras_models.KerasModel import KerasModel
 from modules.keras_models.LearningRateSchedule import LearningRateSchedule
-from modules.keras_models.KerasTrainingProgressBar import KerasTrainingProgressBar
+from modules.keras_models.KerasTrainingProgress import KerasTrainingProgressBar, training_passed
 from modules.keras_models.KerasModelSummary import get_summary
 from modules.classification_training_data.ClassificationTrainingData import ClassificationTrainingData
 from modules.keras_classification.KerasClassification import KerasClassification
@@ -61,13 +61,10 @@ class KerasClassificationTraining:
         keras_model: IKerasModelConfig
             The configuration that will be used to build the Keras Model.
         train_x: ndarray
-            The train features array
         train_y: ndarray
-            The train labels array
         test_x: ndarray
-            The test features array
         test_y: ndarray
-            The test labels array
+            Features and labels. The training data.
         training_data_summary: ITrainingDataSummary
             The summary of the training data that will be attached to the training certificate
     """
@@ -78,7 +75,7 @@ class KerasClassificationTraining:
         "decay_rate": 0.35,
         "epochs": 100,
         "patience": 15,
-        "batch_size": 64
+        "batch_size": 32
     }
 
 
@@ -363,6 +360,7 @@ class KerasClassificationTraining:
                 "price_change_requirement": self.training_data_summary["price_change_requirement"]
             }),
             progress_bar_description="       ",
+            training_passed=training_passed(history, KerasClassificationTraining.TRAINING_CONFIG["epochs"])
         )
 
         # Save the model
