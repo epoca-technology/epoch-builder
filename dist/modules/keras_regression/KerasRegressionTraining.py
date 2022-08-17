@@ -516,6 +516,7 @@ class KerasRegressionTraining:
             "learning_rate": self.learning_rate,
             "optimizer": self.optimizer._name,
             "loss": self.loss.name,
+            "metric": self.metric.name,
             "keras_model_config": self.keras_model,
 
             # Training
