@@ -1,4 +1,4 @@
-from typing import Any, Optional, Tuple, List
+from typing import Any, Optional, Tuple, List, Union
 from os.path import exists, isfile
 from psycopg2 import connect
 from psycopg2.extras import RealDictCursor, Json
@@ -76,20 +76,29 @@ DB_CONNECTION_CONFIG: IDatabaseConnectionConfig = {
 # CONNECTION
 # The established connection with the database. This instance can be used to 
 # generate cursors or commit writes.
-CONNECTION: Any = connect(
-    host=DB_CONNECTION_CONFIG["host_ip"],
-    user=DB_CONNECTION_CONFIG["user"],
-    password=DB_CONNECTION_CONFIG["password"],
-    database=DB_CONNECTION_CONFIG["database"],
-    port=DB_CONNECTION_CONFIG["port"]
-)
+# IMPORTANT: Since some of the processes do not require an active db connection,
+# this part has been made optional and will only show a warning.
+CONNECTION: Union[Any, None] = None
+try:
+    CONNECTION = connect(
+        host=DB_CONNECTION_CONFIG["host_ip"],
+        user=DB_CONNECTION_CONFIG["user"],
+        password=DB_CONNECTION_CONFIG["password"],
+        database=DB_CONNECTION_CONFIG["database"],
+        port=DB_CONNECTION_CONFIG["port"]
+    )
+except Exception as e:
+    print(f"Database Connection Error: {str(e)}")
 
 
 
 
 # CONNECTION CURSOR
-# A ready to go connection cursor.
-CURSOR: Any = CONNECTION.cursor(cursor_factory=DICT_CURSOR)
+# Initializes a cursor (Connection to the DB) in case the DB connection was 
+# executed successfully.
+CURSOR: Union[Any, None] = None
+if CONNECTION is not None:
+    CURSOR = CONNECTION.cursor(cursor_factory=DICT_CURSOR)
 
 
 
@@ -315,4 +324,7 @@ class Database:
 
 ## DATABASE INITIALIZATION ##
 # When the Database module is initialized, make sure that all tables exist.
-Database.initialize_tables()
+# Notice that this action will only take place if a DB connection was 
+# established.
+if CONNECTION is not None:
+    Database.initialize_tables()

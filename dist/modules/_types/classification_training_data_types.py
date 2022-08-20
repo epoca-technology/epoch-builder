@@ -75,8 +75,16 @@ class ICompressedTrainingData(TypedDict):
 # Dataset Summary
 # A summary extracted from the DataFrame holding all the features and
 # labels
-ITrainingDataDatasetSummary = Dict[str, Dict[str, float]]
-
+class ITrainingDataDatasetFeatureSummary(TypedDict):
+    count: float
+    mean: float
+    std: float
+    min: float
+    #"25%": float
+    #"50%": float
+    #"75%": float
+    max: float
+ITrainingDataDatasetSummary = Dict[str, ITrainingDataDatasetFeatureSummary]
 
 
 

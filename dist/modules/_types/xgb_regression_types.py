@@ -1,6 +1,7 @@
 from typing import List, TypedDict, Dict, Any
 from modules._types.model_types import IXGBRegressionConfig
 from modules._types.discovery_types import IDiscoveryPayload
+from modules._types.regression_training_data_types import IRegressionDatasetSummary
 
 
 
@@ -90,7 +91,7 @@ class IXGBRegressionTrainingCertificate(TypedDict):
     test_size: int      # Number of rows in the test dataset
 
     # Training Data Summary - Description extracted directly from the normalized dataframe
-    training_data_summary: Dict[str, float]
+    training_data_summary: IRegressionDatasetSummary
 
     # Training Configuration
     autoregressive: bool
