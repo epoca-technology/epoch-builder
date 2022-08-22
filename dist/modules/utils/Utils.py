@@ -1,5 +1,5 @@
 from typing import List, Union, Any, Tuple
-from os import makedirs, listdir, system, name as os_name
+from os import makedirs, listdir, system, name as os_name, remove
 from os.path import exists, isfile, dirname, splitext
 from shutil import rmtree, move, copy
 from json import load, dumps
@@ -488,29 +488,6 @@ class Utils:
 
 
 
-    @staticmethod
-    def remove_directory(path: str) -> None:
-        """Removes a directory and its contents.
-
-        Args:
-            path: str
-                The path of the directory that will be removed.
-
-        Raises:
-            RuntimeError:
-                If the directory does not exist
-        """
-        # Make sure the directory exists
-        if not Utils.directory_exists(path):
-            raise RuntimeError(f"The directory {path} cannot be removed because it does not exist.")
-
-        # Remove the directory
-        rmtree(path)
-
-
-
-
-
 
 
     @staticmethod
@@ -556,7 +533,56 @@ class Utils:
             files = list(filter(lambda x: only_file_ext in x, files))
 
         # Finally, return the contents
-        return sorted(directories), sorted(files)
+        return directories, files
+
+
+
+
+
+
+    @staticmethod
+    def remove_file(path: str) -> None:
+        """Removes a file at a given path.
+
+        Args:
+            path: str
+                The path of the file that will be removed.
+
+        Raises:
+            RuntimeError:
+                If the file does not exist
+        """
+        # Make sure the file exists
+        if not Utils.file_exists(path):
+            raise RuntimeError(f"The file {path} cannot be removed because it does not exist.")
+
+        # Remove the file
+        remove(path)
+
+
+
+
+
+
+    @staticmethod
+    def remove_directory(path: str) -> None:
+        """Removes a directory and its contents.
+
+        Args:
+            path: str
+                The path of the directory that will be removed.
+
+        Raises:
+            RuntimeError:
+                If the directory does not exist
+        """
+        # Make sure the directory exists
+        if not Utils.directory_exists(path):
+            raise RuntimeError(f"The directory {path} cannot be removed because it does not exist.")
+
+        # Remove the directory
+        rmtree(path)
+
 
 
 

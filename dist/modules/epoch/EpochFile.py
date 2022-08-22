@@ -3,7 +3,7 @@ from modules._types import IBacktestAssetsPath, IModelAssetsPath, IBacktestConfi
     IKerasClassificationTrainingBatch, IBacktestResult, ITrainingDataFile, IKerasClassificationTrainingCertificate, \
         IKerasRegressionTrainingCertificate, ITrainableModelType, ITrainableModelExtension, IBacktestID, \
             IRegressionSelectionFile, IXGBClassificationTrainingBatch, IXGBRegressionTrainingBatch, \
-                IXGBClassificationTrainingCertificate, IXGBRegressionTrainingCertificate
+                IXGBClassificationTrainingCertificate, IXGBRegressionTrainingCertificate, IHyperparamsCategory
 from modules.utils.Utils import Utils
 from modules.model.ModelType import TRAINABLE_MODEL_TYPES, get_trainable_model_type
 
@@ -56,6 +56,14 @@ class EpochFile:
         epoch_id: str
             The identifier of the epoch and root directory for all the assets.
 
+    Hyperparams:
+        save_hyperparams_batch(model_type: ITrainableModelType, batch_type: str, batch: ITrainingBatch) -> None
+        save_hyperparams_receipt(model_type: ITrainableModelType, receipt: str) -> None
+        list_training_config_categories(self, model_type: ITrainableModelType) -> List[IHyperparamsCategory]
+        list_training_config_names(self, model_type: ITrainableModelType, category: IHyperparamsCategory) -> List[str]
+        get_training_config_path(self, model_type: ITrainableModelType, category: IHyperparamsCategory, batch_file_name: str) -> str
+        get_hyperparams_dir_path(model_type: ITrainableModelType) -> str
+
     Models:
         save_training_certificate(certificate: ITrainingCertificate) -> None
         save_training_certificate_batch(trainable_model_type: ITrainableModelType, batch_name: str, certificates: ITrainingCertificateList) -> None
@@ -80,11 +88,6 @@ class EpochFile:
         get_classification_training_data(id: str) -> ITrainingDataFile
         list_classification_training_data_ids() -> List[str]
         save_classification_training_data(training_data: ITrainingDataFile) -> None
-
-    Hyperparams:
-        save_hyperparams_batch(model_type: ITrainableModelType, batch_type: str, batch: ITrainingBatch) -> None
-        save_hyperparams_receipt(model_type: ITrainableModelType, receipt: str) -> None
-        get_hyperparams_dir_path(model_type: ITrainableModelType) -> str
 
     Backtests:
         list_backtest_configs() -> List[str]
@@ -136,6 +139,204 @@ class EpochFile:
         """
         # Init the identifier
         self.epoch_id: str = epoch_id
+
+
+
+
+
+
+
+
+
+    #########################################################################################
+    ## HYPERPARAMS                                                                         ##
+    ## The Hyperparams Module builds many different models and saves the configurations in ##
+    ## batches so the models can be trained by multiple machines within the cluster or in  ##
+    ## any external environment.                                                           ##
+    ## In order to find the best possible models, it is recommended to make use of several ##
+    ## technologies.                                                                       ##
+    ##                                                                                     ##
+    ## TRAINING                                                                            ##
+    ## Since models can take a very long time to train and the process can be stopped by   ##
+    ## things like power outages, the flow needs to be a bit different. Instead of just    ##
+    ## reading the configuration file, it should create a temp copy and place it in the    ##
+    ## root config directory.                                                              ##
+    ## When a batch completes the training, the temp configuration file is deleted from    ##
+    ## the root config but maintained in the epoch's directory.                            ##
+    ## If a batch is to be interrupted for any reason, the merge_training_certificates     ##
+    ## functionality will save whatever progress there was and update the temp config file ##
+    ## so the batch can be resumed.                                                        ##
+    #########################################################################################
+
+
+
+    # Hyperparams Creation
+
+
+    def save_hyperparams_batch(
+        self, 
+        model_type: ITrainableModelType,
+        batch_type: str,
+        batch: ITrainingBatch
+    ) -> None:
+        """Saves a Keras Hyperparams batch for a given network.
+
+        Args:
+            model_type: ITrainableModelType
+                The trainable type of the model.
+            batch_type: str
+                The type of batch. This value will be used to create the directory
+                in which the batches will be placed.
+            batch: ITrainingBatch
+                The configs batch to be saved.
+        """
+        # Init the path
+        path: str = f"{self.get_hyperparams_dir_path(model_type)}/{batch_type}/{batch['name']}.json"
+
+        # Save the file
+        Utils.write(path, batch, indent=4)
+
+
+
+
+
+    def save_hyperparams_receipt(self, model_type: ITrainableModelType, receipt: str) -> None:
+        """Saves a Hyperparams receipt that covers the recently generated 
+        configurations.
+
+        Args:
+            model_type: ITrainableModelType
+                The trainable type of the model.
+            receipt: str
+                The receipt to be stored.
+        """
+        # Init the path
+        path: str = f"{self.get_hyperparams_dir_path(model_type)}/receipt.txt"
+
+        # Save the file
+        Utils.write(path, receipt)
+
+
+
+
+
+
+    # Model Training Configuration Management
+
+
+
+
+    def list_training_config_categories(self, model_type: ITrainableModelType) -> List[IHyperparamsCategory]:
+        """Retrieves the list of directories within the training configurations. Moreover,
+        it appends the unit test config at the end of the list.
+
+        Args:
+            model_type: ITrainableModelType
+                The type of model being trained.
+
+        Returns:
+            List[IHyperparamsCategory]
+        """
+        # Extract the directories within the hyperparams dir path
+        directories, _ = Utils.get_directory_content(self.get_hyperparams_dir_path(model_type))
+
+        # Return the directories within as well as the unit test category
+        return directories + [ "UNIT_TEST" ]
+
+
+
+
+
+    def list_training_config_names(self, model_type: ITrainableModelType, category: IHyperparamsCategory) -> List[str]:
+        """Lists the file names of the configuration files within a category.
+
+        Args:
+            model_type: ITrainableModelType
+                The type of model being trained.
+            category: IHyperparamsCategory 
+                The category of the batch config.
+
+        Returns:
+            List[str]
+        """
+        # Retrieve all the config files within the category
+        _, files = Utils.get_directory_content(f"{self.get_hyperparams_dir_path(model_type)}/{category}", only_file_ext=".json")
+
+        # Finally, return the file names
+        return files
+
+
+
+
+
+
+
+    def get_training_config_path(self, model_type: ITrainableModelType, category: IHyperparamsCategory, batch_file_name: str) -> str:
+        """Retrieves the path for a specific training batch configuration file.
+
+        Args:
+            model_type: ITrainableModelType
+                The type of model being trained.
+            category: IHyperparamsCategory 
+                The category of the batch config.
+            batch_file_name: str
+                The name of the batch config.
+
+        Returns:
+            str
+        """
+        # Check if it is a unit test
+        if category == "UNIT_TEST":
+            return f"{self.get_hyperparams_dir_path(model_type)}/{batch_file_name}"
+        else:
+            return f"{self.get_hyperparams_dir_path(model_type)}/{category}/{batch_file_name}"
+
+
+
+
+
+
+
+
+    # Hyperparams Directory Path
+    # Each technology and each type of model has its own dedicated directory in which
+    # the configuration files are stored, grouped by the trainable model type.
+
+    def get_hyperparams_dir_path(self, model_type: ITrainableModelType) -> str:
+        """Retrieves the path of the directory that holds hyperparam configurations
+        by trainable model type.
+
+        Args:
+            model_type: ITrainableModelType
+                The type of models hyperparams will be generated for.
+
+        Returns:
+            str
+        """
+        # Check if it is a Keras Regression
+        if model_type == "keras_regression":
+            return self.p(EpochFile.MODEL_PATH["keras_regression_training_configs"])
+
+        # Check if it is a Keras Classification
+        elif model_type == "keras_classification":
+            return self.p(EpochFile.MODEL_PATH["keras_classification_training_configs"])
+
+        # Check if it is an XGB Regression
+        elif model_type == "xgb_regression":
+            return self.p(EpochFile.MODEL_PATH["xgb_regression_training_configs"])
+
+        # Check if it is an XGB Classification
+        elif model_type == "xgb_classification":
+            return self.p(EpochFile.MODEL_PATH["xgb_classification_training_configs"])
+        
+        # Otherwise, raise an error
+        else:
+            raise ValueError(f"The provided model_type {model_type} is invalid.")
+
+
+
+
+
 
 
 
@@ -637,103 +838,6 @@ class EpochFile:
 
 
 
-
-
-
-
-
-
-
-
-    #########################################################################################
-    ## HYPERPARAMS                                                                         ##
-    ## The Hyperparams Module builds many different models and saves the configurations in ##
-    ## batches so the models can be trained by multiple machines within the cluster or in  ##
-    ## any external environment.                                                           ##
-    ## In order to find the best possible models, it is recommended to make use of several ##
-    ## technologies.                                                                       ##
-    #########################################################################################
-
-
-
-
-    def save_hyperparams_batch(
-        self, 
-        model_type: ITrainableModelType,
-        batch_type: str,
-        batch: ITrainingBatch
-    ) -> None:
-        """Saves a Keras Hyperparams batch for a given network.
-
-        Args:
-            model_type: ITrainableModelType
-                The trainable type of the model.
-            batch_type: str
-                The type of batch. This value will be used to create the directory
-                in which the batches will be placed.
-            batch: ITrainingBatch
-                The configs batch to be saved.
-        """
-        # Init the path
-        path: str = f"{self.get_hyperparams_dir_path(model_type)}/{batch_type}/{batch['name']}.json"
-
-        # Save the file
-        Utils.write(path, batch, indent=4)
-
-
-
-
-
-    def save_hyperparams_receipt(self, model_type: ITrainableModelType, receipt: str) -> None:
-        """Saves a Hyperparams receipt that covers the recently generated 
-        configurations.
-
-        Args:
-            model_type: ITrainableModelType
-                The trainable type of the model.
-            receipt: str
-                The receipt to be stored.
-        """
-        # Init the path
-        path: str = f"{self.get_hyperparams_dir_path(model_type)}/receipt.txt"
-
-        # Save the file
-        Utils.write(path, receipt)
-
-
-
-
-
-    def get_hyperparams_dir_path(self, model_type: ITrainableModelType) -> str:
-        """Retrieves the path of the directory that holds hyperparam configurations
-        by trainable model type.
-
-        Args:
-            model_type: ITrainableModelType
-                The type of models hyperparams will be generated for.
-
-        Returns:
-            str
-        """
-        # Check if it is a Keras Regression
-        if model_type == "keras_regression":
-            return self.p(EpochFile.MODEL_PATH["keras_regression_training_configs"])
-
-        # Check if it is a Keras Classification
-        elif model_type == "keras_classification":
-            return self.p(EpochFile.MODEL_PATH["keras_classification_training_configs"])
-
-        # Check if it is an XGB Regression
-        elif model_type == "xgb_regression":
-            return self.p(EpochFile.MODEL_PATH["xgb_regression_training_configs"])
-
-        # Check if it is an XGB Classification
-        elif model_type == "xgb_classification":
-            return self.p(EpochFile.MODEL_PATH["xgb_classification_training_configs"])
-        
-        # Otherwise, raise an error
-        else:
-            raise ValueError(f"The provided model_type {model_type} is invalid.")
 
 
 

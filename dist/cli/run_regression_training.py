@@ -1,13 +1,34 @@
 from typing import List, Dict, Union
 from inquirer import List as InquirerList, prompt
 from modules._types import IKerasRegressionTrainingBatch, IKerasRegressionTrainingCertificate, ITrainableModelType,\
-    IKerasRegressionTrainingConfig, IXGBRegressionTrainingBatch, IXGBRegressionTrainingCertificate, IXGBRegressionTrainingConfig
-from modules.epoch.Epoch import Epoch
+    IKerasRegressionTrainingConfig, IXGBRegressionTrainingBatch, IXGBRegressionTrainingCertificate, IXGBRegressionTrainingConfig,\
+        IHyperparamsCategory
 from modules.utils.Utils import Utils
+from modules.configuration.Configuration import Configuration
+from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
 from modules.model.ModelType import TRAINABLE_REGRESSION_MODEL_TYPES
 from modules.keras_regression.KerasRegressionTraining import KerasRegressionTraining
 from modules.xgb_regression.XGBRegressionTraining import XGBRegressionTraining
+
+
+## Types Helpers ##
+
+# Training Batch
+ITrainingBatch = Union[IKerasRegressionTrainingBatch, IXGBRegressionTrainingBatch]
+
+
+# Training Configuration
+ITrainingConfig = Union[IKerasRegressionTrainingConfig, IXGBRegressionTrainingConfig]
+
+
+# Trainer Instance
+ITrainer = Union[KerasRegressionTraining, XGBRegressionTraining]
+
+
+# Training Certificate
+ITrainingCertificate = Union[IKerasRegressionTrainingCertificate, IXGBRegressionTrainingCertificate]
+
 
 
 
@@ -16,28 +37,69 @@ Epoch.init()
 
 
 
-# WELCOME
+
+# MODEL TYPE
+# The trainable model type required to retrieve the configuration, run the training
+# and store the results.
 print("REGRESSION TRAINING\n")
-model_type_answer: Dict[str, str] = prompt([InquirerList("type", message="Select the type of model", choices=TRAINABLE_REGRESSION_MODEL_TYPES)])
-model_type: ITrainableModelType = model_type_answer["type"]
+model_type_answer: Dict[str, str] = prompt([InquirerList("value", message="Select the type of model", choices=TRAINABLE_REGRESSION_MODEL_TYPES)])
+model_type: ITrainableModelType = model_type_answer["value"]
+
+
+
+# CATEGORY
+# The category in which the desired batch configuration file is stored.
+Utils.clear_terminal()
+print("KERAS REGRESSION TRAINING\n" if model_type == "keras_regression" else "XGBOOST REGRESSION TRAINING\n")
+categories: List[IHyperparamsCategory] = Epoch.FILE.list_training_config_categories(model_type)
+category_answer: Dict[str, str] = prompt([InquirerList("value", message="Select the category", choices=categories)])
+category: IHyperparamsCategory = category_answer["value"]
+
+
+
+# TRAINING CONFIGURATION FILE NAME
+# The name of the batch configuration file that will be put through the training process.
+config_file_name: str
+
+# If it is the unit test, populate the file name right away
+if category == "UNIT_TEST":
+    config_file_name = "UNIT_TEST.json"
+
+# Otherwise, show the config files within the category
+else:
+    Utils.clear_terminal()
+    print("KERAS REGRESSION TRAINING\n" if model_type == "keras_regression" else "XGBOOST REGRESSION TRAINING\n")
+    configs: List[str] = Epoch.FILE.list_training_config_names(model_type, category)
+    config_answer: Dict[str, str] = prompt([InquirerList("value", message="Select the configuration", choices=configs)])
+    config_file_name = config_answer["value"]
+
 
 
 
 # TRAINING CONFIGURATION
-# Opens and loads the configuration file that should be placed in the root of the project.
-config: Union[IKerasRegressionTrainingBatch, IXGBRegressionTrainingBatch]
-if model_type == "keras_regression":
-    config = Epoch.FILE.get_keras_regression_training_config()
-elif model_type == "xgb_regression":
-    config = Epoch.FILE.get_xgb_regression_training_config()
-else:
-    raise ValueError(f"The provided type of model could not be processed.")
+# If the selected configuration file is within the root config directory, it will just load it and 
+# use it. Otherwise, it will grab a copy from the epoch directory and place it in the root config.
+
+# Init the final path for the config file
+config_file_path: str = f"{Configuration.DIR_PATH}/{config_file_name}"
+
+# If the file is not in the config directory, grab a copy
+if not Utils.file_exists(config_file_path):
+    Utils.copy_file_or_dir(
+        source=Epoch.FILE.get_training_config_path(model_type, category, config_file_name),
+        destination=config_file_path
+    )
+
+# Read the batch configuration file from the root directory
+config: ITrainingBatch = Utils.read(config_file_path)
+
 
 
 
 # CANDLESTICK INITIALIZATION
-# Initialize the Candlesticks Module based on the highest lookback.
-Candlestick.init(max([m["lookback"] for m in config["models"]]), Epoch.START, Epoch.END)
+# Initialize the Candlesticks Module based on the regression lookback.
+Candlestick.init(Epoch.REGRESSION_LOOKBACK, Epoch.START, Epoch.END)
+
 
 
 
@@ -47,11 +109,10 @@ certificates: Union[List[IKerasRegressionTrainingCertificate], List[IXGBRegressi
 
 
 
+
 # TRAINER INSTANCE
 # Returns the instance of a training class based on the selected model_type
-def get_trainer(
-    model_config: Union[IKerasRegressionTrainingConfig, IXGBRegressionTrainingConfig]
-) -> Union[KerasRegressionTraining, XGBRegressionTraining]:
+def get_trainer(model_config: ITrainingConfig) -> ITrainer:
     if model_type == "keras_regression":
         return KerasRegressionTraining(model_config)
     elif model_type == "xgb_regression":
@@ -73,16 +134,17 @@ def get_trainer(
 # corresponding Training Configuration File, leaving only the models that did not finish.
 for index, model_config in enumerate(config["models"]):
     # Initialize the instance of the trainer
-    trainer: Union[KerasRegressionTraining, XGBRegressionTraining] = get_trainer(model_config)
+    trainer: ITrainer = get_trainer(model_config)
 
     # Log the progress
     if index == 0:
-        print("\nREGRESSION TRAINING RUNNING\n")
+        Utils.clear_terminal()
+        print("KERAS REGRESSION TRAINING\n" if model_type == "keras_regression" else "XGBOOST REGRESSION TRAINING\n")
         print(f"{config['name']}\n")
     print(f"\n{index + 1}/{len(config['models'])}) {Utils.prettify_model_id(model_config['id'])}")
 
     # Train the model
-    cert: Union[IKerasRegressionTrainingCertificate, IXGBRegressionTrainingCertificate] = trainer.train()
+    cert: ITrainingCertificate = trainer.train()
 
     # Add the certificate to the list
     certificates.append(cert)
@@ -98,4 +160,10 @@ Epoch.FILE.save_training_certificate_batch(model_type, config["name"], certifica
 Epoch.FILE.move_trained_models_to_bank(model_type, certificates)
 
 
-print("\n\nREGRESSION TRAINING COMPLETED")
+
+# REMOVING TEMP CONFIG FILE
+Utils.remove_file(f"{Configuration.DIR_PATH}/{config_file_name}")
+
+
+
+print("\n\nKERAS REGRESSION TRAINING COMPLETED\n" if model_type == "keras_regression" else "\n\nXGBOOST REGRESSION TRAINING COMPLETED\n")

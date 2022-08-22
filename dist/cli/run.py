@@ -9,9 +9,9 @@ from modules.configuration.Configuration import Configuration
 gpus_available: int = len(config.list_physical_devices("GPU"))
 Utils.clear_terminal()
 if gpus_available > 0:
-    print(f"EPOCH BUILDER\n")
+    print(f"ACCELERATED EPOCH BUILDER\n")
 else:
-    print(f"EPOCH BUILDER GPU\n")
+    print(f"EPOCH BUILDER\n")
 
 
 # Database Host IP

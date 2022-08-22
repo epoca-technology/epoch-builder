@@ -4,10 +4,29 @@ from modules._types.keras_models_types import IKerasLoss, IKerasMetric, IKerasMo
 
 
 
+
+#############
+## General ##
+#############
+
+
+IHyperparamsCategory = Literal[
+    # General
+    "UNIT_TEST",
+
+    # Keras
+    "DNN", "CNN", "LSTM", "CLSTM",
+
+    # XGBoost
+    # ...
+]
+
+
+
+
+
+
 ## KERAS TYPES ##
-
-
-
 
 
 
