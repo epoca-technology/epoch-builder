@@ -1,17 +1,11 @@
-from typing import List, Union, Any, Tuple
-from os import makedirs, listdir
-from os.path import exists, isfile, dirname, splitext
-from shutil import rmtree, move
-from json import load, dumps
-from modules._types import IConfigPath, IBacktestAssetsPath, IModelAssetsPath, IEpochConfig, \
-    IBacktestConfig, IKerasRegressionTrainingBatch, ITrainingDataConfig, IKerasClassificationTrainingBatch,\
-        IBacktestResult, ITrainingDataFile, IKerasClassificationTrainingCertificate, IKerasRegressionTrainingCertificate,\
-            ITrainableModelType, ITrainableModelExtension, IBacktestID, IRegressionSelectionFile, \
-                IXGBClassificationTrainingBatch, IXGBRegressionTrainingBatch, IXGBClassificationTrainingCertificate,\
-                    IXGBRegressionTrainingCertificate
-from modules.model.ModelType import TRAINABLE_MODEL_TYPES
+from typing import List, Union
+from modules._types import IBacktestAssetsPath, IModelAssetsPath, IBacktestConfig, IKerasRegressionTrainingBatch, \
+    IKerasClassificationTrainingBatch, IBacktestResult, ITrainingDataFile, IKerasClassificationTrainingCertificate, \
+        IKerasRegressionTrainingCertificate, ITrainableModelType, ITrainableModelExtension, IBacktestID, \
+            IRegressionSelectionFile, IXGBClassificationTrainingBatch, IXGBRegressionTrainingBatch, \
+                IXGBClassificationTrainingCertificate, IXGBRegressionTrainingCertificate
 from modules.utils.Utils import Utils
-from modules.model.ModelType import get_trainable_model_type
+from modules.model.ModelType import TRAINABLE_MODEL_TYPES, get_trainable_model_type
 
 
 
@@ -53,8 +47,6 @@ class EpochFile:
     as some processes cannot initialize the Epoch Module.
 
     Class Properties:
-        CONFIG_PATH: IConfigPath
-            The paths to the configuration files that govern the software.
         BACKTEST_PATH: IBacktestAssetsPath
             The paths for all the directories within the backtest_assets directory.
         MODEL_PATH: IModelAssetsPath
@@ -63,17 +55,55 @@ class EpochFile:
     Instance Properties:
         epoch_id: str
             The identifier of the epoch and root directory for all the assets.
-    """
-    # Configuration Files' Paths
-    CONFIG_PATH: IConfigPath = {
-        "epoch":                                    "config/Epoch.json",
-        "backtest":                                 "config/Backtest.json",
-        "keras_classification_training":            "config/KerasClassificationTraining.json",
-        "keras_regression_training":                "config/KerasRegressionTraining.json",
-        "xgb_classification_training":              "config/XGBClassificationTraining.json",
-        "xgb_regression_training":                  "config/XGBRegressionTraining.json",
-    }
 
+    Models:
+        save_training_certificate(certificate: ITrainingCertificate) -> None
+        save_training_certificate_batch(trainable_model_type: ITrainableModelType, batch_name: str, certificates: ITrainingCertificateList) -> None
+        move_trained_models_to_bank(model_type: ITrainableModelType, certificates: ITrainingCertificateList) -> None
+        activate_model(model_id: str) -> None
+        model_exists(model_id: str, model_type: ITrainableModelType) -> bool
+        get_active_model_dir_path(model_id: str) -> str
+        make_active_model_dir(model_id: str) -> None
+        get_active_model_path(model_id: str, model_type: ITrainableModelType) -> str
+        get_active_model_certificate_path(model_id: str) -> str
+        get_active_model_certificate(model_id: str) -> ITrainingCertificate
+        get_active_model_ids(model_type: ITrainableModelType, exclude_unit_test: bool = False) -> List[str]
+        active_model_has_certificate(model_id: str) -> bool
+        remove_active_model(model_id: str) -> None
+        is_model_active(model_id: str) -> bool
+        get_banked_model_certificate(model_id: str, model_type: ITrainableModelType) -> ITrainingCertificate
+        get_banked_model_dir_path(model_id: str, model_type: ITrainableModelType) -> str
+        get_banked_model_path(model_id: str, model_type: ITrainableModelType) -> str
+        get_model_extension(model_type: ITrainableModelType) -> ITrainableModelExtension
+
+    Classification Training Data:
+        get_classification_training_data(id: str) -> ITrainingDataFile
+        list_classification_training_data_ids() -> List[str]
+        save_classification_training_data(training_data: ITrainingDataFile) -> None
+
+    Hyperparams:
+        save_hyperparams_batch(model_type: ITrainableModelType, batch_type: str, batch: ITrainingBatch) -> None
+        save_hyperparams_receipt(model_type: ITrainableModelType, receipt: str) -> None
+        get_hyperparams_dir_path(model_type: ITrainableModelType) -> str
+
+    Backtests:
+        list_backtest_configs() -> List[str]
+        get_backtest_config(file_name: str) -> IBacktestConfig
+        save_backtest_config(config: IBacktestConfig) -> None
+        get_backtest_results(backtest_id: IBacktestID) -> List[IBacktestResult]
+        save_backtest_results(results: List[IBacktestResult]) -> None
+
+    Regression Selection:
+        save_regression_selection(file: IRegressionSelectionFile) -> None
+        list_regression_selection_ids() -> List[str]
+        get_regression_selection(id: str) -> IRegressionSelectionFile
+
+    Epoch Path:
+        p(path: str) -> str
+
+    Epoch Directories:
+        create_epoch_directories(epoch_id: str) -> None
+    """
     # Backtest Files' Paths
     BACKTEST_PATH: IBacktestAssetsPath = {
         "assets":                                   "backtest_assets",
@@ -114,19 +144,15 @@ class EpochFile:
 
 
 
-    ## Epoch Files Management ##
 
-
-
-
-
-
-    # Models Management
-    # When models are trained, a model file and a certificate file are created and 
-    # placed inside of the model's directory.
-    # Active models live in the models directory and the entire lib should be placed 
-    # in the models_bank directory. The Model Activation functionality will handle
-    # the management of these dirs.
+    #####################################################################################
+    ## MODELS                                                                          ##
+    ## When models are trained, a model file and a certificate file are created and    ##
+    ## placed inside of the model's directory within the active models directory       ##
+    ## so it can be evaluated (if applies). Once the evaluation completes, the model's ##
+    ## directory is moved into the bank.                                               ##
+    ## Later on, a model can be activated if needed.                                   ##
+    #####################################################################################
 
 
 
@@ -139,7 +165,7 @@ class EpochFile:
             certificate: ITrainingCertificate
                 The training certificate to be stored.
         """
-        EpochFile.write(self.get_active_model_certificate_path(certificate["id"]), certificate)
+        Utils.write(self.get_active_model_certificate_path(certificate["id"]), certificate)
 
 
 
@@ -163,7 +189,7 @@ class EpochFile:
                 The certificates built on training completion.
         """
         # Init the path
-        path: str = self._p(EpochFile.MODEL_PATH["batched_training_certificates"])
+        path: str = self.p(EpochFile.MODEL_PATH["batched_training_certificates"])
 
         # If it is a unit test, save the file in the unit test directory
         if "UNIT_TEST" in batch_name:
@@ -174,7 +200,7 @@ class EpochFile:
             path = f"{path}/{trainable_model_type}/{batch_name}.json"
 
         # Finally, save the batch
-        EpochFile.write(path, certificates, timestamp_file_name=True)
+        Utils.write(path, certificates, timestamp_file_name=True)
 
 
 
@@ -191,9 +217,34 @@ class EpochFile:
                 The list of certificates issued when training the models.
         """
         for cert in certificates:
-            EpochFile.move_file_or_dir(
+            Utils.move_file_or_dir(
                 source=self.get_active_model_dir_path(cert["id"]),
                 destination=self.get_banked_model_dir_path(cert["id"], model_type),
+            )
+
+
+
+
+
+
+
+    def activate_model(self, model_id: str) -> None:
+        """Verifies if a model exists in the active directory. If not, it copies it
+        from the bank.
+
+        Args:
+            model_id: str
+                The ID of the model to be activated.
+        """
+        # Firstly, make sure the model is not already active
+        if not self.is_model_active(model_id):
+            # Retrieve the trainable type
+            trainable_type: ITrainableModelType = get_trainable_model_type(model_id)
+
+            # Finally, Copy the file to the active directory from the bank
+            Utils.copy_file_or_dir(
+                source=self.get_banked_model_dir_path(model_id, trainable_type), 
+                destination=self.get_active_model_dir_path(model_id)
             )
 
 
@@ -205,13 +256,8 @@ class EpochFile:
 
 
 
+    # General Model Helpers
 
-    # Model Management Misc Helpers
-    # All models must be kept in the models_bank directory. Only active models should
-    # be placed in the models directory.
-
-
-    # General
 
 
     def model_exists(self, model_id: str, model_type: ITrainableModelType) -> bool:
@@ -226,8 +272,8 @@ class EpochFile:
         Returns:
             bool
         """
-        return EpochFile.file_exists(self.get_active_model_path(model_id, model_type)) or\
-            EpochFile.file_exists(self.get_banked_model_path(model_id, model_type))
+        return Utils.file_exists(self.get_active_model_path(model_id, model_type)) or\
+            Utils.file_exists(self.get_banked_model_path(model_id, model_type))
 
 
 
@@ -236,7 +282,11 @@ class EpochFile:
 
 
 
-    # Active Model
+    # Active Model Misc Helpers
+    # An active model is a model that is placed in the models directory and 
+    # is ready to be loaded in order to generate predictions.
+
+
 
 
     def get_active_model_dir_path(self, model_id: str) -> str:
@@ -249,7 +299,8 @@ class EpochFile:
         Returns:
             str
         """
-        return self._p(f"{EpochFile.MODEL_PATH['models']}/{model_id}")
+        return self.p(f"{EpochFile.MODEL_PATH['models']}/{model_id}")
+
 
 
 
@@ -265,7 +316,8 @@ class EpochFile:
             model_id: str
                 The ID of the model
         """
-        EpochFile.make_directory(self.get_active_model_dir_path(model_id))
+        Utils.make_directory(self.get_active_model_dir_path(model_id))
+
 
 
 
@@ -318,7 +370,7 @@ class EpochFile:
             RuntimeError:
                 If the certificate does not exist.
         """
-        return EpochFile.read(self.get_active_model_certificate_path(model_id))
+        return Utils.read(self.get_active_model_certificate_path(model_id))
 
 
 
@@ -337,7 +389,7 @@ class EpochFile:
             List[str]
         """
         # Retrieve the directory contents
-        directories, _ = EpochFile.get_directory_content(self._p(EpochFile.MODEL_PATH["models"]))
+        directories, _ = Utils.get_directory_content(self.p(EpochFile.MODEL_PATH["models"]))
 
         # Filter the directories and add only the ones related to the provided model type.
         model_ids: List[str] = list(filter(lambda x: get_trainable_model_type(x) == model_type, directories))
@@ -362,7 +414,8 @@ class EpochFile:
         Returns:
             bool
         """
-        return EpochFile.file_exists(self.get_active_model_certificate_path(model_id))
+        return Utils.file_exists(self.get_active_model_certificate_path(model_id))
+
 
 
 
@@ -375,7 +428,28 @@ class EpochFile:
             model_id: str
                 The identifier of the model.
         """
-        EpochFile.remove_directory(self.get_active_model_dir_path(model_id))
+        Utils.remove_directory(self.get_active_model_dir_path(model_id))
+
+
+
+
+
+    def is_model_active(self, model_id: str) -> bool:
+        """Verifies if a model is in the active directory.
+
+        Args:
+            model_id: str
+                The identifier of the model.
+
+        Returns: bool
+        """
+        return Utils.file_exists(self.get_active_model_dir_path(model_id))
+
+
+
+
+
+
 
 
 
@@ -384,6 +458,10 @@ class EpochFile:
 
 
     # Model Bank
+    # Once a model is trained, it is moved from the active directory 
+    # into the bank. The active directory should only be left with
+    # models that are being used.
+
 
 
 
@@ -401,7 +479,7 @@ class EpochFile:
             RuntimeError:
                 If the certificate does not exist.
         """
-        return EpochFile.read(f"{self.get_banked_model_dir_path(model_id, model_type)}/certificate.json")
+        return Utils.read(f"{self.get_banked_model_dir_path(model_id, model_type)}/certificate.json")
         
 
 
@@ -420,7 +498,8 @@ class EpochFile:
         Returns:
             str
         """
-        return self._p(f"{EpochFile.MODEL_PATH['models_bank']}/{model_type}/{model_id}")
+        return self.p(f"{EpochFile.MODEL_PATH['models_bank']}/{model_type}/{model_id}")
+
 
 
 
@@ -449,6 +528,8 @@ class EpochFile:
 
 
     # Model File Extension
+    # The extension of the model's file depends on the technology behind it.
+
 
 
     def get_model_extension(self, model_type: ITrainableModelType) -> ITrainableModelExtension:
@@ -476,9 +557,21 @@ class EpochFile:
 
 
 
-    # Classification Training Data
-    # The classification training data is saved once the process is completed and then
-    # read in order to validate the integrity of the file.
+
+
+
+
+
+
+
+    #########################################################################################
+    ## CLASSIFICATION TRAINING DATA                                                        ##
+    ## The classification training data is saved once the process is completed. This value ##
+    ## can be read by other modules and is exported with the Epoch. 
+    #########################################################################################
+
+
+
 
 
     def get_classification_training_data(self, id: str) -> ITrainingDataFile:
@@ -495,7 +588,7 @@ class EpochFile:
             RuntimeError:
                 If the training data file does not exist.
         """
-        return EpochFile.read(self._p(f"{EpochFile.MODEL_PATH['classification_training_data']}/{id}.json"))
+        return Utils.read(self.p(f"{EpochFile.MODEL_PATH['classification_training_data']}/{id}.json"))
 
 
 
@@ -510,7 +603,10 @@ class EpochFile:
             List[str]
         """
         # Retrieve the directory contents
-        _, files = EpochFile.get_directory_content(self._p(EpochFile.MODEL_PATH["classification_training_data"]))
+        _, files = Utils.get_directory_content(
+            path=self.p(EpochFile.MODEL_PATH["classification_training_data"]), 
+            only_file_ext=".json"
+        )
 
         # Init the ids
         ids: List[str] = list(filter(lambda x: ".json" in x, files))
@@ -531,10 +627,10 @@ class EpochFile:
                 The training data file data.
         """
         # Init the path
-        path: str = self._p(f"{EpochFile.MODEL_PATH['classification_training_data']}/{training_data['id']}.json")
+        path: str = self.p(f"{EpochFile.MODEL_PATH['classification_training_data']}/{training_data['id']}.json")
 
         # Save the file
-        EpochFile.write(path, training_data)
+        Utils.write(path, training_data)
 
 
 
@@ -544,12 +640,19 @@ class EpochFile:
 
 
 
-    # Hyperparams
-    # The Hyperparams Module builds many different models and saves the configurations in
-    # batches so the models can be trained by multiple machines within the cluster or in 
-    # any external environment.
-    # In order to find the best possible models, it is recommended to make use of several
-    # technologies. 
+
+
+
+
+
+    #########################################################################################
+    ## HYPERPARAMS                                                                         ##
+    ## The Hyperparams Module builds many different models and saves the configurations in ##
+    ## batches so the models can be trained by multiple machines within the cluster or in  ##
+    ## any external environment.                                                           ##
+    ## In order to find the best possible models, it is recommended to make use of several ##
+    ## technologies.                                                                       ##
+    #########################################################################################
 
 
 
@@ -575,7 +678,7 @@ class EpochFile:
         path: str = f"{self.get_hyperparams_dir_path(model_type)}/{batch_type}/{batch['name']}.json"
 
         # Save the file
-        EpochFile.write(path, batch, indent=4)
+        Utils.write(path, batch, indent=4)
 
 
 
@@ -595,7 +698,7 @@ class EpochFile:
         path: str = f"{self.get_hyperparams_dir_path(model_type)}/receipt.txt"
 
         # Save the file
-        EpochFile.write(path, receipt)
+        Utils.write(path, receipt)
 
 
 
@@ -614,19 +717,19 @@ class EpochFile:
         """
         # Check if it is a Keras Regression
         if model_type == "keras_regression":
-            return self._p(EpochFile.MODEL_PATH["keras_regression_training_configs"])
+            return self.p(EpochFile.MODEL_PATH["keras_regression_training_configs"])
 
         # Check if it is a Keras Classification
         elif model_type == "keras_classification":
-            return self._p(EpochFile.MODEL_PATH["keras_classification_training_configs"])
+            return self.p(EpochFile.MODEL_PATH["keras_classification_training_configs"])
 
         # Check if it is an XGB Regression
         elif model_type == "xgb_regression":
-            return self._p(EpochFile.MODEL_PATH["xgb_regression_training_configs"])
+            return self.p(EpochFile.MODEL_PATH["xgb_regression_training_configs"])
 
         # Check if it is an XGB Classification
         elif model_type == "xgb_classification":
-            return self._p(EpochFile.MODEL_PATH["xgb_classification_training_configs"])
+            return self.p(EpochFile.MODEL_PATH["xgb_classification_training_configs"])
         
         # Otherwise, raise an error
         else:
@@ -643,9 +746,69 @@ class EpochFile:
 
 
 
-    # Backtest Results Management
-    # The backtest results are saved once all the models within have completed. These results
-    # can also be read by modules such as RegressionSelection.
+    #####################################################################################
+    ## BACKTESTS                                                                       ##
+    ## The backtest process reads the configuration files and saves the results in     ##
+    ## the corresponding paths so they can be visualized by the user or other modules. ##
+    #####################################################################################
+
+
+
+
+
+
+    def list_backtest_configs(self) -> List[str]:
+        """Retrieves the list of backtest configuration files within the directory.
+
+        Returns:
+            List[str]
+        """
+        # Retrieve the directory contents
+        _, files = Utils.get_directory_content(
+            path=self.p(EpochFile.BACKTEST_PATH["configurations"]), 
+            only_file_ext=".json"
+        )
+
+        # Return the files
+        return files
+
+
+
+
+
+    def get_backtest_config(self, file_name: str) -> IBacktestConfig:
+        """Retrieves all the results for a given backtest.
+
+        Args:
+            file_name: str
+                The name of the configuration file.
+
+        Returns:
+            IBacktestConfig
+
+        Raises:
+            RuntimeError:
+                If the backtest config file does not exist.
+        """
+        return Utils.read(f"{EpochFile.BACKTEST_PATH['configurations']}/{file_name}")
+
+
+
+
+
+    def save_backtest_config(self, config: IBacktestConfig) -> None:
+        """Saves a backtest configuration file in the corresponding path.
+
+        Args:
+            config: IBacktestConfig
+                The configuration to save.
+        """
+        # Init values
+        path: str = self.p(f"{EpochFile.BACKTEST_PATH['configurations']}/{config['id']}.json")
+
+        # Save the results
+        Utils.write(path, config)
+
 
 
 
@@ -664,7 +827,7 @@ class EpochFile:
             RuntimeError:
                 If the backtest result file does not exist.
         """
-        return EpochFile.read(f"{EpochFile.BACKTEST_PATH['results']}/{backtest_id}.json")
+        return Utils.read(f"{EpochFile.BACKTEST_PATH['results']}/{backtest_id}.json")
 
 
 
@@ -691,10 +854,10 @@ class EpochFile:
             raise ValueError("Cannot save the backtest results because the provided list is empty.")
 
         # Init values
-        path: str = self._p(f"{EpochFile.BACKTEST_PATH['results']}/{results[0]['backtest']['id']}.json")
+        path: str = self.p(f"{EpochFile.BACKTEST_PATH['results']}/{results[0]['backtest']['id']}.json")
 
         # Save the results
-        EpochFile.write(path, results)
+        Utils.write(path, results)
 
 
 
@@ -705,9 +868,19 @@ class EpochFile:
 
 
 
-    # Regression Selection
-    # This process is performed in order to find out what regression models and position
-    # exit combinations perform best. 
+
+
+
+
+
+
+    ###############################################################################################
+    ## REGRESSION SELECTION                                                                      ##
+    ## This process analyzes a given list of regressions and groups all the neccessary data      ##
+    ## in order to validate the selection prior to generating the Classification Training Data.  ##
+    ###############################################################################################
+
+
 
 
 
@@ -719,10 +892,10 @@ class EpochFile:
                 The selection to be stored
         """
         # Init the path
-        path: str = self._p(f"{EpochFile.BACKTEST_PATH['regression_selection']}/{file['id']}.json")
+        path: str = self.p(f"{EpochFile.BACKTEST_PATH['regression_selection']}/{file['id']}.json")
 
         # Save the file
-        EpochFile.write(path, file)
+        Utils.write(path, file)
     
 
 
@@ -736,14 +909,13 @@ class EpochFile:
             List[str]
         """
         # Retrieve the directory contents
-        _, files = EpochFile.get_directory_content(self._p(EpochFile.BACKTEST_PATH["regression_selection"]))
-
-        # Init the ids
-        ids: List[str] = list(filter(lambda x: ".json" in x, files))
+        _, files = Utils.get_directory_content(
+            path=self.p(EpochFile.BACKTEST_PATH["regression_selection"]), 
+            only_file_ext=".json"
+        )
 
         # Remove the extension from the id
-        return [id.replace(".json", "") for id in ids]
-
+        return [id.replace(".json", "") for id in files]
 
 
 
@@ -763,7 +935,7 @@ class EpochFile:
             RuntimeError:
                 If the regression selection file does not exist.
         """
-        return EpochFile.read(self._p(f"{EpochFile.BACKTEST_PATH['regression_selection']}/{id}.json"))
+        return Utils.read(self.p(f"{EpochFile.BACKTEST_PATH['regression_selection']}/{id}.json"))
 
 
 
@@ -774,10 +946,23 @@ class EpochFile:
 
 
 
-    # Misc Helpers
 
 
-    def _p(self, path: str) -> str:
+
+
+
+    ###############################################################################
+    ## EPOCH PATH                                                                ##
+    ## All the assets generated during the creation of an epoch, are stored in a ##
+    ## directory named after the Epoch's ID. For this reason, when interacting   ##
+    ## with Epoch Files, it is important to call the p method.                  ##
+    ###############################################################################
+
+
+
+
+
+    def p(self, path: str) -> str:
         """Adds the Epoch's name to the beggining of a given path.
 
         Args:
@@ -801,211 +986,20 @@ class EpochFile:
 
 
 
-    ## Configuration Files Management ##
 
 
 
 
 
 
+    ###############################################################################
+    ## EPOCH DIRECTORIES                                                         ##
+    ## For the Epoch to be able to operate in a scalable way, it needs to follow ##
+    ## strict guidelines when storing configurations, results, models, etc.      ##
+    ## This function creates the entire skeleton for both, backtest and model    ##
+    ## management.                                                               ##
+    ###############################################################################
 
-    # Epoch Configuration
-    # The Epoch Configuration File holds global configuration variables that are
-    # used by several modules.
-
-
-    @staticmethod
-    def get_epoch_config(allow_empty: bool = False) -> Union[IEpochConfig, None]:
-        """Retrieves the Epoch Configuration.
-
-        Args:
-            allow_empty: bool
-                If enabled, an error won't be raised in case the file doesn't exist
-                and instead returns None.
-
-        Returns:
-            Union[IEpochConfig, None]
-        """
-        return EpochFile.read(EpochFile.CONFIG_PATH["epoch"], allow_empty=allow_empty)
-
-
-
-    @staticmethod
-    def update_epoch_config(new_config: IEpochConfig) -> None:
-        """Updates the current Epoch Configuration.
-
-        Args:
-            new_config: IEpochConfig
-                The new config to be set on the file
-        """
-        EpochFile.write(EpochFile.CONFIG_PATH["epoch"], data=new_config, indent=4)
-
-
-
-
-
-
-
-    # Backtest Configuration
-    # The Backtest Configuration File holds the configuration that will be used
-    # to run the Backtest Process.
-
-    def get_backtest_config(self) -> IBacktestConfig:
-        """Retrieves the Backtest Configuration.
-
-        Returns:
-            IBacktestConfig
-        """
-        return EpochFile.read(EpochFile.CONFIG_PATH["backtest"])
-
-
-
-
-
-
-
-
-
-    # Keras Regression Training Configuration
-    # The configuration file holds the data that will be used to train Keras Regression Models.
-    
-
-    def get_keras_regression_training_config(self) -> IKerasRegressionTrainingBatch:
-        """Retrieves the configuration for training Keras Regression Models.
-
-        Returns:
-            IKerasRegressionTrainingBatch
-        """
-        return EpochFile.read(EpochFile.CONFIG_PATH["keras_regression_training"])
-
-    
-
-
-    def update_keras_regression_training_config(self, new_config: IKerasRegressionTrainingBatch) -> None:
-        """Updates the Keras Regression Training configuration.
-
-        Args:
-            new_config: IKerasRegressionTrainingBatch
-                The new config to be set on the file
-        """
-        EpochFile.write(EpochFile.CONFIG_PATH["keras_regression_training"], data=new_config, indent=4)
-
-
-
-
-
-
-    # Keras Classification Training Configuration
-    # The configuration file holds the data used to train Keras Classification Models.
-
-
-
-    def get_keras_classification_training_config(self) -> IKerasClassificationTrainingBatch:
-        """Retrieves the KerasClassificationTraining Configuration.
-
-        Returns:
-            IKerasClassificationTrainingBatch
-        """
-        return EpochFile.read(EpochFile.CONFIG_PATH["keras_classification_training"])
-
-   
-
-
-    def update_keras_classification_training_config(self, new_config: IKerasClassificationTrainingBatch) -> None:
-        """Updates the current KerasClassificationTraining Configuration.
-
-        Args:
-            new_config: IKerasClassificationTrainingBatch
-                The new config to be set on the file
-        """
-        EpochFile.write(EpochFile.CONFIG_PATH["keras_classification_training"], data=new_config, indent=4)
-
-
-
-
-
-
-    # XGBoost Regression Training Configuration
-    # The configuration file holds the data that will be used to train XGB Regression Models.
-    
-
-
-    def get_xgb_regression_training_config(self) -> IXGBRegressionTrainingBatch:
-        """Retrieves the configuration for training XGB Regression Models.
-
-        Returns:
-            IXGBRegressionTrainingBatch
-        """
-        return EpochFile.read(EpochFile.CONFIG_PATH["xgb_regression_training"])
-
-
-
-
-    
-    def update_xgb_regression_training_config(self, new_config: IXGBRegressionTrainingBatch) -> None:
-        """Updates the XGB Regression Training configuration.
-
-        Args:
-            new_config: IXGBRegressionTrainingBatch
-                The configuration to be set on the file.
-        """
-        EpochFile.write(EpochFile.CONFIG_PATH["xgb_regression_training"], data=new_config, indent=4)
-
-
-
-
-
-
-
-    # XGBoost Classification Training Configuration
-    # The configuration file holds the data used to train XGB Classification Models.
-
-
-    def get_xgb_classification_training_config(self) -> IXGBClassificationTrainingBatch:
-        """Retrieves the XGBClassificationTraining Configuration.
-
-        Returns:
-            IXGBClassificationTrainingBatch
-        """
-        return EpochFile.read(EpochFile.CONFIG_PATH["xgb_classification_training"])
-
-
-
-
-
-    def update_xgb_classification_training_config(self, new_config: IXGBClassificationTrainingBatch) -> None:
-        """Updates the current XGBClassificationTraining Configuration.
-
-        Args:
-            new_config: IXGBClassificationTrainingBatch
-                The configuration to be set on the file.
-        """
-        EpochFile.write(EpochFile.CONFIG_PATH["xgb_classification_training"], data=new_config, indent=4)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    ## Epoch Directories Creation ##
-
-
-
-
-    # Epoch Directories
-    # For the Epoch to be able to operate in a scalable way, it needs to follow
-    # strict guidelines when storing configurations, results, models, etc.
-    # This function creates the entire skeleton for both, backtest and model 
-    # management.
 
 
     @staticmethod
@@ -1017,276 +1011,22 @@ class EpochFile:
                 The identifier of the epoch.
         """
         # Create all the backtest asset directories
-        EpochFile.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['assets']}")
-        EpochFile.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['configurations']}")
-        EpochFile.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['regression_selection']}")
-        EpochFile.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['results']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['assets']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['configurations']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['regression_selection']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['results']}")
 
         # Create all the model asset directories
-        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['assets']}")
-        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['batched_training_certificates']}")
-        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['batched_training_certificates']}/unit_tests")
-        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['classification_training_data']}")
-        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['models']}")
-        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['models_bank']}")
-        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['keras_classification_training_configs']}")
-        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['keras_regression_training_configs']}")
-        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['xgb_classification_training_configs']}")
-        EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['xgb_regression_training_configs']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['assets']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['batched_training_certificates']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['batched_training_certificates']}/unit_tests")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['classification_training_data']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['models']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['models_bank']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['keras_classification_training_configs']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['keras_regression_training_configs']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['xgb_classification_training_configs']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['xgb_regression_training_configs']}")
         for trainable_model in TRAINABLE_MODEL_TYPES:
-            EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['batched_training_certificates']}/{trainable_model}")
-            EpochFile.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['models_bank']}/{trainable_model}")
-
-
-
-
-
-
-
-
-
-
-
-    ## File System Management ##
-
-
-
-
-    # General
-
-
-    @staticmethod
-    def move_file_or_dir(source: str, destination: str) -> None:
-        """Moves a directory or file from source to destination
-
-        Args:
-            source: str
-                The path that will be moved to the destination.
-            destination: str
-                The path in which the source will be moved to.
-        """
-        # Firstly make sure the source exists
-        if not EpochFile.file_exists(source) and not EpochFile.directory_exists(source):
-            raise RuntimeError(f"The file/dir cannot be moved because the source does not exist: {source}")
-
-        # Finally, move the file/dir
-        move(source, destination)
-
-
-
-
-
-
-
-    # Directory/File Existance
-
-
-    @staticmethod
-    def directory_exists(path: str) -> bool:
-        """Checks if a given directory path exists.
-
-        Args:
-            path: str
-                The path to be checked for existance.
-
-        Returns:
-            bool
-        """
-        return exists(path)
-
-
-
-
-
-    @staticmethod
-    def file_exists(path: str) -> bool:
-        """Checks if a given file path exists.
-
-        Args:
-            path: str
-                The path to be checked for existance.
-
-        Returns:
-            bool
-        """
-        return isfile(path)
-
-
-
-
-
-
-
-    # Directory Management
-
-
-
-    @staticmethod
-    def make_directory(path: str) -> None:
-        """Creates a directory at a given path if it doesnt already exist.
-
-        Args:
-            path: str
-                The path in which the directory should be created.
-        """
-        if not EpochFile.directory_exists(path):
-            makedirs(path)
-
-
-
-
-
-    @staticmethod
-    def remove_directory(path: str) -> None:
-        """Removes a directory and its contents.
-
-        Args:
-            path: str
-                The path of the directory that will be removed.
-
-        Raises:
-            RuntimeError:
-                If the directory does not exist
-        """
-        # Make sure the directory exists
-        if not EpochFile.directory_exists(path):
-            raise RuntimeError(f"The directory {path} does not exist.")
-
-        # Remove the directory
-        rmtree(path)
-
-
-
-
-
-
-
-    @staticmethod
-    def get_directory_content(path: str) -> Tuple[List[str], List[str]]:
-        """Retrieves all the directories and files located in the
-        provided path.
-
-        Args:
-            path: str
-                The path of the directory
-
-        Returns:
-            Tuple[List[str], List[str]]
-            (directories, files)
-        
-        Raises:
-            RuntimeError:
-                If the directory does not exist.
-        """
-        # Init values
-        directories: List[str] = []
-        files: List[str] = []
-
-        # Make sure the directory exists
-        if not EpochFile.directory_exists(path):
-            raise RuntimeError(f"The directory {path} does not exist.")
-
-        # Iterate over each item in the directory
-        for item in listdir(path):
-            # Check if it is a file
-            if isfile(f"{path}/{item}"):
-                files.append(item)
-            
-            # Otherwise, it is a directory
-            else:
-                directories.append(item)
-
-        # Finally, return the contents
-        return directories, files
-
-
-
-
-
-
-
-    # Read / Write File Actions
-
-
-
-
-    @staticmethod
-    def read(path: str, allow_empty: bool = False) -> Any:
-        """Reads a file located at a given path and returns
-        its contents.
-
-        Args:
-            path: str
-                The path in which the file is located.
-            allow_empty: bool
-                If enabled, the function won't raise an error if the file
-                does not exist.
-        
-        Returns:
-            Any
-
-        Raises:
-            RuntimeError:
-                If the file does not exist and allow_empty is set to False.
-        """
-        # Check if the file exists
-        if EpochFile.file_exists(path):
-            # Split the path into path name and extension
-            _, extension = splitext(path)
-
-            # Read the file according to its format
-            if extension == ".json":
-                return load(open(path))
-            else:
-                return open(path).read()
-
-        # Otherwise, check if an error needs to raised
-        else:
-            if allow_empty:
-                return None
-            else:
-                raise RuntimeError(f"The file {path} does not exist.")
-
-
-
-
-
-
-    @staticmethod
-    def write(path: str, data: Any, timestamp_file_name: bool = False, indent: Union[int, None] = None) -> None:
-        """Writes a file on given path.
-
-        Args:
-            path: str
-                The path of the file that will be written. Note that if the file
-                exists, it will overwrite it.
-            data: Any
-                The data to be stored in the file. If it is a JSON file, the data must
-                be compatible.
-            timestamp_file_name: bool
-                If enabled, it will append the current timestamp to the file name in the
-                following way: my_file.json -> my_file_1657887972213.json
-            indent: Union[int, None]
-                The indenting to be applied on the JSON File. Defaults to no indenting.
-        """
-        # Make sure the directory exists
-        dir_name: str = dirname(path)
-        if not EpochFile.directory_exists(dir_name):
-            EpochFile.make_directory(dir_name)
-
-        # Split the path into path name and extension
-        path_name, extension = splitext(path)
-
-        # Check if the file name needs to be timestamped
-        if timestamp_file_name:
-            path_name += f"_{Utils.get_time()}"
-
-        # Write the File based on its format
-        with open(path_name + extension, "w") as file_wrapper:
-            if extension == ".json":
-                file_wrapper.write(dumps(data, indent=indent))
-            else:
-                file_wrapper.write(data)
-
-
-
+            Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['batched_training_certificates']}/{trainable_model}")
+            Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['models_bank']}/{trainable_model}")

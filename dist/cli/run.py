@@ -1,22 +1,26 @@
-from typing import List, Dict
-import os
-from inquirer import List as InquirerList, Text, prompt
+from typing import List, Dict, Union
 from subprocess import Popen
+from inquirer import List as InquirerList, Text, prompt
+from tensorflow import config
+from modules.utils.Utils import Utils
+from modules.configuration.Configuration import Configuration
 
 # Welcome
-os.system("cls" if os.name == "nt" else "clear")
-print("EPOCH BUILDER\n")
+gpus_available: int = len(config.list_physical_devices("GPU"))
+Utils.clear_terminal()
+if gpus_available > 0:
+    print(f"EPOCH BUILDER\n")
+else:
+    print(f"EPOCH BUILDER GPU\n")
 
 
-# Host IP
-path: str = "config/host_ip.txt"
-if not os.path.exists("config"):
-    os.makedirs("config")
-if not os.path.isfile(path):
-    host_ip_answer: Dict[str, str] = prompt([Text("ip", f"Enter the Host IP")])
-    host_ip: str = host_ip_answer["ip"]
-    with open(path, "w") as file_wrapper:
-        file_wrapper.write(host_ip)
+# Database Host IP
+# Checks if the Database Host IP has been set. If not, it will prompt a form
+# in order to set it prior to running the process.
+db_host_ip: Union[str, None] = Configuration.get_db_host_ip()
+if db_host_ip is None:
+    db_host_ip: Dict[str, str] = prompt([Text("value", f"Enter the Database Host IP")])
+    Configuration.set_db_host_ip(db_host_ip["value"])
 
 
 
@@ -32,7 +36,7 @@ processes: Dict[str, str] = {
     "Merge Training Certificates": "run_merge_training_certificates.py",
     "Regression Selection": "run_regression_selection.py",
     "Regression Training": "run_regression_training.py",
-    "Update Host IP": "run_update_host_ip.py",
+    "Update Database Host IP": "run_update_db_host_ip.py",
     "Unit Tests": ""
 }
 processes_answer: List[Dict[str, str]] = prompt([
@@ -41,7 +45,7 @@ processes_answer: List[Dict[str, str]] = prompt([
 
 
 # Init the process
-os.system("cls" if os.name == "nt" else "clear")
+Utils.clear_terminal()
 proc: Popen
 
 # Execute a CLI Script

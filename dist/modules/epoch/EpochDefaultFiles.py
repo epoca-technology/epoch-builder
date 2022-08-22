@@ -1,3 +1,4 @@
+from modules.utils.Utils import Utils
 from modules.epoch.EpochFile import EpochFile
 
 
@@ -16,7 +17,7 @@ def create_default_files(epoch_id: str, regression_lookback: int, regression_pre
             The name of the epoch.
     """
     # Create the backtest unit test file
-    EpochFile.write(
+    Utils.write(
         path=f"{epoch_id}/{EpochFile.BACKTEST_PATH['configurations']}/unit_test.json", 
         indent=4,
         data={
@@ -43,7 +44,7 @@ def create_default_files(epoch_id: str, regression_lookback: int, regression_pre
     )
 
     # Create the keras regression config unit test file
-    EpochFile.write(
+    Utils.write(
         path=f"{epoch_id}/{EpochFile.MODEL_PATH['keras_regression_training_configs']}/UNIT_TEST.json", 
         indent=4,
         data={
@@ -70,12 +71,12 @@ def create_default_files(epoch_id: str, regression_lookback: int, regression_pre
     )
 
     # Create the keras classification config unit test file
-    EpochFile.write(
+    Utils.write(
         path=f"{epoch_id}/{EpochFile.MODEL_PATH['keras_classification_training_configs']}/UNIT_TEST.json",
         indent=4,
         data={
             "name": "KC_UNIT_TEST",
-            "training_data_id": "", # Must fill once the training data has been generated
+            "training_data_id": "FILL_THIS_VALUE", # Must fill once the training data has been generated
             "models": [
                 {
                     "id": "KC_UNIT_TEST",

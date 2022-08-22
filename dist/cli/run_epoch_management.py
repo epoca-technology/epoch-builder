@@ -10,6 +10,7 @@ print("EPOCH MANAGEMENT\n")
 action_answer: Dict[str, str] = prompt([InquirerList("action", message="Select an action to execute", choices=[ 
     "Create Epoch", 
     "Classification Training Data for Unit Tests",
+    "Classification Training Data",
     "Export Epoch"
 ])])
 action: str = action_answer["action"]
@@ -53,11 +54,12 @@ if action == "Create Epoch":
 
 
 
+
 # Classification Training Data for Unit Tests
 # Alters the current Epoch's configuration and sets the classification training data ID that will be used by
 # the Unit Tests
 elif action == "Classification Training Data for Unit Tests":
-    print("\n\nCLASSIFICATION TRAINING DATA ID RUNNING\n")
+    print("\n\nCLASSIFICATION TRAINING DATA ID FOR UNIT TEST RUNNING\n")
     print(" ")
     
     # Init the Epoch
@@ -71,6 +73,28 @@ elif action == "Classification Training Data for Unit Tests":
 
     # Finally, update the file
     Epoch.set_classification_training_data_id_ut(training_data_answer["id"])
+
+
+
+
+# Classification Training Data
+# Alters the current Epoch's configuration and sets the selected classification training data ID
+elif action == "Classification Training Data":
+    print("\n\nCLASSIFICATION TRAINING DATA ID RUNNING\n")
+    print(" ")
+    
+    # Init the Epoch
+    Epoch.init()
+
+    # List the training data files
+    training_data_ids: List[str] = Epoch.FILE.list_classification_training_data_ids()
+    if len(training_data_ids) == 0:
+        raise RuntimeError("The Classification Training data assets directory is empty.")
+    training_data_answer: Dict[str, str] = prompt([InquirerList("id", message="Select the Classification Training data", choices=training_data_ids)])
+
+    # Finally, update the file
+    Epoch.set_classification_training_data_id(training_data_answer["id"])
+
 
 
 

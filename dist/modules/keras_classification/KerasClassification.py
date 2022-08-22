@@ -69,8 +69,8 @@ class KerasClassification(KerasModelInterface):
 
         # Otherwise, load the file
         else:
-            model_path: str = Epoch.FILE.get_active_model_path(id, "keras_classification")
-            with h5pyFile(model_path, mode='r') as model_file:
+            Epoch.FILE.activate_model(id)
+            with h5pyFile(Epoch.FILE.get_active_model_path(id, "keras_classification"), mode='r') as model_file:
                 self.id: str = model_file.attrs['id']
                 self.description: str = model_file.attrs["description"]
                 self.training_data_id: str = model_file.attrs["training_data_id"]

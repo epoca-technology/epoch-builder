@@ -1,11 +1,9 @@
-from typing import List, Dict
-from os import makedirs, listdir
-from os.path import exists, isfile, join
+from typing import Dict
 from inquirer import List as InquirerList, prompt
 from subprocess import Popen
 from modules._types import IDatabaseSummary
-from modules.epoch.Epoch import Epoch
 from modules.utils.Utils import Utils
+from modules.epoch.Epoch import Epoch
 from modules.database.Database import Database, DB_CONNECTION_CONFIG
 
 
@@ -13,13 +11,23 @@ from modules.database.Database import Database, DB_CONNECTION_CONFIG
 Epoch.init()
 
 
+# Welcome
+print("DATABASE MANAGEMENT\n")
 
-## Database Summary ##
+
+# Process Menu
+process: Dict[str, str] = prompt([
+    InquirerList("id", message="Select an action to execute", choices=[
+        "View Database Summary",
+        "Backup Database",
+        "Restore Database"
+    ])
+])
 
 
-def _display_db_summary() -> None:
-    """Displays the summary of the Database.
-    """
+# Database Summary
+# Extracts a summary of the tables and the data stored so far.
+if process["id"] == "View Database Summary":
     # Retrieve the summary
     s: IDatabaseSummary = Database.get_summary()
 
@@ -43,23 +51,22 @@ def _display_db_summary() -> None:
     for tt in s["test_tables"]:
         print(f"{tt['name']}: {format_size(tt['size'])}")
 
+    print("\n\nDATABASE SUMMARY COMPLETED")
 
 
 
 
-## Database Backup ##
 
-def _backup_db() -> None:
-    """Backs up the entire Database into the db management directory.
-    """
+# Database Backup
+# Generates a compressed backup file and places it in the backup directory.
+elif process["id"] == "Backup Database":
     print("\nDATABASE BACKUP RUNNING")
     # Init the backup directory
     backup_path: str = Database.DB_MANAGEMENT_PATH + "/backup"
     backup_name: str = str(Utils.get_time()) + ".dump"
 
     # Create the backup directory if it does not exist
-    if not exists(backup_path):
-        makedirs(backup_path)
+    Utils.make_directory(backup_path)
 
     # Init the command
     command: str = f"pg_dump \
@@ -74,29 +81,28 @@ def _backup_db() -> None:
         'PGPASSWORD': DB_CONNECTION_CONFIG['password']
     })
     proc.wait()
-    print("\nDATABASE BACKUP COMPLETED")
+    print("\n\nDATABASE BACKUP COMPLETED")
 
 
 
 
 
-## Database Restore ##
-
-
-def _restore_db() -> None:
+# Database Restore
+# Reads the restore directory and restores the compressed backup file located in it.
+else:
     print("\nDATABASE RESTORE RUNNING")
     # Init the restore path
     restore_path: str = Database.DB_MANAGEMENT_PATH + "/restore"
 
     # Make sure the restore path exists, otherwise create it and provide information
-    if not exists(restore_path):
-        makedirs(restore_path)
-        raise ValueError(f"The dump to be restored must be placed in {restore_path}")
+    if not Utils.directory_exists(restore_path):
+        Utils.make_directory(restore_path)
+        raise ValueError(f"The backup dump to be restored must be placed in {restore_path}")
 
     # Extract the names of the databases in the path. Make sure there is exactly 1 dump
-    names: List[str] = list(filter(lambda f: ".dump" in f, [f for f in listdir(restore_path) if isfile(join(restore_path, f))]))
-    if len(names) != 1:
-        raise ValueError(f"There must be 1 dump file to be restored in {restore_path}")
+    _, backup_names = Utils.get_directory_content(restore_path, only_file_ext=".dump")
+    if len(backup_names) != 1:
+        raise ValueError(f"There must be 1 backup dump file to be restored in {restore_path}")
 
     # Clean all the tables and reinitialize them fresh
     Database.delete_tables()
@@ -107,33 +113,11 @@ def _restore_db() -> None:
         -U {DB_CONNECTION_CONFIG['user']} \
             -h {DB_CONNECTION_CONFIG['host_ip']} \
                 -p {DB_CONNECTION_CONFIG['port']} \
-                    -d {DB_CONNECTION_CONFIG['database']} {restore_path}/{names[0]}"
+                    -d {DB_CONNECTION_CONFIG['database']} {restore_path}/{backup_names[0]}"
 
     # Add the required env vars and execute the command
     proc = Popen(command, shell=True, env={
         'PGPASSWORD': DB_CONNECTION_CONFIG['password']
     })
     proc.wait()
-    print("\nDATABASE RESTORE COMPLETED")
-
-
-
-
-
-
-
-## CLI ##
-print("DATABASE MANAGEMENT\n")
-SUMMARY: str = "View Database Summary"
-BACKUP: str = "Backup Database"
-RESTORE: str = "Restore Database"
-questions = [InquirerList("action", message="Select an action to execute", choices=[SUMMARY, BACKUP, RESTORE])]
-answer: Dict[str, str] = prompt(questions)
-if answer["action"] == SUMMARY:
-    _display_db_summary()
-elif answer["action"] == BACKUP:
-    _backup_db()
-elif answer["action"] == RESTORE:
-    _restore_db()
-else:
-    raise ValueError(f"The provided action could not be processed: {str(answer)}")
+    print("\n\nDATABASE RESTORE COMPLETED")

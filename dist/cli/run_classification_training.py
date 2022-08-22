@@ -19,6 +19,10 @@ Epoch.init()
 
 ## WELCOME ##
 print("CLASSIFICATION TRAINING\n")
+
+
+# Model Type
+# Extracts the type of model that will be trained.
 model_type_answer: Dict[str, str] = prompt([InquirerList("type", message="Select the type of model", choices=TRAINABLE_CLASSIFICATION_MODEL_TYPES)])
 model_type: ITrainableModelType = model_type_answer["type"]
 
@@ -110,6 +114,11 @@ Epoch.FILE.save_training_certificate_batch(model_type, config["name"], certifica
 
 # MOVING MODELS TO BANK
 Epoch.FILE.move_trained_models_to_bank(model_type, certificates)
+
+
+
+# REMOVING TEMP CONFIGURATION FILE
+# @TODO
 
 
 

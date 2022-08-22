@@ -66,8 +66,8 @@ class KerasRegression(KerasModelInterface):
 
         # Otherwise, load the file
         else:
-            model_path: str = Epoch.FILE.get_active_model_path(id, "keras_regression")
-            with h5pyFile(model_path, mode="r") as model_file:
+            Epoch.FILE.activate_model(id)
+            with h5pyFile(Epoch.FILE.get_active_model_path(id, "keras_regression"), mode="r") as model_file:
                 self.id: str = model_file.attrs["id"]
                 self.description: str = model_file.attrs["description"]
                 self.autoregressive: bool = bool(model_file.attrs["autoregressive"]) # Downcast to bool

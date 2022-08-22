@@ -1,3 +1,4 @@
+from modules._types.utils_types import *
 from modules._types.candlestick_types import *
 from modules._types.database_types import *
 from modules._types.process_early_stopping_types import *

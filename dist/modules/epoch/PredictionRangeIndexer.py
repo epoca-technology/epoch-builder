@@ -1,8 +1,8 @@
 from typing import List
 from tqdm import tqdm
 from modules._types import IPredictionRangeIndexer
+from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
-from modules.epoch.EpochFile import EpochFile
 
 
 
@@ -42,4 +42,4 @@ def create_indexer(lookbacks: List[int], progress_bar_description: str) -> None:
             progress_bar.update()
 
     # Finally, save the indexer
-    EpochFile.write(Candlestick.PREDICTION_RANGE_INDEXER_PATH, indexer)
+    Utils.write(Candlestick.PREDICTION_RANGE_INDEXER_PATH, indexer)

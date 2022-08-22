@@ -10,17 +10,16 @@ from modules._types.position_types import IPositionPerformance
 # file system level. Eventhough the type appears strict, the system should be able to
 # handle any string as an ID.
 IBacktestID = Literal[
-    # Unit Test
+    # Unit Test Models
     "unit_test",
 
-    # Keras Classification Backtests
-    "keras_classification",
+    # KerasClassificationModels & XGBClassificationModels
+    "classifications",
 
-    # XGBoost Classification Backtests
-    "xgb_classification",
-
-    # Final Shortlist - Includes best classification and consensus models
-    "final"
+    # ConsensusModels
+    "consensus_2_2",
+    "consensus_2_3",
+    "consensus_3_3"
 ]
 
 

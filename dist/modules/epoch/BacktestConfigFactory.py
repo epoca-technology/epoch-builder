@@ -1,5 +1,6 @@
 from typing import List
 from modules._types import IBacktestConfig, IModel, IBacktestID
+from modules.utils.Utils import Utils
 from modules.epoch.EpochFile import EpochFile
 
 
@@ -60,7 +61,7 @@ class BacktestConfigFactory:
         path: str = f"{epoch_id}/{EpochFile.BACKTEST_PATH['configurations']}/{config['id']}.json"
 
         # Finally, save the file
-        EpochFile.write(path, config, indent=4)
+        Utils.write(path, config, indent=4)
 
 
 

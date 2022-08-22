@@ -6,6 +6,7 @@ from math import ceil
 from pandas import DataFrame
 from modules._types import IEpochConfig, IEpochDefaults
 from modules.utils.Utils import Utils
+from modules.configuration.Configuration import Configuration
 from modules.database.Database import Database
 from modules.candlestick.Candlestick import Candlestick
 from modules.epoch.EpochFile import EpochFile
@@ -68,6 +69,8 @@ class Epoch:
             The number of minutes a model must remain idle once a position is closed.
         CLASSIFICATION_TRAINING_DATA_ID_UT: Union[str, None]
             The ID of the training data that will be used in the unit tests.
+        CLASSIFICATION_TRAINING_DATA_ID: Union[str, None]
+            The identifier of the selected classification training data
     """
     # Initialization State
     INITIALIZED: bool = False
@@ -121,6 +124,9 @@ class Epoch:
 
     # The identifier of the classification training data for unit tests
     CLASSIFICATION_TRAINING_DATA_ID_UT: Union[str, None] = None
+
+    # The identifier of the selected classification training data
+    CLASSIFICATION_TRAINING_DATA_ID: Union[str, None] = None
 
     # EpochFile Instance
     FILE: EpochFile
@@ -219,7 +225,7 @@ class Epoch:
         Candlestick.init(max(lookbacks), start=start, end=end)
 
         # Check if the candlesticks' prediction range need to be indexed
-        if EpochFile.file_exists(Candlestick.PREDICTION_RANGE_INDEXER_PATH):
+        if Utils.file_exists(Candlestick.PREDICTION_RANGE_INDEXER_PATH):
             print("4/10) Creating Prediction Range Indexer: Skipped")
         else:
             create_indexer(lookbacks, "4/10) Creating Prediction Range Indexer")
@@ -251,7 +257,7 @@ class Epoch:
             "model_discovery_steps": model_discovery_steps,
             "idle_minutes_on_position_close": idle_minutes_on_position_close
         }
-        EpochFile.update_epoch_config(epoch_config)
+        Configuration.update_epoch_config(epoch_config)
 
         # Add the Epoch's Directory to the gitignore file
         print("8/10) Adding Epoch to .gitignore file...")
@@ -345,19 +351,19 @@ class Epoch:
             raise ValueError(f"The provided idle_minutes_on_position_close is invalid {idle_minutes_on_position_close}. It must be an int ranging 0-1000")
 
         # Retrieve the current epoch (if any)
-        current_config: Union[IEpochConfig, None] = EpochFile.get_epoch_config(allow_empty=True)
+        current_config: Union[IEpochConfig, None] = Configuration.get_epoch_config(allow_empty=True)
 
         # Make sure the previous epoch is no longer in the project
-        if current_config is not None and EpochFile.directory_exists(current_config["id"]):
+        if current_config is not None and Utils.directory_exists(current_config["id"]):
             raise RuntimeError(f"Cannot create a new epoch because the previous one is still in the root directory: {current_config['id']}")
 
         # Make sure the new epoch doesn't already exist
-        if EpochFile.directory_exists(id):
+        if Utils.directory_exists(id):
             raise RuntimeError(f"The epoch directory {id} already exists.")
 
         # Make sure the candlestick bundle exists
-        if not EpochFile.file_exists(Candlestick.DEFAULT_CANDLESTICK_CONFIG["csv_file"]) or\
-            not EpochFile.file_exists(Candlestick.PREDICTION_CANDLESTICK_CONFIG["csv_file"]):
+        if not Utils.file_exists(Candlestick.DEFAULT_CANDLESTICK_CONFIG["csv_file"]) or\
+            not Utils.file_exists(Candlestick.PREDICTION_CANDLESTICK_CONFIG["csv_file"]):
             raise RuntimeError(f"The candlestick bundle must exist for an Epoch to be created.")
 
 
@@ -453,13 +459,13 @@ class Epoch:
         path: str = "./.gitignore"
 
         # Init the file
-        gitignore: str = EpochFile.read(path)
+        gitignore: str = Utils.read(path)
 
         # Append the new Epoch
         gitignore += f"\n{epoch_id}"
 
         # Save the file
-        EpochFile.write(path, gitignore)
+        Utils.write(path, gitignore)
 
 
 
@@ -505,7 +511,7 @@ class Epoch:
         receipt += f"End: {Utils.from_milliseconds_to_date_string(config['backtest_end'])}"
 
         # Finally, save the receipt
-        EpochFile.write(f"{config['id']}/{config['id']}_receipt.txt", receipt)
+        Utils.write(f"{config['id']}/{config['id']}_receipt.txt", receipt)
 
 
 
@@ -530,10 +536,10 @@ class Epoch:
             raise RuntimeError("The Epoch can only be initialized once.")
 
         # Load the configuration file
-        config: IEpochConfig = EpochFile.get_epoch_config()
+        config: IEpochConfig = Configuration.get_epoch_config()
 
         # Make sure the Epoch's directory also exists
-        if not EpochFile.directory_exists(config["id"]):
+        if not Utils.directory_exists(config["id"]):
             raise RuntimeError(f"The Epochs directory does not exist {config['id']}.")
 
         # Populate epoch properties
@@ -553,6 +559,7 @@ class Epoch:
         Epoch.MODEL_DISCOVERY_STEPS = config["model_discovery_steps"]
         Epoch.IDLE_MINUTES_ON_POSITION_CLOSE = config["idle_minutes_on_position_close"]
         Epoch.CLASSIFICATION_TRAINING_DATA_ID_UT = config.get("classification_training_data_id_ut")
+        Epoch.CLASSIFICATION_TRAINING_DATA_ID = config.get("classification_training_data_id")
 
         # Set a static seed on all required libraries
         seed(Epoch.SEED)
@@ -574,7 +581,7 @@ class Epoch:
 
 
 
-    ## Classification Training Data Unit Test ##
+    ## Classification Training Data ##
 
 
 
@@ -588,16 +595,51 @@ class Epoch:
                 The identifier of the training data.
         """
         # Retrieve the current configuration
-        config: IEpochConfig = EpochFile.get_epoch_config()
+        config: IEpochConfig = Configuration.get_epoch_config()
 
         # Set the id
         config["classification_training_data_id_ut"] = id
 
         # Update the file
-        EpochFile.update_epoch_config(config)
+        Configuration.update_epoch_config(config)
 
 
 
+
+
+
+
+    @staticmethod
+    def set_classification_training_data_id(id: str) -> None:
+        """Updates the Epoch's Configuration File and sets the selected
+        classification training data id.
+
+        Args:
+            id: str
+                The identifier of the training data.
+
+        Raises:
+            RuntimeError:
+                If the classification training data id for unit tests has not been set.
+                If the provided id is equals as the one for unit tests.
+        """
+        # Retrieve the current configuration
+        config: IEpochConfig = Configuration.get_epoch_config()
+
+        # Make sure the training data for unit tests has already been set
+        unit_test_id: Union[str, None] = config.get("classification_training_data_id_ut")
+        if not isinstance(unit_test_id, str):
+            raise RuntimeError("The classification training data id for unit tests must be set prior to setting the selected id.")
+
+        # Make sure it is not the same as the unit test id
+        if id == unit_test_id:
+            raise RuntimeError("The selected classification training data id cannot be the same one as the unit test.")
+
+        # Set the id
+        config["classification_training_data"] = id
+
+        # Update the file
+        Configuration.update_epoch_config(config)
 
 
 
@@ -628,7 +670,7 @@ class Epoch:
                 ...
         """
         # Retrieve the Epoch
-        config: IEpochConfig = EpochFile.get_epoch_config()
+        config: IEpochConfig = Configuration.get_epoch_config()
 
         # Make sure the epoch can be exported
         Epoch._can_epoch_be_exported(config)
@@ -652,17 +694,22 @@ class Epoch:
         Raises:
             RuntimeError:
                 If the class training data for unit tests has not been set
-                If the take profit or the stop loss has not been set
+                If a classification training data has not been selected
                 If the epoch's directory does not exist.
                 ...
         """
-        # Make sure the values that are meant to be set overtime have all been populated
-        ut_class_training_data_id: int = config.get("ut_class_training_data_id")
-        if not isinstance(ut_class_training_data_id, str):
+        # Make sure classification training data id for unit tests has been set
+        classification_training_data_id_ut: Union[str, None] = config.get("classification_training_data_id_ut")
+        if not isinstance(classification_training_data_id_ut, str):
             raise RuntimeError("The Classification Training Data for Unit Tests has not been set.")
 
+        # Make sure classification training data id has been selected
+        classification_training_data_id: Union[str, None] = config.get("classification_training_data_id")
+        if not isinstance(classification_training_data_id, str):
+            raise RuntimeError("A Classification Training Data ID has not been selected.")
+
         # Make sure the epoch's directory exists
-        if not EpochFile.directory_exists(config["id"]):
-            raise RuntimeError("The Epoch directory does not exist.")
+        if not Utils.directory_exists(config["id"]):
+            raise RuntimeError(f"The Epoch directory {config['id']} does not exist.")
 
         # @TODO
