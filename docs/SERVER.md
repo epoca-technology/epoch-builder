@@ -104,6 +104,8 @@ Install it with:
 
 Verify the installation:
 
+`sudo apt-get install cuda-drivers-470`
+
 `nvcc --version`
 
 
