@@ -113,12 +113,12 @@ class UtilsTestCase(TestCase):
 
     # Can convert a Date String into a ms timestamp
     def testFromDateStringToMilliSeconds(self):
-        self.assertEqual(Utils.from_date_string_to_milliseconds('1/1/2022'), 1641009600000)
-        self.assertEqual(Utils.from_date_string_to_milliseconds('25/04/2019'), 1556164800000)
-        self.assertEqual(Utils.from_date_string_to_milliseconds('18/09/2017'), 1505707200000)
-        self.assertEqual(Utils.from_date_string_to_milliseconds('3/12/2017'), 1512273600000)
-        self.assertEqual(Utils.from_date_string_to_milliseconds('19/07/1990'), 648360000000)
-        self.assertEqual(Utils.from_date_string_to_milliseconds('7/5/1992'), 705211200000)
+        self.assertAlmostEqual(Utils.from_date_string_to_milliseconds('1/1/2022'), 1641009600000, delta=14400000)
+        self.assertAlmostEqual(Utils.from_date_string_to_milliseconds('25/04/2019'), 1556164800000, delta=14400000)
+        self.assertAlmostEqual(Utils.from_date_string_to_milliseconds('18/09/2017'), 1505707200000, delta=14400000)
+        self.assertAlmostEqual(Utils.from_date_string_to_milliseconds('3/12/2017'), 1512273600000, delta=14400000)
+        self.assertAlmostEqual(Utils.from_date_string_to_milliseconds('19/07/1990'), 648360000000, delta=14400000)
+        self.assertAlmostEqual(Utils.from_date_string_to_milliseconds('7/5/1992'), 705211200000, delta=14400000)
 
 
 

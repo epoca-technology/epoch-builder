@@ -1,12 +1,12 @@
 from typing import List, Dict, Union
 from subprocess import Popen
 from inquirer import List as InquirerList, Text, prompt
-from tensorflow import config
+import tensorflow as tf
 from modules.utils.Utils import Utils
 from modules.configuration.Configuration import Configuration
 
 # Welcome
-gpus_available: int = len(config.list_physical_devices("GPU"))
+gpus_available: int = len(tf.config.list_physical_devices("GPU"))
 Utils.clear_terminal()
 if gpus_available > 0:
     print(f"ACCELERATED EPOCH BUILDER\n")

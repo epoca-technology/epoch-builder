@@ -262,8 +262,18 @@ class EpochFile:
         # Retrieve all the config files within the category
         _, files = Utils.get_directory_content(f"{self.get_hyperparams_dir_path(model_type)}/{category}", only_file_ext=".json")
 
+        # Create the files with order list
+        def _get_order(file_name: str) -> int:
+            try:
+                return int(file_name.split("_")[-2])
+            except Exception as e:
+                print(e)
+                return 0
+        files_with_order: List[str] = [{ "name": f, "order": _get_order(f)} for f in files]
+        files_with_order = sorted(files_with_order, key=lambda d: d["order"]) 
+
         # Finally, return the file names
-        return files
+        return [file["name"] for file in files_with_order]
 
 
 
@@ -644,7 +654,7 @@ class EpochFile:
 
         Returns: bool
         """
-        return Utils.file_exists(self.get_active_model_dir_path(model_id))
+        return Utils.directory_exists(self.get_active_model_dir_path(model_id))
 
 
 

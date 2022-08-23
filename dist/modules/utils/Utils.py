@@ -533,7 +533,7 @@ class Utils:
             files = list(filter(lambda x: only_file_ext in x, files))
 
         # Finally, return the contents
-        return directories, files
+        return sorted(directories), sorted(files)
 
 
 

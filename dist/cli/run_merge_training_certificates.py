@@ -1,12 +1,12 @@
 from typing import List, Dict, Union
 from copy import deepcopy
 from inquirer import List as InquirerList, prompt
-from dist.modules.utils.Utils import Utils
 from modules._types import IKerasRegressionTrainingCertificate, IKerasClassificationTrainingCertificate, \
     ITrainableModelType, IKerasRegressionTrainingBatch, IKerasClassificationTrainingBatch,\
         IKerasRegressionTrainingConfig, IKerasClassificationTrainingConfig, IXGBRegressionTrainingCertificate,\
             IXGBClassificationTrainingCertificate, IXGBRegressionTrainingBatch, IXGBClassificationTrainingBatch,\
                 IXGBRegressionTrainingConfig, IXGBClassificationTrainingConfig, IHyperparamsCategory
+from modules.utils.Utils import Utils
 from modules.configuration.Configuration import Configuration
 from modules.epoch.Epoch import Epoch
 from modules.model.ModelType import TRAINABLE_MODEL_TYPES

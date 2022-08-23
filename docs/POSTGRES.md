@@ -46,6 +46,17 @@ Setup the password on the postgres user through PSQL:
 
 
 
+# Database Port
+
+Configure the port that Postgres will use with:
+
+`sudo vi /etc/postgresql/14/main/postgresql.conf`
+
+Make the changes and save it by typing `:wq` followed by pressing `Enter`.
+
+Finally, stop and start the Postgres Service
+
+
 
 #
 # Local Network
@@ -54,7 +65,13 @@ For the hosts to be able to communicate with the Postgres Server, a few configur
 
 - Firstly, edit the **postgresql.conf** file and set **listen_addresses** to *
 
+`sudo vi /etc/postgresql/14/main/postgresql.conf`
+
+
 - Finally, edit the file **pg_hba.conf** and insert the following entry:
+
+`sudo vi /etc/postgresql/14/main/pg_hba.conf`
+
 
 `host    postgres        postgres          192.168.2.0/24          md5`
 
