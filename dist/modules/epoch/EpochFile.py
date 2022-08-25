@@ -111,7 +111,6 @@ class EpochFile:
     BACKTEST_PATH: IBacktestAssetsPath = {
         "assets":                                   "backtest_assets",
         "configurations":                           "backtest_assets/configurations",
-        "regression_selection":                     "backtest_assets/regression_selection",
         "results":                                  "backtest_assets/results"
     }
 
@@ -122,6 +121,7 @@ class EpochFile:
         "classification_training_data":             "model_assets/classification_training_data",
         "models":                                   "model_assets/models",
         "models_bank":                              "model_assets/models_bank",
+        "regression_selection":                     "model_assets/regression_selection",
         "keras_classification_training_configs":    "model_assets/keras_classification_training_configs",
         "keras_regression_training_configs":        "model_assets/keras_regression_training_configs",
         "xgb_classification_training_configs":      "model_assets/xgb_classification_training_configs",
@@ -1006,7 +1006,7 @@ class EpochFile:
                 The selection to be stored
         """
         # Init the path
-        path: str = self.p(f"{EpochFile.BACKTEST_PATH['regression_selection']}/{file['id']}.json")
+        path: str = self.p(f"{EpochFile.MODEL_PATH['regression_selection']}/{file['id']}.json")
 
         # Save the file
         Utils.write(path, file)
@@ -1024,7 +1024,7 @@ class EpochFile:
         """
         # Retrieve the directory contents
         _, files = Utils.get_directory_content(
-            path=self.p(EpochFile.BACKTEST_PATH["regression_selection"]), 
+            path=self.p(EpochFile.MODEL_PATH["regression_selection"]), 
             only_file_ext=".json"
         )
 
@@ -1049,7 +1049,7 @@ class EpochFile:
             RuntimeError:
                 If the regression selection file does not exist.
         """
-        return Utils.read(self.p(f"{EpochFile.BACKTEST_PATH['regression_selection']}/{id}.json"))
+        return Utils.read(self.p(f"{EpochFile.MODEL_PATH['regression_selection']}/{id}.json"))
 
 
 

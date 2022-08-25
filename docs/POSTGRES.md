@@ -39,7 +39,7 @@ Stop Service: `sudo service postgresql stop`
 
 Setup the password on the postgres user through PSQL: 
 
-`ALTER USER postgres WITH PASSWORD 'SOME_PASSWORD';`
+`ALTER USER postgres WITH PASSWORD 'oPyjNQqeP8LewFFELIA2BuwoTi8RkYDLaAvhyvWT';`
 
 *Important: The password specified above will be the one used for dev. The production machine has a different password.
 
@@ -48,7 +48,7 @@ Setup the password on the postgres user through PSQL:
 
 # Database Port
 
-Configure the port that Postgres will use with:
+Configure the port **(5442)** that Postgres will use with:
 
 `sudo vi /etc/postgresql/14/main/postgresql.conf`
 
@@ -63,7 +63,7 @@ Finally, stop and start the Postgres Service
 
 For the hosts to be able to communicate with the Postgres Server, a few configurations must be modified.
 
-- Firstly, edit the **postgresql.conf** file and set **listen_addresses** to *
+- Firstly, edit the **postgresql.conf** file and set **listen_addresses** to '*'
 
 `sudo vi /etc/postgresql/14/main/postgresql.conf`
 
@@ -110,7 +110,7 @@ Install for both desktop and web modes: `sudo apt install pgadmin4`
 Install for desktop mode only: `sudo apt install pgadmin4-desktop`
 
 
-Install for web mode only: `sudo apt install pgadmin4-web `
+Install for web mode only: `sudo apt install pgadmin4-web`
 
 
 Configure the webserver, if you installed pgadmin4-web: `sudo /usr/pgadmin4/bin/setup-web.sh`

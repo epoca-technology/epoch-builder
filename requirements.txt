@@ -4,7 +4,6 @@ tqdm==4.64.0
 tensorflow==2.8.0
 pyyaml==6.0
 h5py==3.6.0
-inquirer==2.9.2
 psycopg2-binary==2.9.3
 ta==0.10.1
 protobuf==3.20.*

@@ -6,6 +6,7 @@ from json import load, dumps
 from time import time
 from datetime import datetime
 from uuid import UUID, uuid4
+from tensorflow import config
 from modules._types import IFileExtension
 
 
@@ -709,7 +710,31 @@ class Utils:
 
 
     @staticmethod
-    def clear_terminal() -> None:
-        """Clears the system's terminal.
+    def endpoint_header(eb_version: str, endpoint_name: str) -> None:
+        """Prints an endpoint's header.
+
+        Args:
+            eb_version: str
+                The version of the epoch builder.
+            endpoint_name: str
+                The name of the endpoint being executed.
         """
-        system("cls" if os_name == "nt" else "clear")
+        # Init the title based on the type of execution
+        title: str = f"ACCELERATED EPOCH BUILDER v{eb_version}" if len(config.list_physical_devices("GPU")) > 0 \
+            else f"EPOCH BUILDER v{eb_version}"
+
+        # Finally, print it with the endpoint name
+        print(f"{title}: {endpoint_name}\n")
+
+
+
+
+    @staticmethod
+    def endpoint_footer(endpoint_name: str) -> None:
+        """Prints an endpoint's footer.
+
+        Args:
+            endpoint_name: str
+                The name of the endpoint being executed.
+        """
+        print(f"\n\n{endpoint_name} COMPLETED\n")

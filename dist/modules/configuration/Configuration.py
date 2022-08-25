@@ -1,11 +1,14 @@
-from typing import Union
+from typing import Union, Dict, Any
 from modules._types import IEpochConfig
 from modules.utils.Utils import Utils
 
 
+# package.json file
+package_file: Dict[str, Any] = Utils.read("package.json")
 
 
 
+# Class
 class Configuration:
     """Configuration Class
 
@@ -21,6 +24,8 @@ class Configuration:
     DB_HOST_IP_PATH: str = f"{DIR_PATH}/db_host_ip.txt"
     EPOCH_PATH: str = f"{DIR_PATH}/epoch.json"
 
+    # Version
+    VERSION: str = package_file["version"]
 
 
 

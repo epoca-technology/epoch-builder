@@ -1,4 +1,4 @@
-# EPOCH BUILDER v0.2.0
+# EPOCH BUILDER
 
 The Epoch Builder is a cluster of machines designed to train and evaluate many Prediction Models. It also outputs an Epoch File that can be installed in Epoca's Platform.
 
@@ -10,11 +10,22 @@ The Epoch Builder is a cluster of machines designed to train and evaluate many P
 
 - Pip: v20.0.2
 
-- [PostgreSQL: v14.3](./docs/POSTGRES.md) (On the Plutus Tester Server)
+- [PostgreSQL: v14.3](./docs/POSTGRES.md) (On the Epoca Worker Master)
 
 The dependencies are located in the **requirements.txt** file and can be installed with:
 
 `pip3 install -r requirements.txt`
+
+
+### Launcher Requirements
+
+- NodeJS: v16.14.0
+
+- NPM: 8.3.1
+
+The dependencies in the **package.json** file can be installed with:
+
+`npm install`
 
 
 #

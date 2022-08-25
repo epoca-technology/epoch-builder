@@ -10,11 +10,21 @@ Generate the SSH Keypair with `ssh-keygen`.
 
 Install the SSH Public Key on the server:
 
-`ssh-copy-id -i $HOME/.ssh/eb_id_rsa.pub epoca-worker-01@192.168.1.237`
+`ssh-copy-id -i $HOME/.ssh/eb_id_rsa.pub epoca-worker-01@192.168.1.236`
 
 Connect to the server:
 
-`ssh 'epoca-worker-01@192.168.1.237'`
+`ssh 'epoca-worker-01@192.168.1.236'`
+
+Fix SSH Permission issues with:
+
+`chmod 700 ~/.ssh`
+
+`chmod 600 ~/.ssh/*`
+
+`ssh-add`
+
+`ssh-add -l`
 
 
 #
@@ -22,11 +32,11 @@ Connect to the server:
 
 Transfer Files
 
-`scp ./epoch-builder/requirements.txt epoca-worker-01@192.168.1.237:epoch-builder/requirements.txt`
+`scp ./epoch-builder/requirements.txt epoca-worker-01@192.168.1.236:epoch-builder/requirements.txt`
 
 Transfer Directories
 
-`scp -r ./epoch-builder epoca-worker-01@192.168.1.237:epoch-builder`
+`scp -r ./epoch-builder epoca-worker-01@192.168.1.236:epoch-builder`
 
 
 #
@@ -44,15 +54,28 @@ To remove an entire directory in the server use:
 `landscape-sysinfo`
 
 
-## Sensors
 
-`sudo apt-get install lm-sensors`
 
-`sudo sensors-detect`
 
-Displaying Sensors:
+#
+# Environment Variable
 
-`sensors`
+Edit the .profile file:
+
+`sudo vi ~/.profile`
+
+Add the $PYTHONPATH Variable:
+
+`export PYTHONPATH=/home/epoca-worker-01/epoch-builder/dist`
+
+Refresh the file and test it:
+
+`source ~/.profile`
+
+`$PYTHONPATH`
+
+
+
 
 
 
@@ -82,7 +105,7 @@ Download the pin and place it in the correct directory:
 
 Grab the installer from Epoca's Drive with:
 
-`scp ./cuda-repo-ubuntu2004-11-7-local_11.7.1-515.65.01-1_amd64.deb  epoca-worker-01@192.168.1.237:cuda-repo-ubuntu2004-11-7-local_11.7.1-515.65.01-1_amd64.deb`
+`scp ./cuda-repo-ubuntu2004-11-7-local_11.7.1-515.65.01-1_amd64.deb  epoca-worker-01@192.168.1.236:cuda-repo-ubuntu2004-11-7-local_11.7.1-515.65.01-1_amd64.deb`
 
 Install it with:
 
@@ -113,7 +136,7 @@ Verify the installation:
 
 Grab the installer from Epoca's Drive with:
 
-`scp ./cudnn-local-repo-ubuntu2004-8.5.0.96_1.0-1_amd64.deb  epoca-worker-01@192.168.1.237:cudnn-local-repo-ubuntu2004-8.5.0.96_1.0-1_amd64.deb`
+`scp ./cudnn-local-repo-ubuntu2004-8.5.0.96_1.0-1_amd64.deb  epoca-worker-01@192.168.1.236:cudnn-local-repo-ubuntu2004-8.5.0.96_1.0-1_amd64.deb`
 
 Install it with:
 

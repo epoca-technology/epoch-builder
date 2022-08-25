@@ -1,7 +1,13 @@
 from typing import Dict
 from modules.configuration.Configuration import Configuration
 from inquirer import Text, prompt
+from argparse import ArgumentParser
 
+parser = ArgumentParser()
+parser.add_argument("--file", dest="file", nargs='?')
+
+args = parser.parse_args()
+print(args.file)
 
 
 # Welcome

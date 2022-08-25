@@ -10,8 +10,12 @@ from modules.backtest.Backtest import Backtest
 Epoch.init()
 
 
-## WELCOME ##
+
+# BACKTEST
+# Args:
+#   --config_file_name "unit_test.json"
 print("BACKTEST\n")
+
 
 
 # BACKTEST CONFIGURATION
