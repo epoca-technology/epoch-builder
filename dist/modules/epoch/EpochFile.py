@@ -1,5 +1,5 @@
 from typing import List, Union
-from modules._types import IBacktestAssetsPath, IModelAssetsPath, IBacktestConfig, IKerasRegressionTrainingBatch, \
+from modules._types import IEpochAssetsPath, IBacktestConfig, IKerasRegressionTrainingBatch, \
     IKerasClassificationTrainingBatch, IBacktestResult, ITrainingDataFile, IKerasClassificationTrainingCertificate, \
         IKerasRegressionTrainingCertificate, ITrainableModelType, ITrainableModelExtension, IBacktestID, \
             IRegressionSelectionFile, IXGBClassificationTrainingBatch, IXGBRegressionTrainingBatch, \
@@ -47,10 +47,8 @@ class EpochFile:
     as some processes cannot initialize the Epoch Module.
 
     Class Properties:
-        BACKTEST_PATH: IBacktestAssetsPath
-            The paths for all the directories within the backtest_assets directory.
-        MODEL_PATH: IModelAssetsPath
-            The paths for all the directories within the model_assets directory.
+        EPOCH_PATH: IEpochAssetsPath
+            The paths for all the directories within the epoch's directory.
 
     Instance Properties:
         epoch_id: str
@@ -107,25 +105,19 @@ class EpochFile:
     Epoch Directories:
         create_epoch_directories(epoch_id: str) -> None
     """
-    # Backtest Files' Paths
-    BACKTEST_PATH: IBacktestAssetsPath = {
-        "assets":                                   "backtest_assets",
-        "configurations":                           "backtest_assets/configurations",
-        "results":                                  "backtest_assets/results"
-    }
-
-    # Model Files' Paths
-    MODEL_PATH: IModelAssetsPath = {
-        "assets":                                   "model_assets",
-        "batched_training_certificates":            "model_assets/batched_training_certificates",
-        "classification_training_data":             "model_assets/classification_training_data",
-        "models":                                   "model_assets/models",
-        "models_bank":                              "model_assets/models_bank",
-        "regression_selection":                     "model_assets/regression_selection",
-        "keras_classification_training_configs":    "model_assets/keras_classification_training_configs",
-        "keras_regression_training_configs":        "model_assets/keras_regression_training_configs",
-        "xgb_classification_training_configs":      "model_assets/xgb_classification_training_configs",
-        "xgb_regression_training_configs":          "model_assets/xgb_regression_training_configs",
+    # Epoch Files' Paths
+    EPOCH_PATH: IEpochAssetsPath = {
+        "backtest_configurations":                  "backtest_configurations",
+        "backtest_results":                         "backtest_results",
+        "batched_training_certificates":            "batched_training_certificates",
+        "classification_training_data":             "classification_training_data",
+        "models":                                   "models",
+        "models_bank":                              "models_bank",
+        "regression_selection":                     "regression_selection",
+        "keras_classification_training_configs":    "keras_classification_training_configs",
+        "keras_regression_training_configs":        "keras_regression_training_configs",
+        "xgb_classification_training_configs":      "xgb_classification_training_configs",
+        "xgb_regression_training_configs":          "xgb_regression_training_configs"
     }
 
 
@@ -325,19 +317,19 @@ class EpochFile:
         """
         # Check if it is a Keras Regression
         if model_type == "keras_regression":
-            return self.p(EpochFile.MODEL_PATH["keras_regression_training_configs"])
+            return self.p(EpochFile.EPOCH_PATH["keras_regression_training_configs"])
 
         # Check if it is a Keras Classification
         elif model_type == "keras_classification":
-            return self.p(EpochFile.MODEL_PATH["keras_classification_training_configs"])
+            return self.p(EpochFile.EPOCH_PATH["keras_classification_training_configs"])
 
         # Check if it is an XGB Regression
         elif model_type == "xgb_regression":
-            return self.p(EpochFile.MODEL_PATH["xgb_regression_training_configs"])
+            return self.p(EpochFile.EPOCH_PATH["xgb_regression_training_configs"])
 
         # Check if it is an XGB Classification
         elif model_type == "xgb_classification":
-            return self.p(EpochFile.MODEL_PATH["xgb_classification_training_configs"])
+            return self.p(EpochFile.EPOCH_PATH["xgb_classification_training_configs"])
         
         # Otherwise, raise an error
         else:
@@ -400,7 +392,7 @@ class EpochFile:
                 The certificates built on training completion.
         """
         # Init the path
-        path: str = self.p(EpochFile.MODEL_PATH["batched_training_certificates"])
+        path: str = self.p(EpochFile.EPOCH_PATH["batched_training_certificates"])
 
         # If it is a unit test, save the file in the unit test directory
         if "UNIT_TEST" in batch_name:
@@ -510,7 +502,7 @@ class EpochFile:
         Returns:
             str
         """
-        return self.p(f"{EpochFile.MODEL_PATH['models']}/{model_id}")
+        return self.p(f"{EpochFile.EPOCH_PATH['models']}/{model_id}")
 
 
 
@@ -600,7 +592,7 @@ class EpochFile:
             List[str]
         """
         # Retrieve the directory contents
-        directories, _ = Utils.get_directory_content(self.p(EpochFile.MODEL_PATH["models"]))
+        directories, _ = Utils.get_directory_content(self.p(EpochFile.EPOCH_PATH["models"]))
 
         # Filter the directories and add only the ones related to the provided model type.
         model_ids: List[str] = list(filter(lambda x: get_trainable_model_type(x) == model_type, directories))
@@ -709,7 +701,7 @@ class EpochFile:
         Returns:
             str
         """
-        return self.p(f"{EpochFile.MODEL_PATH['models_bank']}/{model_type}/{model_id}")
+        return self.p(f"{EpochFile.EPOCH_PATH['models_bank']}/{model_type}/{model_id}")
 
 
 
@@ -799,7 +791,7 @@ class EpochFile:
             RuntimeError:
                 If the training data file does not exist.
         """
-        return Utils.read(self.p(f"{EpochFile.MODEL_PATH['classification_training_data']}/{id}.json"))
+        return Utils.read(self.p(f"{EpochFile.EPOCH_PATH['classification_training_data']}/{id}.json"))
 
 
 
@@ -815,7 +807,7 @@ class EpochFile:
         """
         # Retrieve the directory contents
         _, files = Utils.get_directory_content(
-            path=self.p(EpochFile.MODEL_PATH["classification_training_data"]), 
+            path=self.p(EpochFile.EPOCH_PATH["classification_training_data"]), 
             only_file_ext=".json"
         )
 
@@ -838,7 +830,7 @@ class EpochFile:
                 The training data file data.
         """
         # Init the path
-        path: str = self.p(f"{EpochFile.MODEL_PATH['classification_training_data']}/{training_data['id']}.json")
+        path: str = self.p(f"{EpochFile.EPOCH_PATH['classification_training_data']}/{training_data['id']}.json")
 
         # Save the file
         Utils.write(path, training_data)
@@ -879,7 +871,7 @@ class EpochFile:
         """
         # Retrieve the directory contents
         _, files = Utils.get_directory_content(
-            path=self.p(EpochFile.BACKTEST_PATH["configurations"]), 
+            path=self.p(EpochFile.EPOCH_PATH["configurations"]), 
             only_file_ext=".json"
         )
 
@@ -904,7 +896,7 @@ class EpochFile:
             RuntimeError:
                 If the backtest config file does not exist.
         """
-        return Utils.read(f"{EpochFile.BACKTEST_PATH['configurations']}/{file_name}")
+        return Utils.read(f"{EpochFile.EPOCH_PATH['backtest_configurations']}/{file_name}")
 
 
 
@@ -918,7 +910,7 @@ class EpochFile:
                 The configuration to save.
         """
         # Init values
-        path: str = self.p(f"{EpochFile.BACKTEST_PATH['configurations']}/{config['id']}.json")
+        path: str = self.p(f"{EpochFile.EPOCH_PATH['backtest_configurations']}/{config['id']}.json")
 
         # Save the results
         Utils.write(path, config)
@@ -941,7 +933,7 @@ class EpochFile:
             RuntimeError:
                 If the backtest result file does not exist.
         """
-        return Utils.read(f"{EpochFile.BACKTEST_PATH['results']}/{backtest_id}.json")
+        return Utils.read(f"{EpochFile.EPOCH_PATH['backtest_results']}/{backtest_id}.json")
 
 
 
@@ -968,7 +960,7 @@ class EpochFile:
             raise ValueError("Cannot save the backtest results because the provided list is empty.")
 
         # Init values
-        path: str = self.p(f"{EpochFile.BACKTEST_PATH['results']}/{results[0]['backtest']['id']}.json")
+        path: str = self.p(f"{EpochFile.EPOCH_PATH['backtest_results']}/{results[0]['backtest']['id']}.json")
 
         # Save the results
         Utils.write(path, results)
@@ -1006,7 +998,7 @@ class EpochFile:
                 The selection to be stored
         """
         # Init the path
-        path: str = self.p(f"{EpochFile.MODEL_PATH['regression_selection']}/{file['id']}.json")
+        path: str = self.p(f"{EpochFile.EPOCH_PATH['regression_selection']}/{file['id']}.json")
 
         # Save the file
         Utils.write(path, file)
@@ -1024,7 +1016,7 @@ class EpochFile:
         """
         # Retrieve the directory contents
         _, files = Utils.get_directory_content(
-            path=self.p(EpochFile.MODEL_PATH["regression_selection"]), 
+            path=self.p(EpochFile.EPOCH_PATH["regression_selection"]), 
             only_file_ext=".json"
         )
 
@@ -1049,7 +1041,7 @@ class EpochFile:
             RuntimeError:
                 If the regression selection file does not exist.
         """
-        return Utils.read(self.p(f"{EpochFile.MODEL_PATH['regression_selection']}/{id}.json"))
+        return Utils.read(self.p(f"{EpochFile.EPOCH_PATH['regression_selection']}/{id}.json"))
 
 
 
@@ -1124,23 +1116,18 @@ class EpochFile:
             epoch_id: str
                 The identifier of the epoch.
         """
-        # Create all the backtest asset directories
-        Utils.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['assets']}")
-        Utils.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['configurations']}")
-        Utils.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['regression_selection']}")
-        Utils.make_directory(f"{epoch_id}/{EpochFile.BACKTEST_PATH['results']}")
-
-        # Create all the model asset directories
-        Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['assets']}")
-        Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['batched_training_certificates']}")
-        Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['batched_training_certificates']}/unit_tests")
-        Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['classification_training_data']}")
-        Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['models']}")
-        Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['models_bank']}")
-        Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['keras_classification_training_configs']}")
-        Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['keras_regression_training_configs']}")
-        Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['xgb_classification_training_configs']}")
-        Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['xgb_regression_training_configs']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['backtest_configurations']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['backtest_results']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['batched_training_certificates']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['batched_training_certificates']}/unit_tests")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['classification_training_data']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['models']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['models_bank']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['regression_selection']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['keras_classification_training_configs']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['keras_regression_training_configs']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['xgb_classification_training_configs']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['xgb_regression_training_configs']}")
         for trainable_model in TRAINABLE_MODEL_TYPES:
-            Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['batched_training_certificates']}/{trainable_model}")
-            Utils.make_directory(f"{epoch_id}/{EpochFile.MODEL_PATH['models_bank']}/{trainable_model}")
+            Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['batched_training_certificates']}/{trainable_model}")
+            Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['models_bank']}/{trainable_model}")

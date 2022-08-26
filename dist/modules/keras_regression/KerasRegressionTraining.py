@@ -269,17 +269,17 @@ class KerasRegressionTraining:
         Returns:
             int
         """
-        #if "DNN" in self.id:
-        #    return 128
-        #elif "CNN" in self.id:
-        #    return 512
-        #elif "LSTM" in self.id:
-        #    return 512
-        #elif "CLSTM" in self.id:
-        #    return 512
-        #else:
-        #    return KerasRegressionTraining.TRAINING_CONFIG["batch_size"]
-        return KerasRegressionTraining.TRAINING_CONFIG["batch_size"]
+        if "DNN" in self.id:
+            return 16
+        elif "CNN" in self.id:
+            return 64
+        elif "LSTM" in self.id:
+            return 128
+        elif "CLSTM" in self.id:
+            return 128
+        else:
+            return KerasRegressionTraining.TRAINING_CONFIG["batch_size"]
+        #return KerasRegressionTraining.TRAINING_CONFIG["batch_size"]
 
 
 

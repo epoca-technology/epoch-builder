@@ -9,7 +9,10 @@ from modules.database.Database import Database, DB_CONNECTION_CONFIG
 
 # DATABASE MANAGEMENT
 # Args:
-#   --action "summary"|"backup"|"restore"
+#   --action "summary"|"backup"|"restore"|"update_host_ip"
+#
+# Update Host IP Args:
+#   --ip? "192.168.1.236" -> Mandatory arg when updating the host ip
 endpoint_name: str = "DATABASE MANAGEMENT"
 Utils.endpoint_header(Configuration.VERSION, endpoint_name)
 
@@ -26,6 +29,7 @@ Epoch.init()
 # Extract the args
 parser = ArgumentParser()
 parser.add_argument("--action", dest="action")
+parser.add_argument("--ip", dest="id", nargs='?')
 args = parser.parse_args()
 
 
@@ -128,6 +132,16 @@ elif args.action == "restore":
         'PGPASSWORD': DB_CONNECTION_CONFIG['password']
     })
     proc.wait()
+
+
+
+
+# Update Database Host IP
+# Updates the host ip valuye in the db_host_ip.txt file within the root config directory.
+elif args.action == "update_host_ip":
+    # Update Host IP
+    print("1/1) Setting the IP on the configuration file...")
+    Configuration.set_db_host_ip(args.ip)
 
 
 

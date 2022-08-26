@@ -10,7 +10,7 @@ from modules.epoch.Epoch import Epoch
 #   --action "create"|"classification_training_data_ut"|"classification_training_data"|"export"
 # 
 # Create Args:
-#   --id? "_ALPHA" -> Only mandatory arg when creating an epoch
+#   --id? "_ALPHA" -> Mandatory arg when creating an epoch
 #   --epoch_width? "24"
 #   --seed? "60184"
 #   --train_split? "0.85"
@@ -21,7 +21,7 @@ from modules.epoch.Epoch import Epoch
 #   --idle_minutes_on_position_close? "30"
 #
 # Classification Training Data Args:
-#   --training_data_file_name? "ea998c4d-9142-435f-8cc9-c5804ed5c1e8.json" -> Mandatory arg
+#   --training_data_file_name? "ea998c4d-9142-435f-8cc9-c5804ed5c1e8.json" -> Mandatory arg when setting Class. Training Data IDs
 #
 # Export Args:
 #   ...
