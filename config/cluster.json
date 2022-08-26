@@ -1,6 +1,6 @@
 {
-    "localhost_name": "jessdotjs",
-    "ssh_private_key_path": "~/.ssh/eb_id_rsa",
+    "local_path": "/home/jessdotjs/Documents/projects/epoca",
+    "ssh_private_key_path": "/home/jessdotjs/.ssh/eb_id_rsa",
     "servers": [
         {
             "name": "epoca-worker-01",
@@ -8,7 +8,9 @@
             "is_master": true
         }
     ],
-    "trainable_regression_model_types": ["keras_regression", "xgb_regression"],
-    "trainable_classification_model_types": ["keras_classification", "xgb_classification"],
-    "trainable_model_types": ["keras_regression", "keras_classification", "xgb_regression", "xgb_classification"]
+    "trainable_model_types": {
+        "all": ["keras_regression", "keras_classification", "xgb_regression", "xgb_classification"],
+        "regression": ["keras_regression", "xgb_regression"],
+        "classification": ["keras_classification", "xgb_classification"]
+    }
 }

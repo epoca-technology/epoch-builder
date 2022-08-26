@@ -78,7 +78,7 @@ class KerasRegressionTraining:
         "decay_rate": 0.35,
         "epochs": 100,
         "patience": 10,
-        "batch_size": 128
+        "batch_size": 32
     }
 
 
@@ -279,7 +279,6 @@ class KerasRegressionTraining:
             return 128
         else:
             return KerasRegressionTraining.TRAINING_CONFIG["batch_size"]
-        #return KerasRegressionTraining.TRAINING_CONFIG["batch_size"]
 
 
 
