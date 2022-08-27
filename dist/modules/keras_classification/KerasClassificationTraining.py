@@ -75,7 +75,7 @@ class KerasClassificationTraining:
         "decay_rate": 0.35,
         "epochs": 100,
         "patience": 15,
-        "batch_size": 16
+        "batch_size": 8
     }
 
 
@@ -266,13 +266,13 @@ class KerasClassificationTraining:
             int
         """
         if "DNN" in self.id:
-            return 4
+            return 2
         elif "CNN" in self.id:
-            return 8
+            return 4
         elif "LSTM" in self.id:
-            return 16
+            return 8
         elif "CLSTM" in self.id:
-            return 16
+            return 8
         else:
             return KerasClassificationTraining.TRAINING_CONFIG["batch_size"]
             

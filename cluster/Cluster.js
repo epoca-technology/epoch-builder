@@ -31,6 +31,10 @@ import { ClusterInput } from "./ClusterInput.js"
 
 
 
+	/**
+	 * Initializes the Cluster's Instance. Notice that the only public 
+	 * method is run().
+	 */
 	constructor() {
 		// Read the cluster's configuration from the config file
 		this.config = FileSystem.read_json_file(this.CLUSTER_CONFIG_PATH);
@@ -86,6 +90,7 @@ import { ClusterInput } from "./ClusterInput.js"
 				"push_configuration",
 				"push_database_management",
 				"push_candlesticks",
+				"push_dist",
 				"push_active_models",
 				"push_regression_selection",
 				"push_classification_training_data",
@@ -113,10 +118,12 @@ import { ClusterInput } from "./ClusterInput.js"
 
 
 
+	
 	/**
      * Server
      * All server related processes as well as the helpers.
      */
+
 
 
 
@@ -225,44 +232,206 @@ import { ClusterInput } from "./ClusterInput.js"
 
 
 
+
+
+
+
+
+
+	/***************************************************************************
+     * PUSH												   					   *
+     * Push stands for the transfer of data from the local machine to a server * 
+	 * that can live in the cluster or anywhere.							   *
+	 * 																		   *
+	 * Processes:															   *
+	 * 	push_configuration													   *
+	 * 	push_database_management											   *
+	 * 	push_candlesticks											           *
+	 * 	push_dist											                   *
+	 * 	push_active_models											           *
+	 * 	push_regression_selection											   *
+	 * 	push_classification_training_data									   *
+	 * 	push_training_configurations									       *
+	 * 	push_backtest_configurations									       *
+	 * 	push_backtest_results									      		   *
+	 * 	push_epoch									      		   			   *
+	 * 	push_epoch_builder									      		   	   *
+     ***************************************************************************/
+
+
+
+	/* Root Directories */
+
+
 	/**
-     * Push
-     * All push related processes as well as the helpers.
-     */
+	 * Pushes the config directory from the local machine to a selected server.
+	 * @param server?: object
+	 * @returns Promise<string>
+	 */
+	push_configuration(server = undefined) {
+		return this.push(this.cluster_path.config(true), this.cluster_path._path(false), this.cluster_path.config(false), server);
+	}
 
 
 
-    // push_configuration
+
+	/**
+	 * Pushes the db_management directory from the local machine to a selected server.
+	 * @param server?: object
+	 * @returns Promise<string>
+	 */
+	push_database_management(server = undefined) {
+		return this.push(this.cluster_path.db_management(true), this.cluster_path._path(false), this.cluster_path.db_management(false), server);
+	}
 
 
-    // push_database_management
 
 
-    // push_candlesticks
+
+	/**
+	 * Pushes the candlesticks directory from the local machine to a selected server.
+	 * @param server?: object
+	 * @returns Promise<string>
+	 */
+	push_candlesticks(server = undefined) {
+		return this.push(this.cluster_path.candlesticks(true), this.cluster_path._path(false), this.cluster_path.candlesticks(false), server);
+	}
 
 
-    // push_active_models
 
 
-    // push_regression_selection
+	/**
+	 * Pushes the dist directory from the local machine to a selected server.
+	 * @param server?: object
+	 * @returns Promise<string>
+	 */
+	push_dist(server = undefined) {
+		return this.push(this.cluster_path.dist(true), this.cluster_path._path(false), this.cluster_path.dist(false), server);
+	}
 
 
-    // push_classification_training_data
+
+
+	
+    /* Epoch Directories */
+
+
+
+	/**
+	 * Pushes the active models directory from the local machine to a selected server.
+	 * @param server?: object
+	 * @returns Promise<string>
+	 */
+	push_active_models(server = undefined) {
+		return this.push(this.cluster_path.models(true), this.cluster_path._epoch_path(false), this.cluster_path.models(false), server);
+	}
+
+
+	/**
+	 * Pushes the regression selection directory from the local machine to a selected server.
+	 * @param server?: object
+	 * @returns Promise<string>
+	 */
+	push_regression_selection(server = undefined) {
+		return this.push(
+			this.cluster_path.regression_selection(true), 
+			this.cluster_path._epoch_path(false), 
+			this.cluster_path.regression_selection(false), 
+			server
+		);
+	}
+
+
+
+	/**
+	 * Pushes the classification training data directory from the local machine to a selected server.
+	 * @param server?: object
+	 * @returns Promise<string>
+	 */
+	push_classification_training_data(server = undefined) {
+		return this.push(
+			this.cluster_path.classification_training_data(true), 
+			this.cluster_path._epoch_path(false), 
+			this.cluster_path.classification_training_data(false), 
+			server
+		);
+	}
+
 
 
     // push_training_configurations
 
 
-    // push_backtest_configurations
+
+	/**
+	 * Pushes the backtest configurations directory from the local machine to a selected server.
+	 * @param server?: object
+	 * @returns Promise<string>
+	 */
+	push_backtest_configurations(server = undefined) {
+		return this.push(
+			this.cluster_path.backtest_configurations(true), 
+			this.cluster_path._epoch_path(false), 
+			this.cluster_path.backtest_configurations(false), 
+			server
+		);
+	}
 
 
-    // push_backtest_results
+
+	/**
+	 * Pushes the backtest results directory from the local machine to a selected server.
+	 * @param server?: object
+	 * @returns Promise<string>
+	 */
+	push_backtest_results(server = undefined) {
+		return this.push(
+			this.cluster_path.backtest_results(true), 
+			this.cluster_path._epoch_path(false), 
+			this.cluster_path.backtest_results(false), 
+			server
+		);
+	}
 
 
     // push_epoch
 
 
     // push_epoch_builder
+
+
+
+
+
+
+	/**
+	 * Executes a push action based on the provided parameters.
+	 * @param origin: string 
+	 * @param destination: string 
+	 * @param destination_dir_path: string
+	 * @param server?: object 
+	 * @param print_payload?: boolean
+	 * @returns Promise<string>
+	 */
+	async push(origin, destination, destination_dir_path, server = undefined, print_payload = false) {
+		// Retrieve the server in case it wasn't provided
+		server = server ?  server : await this.cluster_input.server(false, false, true, true);
+
+		// Removing the directory on the server if exists
+		console.log(`\n1/2) Removing ${this.cluster_command.ssh_addr(server)}@${destination_dir_path}...`);
+		try { await this.cluster_command.remove_server_dir(server, destination_dir_path) } catch (e) { }
+		
+		// Push the directory
+		console.log(`2/2) Pushing ${origin}...`);
+		const push_payload = await this.cluster_command.push_dir(server, origin, destination);
+		if (print_payload) console.log(push_payload);
+		return push_payload;
+	}
+
+
+
+
+
 
 
 
@@ -320,7 +489,7 @@ import { ClusterInput } from "./ClusterInput.js"
 		
 		// Pull the database management dir
 		console.log(`\n1/2) Pulling the database management directory...`);
-		const origin = this.cluster_path.database_management(false);
+		const origin = this.cluster_path.db_management(false);
 		const destination = this.cluster_path._path(true);
 		const pull_payload = await this.cluster_command.pull_dir(server, origin, destination);
 
