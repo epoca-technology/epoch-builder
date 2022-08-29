@@ -26,7 +26,8 @@ class KerasHyperparams:
         REGRESSION_BATCH_SIZE: int
         CLASSIFICATION_BATCH_SIZE: int
             The maximum number of models per batch that will be used if none was provided.
-        LEARNING_RATES: List[float]
+        REGRESSION_LEARNING_RATES: List[float]
+        CLASSIFICATION_LEARNING_RATES: List[float]
             The learning rates to be used during training. If the value is equals to -1 it will make
             use of the InverseDecay instance.
         OPTIMIZERS: List[IKerasOptimizer]
@@ -60,7 +61,10 @@ class KerasHyperparams:
     CLASSIFICATION_BATCH_SIZE: int = 60
 
     # Learning Rates
-    LEARNING_RATES: List[float] = [ -1, 0.001 ] # Reduced from [ -1, 0.01, 0.001, 0.0001 ]
+    REGRESSION_LEARNING_RATES: List[float] = [ -1 ] # Reduced from [ -1, 0.01 ]
+
+    # Classification Learning Rates
+    CLASSIFICATION_LEARNING_RATES: List[float] = [ -1, 0.001, 0.0001 ]
 
     # Optimizers
     OPTIMIZERS: List[IKerasOptimizer] = [ "adam", "rmsprop" ]
@@ -155,6 +159,16 @@ class KerasHyperparams:
         # Init the network receipts
         network_receipts: List[IKerasHyperparamsNetworkReceipt] = []
 
+        # Init the learning rates
+        learning_rates: List[float] = \
+            KerasHyperparams.REGRESSION_LEARNING_RATES if self.model_type == "keras_regression" \
+                else KerasHyperparams.CLASSIFICATION_LEARNING_RATES
+        
+        # Init the loss functions
+        loss_functions: List[IKerasHyperparamsLoss] = \
+            KerasHyperparams.REGRESSION_LOSS_FUNCTIONS if self.model_type == "keras_regression" \
+                else KerasHyperparams.CLASSIFICATION_LOSS_FUNCTIONS
+
         # Iterate over the networks
         for network_type, network_variations in self.networks.items():
             # Init the network's list of configs
@@ -165,14 +179,13 @@ class KerasHyperparams:
             for variation_name, variations in network_variations.items():
 
                 # Iterate over the learning rates
-                for learning_rate in KerasHyperparams.LEARNING_RATES:
+                for learning_rate in learning_rates:
 
                     # Iterate over the optimizers
                     for optimizer in KerasHyperparams.OPTIMIZERS:
 
                         # Iterate over the loss functions
-                        for loss in KerasHyperparams.REGRESSION_LOSS_FUNCTIONS if self.model_type == "keras_regression" \
-                            else KerasHyperparams.CLASSIFICATION_LOSS_FUNCTIONS:
+                        for loss in loss_functions:
 
                             # Generate all the combinations for the variation and concatenate them
                             configs = configs + self._get_variation_configs(

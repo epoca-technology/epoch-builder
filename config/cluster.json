@@ -5,6 +5,7 @@
         {
             "name": "epoca-worker-01",
             "ip": "192.168.1.236",
+            "is_cluster": true,
             "is_master": true
         }
     ],

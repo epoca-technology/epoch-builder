@@ -272,10 +272,10 @@ class KerasRegressionTraining:
         if "DNN" in self.id:
             return 4
         elif "CNN" in self.id:
-            return 64
-        elif "LSTM" in self.id:
-            return 128
+            return 32
         elif "CLSTM" in self.id:
+            return 128
+        elif "LSTM" in self.id:
             return 128
         else:
             return KerasRegressionTraining.TRAINING_CONFIG["batch_size"]

@@ -18,10 +18,10 @@ def create_default_files(epoch_id: str, regression_lookback: int, regression_pre
     """
     # Create the backtest unit test file
     Utils.write(
-        path=f"{epoch_id}/{EpochFile.BACKTEST_PATH['configurations']}/unit_test.json", 
+        path=f"{epoch_id}/{EpochFile.EPOCH_PATH['backtest_configurations']}/UNIT_TEST.json", 
         indent=4,
         data={
-            "id": "unit_test",
+            "id": "UNIT_TEST",
             "description": "The purpose of this test is to make sure the Backtest Module can run any Model.",
             "take_profit": 2.5,
             "stop_loss": 2.5,
@@ -45,7 +45,7 @@ def create_default_files(epoch_id: str, regression_lookback: int, regression_pre
 
     # Create the keras regression config unit test file
     Utils.write(
-        path=f"{epoch_id}/{EpochFile.MODEL_PATH['keras_regression_training_configs']}/UNIT_TEST.json", 
+        path=f"{epoch_id}/{EpochFile.EPOCH_PATH['training_configs']}/keras_regression/UNIT_TEST/UNIT_TEST.json", 
         indent=4,
         data={
             "name": "KR_UNIT_TEST",
@@ -72,7 +72,7 @@ def create_default_files(epoch_id: str, regression_lookback: int, regression_pre
 
     # Create the keras classification config unit test file
     Utils.write(
-        path=f"{epoch_id}/{EpochFile.MODEL_PATH['keras_classification_training_configs']}/UNIT_TEST.json",
+        path=f"{epoch_id}/{EpochFile.EPOCH_PATH['training_configs']}/keras_classification/UNIT_TEST/UNIT_TEST.json", 
         indent=4,
         data={
             "name": "KC_UNIT_TEST",

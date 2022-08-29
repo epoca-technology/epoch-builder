@@ -165,7 +165,7 @@ for index, model_config in enumerate(config["models"]):
     # Log the progress
     if index == 0:
         print(f"Running {config['name']}:\n")
-    print(f"\n{index + 1}/{len(config['models'])}) {Utils.prettify_model_id(model_config['id'])}")
+    print(f"\n{index + 1}/{len(config['models'])}) {model_config['id']}")
 
     # Train the model
     cert: ITrainingCertificate = trainer.train()

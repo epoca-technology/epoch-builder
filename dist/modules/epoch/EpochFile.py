@@ -107,17 +107,14 @@ class EpochFile:
     """
     # Epoch Files' Paths
     EPOCH_PATH: IEpochAssetsPath = {
-        "backtest_configurations":                  "backtest_configurations",
-        "backtest_results":                         "backtest_results",
+        "backtest_configurations":                  "backtests/configurations",
+        "backtest_results":                         "backtests/results",
         "batched_training_certificates":            "batched_training_certificates",
         "classification_training_data":             "classification_training_data",
         "models":                                   "models",
         "models_bank":                              "models_bank",
         "regression_selection":                     "regression_selection",
-        "keras_classification_training_configs":    "keras_classification_training_configs",
-        "keras_regression_training_configs":        "keras_regression_training_configs",
-        "xgb_classification_training_configs":      "xgb_classification_training_configs",
-        "xgb_regression_training_configs":          "xgb_regression_training_configs"
+        "training_configs":                         "training_configs"
     }
 
 
@@ -168,7 +165,7 @@ class EpochFile:
     def save_hyperparams_batch(
         self, 
         model_type: ITrainableModelType,
-        batch_type: str,
+        batch_type: IHyperparamsCategory,
         batch: ITrainingBatch
     ) -> None:
         """Saves a Keras Hyperparams batch for a given network.
@@ -287,11 +284,7 @@ class EpochFile:
         Returns:
             str
         """
-        # Check if it is a unit test
-        if category == "UNIT_TEST":
-            return f"{self.get_hyperparams_dir_path(model_type)}/{batch_file_name}"
-        else:
-            return f"{self.get_hyperparams_dir_path(model_type)}/{category}/{batch_file_name}"
+        return f"{self.get_hyperparams_dir_path(model_type)}/{category}/{batch_file_name}"
 
 
 
@@ -315,25 +308,7 @@ class EpochFile:
         Returns:
             str
         """
-        # Check if it is a Keras Regression
-        if model_type == "keras_regression":
-            return self.p(EpochFile.EPOCH_PATH["keras_regression_training_configs"])
-
-        # Check if it is a Keras Classification
-        elif model_type == "keras_classification":
-            return self.p(EpochFile.EPOCH_PATH["keras_classification_training_configs"])
-
-        # Check if it is an XGB Regression
-        elif model_type == "xgb_regression":
-            return self.p(EpochFile.EPOCH_PATH["xgb_regression_training_configs"])
-
-        # Check if it is an XGB Classification
-        elif model_type == "xgb_classification":
-            return self.p(EpochFile.EPOCH_PATH["xgb_classification_training_configs"])
-        
-        # Otherwise, raise an error
-        else:
-            raise ValueError(f"The provided model_type {model_type} is invalid.")
+        return self.p(f"{EpochFile.EPOCH_PATH['training_configs']}/{model_type}")
 
 
 
@@ -1124,10 +1099,8 @@ class EpochFile:
         Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['models']}")
         Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['models_bank']}")
         Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['regression_selection']}")
-        Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['keras_classification_training_configs']}")
-        Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['keras_regression_training_configs']}")
-        Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['xgb_classification_training_configs']}")
-        Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['xgb_regression_training_configs']}")
+        Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['training_configs']}")
         for trainable_model in TRAINABLE_MODEL_TYPES:
             Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['batched_training_certificates']}/{trainable_model}")
             Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['models_bank']}/{trainable_model}")
+            Utils.make_directory(f"{epoch_id}/{EpochFile.EPOCH_PATH['training_configs']}/{trainable_model}")

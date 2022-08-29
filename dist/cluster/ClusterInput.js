@@ -1,5 +1,5 @@
 import inquirer from "inquirer";
-
+import { FileSystem } from "./FileSystem.js";
 
 
 
@@ -68,13 +68,14 @@ class ClusterInput {
 	 * Retrieves the list of servers and displays the list
 	 * according to the provided configuration. Once a server
 	 * is selected, the server object is returned.
-	 * @param include_localhost: boolean
-	 * @param include_all: boolean
-	 * @param online_only: boolean
-	 * @param available_only: boolean
+	 * @param include_localhost?: boolean
+	 * @param include_all?: boolean
+	 * @param online_only?: boolean
+	 * @param available_only?: boolean
+	 * @param busy_only?: boolean
 	 * @returns Promise<object>
 	 */
-	async server(include_localhost = false, include_all = false, online_only = false, available_only = false) {
+	async server(include_localhost = false, include_all = false, online_only = false, available_only = false, busy_only = false) {
 		// Retrieve the list of servers
 		const servers = await this.cluster_server.list_servers(include_localhost, include_all);
 
@@ -85,6 +86,7 @@ class ClusterInput {
 			let disabled_state = undefined;
 			if (online_only && !server.is_online) { disabled_state = "Offline" }
 			else if (available_only && !server.is_available) { disabled_state = "Busy" }
+			else if (busy_only && server.is_available) { disabled_state = "Not Busy" }
 
 			// Push the choice to the list
 			choices.push({ name: server.name, disabled: disabled_state })
@@ -113,13 +115,59 @@ class ClusterInput {
 		// Present the list
 		console.log(" ");
 		const answer = await inquirer.prompt([
-			{type: "list", name: "value", message: "Select a type of model", loop: false, choices: this.trainable_model_types[mode]}]);
+			{type: "list", name: "value", message: "Select a type of model", loop: false, choices: this.trainable_model_types[mode]}
+		]);
 
 		// Finally, return the answer
 		return answer["value"];
 	}
 
 
+
+
+
+
+
+	/**
+	 * Based on the provided type of model, it will put together the training config
+	 * category and configuration file.
+	 * @param trainable_model_type 
+	 * @returns object { category: string, config_file_name: string }
+	 */
+	async training_config(trainable_model_type) {
+		// Retrieve the list of categories
+		const categories = FileSystem.get_path_content(this.cluster_path.training_configs(true, trainable_model_type));
+
+		// Present the list of categories
+		console.log(" ");
+		const category_answer = await inquirer.prompt([
+			{type: "list", name: "value", message: "Select a category", loop: false, choices: categories.directories}
+		]);
+
+		// Retrieve the list of configuration files
+		let config_files = FileSystem.get_path_content(
+			this.cluster_path.training_configs(true, trainable_model_type, category_answer["value"])
+		);
+		config_files.files.sort((a, b) => { return this.get_batch_number(a) > this.get_batch_number(b) ? 1: -1});
+
+		// Present the list of config files
+		console.log(" ");
+		const config_file_answer = await inquirer.prompt([
+			{type: "list", name: "value", message: "Select a configuration file", loop: false, choices: config_files.files}
+		]);
+
+		// Return the packed results
+		return { category: category_answer["value"], config_file_name: config_file_answer["value"] }
+	}
+
+
+
+	/**
+	 * Retrieves the batch number from a given config file name.
+	 * @param config_file_name: string
+	 * @returns number
+	 */
+	get_batch_number(config_file_name) { try { return Number(config_file_name.split("_").at(-2)) } catch (e) { return 0 } }
 }
 
 

@@ -10,6 +10,3 @@ Epoch.init()
 
 # Initialize the candlesticks
 Candlestick.init(Epoch.REGRESSION_LOOKBACK, Epoch.START, Epoch.END)
-
-# Notify the user
-print("EPOCH BUILDER UNIT TESTS\n")

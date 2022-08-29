@@ -1,4 +1,4 @@
-import { lstatSync, readFileSync } from "fs";
+import { lstatSync, readFileSync, readdirSync } from "fs";
 import { extname } from "path";
 
 
@@ -55,6 +55,42 @@ import { extname } from "path";
 
 		// Finally, return the configuration
 		return JSON.parse(readFileSync(path));
+	}
+
+
+
+
+	/**
+	 * Retrieves the directories and files located in a given path.
+	 * @param path: string
+	 * @returns object { directories: string[], files: string[] }
+	 */
+	static get_path_content(path) {
+		// Init values
+		let directories = [];
+		let files = [];
+
+		// Make sure the path is a directory
+		if (!FileSystem.dir_exists(path)) throw new Error(`The provided path ${path} is not an existing directory.`);
+
+		// Retrieve the raw path contents
+		const path_content = readdirSync(path);
+
+		// Iterate over each item and add them to the lists accordingly
+		for (var item of path_content) {
+			// Check if it is a directory
+			if (FileSystem.dir_exists(`${path}/${item}`)) { directories.push(item) }
+
+			// Otherwise, it is a file
+			else { files.push(item) }
+		}
+
+		// Sort the lists alphabetically
+		directories.sort();
+		files.sort();
+
+		// Finally, return the packed values
+		return { directories: directories, files: files }
 	}
 }
 

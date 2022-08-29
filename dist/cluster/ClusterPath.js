@@ -35,8 +35,48 @@
 
 
 
+	/* Root File Paths */
+
+
+
+	/**
+	 * Retrieves the path for the requirements.txt file
+	 * @param local: boolean
+	 * @returns string
+	 */
+	requirements(local) { return this._path(local, "requirements.txt") }
+
+
+
+
+	/**
+	 * Retrieves the path for the package.json file
+	 * @param local: boolean
+	 * @returns string
+	 */
+	package_json(local) { return this._path(local, "package.json") }
+
+
+
+
+
+	/**
+	 * Retrieves the path for the nohup.out file
+	 * @param local: boolean
+	 * @returns string
+	 */
+	nohup_logs(local) { return this._path(local, "nohup.out") }
+
+
+
+
+
+
+
+
 
 	/* Root Paths */
+
 
 
 	/**
@@ -44,7 +84,7 @@
 	 * @param local: boolean
 	 * @returns string
 	 */
-	 config(local) { return this._path(local, "config") }
+	config(local) { return this._path(local, "config") }
 
 
 
@@ -54,7 +94,7 @@
 	 * @param local: boolean
 	 * @returns string
 	 */
-	 db_management(local) { return this._path(local, "db_management") }
+	db_management(local) { return this._path(local, "db_management") }
 
 
 
@@ -65,7 +105,7 @@
 	 * @param local: boolean
 	 * @returns string
 	 */
-	 candlesticks(local) { return this._path(local, "candlesticks") }
+	candlesticks(local) { return this._path(local, "candlesticks") }
 
 
 
@@ -76,11 +116,19 @@
 	 * @param local: boolean
 	 * @returns string
 	 */
-	 dist(local) { return this._path(local, "dist") }
+	dist(local) { return this._path(local, "dist") }
 
 
 
 
+
+	/**
+	 * Retrieves the path for the unit tests directory.
+	 * @param local: boolean
+	 * @returns string
+	 */
+	unit_tests(local) { return this._path(local, "dist/tests") }
+	//unit_tests(local) { return local ? this._path(local, "dist/tests"): "dist/tests" }
 
 
 
@@ -90,6 +138,23 @@
 
 
 	/* Epoch Paths */
+
+
+
+	/**
+	 * Retrieves the path for the backtest configurations, results or the 
+	 * root directory.
+	 * @param local: boolean
+	 * @param dir_name?: string "configurations"|"results"
+	 * @returns string
+	 */
+	backtests(local, dir_name = undefined) { 
+		// Check if the dir name was provided
+		if (typeof dir_name == "string") { return this._epoch_path(local, `backtests/${dir_name}`) }
+
+		// Otherwise, return the root directory
+		else { return this._epoch_path(local, "backtests")  }
+	}
 
 
 
@@ -169,37 +234,32 @@
 
 
 	/**
-	 * Retrieves the path for the training configurations directory.
+	 * Retrieves the path for the training configurations directory. If the model
+	 * type is not provided, it will return the root of the directory.
 	 * @param local: boolean
-	 * @param trainable_model_type: string
+	 * @param trainable_model_type?: string
+	 * @param category?: string
 	 * @returns string
 	 */
-	training_configs(local, trainable_model_type) { return this._epoch_path(local, `${trainable_model_type}_training_configs`) }
+	training_configs(local, trainable_model_type = undefined, category = undefined) { 
+		// Check if the model type was provided
+		if (typeof trainable_model_type == "string") {
+			// Check if the category was provided
+			if (typeof category == "string") {
+				return this._epoch_path(local, `training_configs/${trainable_model_type}/${category}`);
+			}
 
-
-
-
-
-	/**
-	 * Retrieves the path for the backtest configurations directory.
-	 * @param local: boolean
-	 * @returns string
-	 */
-	backtest_configurations(local) { return this._epoch_path(local, "backtest_configurations") }
-
-
-
-
-
-
-	/**
-	 * Retrieves the path for the backtest results directory.
-	 * @param local: boolean
-	 * @returns string
-	 */
-	backtest_results(local) { return this._epoch_path(local, "backtest_results") }
-
-
+			// Otherwise, return the model specific path
+			else {
+				return this._epoch_path(local, `training_configs/${trainable_model_type}`);
+			}
+		} 
+		
+		// Otherwise, return the root directory
+		else {
+			return this._epoch_path(local, "training_configs") 
+		}
+	}
 
 
 
@@ -230,7 +290,7 @@
 		if (typeof path == "string") { return this._path(local, `${this.epoch_id}/${path}`)} 
 
 		// Otherwise, return the root directory of the epoch
-		else { return this._path(this.epoch_id) }
+		else { return this._path(local, this.epoch_id) }
 	}
 
 

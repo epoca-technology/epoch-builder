@@ -15,8 +15,8 @@
   */
 class ClusterServer {
 	// Server objects of localhost and all
-	LOCALHOST_SERVER = {name: "localhost", ip: "", is_master: false, is_online: true, is_available: true};
-	ALL_SERVER = {name: "all", ip: "", is_master: false, is_online: true, is_available: true};
+	LOCALHOST_SERVER = {name: "localhost", ip: "", is_cluster: true, is_master: false, is_online: true, is_available: true};
+	ALL_SERVER = {name: "all", ip: "", is_cluster: false, is_master: false, is_online: true, is_available: true};
 
 
 
@@ -106,6 +106,7 @@ class ClusterServer {
 			servers.push({
 				name: this.servers[i].name,
 				ip: this.servers[i].ip,
+				is_cluster: this.servers[i].is_cluster,
 				is_master: this.servers[i].is_master,
 				is_online: is_online,
 				is_available: await this.cluster_command.is_server_available(is_online, this.servers[i])

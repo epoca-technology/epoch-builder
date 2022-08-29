@@ -1,4 +1,4 @@
-import { Cluster } from "./cluster/Cluster.js";
+import { Cluster } from "./dist/cluster/Cluster.js";
 
 
 
@@ -10,7 +10,8 @@ import { Cluster } from "./cluster/Cluster.js";
  */
 console.clear();
 console.log("EPOCH BUILDER CLUSTER\n\n");
-new Cluster().run()
+new Cluster()
+.run()
 .then(() => { 
     console.log("\n\nEPOCH BUILDER CLUSTER COMPLETED");
     process.exit(0);
