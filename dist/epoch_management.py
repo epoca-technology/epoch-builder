@@ -24,7 +24,7 @@ from modules.epoch.Epoch import Epoch
 #   --training_data_file_name? "ea998c4d-9142-435f-8cc9-c5804ed5c1e8.json" -> Mandatory arg when setting Class. Training Data IDs
 #
 # Export Args:
-#   ...
+#   --model_ids? "KC_LSTM_S2_c064c7c8-9208-472a-b963-007225372c08,CON_2_3_8e00946d-dd77-46eb-bb3a-e5e92369ad7a,..."
 endpoint_name: str = "EPOCH MANAGEMENT"
 Utils.endpoint_header(Configuration.VERSION, endpoint_name)
 
@@ -47,6 +47,9 @@ parser.add_argument("--idle_minutes_on_position_close", dest="idle_minutes_on_po
 
 # Classification Training Data specific args
 parser.add_argument("--training_data_file_name", dest="training_data_file_name", nargs='?')
+
+# Export specific args
+parser.add_argument("--model_ids", dest="model_ids", nargs='?')
 args = parser.parse_args()
 
 

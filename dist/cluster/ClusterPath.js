@@ -15,8 +15,7 @@
  * 	epoch_id: string|undefined
  */
  class ClusterPath {
-	// Epoch ID Not Set Error
-	EPOCH_ID_NOT_SET_ERROR = "The Epoch's ID was not set in the ClusterPath because the configuration file could not be loaded.";
+
 
 
 	/**
@@ -128,7 +127,6 @@
 	 * @returns string
 	 */
 	unit_tests(local) { return this._path(local, "dist/tests") }
-	//unit_tests(local) { return local ? this._path(local, "dist/tests"): "dist/tests" }
 
 
 
@@ -284,7 +282,9 @@
 	 */
 	_epoch_path(local, path = undefined) {
 		// Make sure the Epoch ID was initialized
-		if (typeof this.epoch_id != "string") throw new Error(this.EPOCH_ID_NOT_SET_ERROR);
+		if (typeof this.epoch_id != "string") {
+			throw new Error("The Epoch's ID was not set in the ClusterPath because the configuration file could not be loaded.");
+		}
 
 		// If the path was provided, prepend the epoch's id to it
 		if (typeof path == "string") { return this._path(local, `${this.epoch_id}/${path}`)} 

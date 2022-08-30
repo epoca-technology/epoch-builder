@@ -295,6 +295,28 @@ import { spawn } from "child_process";
 
 
 	/**
+	 * Runs the Hyperparams Process.
+	 * @param server: object 
+	 * @param model_type: string
+	 * @param training_data_file_name: string
+	 * @param batch_size: string
+	 * @returns Promise<void>
+	 */
+	hyperparams(server, model_type, training_data_file_name, batch_size) {
+		return this.execute_eb(
+			server, "hyperparams.py",
+			[
+				"--model_type", model_type, 
+				"--training_data_file_name", training_data_file_name, 
+				"--batch_size", batch_size
+			]
+		);
+	}
+
+
+
+
+	/**
 	 * Initializes the Regression Training Process. If running on localhost, it will
 	 * run it in inherited mode. Otherwise, it will run it in deatached mode.
 	 * @param server: object 
@@ -318,6 +340,103 @@ import { spawn } from "child_process";
 
 
 
+	/**
+	 * Runs the Regression Selection Process.
+	 * @param server: object 
+	 * @param model_ids: string
+	 * @returns Promise<void>
+	 */
+	regression_selection(server, model_ids) {
+		return this.execute_eb(
+			server, "regression_selection.py",
+			[
+				"--model_ids", model_ids
+			]
+		);
+	}
+
+
+
+
+	/**
+	 * Initializes the Classification Training Data Process. If running on localhost, it will
+	 * run it in inherited mode. Otherwise, it will run it in deatached mode.
+	 * @param server: object 
+	 * @param regression_selection_file_name: string
+	 * @param description: string
+	 * @param steps: string
+	 * @param include_rsi: string
+	 * @param include_aroon: string
+	 * @returns Promise<void>
+	 */
+	classification_training_data(
+		server,
+		regression_selection_file_name, 
+		description, 
+		steps, 
+		include_rsi, 
+		include_aroon
+	) {
+		return this.execute_eb(
+			server, "classification_training_data.py",
+			[
+				"--regression_selection_file_name", regression_selection_file_name,
+				"--description", description,
+				"--steps", steps,
+				"--include_rsi", include_rsi,
+				"--include_aroon", include_aroon
+			],
+			true
+		);
+	}
+
+
+
+
+
+	/**
+	 * Initializes the Classification Training Process. If running on localhost, it will
+	 * run it in inherited mode. Otherwise, it will run it in deatached mode.
+	 * @param server: object 
+	 * @param trainable_model_type: string
+	 * @param hyperparams_category: string
+	 * @param config_file_name: string
+	 * @returns Promise<void>
+	 */
+	classification_training(server, trainable_model_type, hyperparams_category, config_file_name) {
+		return this.execute_eb(
+			server, "classification_training.py",
+			[
+				"--model_type", trainable_model_type, 
+				"--hyperparams_category", hyperparams_category, 
+				"--config_file_name", config_file_name
+			],
+			true
+		);
+	}
+
+
+
+
+
+	/**
+	 * Initializes the Backtest Process. If running on localhost, it will
+	 * run it in inherited mode. Otherwise, it will run it in deatached mode.
+	 * @param server: object 
+	 * @param config_file_name: string
+	 * @returns Promise<void>
+	 */
+	 backtest(server, config_file_name) {
+		return this.execute_eb(
+			server, "backtest.py",
+			[
+				"--config_file_name", config_file_name
+			],
+			true
+		);
+	}
+
+
 
 
 
@@ -337,6 +456,62 @@ import { spawn } from "child_process";
 			]
 		);
 	}
+
+
+
+
+
+
+	/**
+	 * Runs the Epoch Management Process.
+	 * @param server: object 
+	 * @param args
+	 * @returns Promise<void>
+	 */
+	epoch_management(server, args) {
+		return this.execute_eb(
+			server, "epoch_management.py",
+			[
+				"--action", args.action,
+				"--id", args.id,
+				"--epoch_width", args.epoch_width,
+				"--seed", args.seed,
+				"--train_split", args.train_split,
+				"--backtest_split", args.backtest_split,
+				"--regression_lookback", args.regression_lookback,
+				"--regression_predictions", args.regression_predictions,
+				"--model_discovery_steps", args.model_discovery_steps,
+				"--idle_minutes_on_position_close", args.idle_minutes_on_position_close,
+				"--training_data_file_name", args.training_data_file_name,
+				"--model_ids", args.model_ids
+			]
+		);
+	}
+
+
+
+
+
+
+	/**
+	 * Runs the DB Management Process.
+	 * @param server: object 
+	 * @param action: string
+	 * @param ip: string
+	 * @returns Promise<void>
+	 */
+	db_management(server, action, ip) {
+		return this.execute_eb(
+			server, "db_management.py",
+			[
+				"--action", action,
+				"--ip", ip
+			]
+		);
+	}
+
+
+
 
 
 
@@ -540,7 +715,7 @@ import { spawn } from "child_process";
 	 * @param server: object
 	 * @param origin_path: string
 	 * @param destination_path: string
-	 * @returns Promise<string>
+	 * @returns Promise<string|undefined>
 	 */
 	async push_dir(server, origin_path, destination_path) {
 		return this.execute("scp", this.ssh_args(["-r", origin_path, `${this.ssh_addr(server)}:${destination_path}`]), "inherit");
@@ -555,7 +730,7 @@ import { spawn } from "child_process";
 	 * @param server: object
 	 * @param origin_path: string
 	 * @param destination_path: string
-	 * @returns Promise<string>
+	 * @returns Promise<string|undefined>
 	 */
 	async pull_dir(server, origin_path, destination_path) {
 		return this.execute("scp", this.ssh_args(["-r", `${this.ssh_addr(server)}:${origin_path}`, destination_path]), "inherit");

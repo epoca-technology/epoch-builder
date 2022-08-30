@@ -29,7 +29,7 @@ Epoch.init()
 # Extract the args
 parser = ArgumentParser()
 parser.add_argument("--action", dest="action")
-parser.add_argument("--ip", dest="id", nargs='?')
+parser.add_argument("--ip", dest="ip", nargs='?')
 args = parser.parse_args()
 
 

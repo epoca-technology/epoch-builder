@@ -272,7 +272,7 @@ class KerasRegressionTraining:
         if "DNN" in self.id:
             return 4
         elif "CNN" in self.id:
-            return 32
+            return 16
         elif "CLSTM" in self.id:
             return 128
         elif "LSTM" in self.id:

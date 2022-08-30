@@ -10,7 +10,7 @@ from modules.backtest.Backtest import Backtest
 
 # BACKTEST
 # Args:
-#   --config_file_name "unit_test.json"
+#   --config_file_name "UNIT_TEST.json"
 endpoint_name: str = "BACKTEST"
 Utils.endpoint_header(Configuration.VERSION, endpoint_name)
 

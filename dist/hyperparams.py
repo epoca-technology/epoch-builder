@@ -28,6 +28,7 @@ Epoch.init()
 # Extract the args
 parser = ArgumentParser()
 parser.add_argument("--model_type", dest="model_type")
+parser.add_argument("--training_data_file_name", dest="training_data_file_name", nargs='?')
 parser.add_argument("--batch_size", dest="batch_size", nargs='?')
 args = parser.parse_args()
 

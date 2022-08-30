@@ -288,7 +288,25 @@ import { ClusterInput } from "./ClusterInput.js"
 
 
 
-    // hyperparams
+
+
+	/**
+	 * Builds the hyperparams based on the provided config on the selected 
+	 * server.
+	 * @returns Promise<void>
+	 */
+	 async hyperparams() { 
+		// Retrieve the server
+		const server = await this.cluster_input.server(true, false, true, true);
+
+		// Retrieve and unpack the category and the config file
+		const { model_type, training_data_file_name, batch_size } = await this.cluster_input.hyperparams();
+
+		// Finally, Run the command
+		await this.cluster_command.hyperparams(server, model_type, training_data_file_name, batch_size); 
+	}
+
+
 
 
 
@@ -296,7 +314,7 @@ import { ClusterInput } from "./ClusterInput.js"
 	 * Initializes the training process for a selected model type and server.
 	 * @returns Promise<void>
 	 */
-	 async regression_training() { 
+	async regression_training() { 
 		// Retrieve the server
 		const server = await this.cluster_input.server(true, false, true, true);
 
@@ -312,24 +330,104 @@ import { ClusterInput } from "./ClusterInput.js"
 
 
 
-    // regression_selection
+
+	/**
+	 * Initializes the regression selection process for the selected list of models and server.
+	 * @returns Promise<void>
+	 */
+	async regression_selection() { 
+		// Retrieve the server
+		const server = await this.cluster_input.server(true, false, true, true);
+
+		// Retrieve the model ids string
+		const model_ids = await this.cluster_input.selected_model_ids();
+
+		// Finally, Run the command
+		await this.cluster_command.regression_selection(server, model_ids); 
+	}
 
 
-    // classification_training_data
 
 
-    // classification_training
+
+	/**
+	 * Initializes the classification training data process for the selected server.
+	 * @returns Promise<void>
+	 */
+	async classification_training_data() { 
+		// Retrieve the server
+		const server = await this.cluster_input.server(true, false, true, true);
+
+		// Retrieve the configuration values
+		const {
+			regression_selection_file_name,
+			description,
+			steps,
+			include_rsi,
+			include_aroon
+		} = await this.cluster_input.classification_training_data();
+
+		// Finally, Run the command
+		await this.cluster_command.classification_training_data(
+			server, 
+			regression_selection_file_name,
+			description,
+			steps,
+			include_rsi,
+			include_aroon
+		); 
+	}
 
 
-    // backtest
+
+
+
+	/**
+	 * Initializes the training process for a selected model type and server.
+	 * @returns Promise<void>
+	 */
+	async classification_training() { 
+		// Retrieve the server
+		const server = await this.cluster_input.server(true, false, true, true);
+
+		// Retrieve the model type
+		const trainable_model_type = await this.cluster_input.trainable_model_type("classification");
+
+		// Retrieve and unpack the category and the config file
+		const { category, config_file_name } = await this.cluster_input.training_config(trainable_model_type);
+
+		// Finally, Run the command
+		await this.cluster_command.classification_training(server, trainable_model_type, category, config_file_name); 
+	}
+
+
+
+
+
+	/**
+	 * Initializes the backtest process on a selected server.
+	 * @returns Promise<void>
+	 */
+	async backtest() { 
+		// Retrieve the server
+		const server = await this.cluster_input.server(true, false, true, true);
+
+		// Retrieve the backtest config file name
+		const config_file_name = await this.cluster_input.backtest_config();
+
+		// Finally, Run the command
+		await this.cluster_command.backtest(server, config_file_name); 
+	}
+
 
 
     
+
 	/**
 	 * Merges the training certificates for a selected model type and server.
 	 * @returns Promise<void>
 	 */
-	 async merge_training_certificates() { 
+	async merge_training_certificates() { 
 		// Retrieve the server
 		const server = await this.cluster_input.server(true, false, true, true);
 
@@ -341,10 +439,44 @@ import { ClusterInput } from "./ClusterInput.js"
 	}
 
 
-    // epoch_management
 
 
-    // database_management
+
+	/**
+	 * Runs the Epoch Builder's Epoch Management tool on a selected server.
+	 * @returns Promise<void>
+	 */
+	async epoch_management() { 
+		// Retrieve the server
+		const server = await this.cluster_input.server(true, false, true, true);
+
+		// Retrieve the epoch management args
+		const args = await this.cluster_input.epoch_management();
+
+		// Finally, Run the command
+		await this.cluster_command.epoch_management(server, args); 
+	}
+
+
+
+
+
+	/**
+	 * Runs the Epoch Builder's Database Management tool on a selected server.
+	 * @returns Promise<void>
+	 */
+	async database_management() { 
+		// Retrieve the server
+		const server = await this.cluster_input.server(true, false, true, true);
+
+		// Retrieve the db management args
+		const { action, ip } = await this.cluster_input.db_management(server);
+
+		// Finally, Run the command
+		await this.cluster_command.db_management(server, action, ip); 
+	}
+
+
 
 
 
@@ -579,7 +711,7 @@ import { ClusterInput } from "./ClusterInput.js"
 	 * @param server?: object
 	 * @returns Promise<void>
 	 */
-	 async push_epoch(server = undefined) {
+	async push_epoch(server = undefined) {
 		// Check if the server has been provided
 		server = server ? server: await this.cluster_input.server(false, false, true, true); 
 
@@ -621,7 +753,7 @@ import { ClusterInput } from "./ClusterInput.js"
 	 * @param trainable_model_type?: string
 	 * @returns Promise<string>
 	 */
-	 async push_epoch_builder() {
+	async push_epoch_builder() {
 		// Retrieve the server
 		const server = await this.cluster_input.server(false, false, true, true);
 
@@ -677,7 +809,7 @@ import { ClusterInput } from "./ClusterInput.js"
 	 * @param print_payload?: boolean
 	 * @returns Promise<string>
 	 */
-	 async push_file(origin, destination, server = undefined, print_payload = false) {
+	async push_file(origin, destination, server = undefined, print_payload = false) {
 		// Retrieve the server in case it wasn't provided
 		server = server ?  server : await this.cluster_input.server(false, false, true, true);
 
@@ -751,7 +883,7 @@ import { ClusterInput } from "./ClusterInput.js"
 	 * the server's directories on completion.
 	 * @returns Promise<void>
 	 */
-	 async pull_trained_models() {
+	async pull_trained_models() {
 		// Retrieve the server which data will be pulled from
 		const server = await this.cluster_input.server(false, false, true, true);
 
