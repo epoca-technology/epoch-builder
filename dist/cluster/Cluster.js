@@ -214,24 +214,10 @@ import { ClusterInput } from "./ClusterInput.js"
 	 */
 	async shutdown_server() { 
 		// Select the server
-		const server = await this.cluster_input.server(false, true, true);
+		const server = await this.cluster_input.server(false, false, true);
 
-		// Check if it has to shutdown all servers in the cluster
-		if (server.name == "all") { 
-			// Shutdown all the servers that are online and are a part of the cluster
-            for (let s of await this.cluster_server.list_servers()) { 
-				if (s.is_cluster && s.is_online) {
-					console.log(`\nShutting ${server.name} down...`);
-					await this.cluster_command.shutdown(a);
-				}
-			} 
-        }
-
-		// Otherwise, shutdown the specific server
-		else { 
-			console.log(`\n1/1) Shutting ${server.name} down...`);
-			await this.cluster_command.shutdown(server);
-		}
+		console.log(`\n1/1) Shutting ${server.name} down...`);
+		await this.cluster_command.shutdown(server);
 	}
 
 

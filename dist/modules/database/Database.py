@@ -184,14 +184,20 @@ class Database:
             text (str): The query to be executed.
             values? (Tuple[Any]): The values to be used for the query substitutions.
         """
-        # Handle the case accordingly
-        if values:
-            CURSOR.execute(text, values)
-        else:
-            CURSOR.execute(text)
-        
-        # Commit the write action
-        CONNECTION.commit()
+        try:
+            # Handle the case accordingly
+            if values:
+                CURSOR.execute(text, values)
+            else:
+                CURSOR.execute(text)
+            
+            # Commit the write action
+            CONNECTION.commit()
+
+        # In the case of an error, roll back the execution and re-raise it
+        except Exception as e:
+            CONNECTION.rollback()
+            raise e
 
 
 

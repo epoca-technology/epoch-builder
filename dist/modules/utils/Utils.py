@@ -1,7 +1,7 @@
 from typing import List, Union, Any, Tuple
-from os import makedirs, listdir, system, name as os_name, remove
+from os import makedirs, listdir, remove
 from os.path import exists, isfile, dirname, splitext
-from shutil import rmtree, move, copy
+from shutil import rmtree, move, copy, copytree
 from json import load, dumps
 from time import time
 from datetime import datetime
@@ -462,12 +462,17 @@ class Utils:
             destination: str
                 The path where it will be pasted
         """
-        # Firstly make sure the source exists
-        if not Utils.file_exists(source) and not Utils.directory_exists(source):
-            raise RuntimeError(f"The file/dir cannot be copied because the source does not exist: {source}")
+        # Check if the source is a file
+        if Utils.file_exists(source):
+            copy(source, destination)
+        
+        # Check if the source is a directory
+        elif Utils.directory_exists(source):
+            copytree(source, destination)
 
-        # Finally, move the file/dir
-        copy(source, destination)
+        # Otherwise, raise an error
+        else:
+            raise RuntimeError(f"The file/dir cannot be copied because the source does not exist: {source}")
 
 
 

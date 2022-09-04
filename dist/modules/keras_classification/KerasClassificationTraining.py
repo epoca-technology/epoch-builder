@@ -72,8 +72,8 @@ class KerasClassificationTraining:
     TRAINING_CONFIG: IKerasTrainingTypeConfig = {
         "initial_lr": 0.01,
         "decay_steps": 1,
-        "decay_rate": 0.35,
-        "epochs": 100,
+        "decay_rate": 0.1,
+        "epochs": 200,
         "patience": 15,
         "batch_size": 32
     }
@@ -312,7 +312,7 @@ class KerasClassificationTraining:
             mode="max", 
             min_delta=0.001, 
             patience=KerasClassificationTraining.TRAINING_CONFIG["patience"],
-            restore_best_weights=True
+            #restore_best_weights=True
         )
 
         # Retrieve the Keras Model

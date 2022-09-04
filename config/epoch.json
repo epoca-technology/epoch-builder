@@ -14,5 +14,5 @@
     "regression_predictions": 32,
     "model_discovery_steps": 5,
     "idle_minutes_on_position_close": 30,
-    "classification_training_data_id_ut": "ea998c4d-9142-435f-8cc9-c5804ed5c1e8"
+    "classification_training_data_id_ut": "9bdad3ff-212d-43bc-9d4b-7d6cf4fcd6a7"
 }

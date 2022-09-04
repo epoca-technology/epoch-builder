@@ -381,7 +381,7 @@ import { spawn } from "child_process";
 			server, "classification_training_data.py",
 			[
 				"--regression_selection_file_name", regression_selection_file_name,
-				"--description", description,
+				"--description", `'${description}'`,
 				"--steps", steps,
 				"--include_rsi", include_rsi,
 				"--include_aroon", include_aroon

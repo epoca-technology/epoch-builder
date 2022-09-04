@@ -29,10 +29,10 @@ class KerasTrainingProgressBar(Callback):
 
 
 # Training Result
-# Any model that does not complete at least 30% of its training is considered to
+# Any model that does not complete at least 15% of its training is considered to
 # have failed.
 def training_passed(history: IKerasModelTrainingHistory, epochs: int) -> bool:
-    """Verifies if a model completed at least 30% of its training.
+    """Verifies if a model completed at least 15% of its training.
 
     Args:
         history: IKerasModelTrainingHistory
@@ -42,4 +42,4 @@ def training_passed(history: IKerasModelTrainingHistory, epochs: int) -> bool:
 
     Returns bool
     """
-    return Utils.get_percentage_out_of_total(len(history["loss"]), epochs) >= 30
+    return Utils.get_percentage_out_of_total(len(history["loss"]), epochs) >= 15

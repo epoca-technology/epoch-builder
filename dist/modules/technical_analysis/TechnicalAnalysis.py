@@ -147,7 +147,8 @@ class TechnicalAnalysis:
                     (id, ta)
                 )
             except Exception as e:
-                print(f"TA Insert Error: {str(e)}")
+                pass
+                #print(f"TA Insert Error: {str(e)}")
 
 
 

@@ -75,8 +75,8 @@ class KerasRegressionTraining:
     TRAINING_CONFIG: IKerasTrainingTypeConfig = {
         "initial_lr": 0.01,
         "decay_steps": 1,
-        "decay_rate": 0.35,
-        "epochs": 100,
+        "decay_rate": 0.1,
+        "epochs": 200,
         "patience": 10,
         "batch_size": 32
     }
@@ -270,11 +270,11 @@ class KerasRegressionTraining:
             int
         """
         if "DNN" in self.id:
-            return 4
+            return 2
         elif "CNN" in self.id:
             return 16
         elif "CLSTM" in self.id:
-            return 128
+            return 256
         elif "LSTM" in self.id:
             return 128
         else:

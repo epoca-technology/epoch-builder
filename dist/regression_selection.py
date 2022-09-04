@@ -27,7 +27,7 @@ args = parser.parse_args()
 
 
 # Init the Model IDs
-model_ids: List[str] = model_ids.model_ids.split(",")
+model_ids: List[str] = args.model_ids.split(",")
 
 
 
