@@ -47,7 +47,7 @@ import { spawn } from "child_process";
 	 */
 	 async is_server_online(ip) {
 		try {
-			await this.execute("ping", ["-c", "1", ip], "pipe");
+			await this.execute("ping", ["-c", "1", "-w", "1", ip], "pipe");
 			return true;
 		} catch(e) { return false }
 	}
@@ -72,7 +72,7 @@ import { spawn } from "child_process";
 			// Attempt to retrieve the state of the server
 			try {
 				// Retrieve the pid, if it exists, it means the server is unavailable
-				const pid = await this.get_process_id(server);
+				const {pid, command} = await this.get_process(server);
 
 				// If it exists, it means the server is unavailable.
 				return pid == undefined;
@@ -92,11 +92,14 @@ import { spawn } from "child_process";
 	 * Attempts to extract the python3 process id from a server. If found, it will return it
 	 * in string format. Otherwise, returns undefined.
 	 * @param server: object
-	 * @returns Promise<string|undefined>
+	 * @returns Promise<object>
 	 */
-	async get_process_id(server) {
+	async get_process(server) {
+		// Init the process object
+		var final_process = { pid: undefined, command: undefined };
+
 		// Init the payload
-		let payload = "";
+		var payload = "";
 
 		// Check if the server is localhost
 		if (server.name == "localhost") { payload = await this.execute("ps", ["aux"], "pipe") }
@@ -122,24 +125,25 @@ import { spawn } from "child_process";
 				// Iterate over each item the first valid number is found (PID)
 				var i = 0;
 				var pid = undefined;
+				var command = undefined;
 				while (pid == undefined && i < process_items.length) {
 					// Check if the current item is a valid number
-					if (Number(process_items[i])) pid =  process_items[i];
+					if (Number(process_items[i])) {
+						pid =  process_items[i];
+						command = process_items.slice(process_items.indexOf("python3")).join(" ");
+					}
 
 					// Increment the counter
 					i += 1;
 				}
 
-				// Finally, return the process id
-				return pid;
+				// Populate the process
+				final_process = {pid: pid, command: command}
 			} 
-			
-			// Otherwise, no process was found
-			else { return undefined }
 		}
 
-		// Otherwise, return undefined
-		else { return undefined }
+		// Finally, return the process object
+		return final_process;
 	}
 
 
@@ -152,7 +156,7 @@ import { spawn } from "child_process";
      * @param server: object
      * @returns Promise<string>
      */
-    async get_server_status(server) {
+    async get_landscape_sysinfo(server) {
         // Init the payload
         var payload = "";
 
@@ -250,7 +254,7 @@ import { spawn } from "child_process";
 	 */
 	async kill_process(server) {
 		// Retrieve the process id (if any)
-		let pid = await this.get_process_id(server);
+		var {pid, command} = await this.get_process(server);
 		if (typeof pid != "string") { throw new Error(`The python3 process is not running on ${server.name}`) }
 
         // Check if the server is localhost
@@ -262,7 +266,7 @@ import { spawn } from "child_process";
 			await this.execute("ssh", this.ssh_args([server, "kill", "-9", pid]), "pipe");
 
 			// When a process is executed with nohup, a second process is created
-			pid = await this.get_process_id(server);
+			var {pid, command} = await this.get_process(server);
 			if (typeof pid == "string") await this.execute("ssh", this.ssh_args([server, "kill", "-9", pid]), "pipe");
         }
     }

@@ -160,14 +160,43 @@ import { ClusterInput } from "./ClusterInput.js"
 
 		// Check if it has to display all servers
 		if (server.name == "all") { 
-            for (let s of await this.cluster_server.list_servers(true)) { 
-				console.log(`\n\n${s.name}:\n`);
-				console.log(await this.cluster_command.get_server_status(s));
-			} 
+            for (let s of await this.cluster_server.list_servers(true)) { await this._display_server_status(s) } 
         }
 
 		// Otherwise, print the specific server
-		else { console.log(" "); console.log(await this.cluster_command.get_server_status(server)); }
+		else { 
+			server.is_online = server.name == "localhost" ? true: await this.cluster_command.is_server_online(server.ip);
+			server.is_available = await this.cluster_command.is_server_available(server.is_online, server);
+			await this._display_server_status(server);
+		}
+	}
+
+
+
+	/**
+	 * Handles the display of the status for a given server.
+	 * @param server 
+	 * @returns Promise<void>
+	 */
+	async _display_server_status(server) {
+		// Print the heading
+		console.log(`\n\n${server.name}:`);
+
+		// Check if the server is online
+		if (server.is_online) {
+			// Print the state of the server
+			if (server.is_available) {
+				console.log("Not running.");
+			} else {
+				const { pid, command } = await this.cluster_command.get_process(server);
+				console.log(`Running: ${pid} (${command})`);
+			}
+
+			// Print the system info
+			console.log(await this.cluster_command.get_landscape_sysinfo(server));
+		} else {
+			console.log("Offline");
+		}
 	}
 
 
@@ -214,10 +243,25 @@ import { ClusterInput } from "./ClusterInput.js"
 	 */
 	async shutdown_server() { 
 		// Select the server
-		const server = await this.cluster_input.server(false, false, true);
+		const server = await this.cluster_input.server(false, true, true);
 
-		console.log(`\n1/1) Shutting ${server.name} down...`);
-		await this.cluster_command.shutdown(server);
+		// Check if it has to display all servers
+		if (server.name == "all") { 
+            for (let s of await this.cluster_server.list_servers()) { 
+				if (s.is_online && s.is_cluster) {
+					console.log(`\n\nShutting ${s.name} down...\n`);
+					try {
+						await this.cluster_command.shutdown(s);
+					} catch (e) { }
+				}
+			} 
+        }
+
+		// Otherwise, print the specific server
+		else { 
+			console.log(`\n1/1) Shutting ${server.name} down...`);
+			await this.cluster_command.shutdown(server);
+		}
 	}
 
 
