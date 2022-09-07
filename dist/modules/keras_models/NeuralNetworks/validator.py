@@ -38,8 +38,7 @@ def validate(
 
     Raises:
         ValueError:
-            If it is a regression and did not receive correct autoregressive, lookback or
-                prediction args.
+            If it is a regression and did not receive correct lookback or prediction args.
             If it is a classification and did not receive correct features_num
             If the provided configuration doesnt match the model's requirements in any way.
     """
@@ -51,12 +50,11 @@ def validate(
     model_type: ITrainableModelType = get_trainable_model_type(config["name"])
 
     # Make sure the autoregressive, lookback and predictions have been provided in case of a regression
-    if model_type == "keras_regression" and (not isinstance(config.get("autoregressive"), bool) \
-        or not isinstance(config.get("lookback"), int) or not isinstance(config.get("predictions"), int)):
-        print(config.get("autoregressive"))
+    if model_type == "keras_regression" and (not isinstance(config.get("lookback"), int) \
+        or not isinstance(config.get("predictions"), int)):
         print(config.get("lookback"))
         print(config.get("predictions"))
-        raise ValueError(f"The provided keras regression config (autoregressive, lookback and/or predictions) are invalid.")
+        raise ValueError(f"The provided keras regression config (lookback and/or predictions) are invalid.")
 
     # Make sure the number of features has been provided in case of a classification
     if model_type == "keras_classification" and not isinstance(config.get("features_num"), int):

@@ -8,7 +8,7 @@ from modules.candlestick.Candlestick import Candlestick
 
 
 
-def make_datasets(lookback: int, autoregressive: bool, predictions: int, train_split: float) -> IRegressionDatasets:
+def make_datasets(lookback: int, predictions: int, train_split: float) -> IRegressionDatasets:
     """Builds a tuple containing the features and labels for the train and test datasets based
     on the kind of regression. 
 
@@ -16,13 +16,6 @@ def make_datasets(lookback: int, autoregressive: bool, predictions: int, train_s
         lookback: int
             The number of prediction candlesticks the model needs to look at in order
             to make a prediction.
-        autoregressive: bool
-            The kind of regression. An Autoregressive Regression performs predictions 1 by 
-            1 and keeps feeding them to itself. On the other hand, a single shot prediction
-            generates them all at once.
-            The training data looks as follows:
-            Autoregressive: features[100] -> labels[1]
-            Single Shot: features[100] -> labels[30]
         predictions: int
             The number of predictions the model will output in the end.
         train_split: float
@@ -45,13 +38,8 @@ def make_datasets(lookback: int, autoregressive: bool, predictions: int, train_s
 
     # Iterate over the normalized ds and build the features & labels
     for i in range(lookback, rows):
-        # If it is an autoregression, add only 1 price as the label
-        if autoregressive:
-            features_raw.append(df.iloc[i-lookback:i, 0])
-            labels_raw.append(df.iloc[i, 0])
-
-        # If it is not an autoregression, add the labels based on the number of predictions
-        elif not autoregressive and i < (rows-predictions):
+        # Make sure there are enough items remaining
+        if i < (rows-predictions):
             features_raw.append(df.iloc[i-lookback:i, 0])
             labels_raw.append(df.iloc[i:i+predictions, 0])
 

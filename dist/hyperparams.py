@@ -42,9 +42,9 @@ model_type: ITrainableModelType = args.model_type
 # Batch Size - The maximum amount of models that will be included per batch.
 default_batch_size: int
 if model_type == "keras_regression":
-    default_batch_size = KerasHyperparams.REGRESSION_BATCH_SIZE
+    default_batch_size = KerasHyperparams.REGRESSION_PARAMS["batch_size"]
 elif model_type == "keras_classification":
-    default_batch_size = KerasHyperparams.CLASSIFICATION_BATCH_SIZE
+    default_batch_size = KerasHyperparams.CLASSIFICATION_PARAMS["batch_size"]
 else:
     raise ValueError(f"The default batch size could not be extracted for: {model_type}")
 batch_size: int = int(args.batch_size) if args.batch_size.isdigit() else default_batch_size

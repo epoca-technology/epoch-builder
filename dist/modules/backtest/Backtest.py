@@ -17,9 +17,6 @@ class Backtest:
     that can be analyzed in the GUI.
 
     Instance Properties:
-        test_mode: bool
-            If test_mode is enabled, it won't initialize the candlesticks and will perform predictions
-            with cache disabled
         Identification: 
             id: str
                 The identification/description of the Backtest Instance. This value must be compatible
@@ -59,18 +56,13 @@ class Backtest:
     ## Initialization ##
 
 
-    def __init__(self, config: IBacktestConfig, test_mode: bool = False):
+    def __init__(self, config: IBacktestConfig):
         """Initializes the Backtesting Instance as well as the Candlesticks.
 
         Args:
             config: IBacktestConfig
                 The configuration that will be used during the backtesting process
-            test_mode: bool
-                Indicates if the execution is running from unit tests.
         """
-        # Initialize the type of execution
-        self.test_mode: bool = test_mode
-
         # ID & Description
         self.id: str = config["id"]
         self.description: str = config["description"]
@@ -80,12 +72,6 @@ class Backtest:
 
         # Initialize the results
         self.results: List[IBacktestResult] = []
-
-        # Candlesticks Initialization
-        # Initialize the candlesticks based on the epoch's configuration.
-        # IMPORTANT: Candlesticks should not be initialized when running on test mode.
-        if not self.test_mode:
-            Candlestick.init(max([m.get_lookback() for m in self.models]), Epoch.BACKTEST_START, Epoch.BACKTEST_END)
         
         # Init the start and end
         self.start: int = int(Candlestick.DF.iloc[0]["ot"])
@@ -171,7 +157,7 @@ class Backtest:
                 # 4) The current prediction range's close time is greater than the last one
                 elif (position.active == None) and (candlestick["ot"] > idle_until) and (not is_last_candlestick):
                     # Retrieve the current prediction range's close time
-                    _, last_ct = Candlestick.get_lookback_prediction_range(100, candlestick["ot"])
+                    _, last_ct = Candlestick.get_lookback_prediction_range(Epoch.REGRESSION_LOOKBACK, candlestick["ot"])
 
                     # Only predict in new ranges
                     if last_ct > last_neutral_ct:

@@ -143,15 +143,15 @@ class ClusterInput {
 
 		// If it is a classification, retrieve the file name and set the default batch size
 		if (this.trainable_model_types["classification"].includes(model_type)) {
-			// Set the default batch size to 60 (Classification default batch size)
-			default_batch_size = "60";
+			// Set the default batch size to 300 (Classification default batch size)
+			default_batch_size = "300";
 
 			// Retrieve the classification training data file
 			training_data_file_name = await this.classification_training_data_file_name();
 		} 
 		
-		// Otherwise, set the batch size to 30 (Regression default batch size)
-		else { default_batch_size = "30" }
+		// Otherwise, set the batch size to 150 (Regression default batch size)
+		else { default_batch_size = "150" }
 	
 		// Present the batch size form
 		console.log(" ");
@@ -159,8 +159,8 @@ class ClusterInput {
 			{
 				type: "input", name: "value", message: `Enter the batch size (Optional: defaults to ${default_batch_size})`, 
 				validate(value) {
-					if (typeof value != "string" || isNaN(value) || Number(value) < 5 || Number(value) > 200) {
-						return "Please enter a valid batch size. It can be an int ranging 5 - 200.";
+					if (typeof value != "string" || isNaN(value) || Number(value) < 5 || Number(value) > 300) {
+						return "Please enter a valid batch size. It can be an int ranging 5 - 300.";
 					} else { return true }
 				}
 			}
@@ -359,10 +359,8 @@ class ClusterInput {
 			epoch_width: "",
 			seed: "",
 			train_split: "",
-			backtest_split: "",
 			regression_lookback: "",
 			regression_predictions: "",
-			model_discovery_steps: "",
 			idle_minutes_on_position_close: "",
 			training_data_file_name: "",
 			model_ids: ""
@@ -406,18 +404,10 @@ class ClusterInput {
 					}
 				},
 				{
-					type: "input", name: "train_split", message: "Enter the train split (Optional: defaults to 0.85)", 
+					type: "input", name: "train_split", message: "Enter the train split (Optional: defaults to 0.8)", 
 					validate(value) {
 						if (typeof value == "string" && value.length && (isNaN(value) || Number(value) < 0.6 || Number(value) > 0.95)) {
 							return "Please enter a valid train split. It can be a float ranging 0.6 - 0.95.";
-						} else { return true }
-					}
-				},
-				{
-					type: "input", name: "backtest_split", message: "Enter the backtest split (Optional: defaults to 0.3)", 
-					validate(value) {
-						if (typeof value == "string" && value.length && (isNaN(value) || Number(value) < 0.2 || Number(value) > 0.6)) {
-							return "Please enter a valid backtest split. It can be a float ranging 0.2 - 0.6.";
 						} else { return true }
 					}
 				},
@@ -438,14 +428,6 @@ class ClusterInput {
 					}
 				},
 				{
-					type: "input", name: "model_discovery_steps", message: "Enter the model discovery steps (Optional: defaults to 5)", 
-					validate(value) {
-						if (typeof value == "string" && value.length && (isNaN(value) || Number(value) < 1 || Number(value) > 20)) {
-							return "Please enter a valid regression predictions. It can be an int ranging 1 - 20.";
-						} else { return true }
-					}
-				},
-				{
 					type: "input", name: "idle_minutes_on_position_close", message: "Enter the idle minutes on position_close (Optional: defaults to 30)", 
 					validate(value) {
 						if (typeof value == "string" && value.length && (isNaN(value) || Number(value) < 0 || Number(value) > 1000)) {
@@ -460,10 +442,8 @@ class ClusterInput {
 			args.epoch_width = form["epoch_width"];
 			args.seed = form["seed"];
 			args.train_split = form["train_split"];
-			args.backtest_split = form["backtest_split"];
 			args.regression_lookback = form["regression_lookback"];
 			args.regression_predictions = form["regression_predictions"];
-			args.model_discovery_steps = form["model_discovery_steps"];
 			args.idle_minutes_on_position_close = form["idle_minutes_on_position_close"];
 		}
 

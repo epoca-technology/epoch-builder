@@ -35,13 +35,15 @@ class RegressionSelection:
 
 
 
-    def __init__(self, model_ids: List[str]):
+    def __init__(self, model_ids: List[str], selection_size: int):
         """Initializes the RegressionSelection Instance and prepares it
         to be executed.
 
         Args:
             model_ids: List[str]
                 The list of regression ids that have been selected.
+            selection_size: int
+                The number of models that will be selected at the end.
         
         Raises:
             ValueError:

@@ -26,11 +26,6 @@ class IKerasRegressionTrainingConfig(TypedDict):
     # Any relevant data that should be attached to the trained model.
     description: str
 
-    # Regression Model Type
-    # Default: will generate all predictions in one go.
-    # Autoregressive: will generate 1 prediction at a time and feed it to itself as an input 
-    autoregressive: bool
-
     # The number of prediction candlesticks that will look into the past in order to make a prediction.
     lookback: int
 
@@ -83,7 +78,6 @@ class IKerasRegressionTrainingBatch(TypedDict):
 # load the model's file
 class IKerasRegressionDiscoveryInitConfig(TypedDict):
     model: Sequential
-    autoregressive: bool
     lookback: int
     predictions: int
 
@@ -113,7 +107,6 @@ class IKerasRegressionTrainingCertificate(TypedDict):
     training_data_summary: IRegressionDatasetSummary
 
     # Training Configuration
-    autoregressive: bool
     lookback: int
     predictions: int
     learning_rate: float

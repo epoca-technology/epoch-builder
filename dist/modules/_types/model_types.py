@@ -74,11 +74,6 @@ class IRegressionConfig(TypedDict):
     # Important information regarding the model
     description: str
 
-    # Regression Model Type
-    # Default: will generate all predictions in one go.
-    # Autoregressive: will generate 1 prediction at a time and feed it to itself as an input 
-    autoregressive: bool
-
     # The number of candlesticks it will lookback to make a prediction
     lookback: int
 

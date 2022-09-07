@@ -54,18 +54,12 @@ class IKerasModelConfig(TypedDict):
     # Pool Sizes
     pool_sizes: Union[List[int], None]
 
-    # Regression Model Type
-    # Default: will generate all predictions in one go.
-    # Autoregressive: will generate 1 prediction at a time and feed it to itself as an input 
-    autoregressive: Union[bool, None]
-
     # Lookback used as the model's input. This lookback is not set in the 
     # RegressionTraining.json file. However, it is populated once the RegressionTraining
     # instance is initialized.
     # Also keep in mind that this property only exists Regressions.
     lookback: Union[int, None]
 
-    # Only used for not autoregressive regressions
     # Number of predictions the model will output. This prediction is not set in the 
     # RegressionTraining.json file. However, it is populated once the RegressionTraining
     # instance is initialized.
@@ -258,7 +252,7 @@ class KerasModelInterface:
         raise NotImplementedError("KerasModel.__init__ has not been implemented.")
 
     # Performs a prediction based provided features
-    def predict(self, *args,**kwargs) -> List[float]:
+    def predict(self, *args,**kwargs) -> Any:
         raise NotImplementedError("KerasModel.predict has not been implemented.")
 
     # Retrieves the configuration of the Keras Model

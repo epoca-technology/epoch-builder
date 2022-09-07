@@ -11,10 +11,10 @@ from keras.callbacks import EarlyStopping, History
 from modules._types import IKerasTrainingTypeConfig, IKerasModelConfig, IKerasModelTrainingHistory,\
     IKerasRegressionTrainingConfig, IKerasRegressionTrainingCertificate, IKerasOptimizer, IKerasRegressionLoss, \
         IKerasRegressionMetric, ITrainableModelType, IDiscovery, IDiscoveryPayload
+from modules._types.regression_training_data_types import IRegressionDatasets
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
-from modules.regression_training_data.Datasets import make_datasets
 from modules.keras_models.KerasModel import KerasModel
 from modules.keras_models.LearningRateSchedule import LearningRateSchedule
 from modules.keras_models.KerasTrainingProgress import KerasTrainingProgressBar, training_passed
@@ -91,12 +91,15 @@ class KerasRegressionTraining:
 
 
 
-    def __init__(self, config: IKerasRegressionTrainingConfig, test_mode: bool=False):
+    def __init__(self, config: IKerasRegressionTrainingConfig, datasets: IRegressionDatasets, test_mode: bool=False):
         """Initializes the RegressionTraining Instance.
 
         Args:
             config: IKerasRegressionTrainingConfig
                 The configuration that will be used to train the model.
+            datasets: IRegressionDatasets
+                The packed datasets that will be used to train and evaluate the
+                regression.
             test_mode: bool
                 If running from unit tests, it won't check the model's directory.
 
@@ -149,12 +152,7 @@ class KerasRegressionTraining:
         self.keras_model["predictions"] = self.predictions
 
         # Make the datasets
-        self.train_x, self.train_y, self.test_x, self.test_y = make_datasets(
-            lookback=self.lookback,
-            autoregressive=self.autoregressive,
-            predictions=self.predictions,
-            train_split=Epoch.TRAIN_SPLIT
-        )
+        self.train_x, self.train_y, self.test_x, self.test_y = datasets
 
         # Initialize the Dataset Sizes
         self.train_size: int = self.train_x.shape[0]
@@ -408,7 +406,6 @@ class KerasRegressionTraining:
             save_model_to_hdf5(model, f)
             f.attrs["id"] = self.id
             f.attrs["description"] = self.description
-            f.attrs["autoregressive"] = self.autoregressive
             f.attrs["lookback"] = self.lookback
             f.attrs["predictions"] = self.predictions
             f.attrs["discovery"] = dumps(discovery)
@@ -509,7 +506,6 @@ class KerasRegressionTraining:
             "training_data_summary": Candlestick.NORMALIZED_PREDICTION_DF["c"].describe().to_dict(),
 
             # Training Configuration
-            "autoregressive": self.autoregressive,
             "lookback": self.lookback,
             "predictions": self.predictions,
             "learning_rate": self.learning_rate,

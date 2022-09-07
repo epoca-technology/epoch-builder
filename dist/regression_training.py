@@ -3,10 +3,12 @@ from argparse import ArgumentParser
 from modules._types import IKerasRegressionTrainingBatch, IKerasRegressionTrainingCertificate, ITrainableModelType,\
     IKerasRegressionTrainingConfig, IXGBRegressionTrainingBatch, IXGBRegressionTrainingCertificate, IXGBRegressionTrainingConfig,\
         IHyperparamsCategory
+from modules._types.regression_training_data_types import IRegressionDatasets
 from modules.utils.Utils import Utils
 from modules.configuration.Configuration import Configuration
-from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
+from modules.epoch.Epoch import Epoch
+from modules.regression_training_data.Datasets import make_datasets
 from modules.keras_regression.KerasRegressionTraining import KerasRegressionTraining
 from modules.xgb_regression.XGBRegressionTraining import XGBRegressionTraining
 
@@ -105,6 +107,15 @@ Candlestick.init(Epoch.REGRESSION_LOOKBACK, Epoch.START, Epoch.END)
 
 
 
+# DATASETS
+# The packed datasets that will be used to train and evaluate regressions.
+datasets: IRegressionDatasets = make_datasets(
+    lookback=Epoch.REGRESSION_LOOKBACK, 
+    predictions=Epoch.REGRESSION_PREDICTIONS,
+    train_split=Epoch.TRAIN_SPLIT
+)
+
+
 
 # CERTIFICATES
 # This file will be used to create the certificates batch once all models finish training.
@@ -117,9 +128,9 @@ certificates: Union[List[IKerasRegressionTrainingCertificate], List[IXGBRegressi
 # Returns the instance of a training class based on the selected model_type
 def get_trainer(model_config: ITrainingConfig) -> ITrainer:
     if model_type == "keras_regression":
-        return KerasRegressionTraining(model_config)
+        return KerasRegressionTraining(model_config, datasets)
     elif model_type == "xgb_regression":
-        return XGBRegressionTraining(model_config)
+        return XGBRegressionTraining(model_config, datasets)
     else:
         raise ValueError(f"Could not find the training class for model_type: {model_type}")
 

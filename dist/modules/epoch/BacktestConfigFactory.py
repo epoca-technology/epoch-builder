@@ -58,7 +58,7 @@ class BacktestConfigFactory:
                 The configuration of the Backtest that will be saved.
         """
         # Build the file's path
-        path: str = f"{epoch_id}/{EpochFile.BACKTEST_PATH['configurations']}/{config['id']}.json"
+        path: str = f"{epoch_id}/{EpochFile.EPOCH_PATH['backtest_configurations']}/{config['id']}.json"
 
         # Finally, save the file
         Utils.write(path, config, indent=4)

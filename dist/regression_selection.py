@@ -9,6 +9,7 @@ from modules.regression_selection.RegressionSelection import RegressionSelection
 # REGRESSION SELECTION
 # Args:
 #   --model_ids "KR_LSTM_S2_c064c7c8-9208-472a-b963-007225372c08,KR_LSTM_S3_8e00946d-dd77-46eb-bb3a-e5e92369ad7a,..."
+#   --selection_size "14"
 endpoint_name: str = "REGRESSION SELECTION"
 Utils.endpoint_header(Configuration.VERSION, endpoint_name)
 
@@ -22,6 +23,7 @@ Epoch.init()
 # Extract the args
 parser = ArgumentParser()
 parser.add_argument("--model_ids", dest="model_ids")
+parser.add_argument("--selection_size", dest="selection_size")
 args = parser.parse_args()
 
 
@@ -32,7 +34,7 @@ model_ids: List[str] = args.model_ids.split(",")
 
 
 # Initialize the instance and execute the selection
-rs: RegressionSelection = RegressionSelection(model_ids)
+rs: RegressionSelection = RegressionSelection(model_ids, int(args.selection_size))
 rs.run()
 
 

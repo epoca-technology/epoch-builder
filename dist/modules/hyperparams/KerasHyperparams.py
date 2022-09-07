@@ -4,7 +4,8 @@ from copy import deepcopy
 from math import ceil
 from modules._types import IKerasModelConfig, IKerasHyperparamsLoss, IKerasHyperparamsNetworkReceipt, \
     IKerasRegressionTrainingConfig, IKerasRegressionTrainingBatch, IKerasClassificationTrainingConfig, \
-    IKerasClassificationTrainingBatch, IKerasOptimizer, IKerasActivation, ITrainableModelType, IModelIDPrefix
+    IKerasClassificationTrainingBatch, IKerasParams, ITrainableModelType, IModelIDPrefix, IKerasOptimizer,\
+        IKerasActivation, IKerasHyperparamsNetworks
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.keras_models.KerasModel import KerasModel
@@ -23,29 +24,19 @@ class KerasHyperparams:
     ready to be trained in hyperparams mode.
 
     Class Properties:
-        REGRESSION_BATCH_SIZE: int
-        CLASSIFICATION_BATCH_SIZE: int
-            The maximum number of models per batch that will be used if none was provided.
-        REGRESSION_LEARNING_RATES: List[float]
-        CLASSIFICATION_LEARNING_RATES: List[float]
-            The learning rates to be used during training. If the value is equals to -1 it will make
-            use of the InverseDecay instance.
-        OPTIMIZERS: List[IKerasOptimizer]
-            The list of optimizers that will be used when compiling models.
-        REGRESSION_LOSS_FUNCTIONS: List[IKerasHyperparamsLoss]
-        CLASSIFICATION_LOSS_FUNCTIONS: List[IKerasHyperparamsLoss]
-            The list of loss and metric combinations that will be used when compiling models. 
-            Keep in mind that regressions don't use a metric function.
-        ACTIVATIONS: List[IKerasActivation]
-            The list of different activations that will be used to structure models.
-        DROPOUT_RATES: List[float]
-            The list of different dropout rates that will be used to structure models.
+        REGRESSION_PARAMS: IKerasParams
+        CLASSIFICATION_PARAMS: IKerasParams
+            The parameters that will be used to generate and build the model 
+            variations.
 
     Instance Properties:
         model_type: ITrainableModelType
             The type of model to generate hyperparameters for.
         networks: INeuralNetworks
             The list of networks supported by the model type.
+        params: IKerasParams
+            The parameters that will be used to generate variations based 
+            on the model type.
         batch_size: int
             The max number of models that will go on each batch.
         lookback: int
@@ -54,38 +45,32 @@ class KerasHyperparams:
             The number of predictions that will be generated (Only used by Regressions)
         training_data_id: Union[str, None]
             The identifier of the classification training data.
-
     """
-    # Default Batch Sizes
-    REGRESSION_BATCH_SIZE: int = 30
-    CLASSIFICATION_BATCH_SIZE: int = 60
+    # Regression Model Params
+    REGRESSION_PARAMS: IKerasParams = {
+        "batch_size": 150,
+        "learning_rates": [-1, 0.01, 0.001, 0.0001],
+        "optimizers": [ "adam", "rmsprop" ],
+        "loss_functions": [ 
+            { "name": "mean_absolute_error", "metric": "mean_squared_error" },
+            { "name": "mean_squared_error", "metric": "mean_absolute_error" }
+        ],
+        "activations": [ "relu", "tanh" ],
+        "dropout_rates": [ 0.25, 0.5, 0.75 ]
+    }
 
-    # Learning Rates
-    REGRESSION_LEARNING_RATES: List[float] = [ -1 ] # Reduced from [ -1, 0.01 ]
-
-    # Classification Learning Rates
-    CLASSIFICATION_LEARNING_RATES: List[float] = [ -1, 0.001, 0.0001 ]
-
-    # Optimizers
-    OPTIMIZERS: List[IKerasOptimizer] = [ "adam", "rmsprop" ]
-
-    # Regression Loss Functions
-    REGRESSION_LOSS_FUNCTIONS: List[IKerasHyperparamsLoss] = [ 
-        { "name": "mean_absolute_error", "metric": "mean_squared_error" },
-        { "name": "mean_squared_error", "metric": "mean_absolute_error" }
-    ]
-
-    # Classification Loss Functions
-    CLASSIFICATION_LOSS_FUNCTIONS: List[IKerasHyperparamsLoss] = [ 
-        { "name": "categorical_crossentropy", "metric": "categorical_accuracy" },
-        { "name": "binary_crossentropy", "metric": "binary_accuracy" }
-    ]
-
-    # Activations
-    ACTIVATIONS: List[IKerasActivation] = [ "relu" ]   # Reduced from ["relu", "tanh"]
-
-    # Dropout Rates
-    DROPOUT_RATES: List[float] = [ 0.25 ]   # Reduced from [0.25, 0.5]
+    # Classification Model Params
+    CLASSIFICATION_PARAMS: IKerasParams = {
+        "batch_size": 300,
+        "learning_rates": [-1, 0.01, 0.001, 0.0001, 0.00005 ],
+        "optimizers": [ "adam", "rmsprop" ],
+        "loss_functions": [ 
+            { "name": "categorical_crossentropy", "metric": "categorical_accuracy" },
+            { "name": "binary_crossentropy", "metric": "binary_accuracy" }
+        ],
+        "activations": [ "relu", "tanh" ],
+        "dropout_rates": [ 0.25, 0.5, 0.75 ]
+    }
 
 
 
@@ -118,9 +103,14 @@ class KerasHyperparams:
         self.model_type: ITrainableModelType = model_type
 
         # Init the networks
-        self.networks = REGRESSION_NETWORKS if self.model_type == "keras_regression" else CLASSIFICATION_NETWORKS
+        self.networks: IKerasHyperparamsNetworks = REGRESSION_NETWORKS if self.model_type == "keras_regression" \
+            else CLASSIFICATION_NETWORKS
 
-        # Initialize the batch size
+        # Init the params
+        self.params = KerasHyperparams.REGRESSION_PARAMS if self.model_type == "keras_regression" \
+            else KerasHyperparams.CLASSIFICATION_PARAMS
+
+        # Initialize the batch size based on the input
         self.batch_size: int = batch_size
 
         # Initialize the lookback
@@ -159,16 +149,6 @@ class KerasHyperparams:
         # Init the network receipts
         network_receipts: List[IKerasHyperparamsNetworkReceipt] = []
 
-        # Init the learning rates
-        learning_rates: List[float] = \
-            KerasHyperparams.REGRESSION_LEARNING_RATES if self.model_type == "keras_regression" \
-                else KerasHyperparams.CLASSIFICATION_LEARNING_RATES
-        
-        # Init the loss functions
-        loss_functions: List[IKerasHyperparamsLoss] = \
-            KerasHyperparams.REGRESSION_LOSS_FUNCTIONS if self.model_type == "keras_regression" \
-                else KerasHyperparams.CLASSIFICATION_LOSS_FUNCTIONS
-
         # Iterate over the networks
         for network_type, network_variations in self.networks.items():
             # Init the network's list of configs
@@ -179,13 +159,13 @@ class KerasHyperparams:
             for variation_name, variations in network_variations.items():
 
                 # Iterate over the learning rates
-                for learning_rate in learning_rates:
+                for learning_rate in self.params["learning_rates"]:
 
                     # Iterate over the optimizers
-                    for optimizer in KerasHyperparams.OPTIMIZERS:
+                    for optimizer in self.params["optimizers"]:
 
                         # Iterate over the loss functions
-                        for loss in loss_functions:
+                        for loss in self.params["loss_functions"]:
 
                             # Generate all the combinations for the variation and concatenate them
                             configs = configs + self._get_variation_configs(
@@ -274,7 +254,7 @@ class KerasHyperparams:
         keras_model_name: str,
         keras_model_variations: List[IKerasModelConfig],
         learning_rate: float,
-        optimizer: str,
+        optimizer: IKerasOptimizer,
         loss: IKerasHyperparamsLoss
     ) -> Union[List[IKerasRegressionTrainingConfig], List[IKerasClassificationTrainingConfig]]:
         """Iterates over all the variations and adds all the possible combinations
@@ -285,7 +265,7 @@ class KerasHyperparams:
             keras_model_name: str
             keras_model_variations: List[IKerasModelConfig]
             learning_rate: float
-            optimizer: str
+            optimizer: IKerasOptimizer
             loss: IKerasHyperparamsLoss
         Returns:
             Union[List[IKerasRegressionTrainingConfig], List[IKerasClassificationTrainingConfig]]
@@ -294,7 +274,7 @@ class KerasHyperparams:
         keras_model_configs: List[IKerasModelConfig] = []
 
         # Init the activations
-        activations: List[Union[str, None]] = KerasHyperparams.ACTIVATIONS if network_type != "LSTM" else [None]
+        activations: List[Union[IKerasActivation, None]] = self.params["activations"] if network_type != "LSTM" else [None]
 
         # Iterate over each activation function
         for activation in activations:
@@ -305,7 +285,7 @@ class KerasHyperparams:
                 # Dropout Variations
                 # Add a configuration per dropout variation specified in the Class Properties
                 if variation.get("dropout_rates") != None:
-                    for dropout in KerasHyperparams.DROPOUT_RATES:
+                    for dropout in self.params["dropout_rates"]:
                         keras_model_configs.append({
                             "activations": [activation]*len(variation["activations"]) if activation is not None else None,
                             "units": variation.get("units"),
@@ -325,8 +305,8 @@ class KerasHyperparams:
                         "pool_sizes": variation.get("pool_sizes")
                     })
 
-        # Build the initial list of configs
-        configs: Union[List[IKerasRegressionTrainingConfig], List[IKerasClassificationTrainingConfig]] = [self._generate_model_config(
+        # Finally, return the list of configs
+        return [self._generate_model_config(
             keras_model_name=keras_model_name,
             learning_rate=learning_rate,
             optimizer=optimizer,
@@ -339,29 +319,6 @@ class KerasHyperparams:
             dropout_rates=c.get("dropout_rates"),
         ) for c in keras_model_configs]
 
-        # If it is a Classification, just return them as they are
-        if self.model_type == "keras_classification":
-            return configs
-
-        # Otherwise, add the autoregressive variation
-        else:
-            ar_configs: Union[List[IKerasRegressionTrainingConfig], List[IKerasClassificationTrainingConfig]] = [self._generate_model_config(
-                keras_model_name=keras_model_name,
-                learning_rate=learning_rate,
-                optimizer=optimizer,
-                loss=loss,
-                autoregressive=True,
-                activations=c.get("activations"),
-                units=c.get("units"),
-                filters=c.get("filters"),
-                kernel_sizes=c.get("kernel_sizes"),
-                pool_sizes=c.get("pool_sizes"),
-                dropout_rates=c.get("dropout_rates"),
-            ) for c in keras_model_configs]
-
-            # Finally, return the concatenated list
-            return configs + ar_configs
-
 
 
 
@@ -373,10 +330,9 @@ class KerasHyperparams:
         self,
         keras_model_name: str,
         learning_rate: float,
-        optimizer: str,
+        optimizer: IKerasOptimizer,
         loss: IKerasHyperparamsLoss,
-        autoregressive: Union[bool, None]=None,
-        activations: Union[List[str], None]=None,
+        activations: Union[List[IKerasActivation], None]=None,
         units: Union[List[int], None]=None,
         filters: Union[List[int], None]=None,
         kernel_sizes: Union[List[int], None]=None,
@@ -388,11 +344,10 @@ class KerasHyperparams:
         Args:
             keras_model_name: str
             learning_rate: str
-            optimizer: str
+            optimizer: IKerasOptimizer
             loss: IKerasHyperparamsLoss
-            autoregressive: Union[bool, None]
             units: Union[List[int], None]
-            activations: Union[List[str], None]
+            activations: Union[List[IKerasActivation], None]
             filters: Union[List[int], None]
             kernel_sizes: Union[List[int], None]
             pool_sizes: Union[List[int], None]
@@ -435,7 +390,7 @@ class KerasHyperparams:
             keras_model["pool_sizes"] = pool_sizes
 
         # Validate the integrity of the model
-        self._validate_model_integrity(keras_model, autoregressive=autoregressive)
+        self._validate_model_integrity(keras_model)
         
         # Finally, return the configuration based on the type of model
         if self.model_type == "keras_classification":
@@ -452,7 +407,6 @@ class KerasHyperparams:
             return {
                 "id": id,
                 "description": description,
-                "autoregressive": autoregressive if isinstance(autoregressive, bool) else False,
                 "lookback": self.lookback,
                 "predictions": self.predictions,
                 "learning_rate": learning_rate,
@@ -467,14 +421,12 @@ class KerasHyperparams:
 
 
 
-    def _validate_model_integrity(self, model: IKerasModelConfig, autoregressive: Union[bool, None]) -> None:
+    def _validate_model_integrity(self, model: IKerasModelConfig) -> None:
         """Validates a Keras Model by building an actual instance.
 
         Args:
             model: IKerasModelConfig
                 The model to be validated.
-            autoregressive: Union[bool, None]
-                The type of regression.
 
         Raises:
             ValueError:
@@ -485,7 +437,6 @@ class KerasHyperparams:
 
         # Add model type specific properties
         if self.model_type == "keras_regression":
-            keras_model_val["autoregressive"] = autoregressive if isinstance(autoregressive, bool) else False
             keras_model_val["lookback"] = self.lookback
             keras_model_val["predictions"] = self.predictions
         else:

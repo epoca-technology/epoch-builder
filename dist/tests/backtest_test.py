@@ -56,7 +56,7 @@ class BacktestTestCase(TestCase):
     # Can initialize a Backtest instance with any model and any settings
     def testInitialization(self):
         # Init a backtest instance
-        backtest: Backtest = Backtest(CONFIG, test_mode=True)
+        backtest: Backtest = Backtest(CONFIG)
 
         # Make sure the properties are equal
         self.assertEqual(backtest.id, CONFIG["id"])

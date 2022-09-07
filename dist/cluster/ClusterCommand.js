@@ -481,10 +481,8 @@ import { spawn } from "child_process";
 				"--epoch_width", args.epoch_width,
 				"--seed", args.seed,
 				"--train_split", args.train_split,
-				"--backtest_split", args.backtest_split,
 				"--regression_lookback", args.regression_lookback,
 				"--regression_predictions", args.regression_predictions,
-				"--model_discovery_steps", args.model_discovery_steps,
 				"--idle_minutes_on_position_close", args.idle_minutes_on_position_close,
 				"--training_data_file_name", args.training_data_file_name,
 				"--model_ids", args.model_ids

@@ -120,7 +120,7 @@ def evaluate(
             # 3) The current prediction range's close time is greater than the last one
             elif (position.active == None) and (candlestick["ot"] > idle_until) and (not is_last_candlestick):
                 # Retrieve the current prediction range's close time
-                _, last_ct = Candlestick.get_lookback_prediction_range(100, candlestick["ot"])
+                _, last_ct = Candlestick.get_lookback_prediction_range(Epoch.REGRESSION_LOOKBACK, candlestick["ot"])
 
                 # Only predict in new ranges
                 if last_ct > last_neutral_ct:

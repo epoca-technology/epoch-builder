@@ -53,7 +53,6 @@ def create_default_files(epoch_id: str, regression_lookback: int, regression_pre
                 {
                     "id": "KR_UNIT_TEST",
                     "description": "This is the official KerasRegressionModel for Unit Tests.",
-                    "autoregressive": False,
                     "lookback": regression_lookback,
                     "predictions": regression_predictions,
                     "learning_rate": -1,

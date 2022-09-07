@@ -44,13 +44,6 @@ class Epoch:
             1) Evaluate freshly trained Regression Models
             2) Evaluate freshly trained Classification Models
             training_evaluation_range = 1 - train_split
-        BACKTEST_START: int
-        BACKTEST_END: int
-            The backtest range is used for the following:
-            1) Discover Regressions & Classifications
-            2) Backtest shortlisted ClassificationModels
-            3) Backtest generated ConsensusModels
-            backtest_range = epoch_width * backtest_split
         HIGHEST_PRICE: float
         LOWEST_PRICE: float
             Highest and lowest price within the Epoch. These values are stored as 
@@ -63,8 +56,6 @@ class Epoch:
             The lookback stands for the number of candlesticks from the past it needs to look at
             in order to generate a prediction.
             The predictions stand for the number of predictions the regressions will generate.
-        MODEL_DISCOVERY_STEPS: int
-            This value is used to discover Regressions and Classifications
         IDLE_MINUTES_ON_POSITION_CLOSE: int
             The number of minutes a model must remain idle once a position is closed.
         CLASSIFICATION_TRAINING_DATA_ID_UT: Union[str, None]
@@ -78,12 +69,10 @@ class Epoch:
     # Epoch Defaults
     DEFAULTS: IEpochDefaults = {
         "epoch_width": 24,
-        "train_split": 0.85,
-        "backtest_split": 0.3,
+        "train_split": 0.8,
         "seed": 60184,
         "regression_lookback": 128,
         "regression_predictions": 32,
-        "model_discovery_steps": 5,
         "idle_minutes_on_position_close": 30
     }
 
@@ -104,10 +93,6 @@ class Epoch:
     TRAINING_EVALUATION_START: int
     TRAINING_EVALUATION_END: int
 
-    # Backtest Range
-    BACKTEST_START: int
-    BACKTEST_END: int
-
     # Normalization Price Range
     HIGHEST_PRICE: float
     LOWEST_PRICE: float
@@ -115,9 +100,6 @@ class Epoch:
     # Regression Parameters
     REGRESSION_LOOKBACK: int
     REGRESSION_PREDICTIONS: int
-
-    # Steps used to discover models
-    MODEL_DISCOVERY_STEPS: int
 
     # Idle minutes on position close
     IDLE_MINUTES_ON_POSITION_CLOSE: int
@@ -147,10 +129,8 @@ class Epoch:
         epoch_width: int,
         seed: int,
         train_split: float,
-        backtest_split: float,
         regression_lookback: int,
         regression_predictions: int,
-        model_discovery_steps: int,
         idle_minutes_on_position_close: int
     ) -> None:
         """Creates all the neccessary directories and files for the epoch
@@ -168,15 +148,11 @@ class Epoch:
                 The random seed to be set on all required libs and machines.
             train_split: float
                 The split that will be applied to the epoch_width to train models.
-            backtest_split: float
-                The split that will be applied to the epoch_width to backtest models. 
             regression_lookback: int
                 The number of candlesticks from the past regressions will look at in order
                 to generate predictions.
             regression_predictions: int
                 The number of predictions regressions will generate.
-            model_discovery_steps: int
-                The steps that will be used during the model discovery process.
             idle_minutes_on_position_close: int
                 The number of minutes a model must remain idle after closing a position.
                 
@@ -195,10 +171,8 @@ class Epoch:
             epoch_width=epoch_width,
             seed=seed,
             train_split=train_split,
-            backtest_split=backtest_split,
             regression_lookback=regression_lookback,
             regression_predictions=regression_predictions,
-            model_discovery_steps=model_discovery_steps,
             idle_minutes_on_position_close=idle_minutes_on_position_close
         )
 
@@ -213,8 +187,9 @@ class Epoch:
         print("2/10) Calculating the Epoch Range...")
         start: int = int(prediction_df.iloc[0]["ot"])
         end: int = int(prediction_df.iloc[-1]["ct"])
-        training_evaluation_start, training_evaluation_end = Epoch._calculate_date_range(prediction_df, ceil(epoch_width_days * (1 - train_split)))
-        backtest_start, backtest_end = Epoch._calculate_date_range(prediction_df, ceil(epoch_width_days * backtest_split))
+        training_evaluation_start, training_evaluation_end = Epoch._calculate_date_range(
+            prediction_df, ceil(epoch_width_days * (1 - train_split))
+        )
 
         # Check if the normalized prediction candlesticks csv needs to be created
         print("3/10) Creating the Normalized Prediction Candlesticks CSV...")
@@ -248,13 +223,10 @@ class Epoch:
             "end": end,
             "training_evaluation_start": training_evaluation_start,
             "training_evaluation_end": training_evaluation_end,
-            "backtest_start": backtest_start,
-            "backtest_end": backtest_end,
             "highest_price": highest_price,
             "lowest_price": lowest_price,
             "regression_lookback": regression_lookback,
             "regression_predictions": regression_predictions,
-            "model_discovery_steps": model_discovery_steps,
             "idle_minutes_on_position_close": idle_minutes_on_position_close
         }
         Configuration.update_epoch_config(epoch_config)
@@ -284,10 +256,8 @@ class Epoch:
         epoch_width: int,
         seed: int,
         train_split: float,
-        backtest_split: float,
         regression_lookback: int,
         regression_predictions: int,
-        model_discovery_steps: int,
         idle_minutes_on_position_close: int
     ) -> None:
         """Verifies if an Epoch can be created. Raises an error if any of the
@@ -298,8 +268,8 @@ class Epoch:
             epoch_width: int
             seed: int
             train_split: float
-            backtest_split: float
-            model_discovery_steps: int
+            regression_lookback: int
+            regression_predictions: int
             idle_minutes_on_position_close: int
         Raises:
             RuntimeError:
@@ -330,10 +300,6 @@ class Epoch:
         if not isinstance(train_split, float) or train_split < 0.6 or train_split > 0.95:
             raise ValueError(f"The provided train_split is invalid {train_split}. It must be an float ranging 0.6-0.95")
 
-        # Validate the provided backtest_split
-        if not isinstance(backtest_split, float) or backtest_split < 0.2 or backtest_split > 0.6:
-            raise ValueError(f"The provided backtest_split is invalid {backtest_split}. It must be an float ranging 0.2-0.6")
-
         # Validate the provided regression_lookback
         if not isinstance(regression_lookback, int) or regression_lookback < 32 or regression_lookback > 512:
             raise ValueError(f"The provided regression_lookback is invalid {regression_lookback}. It must be an int ranging 32-512")
@@ -341,10 +307,6 @@ class Epoch:
         # Validate the provided regression_predictions
         if not isinstance(regression_predictions, int) or regression_predictions < 32 or regression_predictions > 256:
             raise ValueError(f"The provided regression_predictions is invalid {regression_predictions}. It must be an int ranging 32-256")
-
-        # Validate the provided model_discovery_steps
-        if not isinstance(model_discovery_steps, int) or model_discovery_steps < 1 or model_discovery_steps > 20:
-            raise ValueError(f"The provided model_discovery_steps is invalid {model_discovery_steps}. It must be an int ranging 1-20")
 
         # Validate the provided idle_minutes_on_position_close
         if not isinstance(idle_minutes_on_position_close, int) or idle_minutes_on_position_close < 0 or idle_minutes_on_position_close > 1000:
@@ -487,7 +449,6 @@ class Epoch:
         receipt += f"Train Split: {config['train_split']}\n"
         receipt += f"Regression Lookback: {config['regression_lookback']}\n"
         receipt += f"Regression Predictions: {config['regression_predictions']}\n"
-        receipt += f"Model Discovery Steps: {config['model_discovery_steps']}\n"
         receipt += f"Idle Minutes On Position Close: {config['idle_minutes_on_position_close']}\n"
 
         # Price Range
@@ -504,11 +465,6 @@ class Epoch:
         receipt += "\nTraining Evaluation Range:\n"
         receipt += f"Start: {Utils.from_milliseconds_to_date_string(config['training_evaluation_start'])}\n"
         receipt += f"End: {Utils.from_milliseconds_to_date_string(config['training_evaluation_end'])}\n"
-
-        # Backtest Date Range
-        receipt += "\nBacktest Range:\n"
-        receipt += f"Start: {Utils.from_milliseconds_to_date_string(config['backtest_start'])}\n"
-        receipt += f"End: {Utils.from_milliseconds_to_date_string(config['backtest_end'])}"
 
         # Finally, save the receipt
         Utils.write(f"{config['id']}/{config['id']}_receipt.txt", receipt)
@@ -550,13 +506,10 @@ class Epoch:
         Epoch.END = config["end"]
         Epoch.TRAINING_EVALUATION_START = config["training_evaluation_start"]
         Epoch.TRAINING_EVALUATION_END = config["training_evaluation_end"]
-        Epoch.BACKTEST_START = config["backtest_start"]
-        Epoch.BACKTEST_END = config["backtest_end"]
         Epoch.HIGHEST_PRICE = config["highest_price"]
         Epoch.LOWEST_PRICE = config["lowest_price"]
         Epoch.REGRESSION_LOOKBACK = config["regression_lookback"]
         Epoch.REGRESSION_PREDICTIONS = config["regression_predictions"]
-        Epoch.MODEL_DISCOVERY_STEPS = config["model_discovery_steps"]
         Epoch.IDLE_MINUTES_ON_POSITION_CLOSE = config["idle_minutes_on_position_close"]
         Epoch.CLASSIFICATION_TRAINING_DATA_ID_UT = config.get("classification_training_data_id_ut")
         Epoch.CLASSIFICATION_TRAINING_DATA_ID = config.get("classification_training_data_id")

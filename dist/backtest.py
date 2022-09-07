@@ -3,6 +3,7 @@ from modules._types import IBacktestConfig
 from modules.utils.Utils import Utils
 from modules.configuration.Configuration import Configuration
 from modules.epoch.Epoch import Epoch
+from modules.candlestick.Candlestick import Candlestick
 from modules.backtest.Backtest import Backtest
 
 
@@ -32,6 +33,10 @@ args = parser.parse_args()
 # Opens and loads the configuration file that should be placed in the root of the project.
 config: IBacktestConfig = Epoch.FILE.get_backtest_config(args.config_file_name)
 
+
+# CANDLESTICKS INIT
+# The candlesticks are initialized on the training evaluation range.
+Candlestick.init(Epoch.REGRESSION_LOOKBACK, Epoch.TRAINING_EVALUATION_START, Epoch.TRAINING_EVALUATION_END)
 
 
 # BACKTEST INSTANCE
