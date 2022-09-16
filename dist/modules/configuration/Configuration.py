@@ -21,66 +21,11 @@ class Configuration:
 
     # Paths
     DIR_PATH: str = "config"
-    DB_HOST_IP_PATH: str = f"{DIR_PATH}/db_host_ip.txt"
     EPOCH_PATH: str = f"{DIR_PATH}/epoch.json"
 
     # Version
     VERSION: str = package_file["version"]
 
-
-
-
-    ######################
-    ## Database Host IP ##
-    ######################
-
-
-
-
-    @staticmethod
-    def get_db_host_ip() -> Union[str, None]:
-        """Retrieves the IP of the Database Host if exists. Otherwise, returns None.
-
-        Returns:
-            Union[str, None]
-        """
-        return Utils.read(Configuration.DB_HOST_IP_PATH, allow_empty=True)
-
-
-
-
-
-
-    @staticmethod
-    def set_db_host_ip(ip: str) -> None:
-        """Sets an IP in the DB Host configuration file.
-
-        Args:
-            ip: str
-                The IP to be set as the Database Host.
-        
-        Raises:
-            ValueError: If the provided ip is invalid.
-        """
-        # Make sure the provided IP is valid
-        if not isinstance(ip, str) or len(ip) < 9:
-            ValueError("The provided DB Host IP is invalid.")
-
-        # Finally, create/update the file
-        Utils.write(Configuration.DB_HOST_IP_PATH, ip)
-
-
-
-
-
-
-
-
-
-
-    #########################
-    ## Epoch Configuration ##
-    #########################
 
 
 

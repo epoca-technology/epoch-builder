@@ -39,14 +39,16 @@ class Candlestick:
             new ranges that are generated as the process goes. Notice that new ranges are only
             stored temporarily in RAM and not saved into the json indexer.
     """
-    # Candlesticks Path
-    BASE_PATH: str = "candlesticks"
+    # Assets' Paths
+    ASSETS_PATH: str = "candlesticks"
+    LOOKBACK_RANGE_PATH: str = f"{ASSETS_PATH}/lookback_range.json"
+    TEST_DS_LABELS_PATH: str = f"{ASSETS_PATH}/test_ds_labels.json"
 
 
     # Default Candlesticks Configuration
     DEFAULT_CANDLESTICK_CONFIG: ICandlestickConfig = {
         "columns": ("ot", "ct", "o", "h", "l", "c"),
-        "csv_file": f"{BASE_PATH}/candlesticks.csv",
+        "csv_file": f"{ASSETS_PATH}/candlesticks.csv",
         "interval_minutes": 1
     }
 
@@ -54,7 +56,7 @@ class Candlestick:
     # Prediction Candlesticks Configuration
     PREDICTION_CANDLESTICK_CONFIG: ICandlestickConfig = {
         "columns": ("ot", "ct", "o", "h", "l", "c", "v"),
-        "csv_file": f"{BASE_PATH}/prediction_candlesticks.csv",
+        "csv_file": f"{ASSETS_PATH}/prediction_candlesticks.csv",
         "interval_minutes": 30
     }
 
@@ -62,7 +64,7 @@ class Candlestick:
     # Normalized Prediction Candlesticks Configuration
     NORMALIZED_PREDICTION_CANDLESTICK_CONFIG: ICandlestickConfig = {
         "columns": ("ot", "ct", "c"),
-        "csv_file": f"{BASE_PATH}/normalized_prediction_candlesticks.csv",
+        "csv_file": f"{ASSETS_PATH}/normalized_prediction_candlesticks.csv",
         "interval_minutes": PREDICTION_CANDLESTICK_CONFIG["interval_minutes"]
     }
 
@@ -74,19 +76,37 @@ class Candlestick:
 
 
 
-    # Lookback Prediction Range Indexer
-    PREDICTION_RANGE_INDEXER_PATH: str = f"{BASE_PATH}/lookback_prediction_range_indexer.json"
-    PREDICTION_RANGE_INDEXER: IPredictionRangeIndexer = {}
-
-
-
-
-
-
-
-
 
     ## Initialization ##
+
+
+
+
+
+
+
+
+
+    ## Assets Building ##
+
+
+
+
+    @staticmethod
+    def build_assets(sma_window_size: int, epoch_width_days: int) -> DataFrame:
+        """Adjusts the candlestick files to the range of the epoch, creates the
+        lookback range indexer and the test dataset labels.
+        """
+        pass
+
+
+
+
+
+
+
+
+
 
 
 

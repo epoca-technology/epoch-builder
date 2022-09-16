@@ -7,12 +7,8 @@ from pandas import DataFrame
 from modules._types import IEpochConfig, IEpochDefaults
 from modules.utils.Utils import Utils
 from modules.configuration.Configuration import Configuration
-from modules.database.Database import Database
 from modules.candlestick.Candlestick import Candlestick
-from modules.epoch.EpochFile import EpochFile
-from modules.epoch.CandlestickNormalization import normalize_prediction_candlesticks
-from modules.epoch.PredictionRangeIndexer import create_indexer
-from modules.epoch.EpochDefaultFiles import create_default_files
+from modules.epoch.EpochPath import EpochPath
 
 
 
@@ -20,7 +16,7 @@ from modules.epoch.EpochDefaultFiles import create_default_files
 class Epoch:
     """Epoch Class
 
-    This singleton manages the initialization, creation and exporting of epochs.
+    This singleton manages the creation, initialization and exporting of epochs.
 
     Class Properties:
         INITIALIZED: bool
@@ -31,19 +27,20 @@ class Epoch:
             The set that will be used to set randomness in all required libs
         ID: str
             The ID of the Epoch.
+        SMA_WINDOW_SIZE: int
+            The window size that will be used to calculate the simple moving averages on
+            the prediction candlesticks dataframe.
         TRAIN_SPLIT: float
             The split that will be applied to the epoch_width in order to train models.
+        VALIDATION_SPLIT: float
+            The split that will be applied to the train data in order to be able to evaluate
+            the model's training performance.
         START: int
         END: int
-            The range of the Epoch. These values are used for:
-            1) Calculate the training evaluation range (1 - train_split)
-            2) Calculate the backtest range (epoch_width * backtest_split)
-        TRAINING_EVALUATION_START: int
-        TRAINING_EVALUATION_END: int
-            The training evaluation range is used for the following:
-            1) Evaluate freshly trained Regression Models
-            2) Evaluate freshly trained Classification Models
-            training_evaluation_range = 1 - train_split
+            The date range of the Epoch.
+        TEST_DS_START: int
+        TEST_DS_END: int
+            The date range of the test dataset.
         HIGHEST_PRICE: float
         LOWEST_PRICE: float
             Highest and lowest price within the Epoch. These values are stored as 
@@ -56,12 +53,13 @@ class Epoch:
             The lookback stands for the number of candlesticks from the past it needs to look at
             in order to generate a prediction.
             The predictions stand for the number of predictions the regressions will generate.
+        POSITION_SIZE: float
+        LEVERAGE: int
         IDLE_MINUTES_ON_POSITION_CLOSE: int
-            The number of minutes a model must remain idle once a position is closed.
-        CLASSIFICATION_TRAINING_DATA_ID_UT: Union[str, None]
-            The ID of the training data that will be used in the unit tests.
-        CLASSIFICATION_TRAINING_DATA_ID: Union[str, None]
-            The identifier of the selected classification training data
+            The configuration values that are used to evaluate prediction models in trading
+            simulations.
+        PATH: EpochPath
+            The instance of the Epoch's Path.
     """
     # Initialization State
     INITIALIZED: bool = False
@@ -69,10 +67,14 @@ class Epoch:
     # Epoch Defaults
     DEFAULTS: IEpochDefaults = {
         "epoch_width": 24,
-        "train_split": 0.8,
+        "sma_window_size": 100,
+        "train_split": 0.75,
+        "validation_split": 0.2,
         "seed": 60184,
         "regression_lookback": 128,
         "regression_predictions": 32,
+        "position_size": 10000,
+        "leverage": 3,
         "idle_minutes_on_position_close": 30
     }
 
@@ -82,16 +84,22 @@ class Epoch:
     # Identifier, must be preffixed with "_EPOCHNAME"
     ID: str
 
+    # Simple Moving Average Window Size
+    SMA_WINDOW_SIZE: int
+
     # Split used to train models
     TRAIN_SPLIT: float
+
+    # Split used to evaluation regression's training performance
+    VALIDATION_SPLIT: float
 
     # The date range of the Epoch
     START: int
     END: int
 
-    # Training Evaluation Range
-    TRAINING_EVALUATION_START: int
-    TRAINING_EVALUATION_END: int
+    # The date range of the test dataset
+    TEST_DS_START: int
+    TEST_DS_END: int
 
     # Normalization Price Range
     HIGHEST_PRICE: float
@@ -101,17 +109,13 @@ class Epoch:
     REGRESSION_LOOKBACK: int
     REGRESSION_PREDICTIONS: int
 
-    # Idle minutes on position close
+    # Prediction Model Evaluation
+    POSITION_SIZE: float
+    LEVERAGE: int
     IDLE_MINUTES_ON_POSITION_CLOSE: int
 
-    # The identifier of the classification training data for unit tests
-    CLASSIFICATION_TRAINING_DATA_ID_UT: Union[str, None] = None
-
-    # The identifier of the selected classification training data
-    CLASSIFICATION_TRAINING_DATA_ID: Union[str, None] = None
-
-    # EpochFile Instance
-    FILE: EpochFile
+    # EpochPath Instance
+    PATH: EpochPath
 
 
 
@@ -123,14 +127,19 @@ class Epoch:
     ## Creation ##
 
 
+
     @staticmethod
     def create(
         id: str, 
         epoch_width: int,
+        sma_window_size: int,
         seed: int,
         train_split: float,
+        validation_split: float,
         regression_lookback: int,
         regression_predictions: int,
+        position_size: float,
+        leverage: int,
         idle_minutes_on_position_close: int
     ) -> None:
         """Creates all the neccessary directories and files for the epoch
@@ -144,15 +153,24 @@ class Epoch:
                 The number of months that comprise the epoch. This value is used
                 to calculate the start and end timestamps of the epoch. This value
                 is also used to calculate the Backtests' Date Range.
+            sma_window_size: int
+                The window size to be applied on the prediction candlesticks.
             seed: int
                 The random seed to be set on all required libs and machines.
             train_split: float
                 The split that will be applied to the epoch_width to train models.
+            validation_split: float
+                The split that will be applied to the train dataset in order to generate
+                the validation dataset.
             regression_lookback: int
                 The number of candlesticks from the past regressions will look at in order
                 to generate predictions.
             regression_predictions: int
                 The number of predictions regressions will generate.
+            position_size: float
+                The amount of USD that will be used to open positions.
+            leverage: int
+                The leverage that will be used to open positions
             idle_minutes_on_position_close: int
                 The number of minutes a model must remain idle after closing a position.
                 
@@ -167,12 +185,16 @@ class Epoch:
         """
         # Make sure the epoch can be created
         Epoch._can_epoch_be_created(
+            seed=seed,
             id=id,
             epoch_width=epoch_width,
-            seed=seed,
+            sma_window_size=sma_window_size,
             train_split=train_split,
+            validation_split=validation_split,
             regression_lookback=regression_lookback,
             regression_predictions=regression_predictions,
+            position_size=position_size,
+            leverage=leverage,
             idle_minutes_on_position_close=idle_minutes_on_position_close
         )
 
@@ -187,46 +209,36 @@ class Epoch:
         print("2/10) Calculating the Epoch Range...")
         start: int = int(prediction_df.iloc[0]["ot"])
         end: int = int(prediction_df.iloc[-1]["ct"])
-        training_evaluation_start, training_evaluation_end = Epoch._calculate_date_range(
+        test_ds_start, test_ds_end = Epoch._calculate_date_range(
             prediction_df, ceil(epoch_width_days * (1 - train_split))
         )
 
-        # Check if the normalized prediction candlesticks csv needs to be created
-        print("3/10) Creating the Normalized Prediction Candlesticks CSV...")
-        highest_price, lowest_price = normalize_prediction_candlesticks(prediction_df)
-
-        # Initialize the candlesticks based on the prediction range lookbacks
-        lookbacks: List[int] = [ regression_lookback ]
-        Candlestick.init(max(lookbacks), start=start, end=end)
-
-        # Check if the candlesticks' prediction range need to be indexed
-        if Utils.file_exists(Candlestick.PREDICTION_RANGE_INDEXER_PATH):
-            print("4/10) Creating Prediction Range Indexer: Skipped")
-        else:
-            create_indexer(lookbacks, "4/10) Creating Prediction Range Indexer")
+        # Initialize the Candlesticks
+        print("5/10) Initializing Candlesticks...")
+        highest_price, lowest_price = (0, 0)#TODO
 
         # Initialize the Epoch's directories
         print("5/10) Creating Directories...")
-        EpochFile.create_epoch_directories(id)
-
-        # Create the Epoch's Default Files
-        print("6/10) Creating Default Files...")
-        create_default_files(id, regression_lookback=regression_lookback, regression_predictions=regression_predictions)
+        EpochPath.init_directories(id)
 
         # Save the epoch's config file
         print("7/10) Saving Epoch Configuration...")
         epoch_config: IEpochConfig = {
             "seed": seed,
             "id": id,
+            "sma_window_size": sma_window_size,
             "train_split": train_split,
+            "validation_split": validation_split,
             "start": start,
             "end": end,
-            "training_evaluation_start": training_evaluation_start,
-            "training_evaluation_end": training_evaluation_end,
+            "test_ds_start": test_ds_start,
+            "test_ds_end": test_ds_end,
             "highest_price": highest_price,
             "lowest_price": lowest_price,
             "regression_lookback": regression_lookback,
             "regression_predictions": regression_predictions,
+            "position_size": position_size,
+            "leverage": leverage,
             "idle_minutes_on_position_close": idle_minutes_on_position_close
         }
         Configuration.update_epoch_config(epoch_config)
@@ -239,11 +251,6 @@ class Epoch:
         print("9/10) Creating receipt...")
         Epoch._create_epoch_receipt(epoch_config)
 
-        # Initialize the Database
-        print("10/10) Initializing Database...")
-        Database.delete_tables()
-        Database.initialize_tables()
-
 
 
 
@@ -252,24 +259,32 @@ class Epoch:
 
     @staticmethod
     def _can_epoch_be_created(
+        seed: int,
         id: str, 
         epoch_width: int,
-        seed: int,
+        sma_window_size: int,
         train_split: float,
+        validation_split: float,
         regression_lookback: int,
         regression_predictions: int,
+        position_size: float,
+        leverage: int,
         idle_minutes_on_position_close: int
     ) -> None:
         """Verifies if an Epoch can be created. Raises an error if any of the
         conditions is not met.
 
         Args:
+            seed: int
             id: str
             epoch_width: int
-            seed: int
+            sma_window_size: int
             train_split: float
+            validation_split: float
             regression_lookback: int
             regression_predictions: int
+            position_size: float
+            leverage: int
             idle_minutes_on_position_close: int
         Raises:
             RuntimeError:
@@ -284,6 +299,10 @@ class Epoch:
         if Epoch.INITIALIZED:
             raise RuntimeError("A new Epoch cannot be created if the singleton has been initialized.")
 
+        # Validate the provided seed
+        if not isinstance(seed, int) or seed < 1 or seed > 100000000:
+            raise ValueError(f"The provided seed is invalid {seed}. It must be an int ranging 1-100000000")
+
         # Validate the provided id
         if not isinstance(id, str) or id[0] != "_" or len(id) < 4:
             raise ValueError(f"The provided Epoch ID {id} is invalid. It must contain at least 4 characters and be prefixed with _")
@@ -292,13 +311,17 @@ class Epoch:
         if not isinstance(epoch_width, int) or epoch_width < 6 or epoch_width > 48:
             raise ValueError(f"The provided epoch_width is invalid {epoch_width}. It must be an int ranging 6-48")
 
-        # Validate the provided seed
-        if not isinstance(seed, int) or seed < 1 or seed > 100000000:
-            raise ValueError(f"The provided seed is invalid {seed}. It must be an int ranging 1-100000000")
+        # Validate the provided sma_window_size
+        if not isinstance(sma_window_size, int) or sma_window_size < 10 or sma_window_size > 300:
+            raise ValueError(f"The provided sma_window_size is invalid {sma_window_size}. It must be an int ranging 10-300")
 
         # Validate the provided train_split
         if not isinstance(train_split, float) or train_split < 0.6 or train_split > 0.95:
             raise ValueError(f"The provided train_split is invalid {train_split}. It must be an float ranging 0.6-0.95")
+
+        # Validate the provided validation_split
+        if not isinstance(validation_split, float) or validation_split < 0.15 or validation_split > 0.4:
+            raise ValueError(f"The provided validation_split is invalid {validation_split}. It must be an float ranging 0.15-0.4")
 
         # Validate the provided regression_lookback
         if not isinstance(regression_lookback, int) or regression_lookback < 32 or regression_lookback > 512:
@@ -307,6 +330,14 @@ class Epoch:
         # Validate the provided regression_predictions
         if not isinstance(regression_predictions, int) or regression_predictions < 32 or regression_predictions > 256:
             raise ValueError(f"The provided regression_predictions is invalid {regression_predictions}. It must be an int ranging 32-256")
+
+        # Validate the provided position_size
+        if not isinstance(position_size, (int, float)) or position_size < 100 or position_size > 100000000:
+            raise ValueError(f"The provided position_size is invalid {position_size}. It must be an float ranging 100-100000000")
+
+        # Validate the provided leverage
+        if not isinstance(leverage, int) or leverage < 1 or leverage > 5:
+            raise ValueError(f"The provided leverage is invalid {leverage}. It must be an int ranging 1-5")
 
         # Validate the provided idle_minutes_on_position_close
         if not isinstance(idle_minutes_on_position_close, int) or idle_minutes_on_position_close < 0 or idle_minutes_on_position_close > 1000:
@@ -447,8 +478,11 @@ class Epoch:
         receipt += f"Creation: {Utils.from_milliseconds_to_date_string(Utils.get_time())}\n"
         receipt += f"Seed: {config['seed']}\n"
         receipt += f"Train Split: {config['train_split']}\n"
+        receipt += f"Validation Split: {config['validation_split']}\n"
         receipt += f"Regression Lookback: {config['regression_lookback']}\n"
         receipt += f"Regression Predictions: {config['regression_predictions']}\n"
+        receipt += f"Position Size: ${config['position_size']}\n"
+        receipt += f"Leverage: x{config['leverage']}\n"
         receipt += f"Idle Minutes On Position Close: {config['idle_minutes_on_position_close']}\n"
 
         # Price Range
@@ -461,10 +495,10 @@ class Epoch:
         receipt += f"Start: {Utils.from_milliseconds_to_date_string(config['start'])}\n"
         receipt += f"End: {Utils.from_milliseconds_to_date_string(config['end'])}\n"
 
-        # Training Evaluation Date Range
-        receipt += "\nTraining Evaluation Range:\n"
-        receipt += f"Start: {Utils.from_milliseconds_to_date_string(config['training_evaluation_start'])}\n"
-        receipt += f"End: {Utils.from_milliseconds_to_date_string(config['training_evaluation_end'])}\n"
+        # Test Dataset Date Range
+        receipt += "\nTest Dataset Range:\n"
+        receipt += f"Start: {Utils.from_milliseconds_to_date_string(config['test_ds_start'])}\n"
+        receipt += f"End: {Utils.from_milliseconds_to_date_string(config['test_ds_end'])}\n"
 
         # Finally, save the receipt
         Utils.write(f"{config['id']}/{config['id']}_receipt.txt", receipt)
@@ -476,7 +510,7 @@ class Epoch:
 
 
 
-    ## Init ##
+    ## Initialization ##
 
 
     @staticmethod
@@ -501,18 +535,20 @@ class Epoch:
         # Populate epoch properties
         Epoch.SEED = config["seed"]
         Epoch.ID = config["id"]
+        Epoch.SMA_WINDOW_SIZE = config["sma_window_size"]
         Epoch.TRAIN_SPLIT = config["train_split"]
+        Epoch.VALIDATION_SPLIT = config["validation_split"]
         Epoch.START = config["start"]
         Epoch.END = config["end"]
-        Epoch.TRAINING_EVALUATION_START = config["training_evaluation_start"]
-        Epoch.TRAINING_EVALUATION_END = config["training_evaluation_end"]
+        Epoch.TEST_DS_START = config["test_ds_start"]
+        Epoch.TEST_DS_END = config["test_ds_end"]
         Epoch.HIGHEST_PRICE = config["highest_price"]
         Epoch.LOWEST_PRICE = config["lowest_price"]
         Epoch.REGRESSION_LOOKBACK = config["regression_lookback"]
         Epoch.REGRESSION_PREDICTIONS = config["regression_predictions"]
+        Epoch.POSITION_SIZE = config["position_size"]
+        Epoch.LEVERAGE = config["leverage"]
         Epoch.IDLE_MINUTES_ON_POSITION_CLOSE = config["idle_minutes_on_position_close"]
-        Epoch.CLASSIFICATION_TRAINING_DATA_ID_UT = config.get("classification_training_data_id_ut")
-        Epoch.CLASSIFICATION_TRAINING_DATA_ID = config.get("classification_training_data_id")
 
         # Set a static seed on all required libraries
         seed(Epoch.SEED)
@@ -520,79 +556,12 @@ class Epoch:
         tf_random.set_seed(Epoch.SEED)
 
         # Initialize the File Instance
-        Epoch.FILE = EpochFile(Epoch.ID)
+        Epoch.PATH = EpochPath(Epoch.ID)
         
         # Set the state of the Epoch as Initialized
         Epoch.INITIALIZED = True
 
 
-
-
-
-
-
-
-
-
-    ## Classification Training Data ##
-
-
-
-    @staticmethod
-    def set_classification_training_data_id_ut(id: str) -> None:
-        """Updates the Epoch's Configuration File and sets the provided
-        classification training data id to be used in the unit tests.
-
-        Args:
-            id: str
-                The identifier of the training data.
-        """
-        # Retrieve the current configuration
-        config: IEpochConfig = Configuration.get_epoch_config()
-
-        # Set the id
-        config["classification_training_data_id_ut"] = id
-
-        # Update the file
-        Configuration.update_epoch_config(config)
-
-
-
-
-
-
-
-    @staticmethod
-    def set_classification_training_data_id(id: str) -> None:
-        """Updates the Epoch's Configuration File and sets the selected
-        classification training data id.
-
-        Args:
-            id: str
-                The identifier of the training data.
-
-        Raises:
-            RuntimeError:
-                If the classification training data id for unit tests has not been set.
-                If the provided id is equals as the one for unit tests.
-        """
-        # Retrieve the current configuration
-        config: IEpochConfig = Configuration.get_epoch_config()
-
-        # Make sure the training data for unit tests has already been set
-        unit_test_id: Union[str, None] = config.get("classification_training_data_id_ut")
-        if not isinstance(unit_test_id, str):
-            raise RuntimeError("The classification training data id for unit tests must be set prior to setting the selected id.")
-
-        # Make sure it is not the same as the unit test id
-        if id == unit_test_id:
-            raise RuntimeError("The selected classification training data id cannot be the same one as the unit test.")
-
-        # Set the id
-        config["classification_training_data"] = id
-
-        # Update the file
-        Configuration.update_epoch_config(config)
 
 
 
@@ -646,21 +615,9 @@ class Epoch:
 
         Raises:
             RuntimeError:
-                If the class training data for unit tests has not been set
-                If a classification training data has not been selected
                 If the epoch's directory does not exist.
                 ...
         """
-        # Make sure classification training data id for unit tests has been set
-        classification_training_data_id_ut: Union[str, None] = config.get("classification_training_data_id_ut")
-        if not isinstance(classification_training_data_id_ut, str):
-            raise RuntimeError("The Classification Training Data for Unit Tests has not been set.")
-
-        # Make sure classification training data id has been selected
-        classification_training_data_id: Union[str, None] = config.get("classification_training_data_id")
-        if not isinstance(classification_training_data_id, str):
-            raise RuntimeError("A Classification Training Data ID has not been selected.")
-
         # Make sure the epoch's directory exists
         if not Utils.directory_exists(config["id"]):
             raise RuntimeError(f"The Epoch directory {config['id']} does not exist.")

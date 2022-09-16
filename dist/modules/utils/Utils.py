@@ -6,7 +6,7 @@ from json import load, dumps
 from time import time
 from datetime import datetime
 from uuid import UUID, uuid4
-from tensorflow import config
+from tensorflow import config, __version__ as tf_version
 from modules._types import IFileExtension
 
 
@@ -596,7 +596,7 @@ class Utils:
 
 
     @staticmethod
-    def read(path: str, allow_empty: bool = False) -> Any:
+    def read(path: str, allow_empty: bool = False) -> Union[str, dict, None]:
         """Reads a file located at a given path and returns
         its contents.
 
@@ -608,7 +608,7 @@ class Utils:
                 does not exist.
         
         Returns:
-            Any
+            Union[str, dict, None]
 
         Raises:
             RuntimeError:
@@ -619,11 +619,13 @@ class Utils:
             # Split the path into path name and extension
             _, extension = splitext(path)
 
-            # Read the file according to its format
-            if extension == ".json":
-                return load(open(path))
-            else:
-                return open(path).read()
+            # Open the file
+            with open(path, "r") as file_instance:
+                # Read the file according to its format
+                if extension == ".json":
+                    return load(file_instance)
+                else:
+                    return file_instance.read()
 
         # Otherwise, check if an error needs to raised
         else:
@@ -727,9 +729,13 @@ class Utils:
         # Init the title based on the type of execution
         title: str = f"ACCELERATED EPOCH BUILDER v{eb_version}" if len(config.list_physical_devices("GPU")) > 0 \
             else f"EPOCH BUILDER v{eb_version}"
+        print(f"{title}\n")
 
-        # Finally, print it with the endpoint name
-        print(f"{title}: {endpoint_name}\n")
+        # Print the title with the endpoint name
+        print(f"{title}: {endpoint_name}")
+
+        # Print the version of tensorflow
+        print(f"TensorFlow: v{tf_version}\n")
 
 
 
