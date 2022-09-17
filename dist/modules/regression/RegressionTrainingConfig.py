@@ -10,7 +10,7 @@ from modules._types import IKerasModelConfig, IKerasOptimizer, IKerasActivation,
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.keras_utils.KerasModel import KerasModel
-from modules.regression.networks import NETWORKS_BY_CATEGORY
+from modules.regression.network_architectures import NETWORKS_BY_CATEGORY
 
 
 

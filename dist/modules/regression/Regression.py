@@ -1,14 +1,13 @@
-from typing import List, Union
+from typing import List
 from json import loads
 from numpy import ndarray
-from json import dumps
 from h5py import File as h5pyFile
-from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5, load_model_from_hdf5
+from tensorflow.python.keras.saving.hdf5_format import load_model_from_hdf5
 from keras import Sequential
-from modules._types import IRegressionConfig, IDiscovery, IRegressionTrainingCertificate
+from modules._types import IRegressionConfig, IDiscovery
+from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.keras_utils.KerasModelSummary import get_summary
-from modules.utils.Utils import Utils
 
 
 

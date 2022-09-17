@@ -1,6 +1,6 @@
 from keras import Sequential
 from modules._types import IKerasModelConfig
-import modules.keras_utils.KerasModelTemplates as KerasModelTemplates
+import modules.keras_utils.KerasModelArchitectureTemplates as KerasModelArchitectureTemplates
 
 
 
@@ -21,4 +21,4 @@ def KerasModel(config: IKerasModelConfig) -> Sequential:
             If the model's template cannot be found.
             if the model configuration is invalid
     """
-    return getattr(KerasModelTemplates, config["name"])(config)
+    return getattr(KerasModelArchitectureTemplates, config["name"])(config)

@@ -5,25 +5,17 @@
         {
             "name": "epoca-worker-01",
             "ip": "192.168.2.100",
-            "is_cluster": true,
-            "is_master": true
+            "is_cluster": true
         },
         {
             "name": "epoca-worker-02",
             "ip": "192.168.2.101",
-            "is_cluster": true,
-            "is_master": false
+            "is_cluster": true
         },
         {
             "name": "epoca-worker-03",
             "ip": "192.168.2.102",
-            "is_cluster": true,
-            "is_master": false
+            "is_cluster": true
         }
-    ],
-    "trainable_model_types": {
-        "all": ["keras_regression", "keras_classification", "xgb_regression", "xgb_classification"],
-        "regression": ["keras_regression", "xgb_regression"],
-        "classification": ["keras_classification", "xgb_classification"]
-    }
+    ]
 }

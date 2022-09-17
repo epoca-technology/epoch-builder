@@ -1,12 +1,14 @@
 from typing import Union, List
 from json import dumps
+from numpy import ndarray, array
+from pandas import DataFrame
 from h5py import File as h5pyFile
 from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras import Sequential
 from keras.callbacks import EarlyStopping, History
 from modules._types import IKerasTrainingConfig, IKerasModelConfig, IKerasModelTrainingHistory,\
     IKerasTrainingConfig, IRegressionTrainingCertificate, IDiscovery, IDiscoveryPayload, \
-        IRegressionDatasets, IRegressionTrainingConfig, ITestDatasetEvaluation
+        IRegressionTrainAndTestDatasets, IRegressionTrainingConfig, ITestDatasetEvaluation
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
@@ -100,9 +102,6 @@ class RegressionTraining:
         # Initialize the description
         self.description: str = config["description"]
 
-        # Initialize the type of regression
-        self.autoregressive: bool = config["autoregressive"]
-
         # Initialize the lookback
         self.lookback: int = config["lookback"]
 
@@ -171,15 +170,15 @@ class RegressionTraining:
         )
 
         # Retrieve the Keras Model
-        print("    1/7) Initializing Model...")
+        print("    1/8) Initializing Model...")
         model: Sequential = KerasModel(config=self.keras_model)
 
         # Compile the model
-        print("    2/7) Compiling Model...")
+        print("    2/8) Compiling Model...")
         model.compile(optimizer=self.optimizer, loss=self.loss, metrics=[ self.metric ])
   
         # Train the model
-        print("    3/7) Training Model")
+        print("    3/8) Training Model")
         history_object: History = model.fit(
             self.train_x, 
             self.train_y, 
@@ -198,18 +197,18 @@ class RegressionTraining:
         history: IKerasModelTrainingHistory = history_object.history
 
         # Predict the test dataset
-        print("    4/7) Predicting Test Dataset...")
+        print("    4/8) Predicting Test Dataset...")
         preds: List[List[float]] = model.predict(self.test_x).tolist()
 
         # Evaluate the test dataset
-        print("    5/7) Evaluating Test Dataset...")
+        print("    5/8) Evaluating Test Dataset...")
         test_ds_evaluation: ITestDatasetEvaluation = {
             self.loss.name: float(self.loss(preds, self.test_y)),
             self.metric.name: float(self.metric(preds, self.test_y))
         }
 
         # Perform the regression discovery
-        print("    6/7) Discovering Regression...")
+        print("    6/8) Discovering Regression...")
         #TODO
 
         # Build the training certificate
@@ -295,7 +294,6 @@ class RegressionTraining:
             "regression_config": {
                 "id": self.id,
                 "description": self.description,
-                "autoregressive": self.autoregressive,
                 "lookback": self.lookback,
                 "predictions": self.predictions,
                 "discovery": discovery,
@@ -341,13 +339,69 @@ class RegressionTraining:
 
 
 
+    #######################
+    ## Training Datasets ##
+    #######################
 
 
 
 
-    ###########################
-    ## Certificate Retriever ##
-    ###########################
+    @staticmethod
+    def make_train_and_test_datasets(lookback: int, predictions: int, train_split: float) -> IRegressionTrainAndTestDatasets:
+        """Builds a tuple containing the features and labels for the train and test datasets.
+
+        Args:
+            lookback: int
+                The number of prediction candlesticks the model needs to look at in order
+                to make a prediction.
+            predictions: int
+                The number of predictions the model will output in the end.
+            train_split: float
+                The split that should be applied to the training / test datasets.
+
+        Returns:
+            IRegressionTrainAndTestDatasets
+            (train_x, train_y, test_x, test_y)
+        """
+        # Init the df, grabbing only the close prices
+        df: DataFrame = Candlestick.NORMALIZED_PREDICTION_DF[["c"]].copy()
+
+        # Init the number of rows and the split that will be applied
+        rows: int = df.shape[0]
+        split: int = int(rows * train_split)
+
+        # Init raw features and labels
+        features_raw: Union[List[List[float]], ndarray] = []
+        labels_raw: Union[List[List[float]], ndarray] = []
+
+        # Iterate over the normalized ds and build the features & labels
+        for i in range(lookback, rows):
+            # Make sure there are enough items remaining
+            if i < (rows-predictions):
+                features_raw.append(df.iloc[i-lookback:i, 0])
+                labels_raw.append(df.iloc[i:i+predictions, 0])
+
+        # Convert the features and labels into np arrays
+        features = array(features_raw)
+        labels = array(labels_raw)
+
+        # Finally, return the split datasets
+        return features[:split], labels[:split], features[split:], labels[split:]
+
+
+
+
+
+
+
+
+
+
+
+
+    ############################
+    ## Certificate Management ##
+    ############################
 
 
 
@@ -365,3 +419,28 @@ class RegressionTraining:
             Union[IRegressionTrainingCertificate, None]
         """
         return Utils.read(Epoch.PATH.regression_certificate(id), allow_empty=True)
+
+
+
+
+    
+
+
+
+    @staticmethod
+    def save_certificates_batch(batch_name: str, certificates: List[IRegressionTrainingCertificate]) -> None:
+        """Retrieves a trained model's certificate. If it doesnt exist it 
+        returns None.
+
+        Args:
+            batch_name: str
+                The name of the batch that contains the certificates that are about
+                to be saved.
+            certificates: List[IRegressionTrainingCertificate]
+                The list of training certificates to be saved in a single file.
+        """
+        # Init the path of the batch
+        batch_path: str = f"{Epoch.PATH.regression_batched_certificates()}/{batch_name}.json"
+
+        # Save the list of certificates
+        Utils.write(batch_path, certificates)

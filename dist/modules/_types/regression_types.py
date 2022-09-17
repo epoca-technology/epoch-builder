@@ -18,7 +18,7 @@ from modules._types.discovery_types import IDiscovery, IDiscoveryPayload
 
 # Datasets to train and test a Regression
 # (train_x, train_y, test_x, test_y)
-IRegressionDatasets = Tuple[ndarray, ndarray, ndarray, ndarray]
+IRegressionTrainAndTestDatasets = Tuple[ndarray, ndarray, ndarray, ndarray]
 
 
 
