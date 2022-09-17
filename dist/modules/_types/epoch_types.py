@@ -37,11 +37,11 @@ class IEpochConfig(TypedDict):
     test_ds_start: int
     test_ds_end: int
 
-    # Highest and lowest price within the Epoch.
+    # Highest and lowest price sma within the Epoch.
     # If the price was to go above the highest or below the lowest price, trading should be
     # stopped and a new epoch should be published once the market is "stable"
-    highest_price: float
-    lowest_price: float
+    highest_price_sma: float
+    lowest_price_sma: float
 
     # Regression Parameters
     # The values that represent the input and the ouput of a regression.

@@ -50,10 +50,8 @@ Thumbs.db
 # Candlesticks CSV Files
 candlesticks/
 
-# Database Management
-db_management/
-
 # Epochs
 _ALPHA
 _ALPHA_BACKUP
 _ALPHANEW
+_NEW

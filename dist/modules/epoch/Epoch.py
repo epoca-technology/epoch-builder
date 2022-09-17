@@ -1,10 +1,8 @@
-from typing import List, Union, Tuple
+from typing import Union
 from random import seed
 from numpy.random import seed as npseed
 from tensorflow import random as tf_random
-from math import ceil
-from pandas import DataFrame
-from modules._types import IEpochConfig, IEpochDefaults
+from modules._types import IEpochConfig, IEpochDefaults, ICandlestickBuildPayload
 from modules.utils.Utils import Utils
 from modules.configuration.Configuration import Configuration
 from modules.candlestick.Candlestick import Candlestick
@@ -41,9 +39,9 @@ class Epoch:
         TEST_DS_START: int
         TEST_DS_END: int
             The date range of the test dataset.
-        HIGHEST_PRICE: float
-        LOWEST_PRICE: float
-            Highest and lowest price within the Epoch. These values are stored as 
+        HIGHEST_PRICE_SMA: float
+        LOWEST_PRICE_SMA: float
+            Highest and lowest price SMA within the Epoch. These values are stored as 
             they are used to scale the prediction candlesticks for trainable models.
             If the price was to go above the highest or below the lowest price, trading should be
             stopped and a new epoch should be published once the market is "stable"
@@ -102,8 +100,8 @@ class Epoch:
     TEST_DS_END: int
 
     # Normalization Price Range
-    HIGHEST_PRICE: float
-    LOWEST_PRICE: float
+    HIGHEST_PRICE_SMA: float
+    LOWEST_PRICE_SMA: float
 
     # Regression Parameters
     REGRESSION_LOOKBACK: int
@@ -198,43 +196,32 @@ class Epoch:
             idle_minutes_on_position_close=idle_minutes_on_position_close
         )
 
-        # Calculate the number of days in the epoch's width
-        epoch_width_days: int = ceil(epoch_width * 30)
-
-        # Extract the predictions candlestick df
-        print("1/10) Extracting the Prediction Candlesticks DF...")
-        prediction_df: DataFrame = Epoch._extract_epoch_prediction_candlesticks_df(epoch_width_days)
-
-        # Calculate the epoch's date ranges
-        print("2/10) Calculating the Epoch Range...")
-        start: int = int(prediction_df.iloc[0]["ot"])
-        end: int = int(prediction_df.iloc[-1]["ct"])
-        test_ds_start, test_ds_end = Epoch._calculate_date_range(
-            prediction_df, ceil(epoch_width_days * (1 - train_split))
+        # Build the candlestick assets
+        print("1/5) Building Candlestick Assets...")
+        candlesticks_payload: ICandlestickBuildPayload = Candlestick.build_candlesticks(
+            epoch_width=epoch_width,
+            sma_window_size=sma_window_size,
+            train_split=train_split
         )
 
-        # Initialize the Candlesticks
-        print("5/10) Initializing Candlesticks...")
-        highest_price, lowest_price = (0, 0)#TODO
-
         # Initialize the Epoch's directories
-        print("5/10) Creating Directories...")
+        print("2/5) Creating Epoch Directories...")
         EpochPath.init_directories(id)
 
         # Save the epoch's config file
-        print("7/10) Saving Epoch Configuration...")
+        print("3/5) Saving Epoch Configuration...")
         epoch_config: IEpochConfig = {
             "seed": seed,
             "id": id,
             "sma_window_size": sma_window_size,
             "train_split": train_split,
             "validation_split": validation_split,
-            "start": start,
-            "end": end,
-            "test_ds_start": test_ds_start,
-            "test_ds_end": test_ds_end,
-            "highest_price": highest_price,
-            "lowest_price": lowest_price,
+            "start": candlesticks_payload["start"],
+            "end": candlesticks_payload["end"],
+            "test_ds_start": candlesticks_payload["test_ds_start"],
+            "test_ds_end": candlesticks_payload["test_ds_end"],
+            "highest_price_sma": candlesticks_payload["highest_price_sma"],
+            "lowest_price_sma": candlesticks_payload["lowest_price_sma"],
             "regression_lookback": regression_lookback,
             "regression_predictions": regression_predictions,
             "position_size": position_size,
@@ -244,11 +231,11 @@ class Epoch:
         Configuration.update_epoch_config(epoch_config)
 
         # Add the Epoch's Directory to the gitignore file
-        print("8/10) Adding Epoch to .gitignore file...")
-        Epoch.add_epoch_to_gitignore_file(id)
+        print("4/5) Adding Epoch to .gitignore file...")
+        Epoch._add_epoch_to_gitignore_file(id)
 
         # Create the Epoch's Receipt
-        print("9/10) Creating receipt...")
+        print("5/5) Creating receipt...")
         Epoch._create_epoch_receipt(epoch_config)
 
 
@@ -365,82 +352,7 @@ class Epoch:
 
 
     @staticmethod
-    def _extract_epoch_prediction_candlesticks_df(epoch_width_days: int) -> DataFrame:
-        """Extracts the prediction candlesticks only covering the epoch. This df is 
-        used to calculate date ranges as well as generating the 
-        normalized prediction candlesticks df.
-
-        Args:
-            epoch_width_days: int
-                The number of days that comprise the epoch.
-
-        Returns:
-            DataFrame
-        """
-        # Extract the entire csv
-        raw_df: DataFrame = Candlestick._get_df(Candlestick.PREDICTION_CANDLESTICK_CONFIG)
-
-        # Subset the rows that are part of the epoch
-        df: DataFrame = raw_df.iloc[-(Epoch._calculate_candlesticks_in_range(epoch_width_days)):]
-        df.reset_index(drop=True, inplace=True)
-
-        # Finally, return the DF
-        return df
-
-
-
-
-
-
-
-    @staticmethod
-    def _calculate_date_range(df: DataFrame, days: int) -> Tuple[int, int]:
-        """Calculates the date range for a given number of days.
-
-        Args:
-            df: DataFrame
-                The prediction candlesticks dataframe.
-            days: int
-                The number of days that comprise the date range that will be calculated
-
-        Returns:
-            Tuple[int, int]
-            (start, end)
-        """
-        # Subset the last items based on the range
-        range_df: DataFrame = df.iloc[-(Epoch._calculate_candlesticks_in_range(days)):]
-
-        # Finally, return the first ot and the last ct
-        return int(range_df.iloc[0]["ot"]), int(range_df.iloc[-1]["ct"])
-
-
-
-
-
-
-    @staticmethod
-    def _calculate_candlesticks_in_range(days: int) -> int:
-        """Calculates the number of prediction candlesticks that fit within a given
-        number of days
-
-        Args:
-            days: int
-                The number of days in which the candlesticks will be fit.
-
-        Returns:
-            int
-        """
-        mins_in_a_day: int = 24 * 60
-        candles_in_a_day: float = mins_in_a_day / Candlestick.PREDICTION_CANDLESTICK_CONFIG["interval_minutes"]
-        return ceil(candles_in_a_day * days)
-
-
-
-
-
-
-    @staticmethod
-    def add_epoch_to_gitignore_file(epoch_id: str) -> None:
+    def _add_epoch_to_gitignore_file(epoch_id: str) -> None:
         """Loads the entire .gitignore file and appends the epoch's
         id at the end of it.
 
@@ -459,6 +371,8 @@ class Epoch:
 
         # Save the file
         Utils.write(path, gitignore)
+
+
 
 
 
@@ -486,9 +400,9 @@ class Epoch:
         receipt += f"Idle Minutes On Position Close: {config['idle_minutes_on_position_close']}\n"
 
         # Price Range
-        receipt += "\n\nPrice Range:\n"
-        receipt += f"Highest: {config['highest_price']}\n"
-        receipt += f"Lowest: {config['lowest_price']}\n"
+        receipt += "\n\nPrice SMA Range:\n"
+        receipt += f"Highest: {config['highest_price_sma']}\n"
+        receipt += f"Lowest: {config['lowest_price_sma']}\n"
 
         # Epoch Date Range
         receipt += "\n\nEpoch Range:\n"
@@ -542,8 +456,8 @@ class Epoch:
         Epoch.END = config["end"]
         Epoch.TEST_DS_START = config["test_ds_start"]
         Epoch.TEST_DS_END = config["test_ds_end"]
-        Epoch.HIGHEST_PRICE = config["highest_price"]
-        Epoch.LOWEST_PRICE = config["lowest_price"]
+        Epoch.HIGHEST_PRICE_SMA = config["highest_price_sma"]
+        Epoch.LOWEST_PRICE_SMA = config["lowest_price_sma"]
         Epoch.REGRESSION_LOOKBACK = config["regression_lookback"]
         Epoch.REGRESSION_PREDICTIONS = config["regression_predictions"]
         Epoch.POSITION_SIZE = config["position_size"]

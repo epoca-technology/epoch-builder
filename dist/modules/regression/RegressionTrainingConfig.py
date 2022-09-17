@@ -2,7 +2,6 @@ from typing import Union, List, Tuple
 from functools import reduce
 from copy import deepcopy
 from math import ceil
-from tqdm import tqdm
 from modules._types import IKerasModelConfig, IKerasOptimizer, IKerasActivation, IRegressionTrainingConfigLoss,\
     IKerasActivation, IRegressionTrainingConfig, IRegressionTrainingConfigBatch, IRegressionTrainingConfigCategory,\
         IKerasModelTemplateName, IKerasUnit, IKerasFilter, IKerasKernelSize, IKerasPoolSize,\
@@ -82,6 +81,7 @@ class RegressionTrainingConfig:
         # Iterate over the networks
         for category, network_variations in NETWORKS_BY_CATEGORY.items():
             # Init the network's list of configs
+            print(f"\n\nGenerating {category} training configuration batches...")
             configs: List[IRegressionTrainingConfig] = []
 
             # Iterate over the variations
@@ -147,10 +147,6 @@ class RegressionTrainingConfig:
             "configs": [] # Placeholder
         }
 
-        # Init the progress bar
-        print(f"\n\nGenerating {category} training configuration batches...")
-        progress_bar: tqdm = tqdm(bar_format='{l_bar}{bar:20}{r_bar}{bar:-20b}', total=batches)
-
         # Save the configurations in batches
         slice_start: int = 0
         for batch_number in range(1, batches+1):
@@ -170,9 +166,6 @@ class RegressionTrainingConfig:
 
             # Set the end of the slice as the new start
             slice_start = slice_end
-
-            # Update the progress bar
-            progress_bar.update()
 
         # Finally, pack and return the network counts
         return models, batches

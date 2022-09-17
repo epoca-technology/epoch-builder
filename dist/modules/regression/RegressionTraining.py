@@ -79,13 +79,13 @@ class RegressionTraining:
 
 
 
-    def __init__(self, config: IRegressionTrainingConfig, datasets: IRegressionDatasets):
+    def __init__(self, config: IRegressionTrainingConfig, datasets: IRegressionTrainAndTestDatasets):
         """Initializes the RegressionTraining Instance.
 
         Args:
             config: IKerasRegressionTrainingConfig
                 The configuration that will be used to train the model.
-            datasets: IRegressionDatasets
+            datasets: IRegressionTrainAndTestDatasets
                 The packed datasets that will be used to train and evaluate the
                 regression.
 
