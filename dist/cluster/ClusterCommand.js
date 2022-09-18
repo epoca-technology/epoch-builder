@@ -296,26 +296,47 @@ import { spawn } from "child_process";
 
 
 
-
-
 	/**
-	 * Runs the Hyperparams Process.
+	 * Runs the Epoch Creation Process.
 	 * @param server: object 
-	 * @param model_type: string
-	 * @param training_data_file_name: string
-	 * @param batch_size: string
+	 * @param args: object
 	 * @returns Promise<void>
 	 */
-	hyperparams(server, model_type, training_data_file_name, batch_size) {
+	create_epoch(server, args) {
 		return this.execute_eb(
-			server, "hyperparams.py",
+			server, "create_epoch.py",
 			[
-				"--model_type", model_type, 
-				"--training_data_file_name", training_data_file_name, 
-				"--batch_size", batch_size
+				"--seed", args.seed,
+				"--id", args.id,
+				"--epoch_width", args.epoch_width,
+				"--sma_window_size", args.sma_window_size,
+				"--train_split", args.train_split,
+				"--validation_split", args.validation_split,
+				"--regression_lookback", args.regression_lookback,
+				"--regression_predictions", args.regression_predictions,
+				"--position_size", args.position_size,
+				"--leverage", args.leverage,
+				"--idle_minutes_on_position_close", args.idle_minutes_on_position_close
 			]
 		);
 	}
+
+
+
+
+
+	/**
+	 * Runs the Generate Regression Training Configs Process.
+	 * @param server: object 
+	 * @returns Promise<void>
+	 */
+	generate_regression_training_configs(server) {
+		return this.execute_eb(server, "generate_regression_training_configs.py");
+	}
+
+
+
+
 
 
 
@@ -324,18 +345,16 @@ import { spawn } from "child_process";
 	 * Initializes the Regression Training Process. If running on localhost, it will
 	 * run it in inherited mode. Otherwise, it will run it in deatached mode.
 	 * @param server: object 
-	 * @param trainable_model_type: string
-	 * @param hyperparams_category: string
-	 * @param config_file_name: string
+	 * @param category: string
+	 * @param batch_file_name: string
 	 * @returns Promise<void>
 	 */
-	regression_training(server, trainable_model_type, hyperparams_category, config_file_name) {
+	train_regression_batch(server, category, batch_file_name) {
 		return this.execute_eb(
-			server, "regression_training.py",
+			server, "train_regression_batch.py",
 			[
-				"--model_type", trainable_model_type, 
-				"--hyperparams_category", hyperparams_category, 
-				"--config_file_name", config_file_name
+				"--category", category, 
+				"--batch_file_name", batch_file_name
 			],
 			true
 		);
@@ -344,53 +363,23 @@ import { spawn } from "child_process";
 
 
 
-	/**
-	 * Runs the Regression Selection Process.
-	 * @param server: object 
-	 * @param model_ids: string
-	 * @returns Promise<void>
-	 */
-	regression_selection(server, model_ids) {
-		return this.execute_eb(
-			server, "regression_selection.py",
-			[
-				"--model_ids", model_ids
-			]
-		);
-	}
-
-
 
 
 	/**
-	 * Initializes the Classification Training Data Process. If running on localhost, it will
+	 * Initializes the Regression Training Process. If running on localhost, it will
 	 * run it in inherited mode. Otherwise, it will run it in deatached mode.
 	 * @param server: object 
-	 * @param regression_selection_file_name: string
-	 * @param description: string
-	 * @param steps: string
-	 * @param include_rsi: string
-	 * @param include_aroon: string
+	 * @param regression_ids: string
+	 * @param max_combinations: string
 	 * @returns Promise<void>
 	 */
-	classification_training_data(
-		server,
-		regression_selection_file_name, 
-		description, 
-		steps, 
-		include_rsi, 
-		include_aroon
-	) {
+	build_prediction_models(server, regression_ids, max_combinations) {
 		return this.execute_eb(
-			server, "classification_training_data.py",
+			server, "build_prediction_models.py",
 			[
-				"--regression_selection_file_name", regression_selection_file_name,
-				"--description", `'${description}'`,
-				"--steps", steps,
-				"--include_rsi", include_rsi,
-				"--include_aroon", include_aroon
-			],
-			true
+				"--regression_ids", regression_ids, 
+				"--max_combinations", max_combinations
+			]
 		);
 	}
 
@@ -398,120 +387,23 @@ import { spawn } from "child_process";
 
 
 
+
+
 	/**
-	 * Initializes the Classification Training Process. If running on localhost, it will
+	 * Initializes the Regression Training Process. If running on localhost, it will
 	 * run it in inherited mode. Otherwise, it will run it in deatached mode.
 	 * @param server: object 
-	 * @param trainable_model_type: string
-	 * @param hyperparams_category: string
-	 * @param config_file_name: string
+	 * @param model_id: string
 	 * @returns Promise<void>
 	 */
-	classification_training(server, trainable_model_type, hyperparams_category, config_file_name) {
+	export_epoch(server, model_id) {
 		return this.execute_eb(
-			server, "classification_training.py",
+			server, "export_epoch.py",
 			[
-				"--model_type", trainable_model_type, 
-				"--hyperparams_category", hyperparams_category, 
-				"--config_file_name", config_file_name
-			],
-			true
-		);
-	}
-
-
-
-
-
-	/**
-	 * Initializes the Backtest Process. If running on localhost, it will
-	 * run it in inherited mode. Otherwise, it will run it in deatached mode.
-	 * @param server: object 
-	 * @param config_file_name: string
-	 * @returns Promise<void>
-	 */
-	 backtest(server, config_file_name) {
-		return this.execute_eb(
-			server, "backtest.py",
-			[
-				"--config_file_name", config_file_name
-			],
-			true
-		);
-	}
-
-
-
-
-
-	/**
-	 * Merges the training certificates from the model's that went through the entire process.
-	 * Later, the models are moved from the active folder into the bank and finally, updates
-	 * the configuration file in the root config directory so the training can be resumed.
-	 * @param server: object
-	 * @param trainable_model_type: string
-	 * @returns Promise<void>
-	 */
-	merge_training_certificates(server, trainable_model_type) {
-		return this.execute_eb(
-			server, "merge_training_certificates.py",
-			[
-				"--model_type", trainable_model_type
+				"--model_id", model_id
 			]
 		);
 	}
-
-
-
-
-
-
-	/**
-	 * Runs the Epoch Management Process.
-	 * @param server: object 
-	 * @param args
-	 * @returns Promise<void>
-	 */
-	epoch_management(server, args) {
-		return this.execute_eb(
-			server, "epoch_management.py",
-			[
-				"--action", args.action,
-				"--id", args.id,
-				"--epoch_width", args.epoch_width,
-				"--seed", args.seed,
-				"--train_split", args.train_split,
-				"--regression_lookback", args.regression_lookback,
-				"--regression_predictions", args.regression_predictions,
-				"--idle_minutes_on_position_close", args.idle_minutes_on_position_close,
-				"--training_data_file_name", args.training_data_file_name,
-				"--model_ids", args.model_ids
-			]
-		);
-	}
-
-
-
-
-
-
-	/**
-	 * Runs the DB Management Process.
-	 * @param server: object 
-	 * @param action: string
-	 * @param ip: string
-	 * @returns Promise<void>
-	 */
-	db_management(server, action, ip) {
-		return this.execute_eb(
-			server, "db_management.py",
-			[
-				"--action", action,
-				"--ip", ip
-			]
-		);
-	}
-
 
 
 

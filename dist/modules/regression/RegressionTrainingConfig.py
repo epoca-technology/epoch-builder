@@ -418,7 +418,7 @@ class RegressionTrainingConfig:
         # Init the config
         config: IRegressionTrainingConfigBatch = {
             "name": "KR_UNIT_TEST",
-            "models": [
+            "configs": [
                 {
                     "id": "KR_UNIT_TEST",
                     "description": "This is the official Regression for Unit Tests.",

@@ -12,8 +12,7 @@ console.clear();
 console.log("EPOCH BUILDER CLUSTER\n\n");
 new Cluster()
 .run()
-.then(() => { 
-    console.log("\n\nEPOCH BUILDER CLUSTER COMPLETED");
+.then(() => {
     process.exit(0);
 }).catch(e => { 
     console.error(e); 

@@ -2,7 +2,7 @@ from typing import List, TypedDict, Tuple, Dict, Literal
 from numpy import ndarray
 from modules._types.keras_utils_types import IKerasModelConfig, IKerasModelTrainingHistory, IKerasOptimizer, \
     IKerasLoss, IKerasMetric, IKerasOptimizerName, IKerasModelSummary, IKerasModelTemplateName
-from modules._types.discovery_types import IDiscovery, IDiscoveryPayload
+from modules._types.discovery_types import IDiscovery
 
 
 
@@ -199,9 +199,6 @@ class IRegressionConfig(TypedDict):
     # The number of predictions it will generate
     predictions: int
 
-    # The discovery performed prior to saving the model
-    discovery: IDiscovery
-
     # The summary of the KerasModel
     summary: IKerasModelSummary
 
@@ -270,7 +267,7 @@ class IRegressionTrainingCertificate(TypedDict):
     test_ds_evaluation: ITestDatasetEvaluation
 
     # Regression Discovery
-    discovery: IDiscoveryPayload
+    discovery: IDiscovery
 
     # The configuration of the Regression
     regression_config: IRegressionConfig

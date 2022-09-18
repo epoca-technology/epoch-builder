@@ -64,11 +64,11 @@ class Epoch:
 
     # Epoch Defaults
     DEFAULTS: IEpochDefaults = {
+        "seed": 60184,
         "epoch_width": 24,
         "sma_window_size": 100,
         "train_split": 0.75,
         "validation_split": 0.2,
-        "seed": 60184,
         "regression_lookback": 128,
         "regression_predictions": 32,
         "position_size": 10000,
@@ -121,17 +121,18 @@ class Epoch:
 
 
 
-
+    ##############
     ## Creation ##
+    ##############
 
 
 
     @staticmethod
     def create(
+        seed: int,
         id: str, 
         epoch_width: int,
         sma_window_size: int,
-        seed: int,
         train_split: float,
         validation_split: float,
         regression_lookback: int,
@@ -144,6 +145,8 @@ class Epoch:
         to get started.
         
         Args:
+            seed: int
+                The random seed to be set on all required libs and machines.
             id: str
                 The identifier of the epoch. Make sure to never reuse these names
                 as the core infrastructure will have validations to prohibit this.
@@ -153,8 +156,6 @@ class Epoch:
                 is also used to calculate the Backtests' Date Range.
             sma_window_size: int
                 The window size to be applied on the prediction candlesticks.
-            seed: int
-                The random seed to be set on all required libs and machines.
             train_split: float
                 The split that will be applied to the epoch_width to train models.
             validation_split: float
@@ -424,7 +425,11 @@ class Epoch:
 
 
 
+
+
+    ####################
     ## Initialization ##
+    ####################
 
 
     @staticmethod
@@ -486,23 +491,31 @@ class Epoch:
 
 
 
-    ## Export ## 
 
+
+
+
+
+    ############
+    ## Export ## 
+    ############
 
 
 
     @staticmethod
-    def export() -> None:
-        """Builds the Epoch's Manifest, as well as all the required assets.
-        The Epoch's File is saved in zip format and placed in the root directory
-        of the Epoch. If any changes need to be made, the original archive will be
-        replaced.
+    def export(model_id: str) -> None:
+        """Builds all the distributable assets of the epoch based on the
+        provided prediction model id.
+
+        Args:
+            model_id: str
+                The identifier of the prediction model that will be exported.
 
         Raises:
             RuntimeError:
-                If the class training data for unit tests has not been set
-                If the take profit or the stop loss has not been set
                 If the epoch's directory does not exist.
+                If the prediction model does not exist.
+                If any of the regressions don't exist
                 ...
         """
         # Retrieve the Epoch
@@ -519,13 +532,16 @@ class Epoch:
 
 
     @staticmethod
-    def _can_epoch_be_exported(config: IEpochConfig) -> None:
+    def _can_epoch_be_exported(config: IEpochConfig, model_id: str) -> None:
         """Verifies if an Epoch can be exported. It raises an error if any
         if the requirements is not met.
 
         Args:
             config: IEpochConfig
                 The configuration of the epoch that will be exported
+            model_id: str
+                The identifier of the prediction model that will be exported.
+            
 
         Raises:
             RuntimeError:

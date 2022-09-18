@@ -8,7 +8,7 @@
  * Cluster Path
  * This class handles the retrieval of any path within the project.
  * IMPORTANT: If this class is initialized with an undefined epoch_id,
- * invoking _epoch_path will trigger an error.
+ * invoking epoch_path will trigger an error.
  * 
  * Instance Properties
  * 	local_path: string
@@ -43,7 +43,7 @@
 	 * @param local: boolean
 	 * @returns string
 	 */
-	requirements(local) { return this._path(local, "requirements.txt") }
+	requirements(local) { return this.path(local, "requirements.txt") }
 
 
 
@@ -53,7 +53,7 @@
 	 * @param local: boolean
 	 * @returns string
 	 */
-	package_json(local) { return this._path(local, "package.json") }
+	package_json(local) { return this.path(local, "package.json") }
 
 
 
@@ -64,7 +64,7 @@
 	 * @param local: boolean
 	 * @returns string
 	 */
-	nohup_logs(local) { return this._path(local, "nohup.out") }
+	nohup_logs(local) { return this.path(local, "nohup.out") }
 
 
 
@@ -83,17 +83,7 @@
 	 * @param local: boolean
 	 * @returns string
 	 */
-	config(local) { return this._path(local, "config") }
-
-
-
-	 
-	/**
-	 * Retrieves the path for the database management directory.
-	 * @param local: boolean
-	 * @returns string
-	 */
-	db_management(local) { return this._path(local, "db_management") }
+	config(local) { return this.path(local, "config") }
 
 
 
@@ -104,7 +94,7 @@
 	 * @param local: boolean
 	 * @returns string
 	 */
-	candlesticks(local) { return this._path(local, "candlesticks") }
+	candlesticks(local) { return this.path(local, "candlesticks") }
 
 
 
@@ -115,7 +105,7 @@
 	 * @param local: boolean
 	 * @returns string
 	 */
-	dist(local) { return this._path(local, "dist") }
+	dist(local) { return this.path(local, "dist") }
 
 
 
@@ -126,7 +116,8 @@
 	 * @param local: boolean
 	 * @returns string
 	 */
-	unit_tests(local) { return this._path(local, "dist/tests") }
+	unit_tests(local) { return this.path(local, "dist/tests") }
+
 
 
 
@@ -139,125 +130,67 @@
 
 
 
-	/**
-	 * Retrieves the path for the backtest configurations, results or the 
-	 * root directory.
-	 * @param local: boolean
-	 * @param dir_name?: string "configurations"|"results"
-	 * @returns string
-	 */
-	backtests(local, dir_name = undefined) { 
-		// Check if the dir name was provided
-		if (typeof dir_name == "string") { return this._epoch_path(local, `backtests/${dir_name}`) }
-
-		// Otherwise, return the root directory
-		else { return this._epoch_path(local, "backtests")  }
-	}
-
-
-
 
 
 	/**
-	 * Retrieves the path for the batched training certificates. If no
-	 * type is provided, it will return the base directory.
+	 * Retrieves the path for the  regression training configurations directory. If no
+	 * category is provided, it will return the root directory.
 	 * @param local: boolean
-	 * @param trainable_model_type?: string
-	 * @returns string
-	 */
-	batched_training_certificates(local, trainable_model_type = undefined) {
-		// Check if the model type was provided
-		if (typeof trainable_model_type == "string") { 
-			return this._epoch_path(local, `batched_training_certificates/${trainable_model_type}`); 
-		}
-
-		// Otherwise, return the root directory
-		else { return this._epoch_path(local, "batched_training_certificates") }
-	}
-
-
-
-
-	/**
-	 * Retrieves the path for the active models directory.
-	 * @param local: boolean
-	 * @returns string
-	 */
-	models(local) { return this._epoch_path(local, "models") }
-
-
-
-
-
-	/**
-	 * Retrieves the path for the models bank. If no type is provided, it will 
-	 * return the base directory.
-	 * @param local: boolean
-	 * @param trainable_model_type?: string
-	 * @returns string
-	 */
-	models_bank(local, trainable_model_type = undefined) {
-		// Check if the model type was provided
-		if (typeof trainable_model_type == "string") { 
-			return this._epoch_path(local, `models_bank/${trainable_model_type}`) 
-		}
-
-		// Otherwise, return the root directory
-		else { return this._epoch_path(local, "models_bank") }
-	}
-
-
-
-
-	/**
-	 * Retrieves the path for the regression selection directory.
-	 * @param local: boolean
-	 * @returns string
-	 */
-	regression_selection(local) { return this._epoch_path(local, "regression_selection") }
-
-
-
-
-
-	/**
-	 * Retrieves the path for the classification training data directory.
-	 * @param local: boolean
-	 * @returns string
-	 */
-	classification_training_data(local) { return this._epoch_path(local, "classification_training_data") }
-	
-
-
-
-
-	/**
-	 * Retrieves the path for the training configurations directory. If the model
-	 * type is not provided, it will return the root of the directory.
-	 * @param local: boolean
-	 * @param trainable_model_type?: string
 	 * @param category?: string
 	 * @returns string
 	 */
-	training_configs(local, trainable_model_type = undefined, category = undefined) { 
-		// Check if the model type was provided
-		if (typeof trainable_model_type == "string") {
-			// Check if the category was provided
-			if (typeof category == "string") {
-				return this._epoch_path(local, `training_configs/${trainable_model_type}/${category}`);
-			}
+	regression_training_configs(local, category = undefined) { 
+		// Check if the category was provided
+		if (typeof category == "string") {
+			return this.epoch_path(local, `regression_training_configs/${category}`);
+		}
 
-			// Otherwise, return the model specific path
-			else {
-				return this._epoch_path(local, `training_configs/${trainable_model_type}`);
-			}
-		} 
-		
-		// Otherwise, return the root directory
+		// Otherwise, return the root path
 		else {
-			return this._epoch_path(local, "training_configs") 
+			return this.epoch_path(local, "regression_training_configs");
 		}
 	}
+
+
+
+
+
+	/**
+	 * Retrieves the path for the regression batched training certificates.
+	 * @param local: boolean
+	 * @returns string
+	 */
+	regression_batched_certificates(local) { 
+		return this.epoch_path(local, "regression_batched_certificates") 
+	}
+
+
+
+
+
+
+	/**
+	 * Retrieves the path for the regressions directory. If no regression id is
+	 * provided, it will return the root path.
+	 * @param local: boolean
+	 * @param id?: string
+	 * @returns string
+	 */
+	regressions(local, id = undefined) { 
+		// Check if the id was provided
+		if (typeof id == "string") {
+			return this.epoch_path(local, `regressions/${id}`);
+		}
+
+		// Otherwise, return the root path
+		else {
+			return this.epoch_path(local, "regressions");
+		}
+	}
+
+
+
+
 
 
 
@@ -280,17 +213,17 @@
 	 * @param local: boolean
 	 * @param path?: string
 	 */
-	_epoch_path(local, path = undefined) {
+	epoch_path(local, path = undefined) {
 		// Make sure the Epoch ID was initialized
 		if (typeof this.epoch_id != "string") {
 			throw new Error("The Epoch's ID was not set in the ClusterPath because the configuration file could not be loaded.");
 		}
 
 		// If the path was provided, prepend the epoch's id to it
-		if (typeof path == "string") { return this._path(local, `${this.epoch_id}/${path}`)} 
+		if (typeof path == "string") { return this.path(local, `${this.epoch_id}/${path}`)} 
 
 		// Otherwise, return the root directory of the epoch
-		else { return this._path(local, this.epoch_id) }
+		else { return this.path(local, this.epoch_id) }
 	}
 
 
@@ -305,7 +238,7 @@
 	 * @param path?: string
 	 * @returns string
 	 */
-	_path(local, path = undefined) { 
+	path(local, path = undefined) { 
 		// Check if a path was provided
 		if (typeof path == "string") {
 			return local ? `${this.local_path}/epoch-builder/${path}`: `epoch-builder/${path}`

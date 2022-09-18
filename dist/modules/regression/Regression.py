@@ -1,10 +1,9 @@
 from typing import List
-from json import loads
 from numpy import ndarray
 from h5py import File as h5pyFile
 from tensorflow.python.keras.saving.hdf5_format import load_model_from_hdf5
 from keras import Sequential
-from modules._types import IRegressionConfig, IDiscovery
+from modules._types import IRegressionConfig
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.keras_utils.KerasModelSummary import get_summary
@@ -25,9 +24,6 @@ class Regression:
             The number of prediction candlesticks that will be used to generate predictions.
         predictions: int
             The number of predictions to be generated.
-        discovery: IDiscovery
-            The model's discovery information. If the model has not yet been saved, this
-            value will be an empty dict.
         model: Sequential
             The instance of the trained model.
     """
@@ -59,7 +55,6 @@ class Regression:
             self.description: str = model_file.attrs["description"]
             self.lookback: int = int(model_file.attrs["lookback"])          # Downcast to int
             self.predictions: int = int(model_file.attrs["predictions"])    # Downcast to int
-            self.discovery: IDiscovery = loads(model_file.attrs["discovery"])
             self.model: Sequential = load_model_from_hdf5(model_file)
 
         # Make sure the IDs are identical
@@ -77,10 +72,6 @@ class Regression:
         # Make sure the predictions were extracted
         if not isinstance(self.predictions, int):
             raise ValueError(f"Regression Predictions is invalid: {str(self.predictions)}")
-
-        # Make sure the discovery was extracted
-        if not isinstance(self.discovery, dict):
-            raise ValueError(f"Regression Discovery is invalid: {str(self.discovery)}")
 
 
 
@@ -114,7 +105,7 @@ class Regression:
         Returns:
             List[float]
         """
-        return self.model.predict(features).tolist()
+        return self.model.predict(features, verbose=0).tolist()
 
 
 
@@ -151,6 +142,5 @@ class Regression:
             "description": self.description,
             "lookback": self.lookback,
             "predictions": self.predictions,
-            "discovery": self.discovery,
             "summary": get_summary(self.model),
         }

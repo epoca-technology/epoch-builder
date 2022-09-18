@@ -726,13 +726,11 @@ class Utils:
             endpoint_name: str
                 The name of the endpoint being executed.
         """
-        # Init the title based on the type of execution
-        title: str = f"ACCELERATED EPOCH BUILDER v{eb_version}" if len(config.list_physical_devices("GPU")) > 0 \
-            else f"EPOCH BUILDER v{eb_version}"
-        print(f"{title}\n")
-
-        # Print the title with the endpoint name
-        print(f"{title}: {endpoint_name}")
+        # Print the Heading
+        eb: str = f"EpochBuilderGPU v{eb_version}" if len(config.list_physical_devices("GPU")) > 0 \
+            else f"EpochBuilder v{eb_version}"
+        print(endpoint_name)
+        print(f"{eb}")
 
         # Print the version of tensorflow
         print(f"TensorFlow: v{tf_version}\n")
@@ -748,4 +746,4 @@ class Utils:
             endpoint_name: str
                 The name of the endpoint being executed.
         """
-        print(f"\n\n{endpoint_name} COMPLETED\n")
+        print(f"\n\n{endpoint_name} COMPLETED")

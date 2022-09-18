@@ -53,7 +53,7 @@ import { ClusterInput } from "./ClusterInput.js"
 		this.cluster_server = new ClusterServer(this.cluster_command, this.config.servers);
 
 		// Initialize the Cluster Input Instance
-		this.cluster_input = new ClusterInput(this.cluster_server, this.cluster_path, this.config.trainable_model_types);
+		this.cluster_input = new ClusterInput(this.cluster_server, this.cluster_path);
 	}
 
 
@@ -76,37 +76,23 @@ import { ClusterInput } from "./ClusterInput.js"
 				"install_ssh_key_on_a_server"
 			],
 			"Epoch Builder": [
-				"hyperparams",
-				"regression_training",
-				"regression_selection",
-				"classification_training_data",
-				"classification_training",
-				"backtest",
-				"merge_training_certificates",
-				"epoch_management",
-				"database_management",
+				"create_epoch",
+				"generate_regression_training_configs",
+				"train_regression_batch",
+				"build_prediction_models",
+				"export_epoch",
 				"unit_tests"
 			],
 			"Push": [
 				"push_root_files",
 				"push_configuration",
-				"push_database_management",
 				"push_candlesticks",
 				"push_dist",
-				"push_active_models",
-				"push_regression_selection",
-				"push_classification_training_data",
-				"push_training_configurations",
-				"push_backtest_configurations",
-				"push_epoch",
+				"push_regression_training_configs",
 				"push_epoch_builder"
 			],
 			"Pull": [
-				"pull_trained_models",
-				"pull_regression_selection",
-				"pull_classification_training_data",
-				"pull_backtest_results",
-				"pull_database_management"
+				"pull_trained_regressions",
 			]
 		});
 
@@ -304,207 +290,108 @@ import { ClusterInput } from "./ClusterInput.js"
 	 * of the new epoch.							   								*
 	 * 																		   		*
 	 * Processes:															   		*
-	 * 	hyperparams													   				*
-	 * 	regression_training											   				*
-	 * 	regression_selection											           	*
-	 * 	classification_training_data											    *
-	 * 	classification_training											           	*
-	 * 	backtest											   						*
-	 * 	merge_training_certificates									   				*
-	 * 	epoch_management									       					*
-	 * 	database_management									       					*
-	 * 	unit_tests									      		   			   		*
+	 * 	create_epoch													   		    *
+	 * 	generate_regression_training_configs									    *
+	 * 	train_regression_batch											           	*
+	 * 	build_prediction_models											    		*
+	 * 	export_epoch											           			*
+	 * 	unit_tests											   						*
      ********************************************************************************/
 
 
 
 
-
 	/**
-	 * Builds the hyperparams based on the provided config on the selected 
-	 * server.
+	 * Collects all the required data and runs the epoch creation process
 	 * @returns Promise<void>
 	 */
-	 async hyperparams() { 
+	async create_epoch() { 
+		// Retrieve the server
+		const server = this.cluster_server.get_server("localhost");
+
+		// Collect the args
+		const args = await this.cluster_input.create_epoch();
+
+		// Finally, Run the command
+		await this.cluster_command.create_epoch(server, args); 
+	}
+
+
+
+
+	/**
+	 * Generates the regression training configurations.
+	 * @returns Promise<void>
+	 */
+	async generate_regression_training_configs() { 
+		// Retrieve the server
+		const server = this.cluster_server.get_server("localhost");
+
+		// Finally, Run the command
+		await this.cluster_command.generate_regression_training_configs(server); 
+	}
+
+
+
+
+
+
+	/**
+	 * Initializes the training process for a selected batch in any server.
+	 * @returns Promise<void>
+	 */
+	async train_regression_batch() { 
 		// Retrieve the server
 		const server = await this.cluster_input.server(true, false, true, true);
 
 		// Retrieve and unpack the category and the config file
-		const { model_type, training_data_file_name, batch_size } = await this.cluster_input.hyperparams();
+		const { category, batch_file_name } = await this.cluster_input.regression_training_configs();
 
 		// Finally, Run the command
-		await this.cluster_command.hyperparams(server, model_type, training_data_file_name, batch_size); 
+		await this.cluster_command.train_regression_batch(server, category, batch_file_name); 
 	}
+
 
 
 
 
 
 	/**
-	 * Initializes the training process for a selected model type and server.
+	 * Initializes the build of the prediction models in the local machine.
 	 * @returns Promise<void>
 	 */
-	async regression_training() { 
+	async build_prediction_models() { 
 		// Retrieve the server
-		const server = await this.cluster_input.server(true, false, true, true);
+		const server = this.cluster_server.get_server("localhost");
 
-		// Retrieve the model type
-		const trainable_model_type = await this.cluster_input.trainable_model_type("regression");
-
-		// Retrieve and unpack the category and the config file
-		const { category, config_file_name } = await this.cluster_input.training_config(trainable_model_type);
+		// Retrieve and unpack the unpacked args
+		const { regression_ids, max_combinations } = await this.cluster_input.build_prediction_models();
 
 		// Finally, Run the command
-		await this.cluster_command.regression_training(server, trainable_model_type, category, config_file_name); 
+		await this.cluster_command.build_prediction_models(server, regression_ids, max_combinations); 
 	}
 
-
-
-
-	/**
-	 * Initializes the regression selection process for the selected list of models and server.
-	 * @returns Promise<void>
-	 */
-	async regression_selection() { 
-		// Retrieve the server
-		const server = await this.cluster_input.server(true, false, true, true);
-
-		// Retrieve the model ids string
-		const model_ids = await this.cluster_input.selected_model_ids();
-
-		// Finally, Run the command
-		await this.cluster_command.regression_selection(server, model_ids); 
-	}
 
 
 
 
 
 	/**
-	 * Initializes the classification training data process for the selected server.
+	 * Initializes the build of the epoch export process in the local machine.
 	 * @returns Promise<void>
 	 */
-	async classification_training_data() { 
+	 async export_epoch() { 
 		// Retrieve the server
-		const server = await this.cluster_input.server(true, false, true, true);
+		const server = this.cluster_server.get_server("localhost");
 
-		// Retrieve the configuration values
-		const {
-			regression_selection_file_name,
-			description,
-			steps,
-			include_rsi,
-			include_aroon
-		} = await this.cluster_input.classification_training_data();
+		// Retrieve and unpack the unpacked args
+		const model_id = await this.cluster_input.export_epoch();
 
 		// Finally, Run the command
-		await this.cluster_command.classification_training_data(
-			server, 
-			regression_selection_file_name,
-			description,
-			steps,
-			include_rsi,
-			include_aroon
-		); 
+		await this.cluster_command.export_epoch(server, model_id); 
 	}
 
 
-
-
-
-	/**
-	 * Initializes the training process for a selected model type and server.
-	 * @returns Promise<void>
-	 */
-	async classification_training() { 
-		// Retrieve the server
-		const server = await this.cluster_input.server(true, false, true, true);
-
-		// Retrieve the model type
-		const trainable_model_type = await this.cluster_input.trainable_model_type("classification");
-
-		// Retrieve and unpack the category and the config file
-		const { category, config_file_name } = await this.cluster_input.training_config(trainable_model_type);
-
-		// Finally, Run the command
-		await this.cluster_command.classification_training(server, trainable_model_type, category, config_file_name); 
-	}
-
-
-
-
-
-	/**
-	 * Initializes the backtest process on a selected server.
-	 * @returns Promise<void>
-	 */
-	async backtest() { 
-		// Retrieve the server
-		const server = await this.cluster_input.server(true, false, true, true);
-
-		// Retrieve the backtest config file name
-		const config_file_name = await this.cluster_input.backtest_config();
-
-		// Finally, Run the command
-		await this.cluster_command.backtest(server, config_file_name); 
-	}
-
-
-
-    
-
-	/**
-	 * Merges the training certificates for a selected model type and server.
-	 * @returns Promise<void>
-	 */
-	async merge_training_certificates() { 
-		// Retrieve the server
-		const server = await this.cluster_input.server(true, false, true, true);
-
-		// Retrieve the model type
-		const trainable_model_type = await this.cluster_input.trainable_model_type("all");
-
-		// Finally, Run the command
-		await this.cluster_command.merge_training_certificates(server, trainable_model_type); 
-	}
-
-
-
-
-
-	/**
-	 * Runs the Epoch Builder's Epoch Management tool on a selected server.
-	 * @returns Promise<void>
-	 */
-	async epoch_management() { 
-		// Retrieve the server
-		const server = await this.cluster_input.server(true, false, true, true);
-
-		// Retrieve the epoch management args
-		const args = await this.cluster_input.epoch_management();
-
-		// Finally, Run the command
-		await this.cluster_command.epoch_management(server, args); 
-	}
-
-
-
-
-
-	/**
-	 * Runs the Epoch Builder's Database Management tool on a selected server.
-	 * @returns Promise<void>
-	 */
-	async database_management() { 
-		// Retrieve the server
-		const server = await this.cluster_input.server(true, false, true, true);
-
-		// Retrieve the db management args
-		const { action, ip } = await this.cluster_input.db_management(server);
-
-		// Finally, Run the command
-		await this.cluster_command.db_management(server, action, ip); 
-	}
 
 
 
@@ -516,7 +403,7 @@ import { ClusterInput } from "./ClusterInput.js"
 	 */
 	async unit_tests() { 
 		// Retrieve the server
-		const server = await this.cluster_input.server(true, false, true, true);
+		const server = this.cluster_server.get_server("localhost");
 
 		// Finally, Run the command
 		await this.cluster_command.unit_tests(server); 
@@ -541,16 +428,10 @@ import { ClusterInput } from "./ClusterInput.js"
 	 * Processes:															   *
 	 * 	push_root_files													   	   *
 	 * 	push_configuration													   *
-	 * 	push_database_management											   *
-	 * 	push_candlesticks											           *
-	 * 	push_dist											                   *
-	 * 	push_active_models											           *
-	 * 	push_regression_selection											   *
-	 * 	push_classification_training_data									   *
-	 * 	push_training_configurations									       *
-	 * 	push_backtest_configurations									       *
-	 * 	push_epoch									      		   			   *
-	 * 	push_epoch_builder									      		   	   *
+	 * 	push_candlesticks											   		   *
+	 * 	push_dist											           		   *
+	 * 	push_regression_training_configs									   *
+	 * 	push_epoch_builder											   		   *
      ***************************************************************************/
 
 
@@ -594,19 +475,7 @@ import { ClusterInput } from "./ClusterInput.js"
 	 * @returns Promise<string>
 	 */
 	push_configuration(server = undefined) {
-		return this.push(this.cluster_path.config(true), this.cluster_path._path(false), this.cluster_path.config(false), server);
-	}
-
-
-
-
-	/**
-	 * Pushes the db_management directory from the local machine to a selected server.
-	 * @param server?: object
-	 * @returns Promise<string>
-	 */
-	push_database_management(server = undefined) {
-		return this.push(this.cluster_path.db_management(true), this.cluster_path._path(false), this.cluster_path.db_management(false), server);
+		return this.push(this.cluster_path.config(true), this.cluster_path.path(false), this.cluster_path.config(false), server);
 	}
 
 
@@ -619,7 +488,7 @@ import { ClusterInput } from "./ClusterInput.js"
 	 * @returns Promise<string>
 	 */
 	push_candlesticks(server = undefined) {
-		return this.push(this.cluster_path.candlesticks(true), this.cluster_path._path(false), this.cluster_path.candlesticks(false), server);
+		return this.push(this.cluster_path.candlesticks(true), this.cluster_path.path(false), this.cluster_path.candlesticks(false), server);
 	}
 
 
@@ -631,101 +500,32 @@ import { ClusterInput } from "./ClusterInput.js"
 	 * @returns Promise<string>
 	 */
 	push_dist(server = undefined) {
-		return this.push(this.cluster_path.dist(true), this.cluster_path._path(false), this.cluster_path.dist(false), server);
+		return this.push(this.cluster_path.dist(true), this.cluster_path.path(false), this.cluster_path.dist(false), server);
 	}
 
 
 
 
+	
 	
     /* Epoch Directories */
 
 
-	
 
-	/**
-	 * Pushes the active models directory from the local machine to a selected server.
-	 * @param server?: object
-	 * @returns Promise<string>
-	 */
-	push_active_models(server = undefined) {
-		return this.push(this.cluster_path.models(true), this.cluster_path._epoch_path(false), this.cluster_path.models(false), server);
-	}
+
 
 
 
 	/**
-	 * Pushes the regression selection directory from the local machine to a selected server.
+	 * Pushes the regression training configs directory from the local machine to a selected server.
 	 * @param server?: object
 	 * @returns Promise<string>
 	 */
-	push_regression_selection(server = undefined) {
+	push_regression_training_configs(server = undefined) {
 		return this.push(
-			this.cluster_path.regression_selection(true), 
-			this.cluster_path._epoch_path(false), 
-			this.cluster_path.regression_selection(false), 
-			server
-		);
-	}
-
-
-
-	/**
-	 * Pushes the classification training data directory from the local machine to a selected server.
-	 * @param server?: object
-	 * @returns Promise<string>
-	 */
-	push_classification_training_data(server = undefined) {
-		return this.push(
-			this.cluster_path.classification_training_data(true), 
-			this.cluster_path._epoch_path(false), 
-			this.cluster_path.classification_training_data(false), 
-			server
-		);
-	}
-
-
-
-
-
-	/**
-	 * Pushes the training configurations directory from the local machine to a selected server.
-	 * Asks the user for the server and the trainable model type if they werent provided.
-	 * @param server?: object
-	 * @param trainable_model_type?: string
-	 * @returns Promise<string>
-	 */
-	async push_training_configurations(server = undefined, trainable_model_type = undefined) {
-		// Check if the server has been provided
-		server = server ? server: await this.cluster_input.server(false, false, true, true); 
-
-		// Check if the type of model has been provided
-		trainable_model_type = typeof trainable_model_type == "string" ? trainable_model_type: 
-			await this.cluster_input.trainable_model_type("all")
-
-		// Finally, perform the push
-		return this.push(
-			this.cluster_path.training_configs(true, trainable_model_type), 
-			this.cluster_path.training_configs(false), 
-			this.cluster_path.training_configs(false, trainable_model_type), 
-			server
-		);
-	}
-
-
-
-
-
-	/**
-	 * Pushes the backtest configurations directory from the local machine to a selected server.
-	 * @param server?: object
-	 * @returns Promise<string>
-	 */
-	push_backtest_configurations(server = undefined) {
-		return this.push(
-			this.cluster_path.backtests(true, "configurations"), 
-			this.cluster_path.backtests(false), 
-			this.cluster_path.backtests(false, "configurations"), 
+			this.cluster_path.regression_training_configs(true), 
+			this.cluster_path.epoch_path(false), 
+			this.cluster_path.regression_training_configs(false), 
 			server
 		);
 	}
@@ -735,44 +535,7 @@ import { ClusterInput } from "./ClusterInput.js"
 
 
 
-	/**
-	 * Asks the user of the destination server and then performs a push on each
-	 * epoch directory.
-	 * @param server?: object
-	 * @returns Promise<void>
-	 */
-	async push_epoch(server = undefined) {
-		// Check if the server has been provided
-		server = server ? server: await this.cluster_input.server(false, false, true, true); 
-
-		// Initialize the epoch path in case it hadn't been
-		await this.cluster_command.init_epoch_path(server);
-
-		// Push the active models
-		console.log(`\nACTIVE MODELS:`);
-		await this.push_active_models(server);
-
-		// Push the regression selection
-		console.log(`\n\nREGRESSION SELECTION:`);
-		await this.push_regression_selection(server);
-
-		// Push the classification training data
-		console.log(`\n\nCLASSIFICATION TRAINING DATA:`);
-		await this.push_classification_training_data(server);
-
-		// Push the training configurations
-		console.log(`\n\nTRAINING CONFIGURATION:`);
-		for (var model_type of this.config.trainable_model_types.all) {
-			await this.push_training_configurations(server, model_type);
-		}
-
-		// Push the backtest configurations
-		console.log(`\n\nBACKTEST CONFIGURATION:`);
-		await this.push_backtest_configurations(server);
-	}
-
-
-
+	/* Full Push */
 
 
 
@@ -798,14 +561,6 @@ import { ClusterInput } from "./ClusterInput.js"
 		console.log(`\nCONFIGURATION:`);
 		await this.push_configuration(server);
 
-		// Push the db_management if applies
-		if (FileSystem.dir_exists(this.cluster_path.db_management(true))) {
-			console.log(`\nDATABASE MANAGEMENT:`);
-			await this.push_database_management(server)
-		} else {
-			console.log(`\nDATABASE MANAGEMENT: Skipped`);
-		}
-
 		// Push the candlesticks
 		console.log(`\nCANDLESTICKS:`);
 		await this.push_candlesticks(server);
@@ -816,7 +571,7 @@ import { ClusterInput } from "./ClusterInput.js"
 
 		// Push the epoch directories
 		console.log(`\n\nEPOCH DIRECTORIES`);
-		await this.push_epoch(server);
+		await this.push_regression_training_configs(server);
 	}
 
 
@@ -897,11 +652,7 @@ import { ClusterInput } from "./ClusterInput.js"
 	 * clean the server's directory once the data has been transferred. 	   *
 	 * 																		   *
 	 * Processes:															   *
-	 * 	pull_trained_models													   *
-	 * 	pull_regression_selection											   *
-	 * 	pull_classification_training_data									   *
-	 * 	pull_backtest_results											       *
-	 * 	pull_database_management											   *
+	 * 	pull_trained_regressions											   *
      ***************************************************************************/
 
 
@@ -909,79 +660,33 @@ import { ClusterInput } from "./ClusterInput.js"
 
 
 	/**
-	 * Pulls all the batched training certificates and the models bank. It also cleans
-	 * the server's directories on completion.
+	 * Pulls all the batched training certificates as well as the trained regression
+	 * files with individual certificates.
 	 * @returns Promise<void>
 	 */
-	async pull_trained_models() {
+	async pull_trained_regressions() {
 		// Retrieve the server which data will be pulled from
 		const server = await this.cluster_input.server(false, false, true, true);
-
-		// Retrieve the type of model
-		const trainable_model_type = await this.cluster_input.trainable_model_type("all");
 		
 		// Pull & Clean the Batched Training Certificates
-		console.log("\n1/2) BATCHED TRAINING CERTIFICATES:");
+		console.log("\n1/2) REGRESSION BATCHED CERTIFICATES:");
 		await this.pull(
-			this.cluster_path.batched_training_certificates(false, trainable_model_type), 
-			this.cluster_path.batched_training_certificates(true), 
+			this.cluster_path.regression_batched_certificates(false), 
+			this.cluster_path.epoch_path(true), 
 			server, 
 			true
 		);
 
-		// Pull & Clean the Models Bank
-		console.log("\n\n2/2) MODELS BANK:");
+		// Pull & Clean the Trained Regressions
+		console.log("\n\n2/2) TRAINED REGRESSIONS:");
 		await this.pull(
-			this.cluster_path.models_bank(false, trainable_model_type), 
-			this.cluster_path.models_bank(true), 
+			this.cluster_path.regressions(false), 
+			this.cluster_path.epoch_path(true), 
 			server, 
 			true
 		);
 	}
 
-
-
-	/**
-	 * Pulls the regression selection directory from a selected server.
-	 * @returns Promise<void>
-	 */
-	pull_regression_selection() {
-		return this.pull(this.cluster_path.regression_selection(false), this.cluster_path._epoch_path(true));
-	}
-
-
-
-
-
-	/**
-	 * Pulls the classification training data directory from a selected server.
-	 * @returns Promise<void>
-	 */
-	pull_classification_training_data() {
-		return this.pull(this.cluster_path.classification_training_data(false), this.cluster_path._epoch_path(true));
-	}
-
-
-
-
-	/**
-	 * Pulls the backtest results directory from a selected server.
-	 * @returns Promise<void>
-	 */
-	pull_backtest_results() {
-		return this.pull(this.cluster_path.backtests(false, "results"), this.cluster_path.backtests(true), undefined, true);
-	}
-
-
-
-
-	/**
-	 * Pulls the database management directory from a selected server.
-	 * @returns Promise<void>
-	 */
-	pull_database_management() {
-		return this.pull(this.cluster_path.db_management(false), this.cluster_path._path(true), undefined, true);
-	}
 
 
 

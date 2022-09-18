@@ -1,5 +1,4 @@
 from typing import Union, List
-from json import dumps
 from numpy import ndarray, array
 from pandas import DataFrame
 from h5py import File as h5pyFile
@@ -7,8 +6,8 @@ from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras import Sequential
 from keras.callbacks import EarlyStopping, History
 from modules._types import IKerasTrainingConfig, IKerasModelConfig, IKerasModelTrainingHistory,\
-    IKerasTrainingConfig, IRegressionTrainingCertificate, IDiscovery, IDiscoveryPayload, \
-        IRegressionTrainAndTestDatasets, IRegressionTrainingConfig, ITestDatasetEvaluation
+    IKerasTrainingConfig, IRegressionTrainingCertificate, IDiscovery, IRegressionTrainingConfig, \
+        IRegressionTrainAndTestDatasets, ITestDatasetEvaluation
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.candlestick.Candlestick import Candlestick
@@ -17,6 +16,7 @@ from modules.keras_utils.KerasLoss import KerasLoss, IKerasLossInstance
 from modules.keras_utils.KerasMetric import KerasMetric, IKerasMetricInstance
 from modules.keras_utils.KerasModel import KerasModel
 from modules.keras_utils.TrainingProgressBar import TrainingProgressBar
+from modules.discovery.RegressionDiscovery import RegressionDiscovery
 from modules.keras_utils.KerasModelSummary import get_summary
 
 
@@ -58,6 +58,8 @@ class RegressionTraining:
             The number of rows included in the train dataset.
         test_size: int
             The number of rows included in the test dataset.
+        discovery: RegressionDiscovery
+            The instance of the regression discovery.
     """
     # Training Configuration
     TRAINING_CONFIG: IKerasTrainingConfig = {
@@ -95,8 +97,8 @@ class RegressionTraining:
                 If the model's directory already exists.
         """
         # Initialize the id
-        if not isinstance(config.get("id"), str) or len(config["id"]) <= 5 or config["id"][0:3] == "KR_":
-            raise ValueError(f"The provided model id is invalid.")
+        if not isinstance(config.get("id"), str) or len(config["id"]) <= 5 or config["id"][0:3] != "KR_":
+            raise ValueError(f"The provided regression model id is invalid: {config.get('id')}.")
         self.id: str = config["id"]
 
         # Initialize the description
@@ -135,6 +137,9 @@ class RegressionTraining:
         # Initialize the Dataset Sizes
         self.train_size: int = self.train_x.shape[0]
         self.test_size: int = self.test_x.shape[0]
+
+        # Initialize the Discovery Instance
+        self.discovery: RegressionDiscovery = RegressionDiscovery()
 
 
 
@@ -198,7 +203,7 @@ class RegressionTraining:
 
         # Predict the test dataset
         print("    4/8) Predicting Test Dataset...")
-        preds: List[List[float]] = model.predict(self.test_x).tolist()
+        preds: List[List[float]] = model.predict(self.test_x, verbose=0).tolist()
 
         # Evaluate the test dataset
         print("    5/8) Evaluating Test Dataset...")
@@ -209,7 +214,11 @@ class RegressionTraining:
 
         # Perform the regression discovery
         print("    6/8) Discovering Regression...")
-        #TODO
+        discovery: IDiscovery = self.discovery.discover(
+            features=self.test_x,
+            labels=self.test_y,
+            preds=preds
+        )
 
         # Build the training certificate
         print("    7/8) Building Certificate...")
@@ -218,8 +227,7 @@ class RegressionTraining:
             start_time=start_time,  
             training_history=history, 
             test_ds_evaluation=test_ds_evaluation, 
-            discovery={},#TODO
-            discovery_payload={}#TODO
+            discovery=discovery
         )
 
         # Save the model
@@ -240,8 +248,7 @@ class RegressionTraining:
         start_time: int, 
         training_history: IKerasModelTrainingHistory, 
         test_ds_evaluation: ITestDatasetEvaluation,
-        discovery: IDiscovery,
-        discovery_payload: IDiscoveryPayload
+        discovery: IDiscovery
     ) -> IRegressionTrainingCertificate:
         """Builds the certificate that contains all the data regarding the training process
         that will be saved alongside the model.
@@ -256,8 +263,7 @@ class RegressionTraining:
             test_ds_evaluation: ITestDatasetEvaluation
                 The evaluation performed on the test dataset.
             discovery: IDiscovery
-            discovery_payload: IDiscoveryPayload
-                The discovery and the payload of the regression.
+                The discovery of the regression.
 
         Returns:
             IRegressionTrainingCertificate
@@ -288,7 +294,7 @@ class RegressionTraining:
             "test_ds_evaluation": test_ds_evaluation,
 
             # Regression Discovery
-            "discovery": discovery_payload,
+            "discovery": discovery,
 
             # The configuration of the Regression
             "regression_config": {
@@ -296,7 +302,6 @@ class RegressionTraining:
                 "description": self.description,
                 "lookback": self.lookback,
                 "predictions": self.predictions,
-                "discovery": discovery,
                 "summary": get_summary(model)
             }
         }
@@ -323,9 +328,8 @@ class RegressionTraining:
             save_model_to_hdf5(model, f)
             f.attrs["id"] = certificate["id"]
             f.attrs["description"] = certificate["description"]
-            f.attrs["lookback"] = certificate["lookback"]
-            f.attrs["predictions"] = certificate["predictions"]
-            f.attrs["discovery"] = dumps(certificate["regression_config"]["discovery"])
+            f.attrs["lookback"] = certificate["regression_config"]["lookback"]
+            f.attrs["predictions"] = certificate["regression_config"]["predictions"]
 
         # Save the certificate
         Utils.write(Epoch.PATH.regression_certificate(certificate["id"]), certificate)
@@ -347,17 +351,8 @@ class RegressionTraining:
 
 
     @staticmethod
-    def make_train_and_test_datasets(lookback: int, predictions: int, train_split: float) -> IRegressionTrainAndTestDatasets:
+    def make_train_and_test_datasets() -> IRegressionTrainAndTestDatasets:
         """Builds a tuple containing the features and labels for the train and test datasets.
-
-        Args:
-            lookback: int
-                The number of prediction candlesticks the model needs to look at in order
-                to make a prediction.
-            predictions: int
-                The number of predictions the model will output in the end.
-            train_split: float
-                The split that should be applied to the training / test datasets.
 
         Returns:
             IRegressionTrainAndTestDatasets
@@ -368,18 +363,18 @@ class RegressionTraining:
 
         # Init the number of rows and the split that will be applied
         rows: int = df.shape[0]
-        split: int = int(rows * train_split)
+        split: int = int(rows * Epoch.TRAIN_SPLIT)
 
         # Init raw features and labels
         features_raw: Union[List[List[float]], ndarray] = []
         labels_raw: Union[List[List[float]], ndarray] = []
 
         # Iterate over the normalized ds and build the features & labels
-        for i in range(lookback, rows):
+        for i in range(Epoch.REGRESSION_LOOKBACK, rows):
             # Make sure there are enough items remaining
-            if i < (rows-predictions):
-                features_raw.append(df.iloc[i-lookback:i, 0])
-                labels_raw.append(df.iloc[i:i+predictions, 0])
+            if i < (rows-Epoch.REGRESSION_PREDICTIONS):
+                features_raw.append(df.iloc[i-Epoch.REGRESSION_LOOKBACK:i, 0])
+                labels_raw.append(df.iloc[i:i+Epoch.REGRESSION_PREDICTIONS, 0])
 
         # Convert the features and labels into np arrays
         features = array(features_raw)

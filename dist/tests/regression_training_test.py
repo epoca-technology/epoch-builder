@@ -1,21 +1,18 @@
 from typing import Tuple
 from unittest import TestCase, main
+from copy import deepcopy
 from numpy import ndarray, concatenate
-from modules.database.Database import Database
+from modules._types import IKerasModelConfig, IRegressionTrainingConfig, IRegressionTrainAndTestDatasets
 from modules.candlestick.Candlestick import Candlestick
 from modules.epoch.Epoch import Epoch
-from modules.regression_training_data.Datasets import make_datasets
+from modules.regression.RegressionTraining import RegressionTraining
 
-
-
-## ONLY RUN WHEN THE DATABASE TEST MODE IS ENABLED ##
-if not Database.TEST_MODE:
-    raise RuntimeError("Unit tests can only be performed when the Database is in test mode.")
 
 
 # Regression Parameters
 lookback: int = Epoch.REGRESSION_LOOKBACK
 predictions: int = Epoch.REGRESSION_PREDICTIONS
+
 
 
 # Dataset Validator
@@ -24,9 +21,6 @@ def validate_dataset(features: ndarray, labels: ndarray) -> None:
     # If they have different lens, something is wrong
     if features.shape[0] != labels.shape[0]:
         raise ValueError(f"Features and labels do not have the same number of rows. {features.shape[0]} != {labels.shape[0]}")
-
-    # Calculate the number of labels based on the type of regression
-    label_num: int = predictions
 
     # Iterate over each index and make sure that features and labels are correct
     for i in range(features.shape[0]):
@@ -39,7 +33,7 @@ def validate_dataset(features: ndarray, labels: ndarray) -> None:
             raise ValueError(f"Regression Dataset Feature Discrepancy on index: {i}")
 
         # Compare the labels
-        expected_labels: ndarray = Candlestick.NORMALIZED_PREDICTION_DF["c"].iloc[lookback+i:lookback+i+label_num].to_numpy()
+        expected_labels: ndarray = Candlestick.NORMALIZED_PREDICTION_DF["c"].iloc[lookback+i:lookback+i+predictions].to_numpy()
         if not (expected_labels == labels[i]).all():
             print(f"Head: {expected_labels[0]} == {labels[i][0]}")
             print(f"Tail: {expected_labels[-1]} == {labels[i][-1]}")
@@ -67,11 +61,34 @@ def calculate_dataset_estimated_sizes() -> Tuple[int, int]:
 
 
 
+# Default Training Configuration
+CONFIG: IRegressionTrainingConfig = {
+    "id": "KR_UNIT_TEST",
+    "description": "This is the official KerasRegressionModel for Unit Tests.",
+    "lookback": lookback,
+    "predictions": predictions,
+    "learning_rate": 0.001,
+    "optimizer": "adam",
+    "loss": "mean_absolute_error",
+    "metric": "mean_squared_error",
+    "keras_model": {
+        "name": "KR_DNN_S3",
+        "units": [256, 128, 64],
+        "activations": ["relu", "relu", "relu"]
+    }
+}
 
 
 
-# Test Class
-class RegressionTrainingDataTestCase(TestCase):
+
+
+
+
+
+
+
+## Test Class ##
+class RegressionTrainingTestCase(TestCase):
     # Before Tests
     def setUp(self):
         pass
@@ -84,14 +101,12 @@ class RegressionTrainingDataTestCase(TestCase):
 
 
 
-    # Can make valid datasets for single shot regressions
-    def testSingleShotRegressionDatasets(self):
-        # Make the datasets
-        train_x, train_y, test_x, test_y = make_datasets(
-            lookback=lookback,
-            predictions=predictions,
-            train_split=Epoch.TRAIN_SPLIT
-        )
+
+    # Can build the train and test dataset and then initialize a valid training instance
+    def testInitializeFlow(self):
+        # Make the datasets and unpack them
+        datasets: IRegressionTrainAndTestDatasets = RegressionTraining.make_train_and_test_datasets()
+        train_x, train_y, test_x, test_y = datasets
 
         # Make sure the features and the labels have the same number of items
         self.assertEqual(train_x.shape[0], train_y.shape[0])
@@ -106,7 +121,36 @@ class RegressionTrainingDataTestCase(TestCase):
 
         # Finally, validate the entire dataset
         validate_dataset(features=concatenate((train_x, test_x)), labels=concatenate((train_y, test_y)))
-        
+
+        # Init the config
+        config: IRegressionTrainingConfig = deepcopy(CONFIG)
+
+        # Initialize the instance
+        training: RegressionTraining = RegressionTraining(config, datasets=datasets)
+
+        # Validate properties
+        self.assertEqual(training.id, config["id"])
+        self.assertEqual(training.description, config["description"])
+        self.assertEqual(training.lookback, config["lookback"])
+        self.assertEqual(training.predictions, config["predictions"])
+        self.assertEqual(training.learning_rate, config["learning_rate"])
+        self.assertEqual(training.optimizer._name.lower(), config["optimizer"])
+        self.assertEqual(training.loss.name, config["loss"])
+        expected_keras_model: IKerasModelConfig = deepcopy(config["keras_model"])
+        expected_keras_model["lookback"] = config["lookback"]
+        expected_keras_model["predictions"] = config["predictions"]
+        self.assertDictEqual(training.keras_model, expected_keras_model)
+        self.assertIsInstance(training.train_x, ndarray)
+        self.assertIsInstance(training.train_y, ndarray)
+        self.assertIsInstance(training.test_x, ndarray)
+        self.assertIsInstance(training.test_y, ndarray)
+        self.assertTrue(len(training.train_x) > 0)
+        self.assertTrue(len(training.train_y) > 0)
+        self.assertTrue(len(training.test_x) > 0)
+        self.assertTrue(len(training.test_y) > 0)
+
+
+
 
 
 

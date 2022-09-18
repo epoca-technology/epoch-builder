@@ -198,6 +198,11 @@ class Candlestick:
 
         # Normalize the sma df
         sma_df["c"] = sma_df["c"].apply(lambda x: (x - lowest_price_sma) / (highest_price_sma - lowest_price_sma))
+
+        # When the dataset normalization takes place, the lowest price is converted to 0.
+        # This value can bring negative impacts to the model's training process and therefore,
+        # it should be replaced with the second lowest price recorded.
+        sma_df.loc[sma_df["c"].nsmallest(1).index, "c"] = sma_df["c"].nsmallest(2).iloc[-1]
         if sma_df["c"].min() <= 0 or sma_df["c"].max() > 1:
             raise RuntimeError(f"The sma_df values were not normalized correctly: {sma_df['c'].min()} | {sma_df['c'].max()}")
 

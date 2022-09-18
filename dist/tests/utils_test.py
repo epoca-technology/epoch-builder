@@ -1,13 +1,8 @@
 from typing import List, Any
 from unittest import TestCase, main
 import time
-from modules.database.Database import Database
 from modules.utils.Utils import Utils
 
-
-## ONLY RUN WHEN THE DATABASE TEST MODE IS ENABLED ##
-if not Database.TEST_MODE:
-    raise RuntimeError("Unit tests can only be performed when the Database is in test mode.")
 
 
 

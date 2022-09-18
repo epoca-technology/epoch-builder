@@ -1,18 +1,18 @@
 {
     "seed": 60184,
     "id": "_ALPHA",
-    "train_split": 0.85,
+    "sma_window_size": 100,
+    "train_split": 0.75,
+    "validation_split": 0.2,
     "start": 1588365000000,
     "end": 1650659639999,
-    "training_evaluation_start": 1641243600000,
-    "training_evaluation_end": 1650659639999,
-    "backtest_start": 1631991600000,
-    "backtest_end": 1650659639999,
-    "highest_price": 68633.69,
-    "lowest_price": 8270.0,
+    "test_ds_start": 1635109200000,
+    "test_ds_end": 1650659639999,
+    "highest_price_sma": 67235.38650000001,
+    "lowest_price_sma": 8681.721000000001,
     "regression_lookback": 128,
     "regression_predictions": 32,
-    "model_discovery_steps": 5,
-    "idle_minutes_on_position_close": 30,
-    "classification_training_data_id_ut": "9bdad3ff-212d-43bc-9d4b-7d6cf4fcd6a7"
+    "position_size": 10000,
+    "leverage": 3,
+    "idle_minutes_on_position_close": 30
 }

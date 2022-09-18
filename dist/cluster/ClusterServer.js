@@ -15,8 +15,8 @@
   */
 class ClusterServer {
 	// Server objects of localhost and all
-	LOCALHOST_SERVER = {name: "localhost", ip: "", is_cluster: true, is_master: false, is_online: true, is_available: true};
-	ALL_SERVER = {name: "all", ip: "", is_cluster: false, is_master: false, is_online: true, is_available: true};
+	LOCALHOST_SERVER = {name: "localhost", ip: "", is_cluster: true, is_online: true, is_available: true};
+	ALL_SERVER = {name: "all", ip: "", is_cluster: false, is_online: true, is_available: true};
 
 
 
@@ -65,21 +65,6 @@ class ClusterServer {
 
 
 
-	/**
-	 * Retrieves the server that is set as the master of the cluster.
-	 * Throws an error if no servers or more than 1 is found.
-	 * IMPORTANT: The object returned by this function does not include
-	 * the online and available properties.
-	 * @returns object
-	 */
-	get_server_master() {
-		const server = this.servers.filter((s) => { return s.is_master })
-		if (server.length == 1) { return server[0] }
-		else { throw new Error(`The server master could not be found.`) }
-	}
-
-
-
 
 
 	/**
@@ -107,7 +92,6 @@ class ClusterServer {
 				name: this.servers[i].name,
 				ip: this.servers[i].ip,
 				is_cluster: this.servers[i].is_cluster,
-				is_master: this.servers[i].is_master,
 				is_online: is_online,
 				is_available: await this.cluster_command.is_server_available(is_online, this.servers[i])
 			})
