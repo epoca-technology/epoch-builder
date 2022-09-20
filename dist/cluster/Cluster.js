@@ -524,7 +524,7 @@ import { ClusterInput } from "./ClusterInput.js"
 	push_regression_training_configs(server = undefined) {
 		return this.push(
 			this.cluster_path.regression_training_configs(true), 
-			this.cluster_path.epoch_path(false), 
+			this.cluster_path.regression_training_configs(false), 
 			this.cluster_path.regression_training_configs(false), 
 			server
 		);
@@ -571,6 +571,7 @@ import { ClusterInput } from "./ClusterInput.js"
 
 		// Push the epoch directories
 		console.log(`\n\nEPOCH DIRECTORIES`);
+		await this.cluster_command.init_epoch_path(server);
 		await this.push_regression_training_configs(server);
 	}
 

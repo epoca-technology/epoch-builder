@@ -4,17 +4,17 @@
     "servers": [
         {
             "name": "epoca-worker-01",
-            "ip": "192.168.2.100",
+            "ip": "192.168.0.100",
             "is_cluster": true
         },
         {
             "name": "epoca-worker-02",
-            "ip": "192.168.2.101",
+            "ip": "192.168.0.101",
             "is_cluster": true
         },
         {
             "name": "epoca-worker-03",
-            "ip": "192.168.2.102",
+            "ip": "192.168.0.102",
             "is_cluster": true
         }
     ]

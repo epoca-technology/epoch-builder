@@ -564,7 +564,7 @@ import { spawn } from "child_process";
 	 */
 	async init_root_path(server) {
 		try {
-			await this.execute("ssh", this.ssh_args([server, "mkdir", this.cluster_path._path(false)]), "pipe");
+			await this.execute("ssh", this.ssh_args([server, "mkdir", this.cluster_path.path(false)]), "pipe");
 		} catch (e) { }
 	}
 
@@ -580,15 +580,11 @@ import { spawn } from "child_process";
 	 async init_epoch_path(server) {
 		// The root epoch paths required to operate
 		const root_epoch_paths = [
-			this.cluster_path._path(false),
-			this.cluster_path._epoch_path(false),
-			this.cluster_path.backtests(false),
-			this.cluster_path.batched_training_certificates(false),
-			this.cluster_path.models(false),
-			this.cluster_path.models_bank(false),
-			this.cluster_path.regression_selection(false),
-			this.cluster_path.classification_training_data(false),
-			this.cluster_path.training_configs(false)
+			this.cluster_path.path(false),
+			this.cluster_path.epoch_path(false),
+			this.cluster_path.regression_training_configs(false),
+			this.cluster_path.regression_batched_certificates(false),
+			this.cluster_path.regressions(false)
 		];
 
 		// Iterate over each path and create it safely
