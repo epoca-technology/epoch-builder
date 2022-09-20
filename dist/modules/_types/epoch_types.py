@@ -56,8 +56,8 @@ class IEpochConfig(TypedDict):
     #   total balance of the evaluation is equals to position_size * 2.
     # leverage: the leverage that will be used by the model evaluation to simulate real life
     #   trading.
-    # idle_minutes_on_position_close: the number of minutes the prediction model will remain idle when a position is closed during the
-    #   model evaluation.
+    # idle_minutes_on_position_close: the number of minutes the prediction model will remain 
+    # idle when a position is closed during the model evaluation.
     position_size: float
     leverage: int
     idle_minutes_on_position_close: int

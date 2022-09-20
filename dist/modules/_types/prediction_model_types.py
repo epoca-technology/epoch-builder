@@ -39,7 +39,7 @@ class IPrediction(TypedDict):
 
 
 ##################
-## Interpreters ##
+## Interpreter  ##
 ##################
 
 
@@ -60,8 +60,8 @@ class IPrediction(TypedDict):
 
 
 
-# Prediction Model
+# Prediction Model Configuration
 # 
-class IPredictionModel(TypedDict):
+class IPredictionModelConfig(TypedDict):
     # Identity of the Model.
     id: str

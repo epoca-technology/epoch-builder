@@ -35,7 +35,7 @@ class RegressionTrainingConfig:
     BATCH_SIZE: int = 100
 
     # Learning Rate Variations
-    LEARNING_RATES: List[float] = [ -1, 0.01, 0.001, 0.0001 ]
+    LEARNING_RATES: List[float] = [ -1, 0.001, 0.0001 ] # Reduced from [ -1, 0.01, 0.001, 0.0001 ]
 
     # Optimizer Variations
     OPTIMIZERS: List[IKerasOptimizer] = [ "adam", "rmsprop" ]
