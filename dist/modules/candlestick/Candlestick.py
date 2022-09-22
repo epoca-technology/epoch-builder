@@ -110,12 +110,21 @@ class Candlestick:
         Candlestick.DF = Candlestick.DF[Candlestick.DF["ot"] >= Candlestick.PREDICTION_DF.iloc[lookback]["ot"]]
         Candlestick.DF.reset_index(drop=True, inplace=True)
 
-        # Both datasets should start at the same time. The first prediction candlestick must be selected based on
-        # the lookback
+        # The default df should start at the same time as the prediction df at the lookback index
         if Candlestick.DF.iloc[0]["ot"] != Candlestick.PREDICTION_DF.iloc[lookback]["ot"]:
-            raise ValueError(f"The candlestick dataframes dont start at the same time. \
+            raise ValueError(f"The default and prediction candlestick dataframes dont start at the same time. \
                 {Candlestick.DF.iloc[0]['ot']} != {Candlestick.PREDICTION_DF.iloc[lookback]['ot']}")
-        
+
+        # The prediction and normalized df should start at the same time
+        if Candlestick.PREDICTION_DF.iloc[0]["ot"] != Candlestick.NORMALIZED_PREDICTION_DF.iloc[0]["ot"]:
+            raise ValueError(f"The prediction and normalized candlestick dataframes dont start at the same time. \
+                {Candlestick.PREDICTION_DF.iloc[0]['ot']} != {Candlestick.NORMALIZED_PREDICTION_DF.iloc[0]['ot']}")
+
+        # The default df should end at the same time as the prediction and normalized dfs
+        if Candlestick.DF.iloc[-1]["ct"] != Candlestick.PREDICTION_DF.iloc[-1]["ct"] or Candlestick.DF.iloc[-1]["ct"] != Candlestick.NORMALIZED_PREDICTION_DF.iloc[-1]["ct"]:
+            raise ValueError(f"The default and prediction candlestick dataframes dont start at the same time. \
+                {Candlestick.DF.iloc[-1]['ct']} != {Candlestick.PREDICTION_DF.iloc[-1]['ct']} != {Candlestick.NORMALIZED_PREDICTION_DF.iloc[-1]['ct']}")
+
         # The default dataset must have more rows than the prediction dataset
         if Candlestick.DF.shape[0] <= Candlestick.PREDICTION_DF.shape[0]:
             raise ValueError(f"The default candlesticks dataframe must contain more rows than the prediction dataframe. \

@@ -160,6 +160,51 @@ class RegressionTestCase(TestCase):
 
 
 
+    # Can generate an individual feature
+    def testSingleFeature(self):
+        # Initialize the instance
+        r: Regression = Regression(MODEL_ID)
+
+        # Prepare the input dataset
+        input_ds: ndarray = _make_input_ds([Candlestick.NORMALIZED_PREDICTION_DF.shape[0] - 1000])
+
+        # Generate the individual prediction
+        features: List[float] = r.predict_feature(input_ds)
+
+        # The predictions should match the model's properties
+        self.assertEqual(len(features), 1)
+        self.assertTrue(features[0] >= -1 and features[0] <= 1)
+
+
+
+
+
+
+
+    # Can generate any number of features in one go
+    def testMultiFeature(self):
+        # Initialize the instance
+        r: Regression = Regression(MODEL_ID)
+
+        # Prepare the input dataset
+        input_ds: ndarray = _make_input_ds([
+            Candlestick.NORMALIZED_PREDICTION_DF.shape[0] - 5000,
+            Candlestick.NORMALIZED_PREDICTION_DF.shape[0] - 4000,
+            Candlestick.NORMALIZED_PREDICTION_DF.shape[0] - 3000,
+        ])
+
+        # Generate the individual prediction
+        features: List[float] = r.predict_feature(input_ds)
+
+        # The predictions should match the model's properties
+        self.assertEqual(len(features), 3)
+        self.assertTrue(features[0] >= -1 and features[0] <= 1)
+        self.assertTrue(features[1] >= -1 and features[1] <= 1)
+        self.assertTrue(features[2] >= -1 and features[2] <= 1)
+
+
+
+
 
 # Test Execution
 if __name__ == '__main__':

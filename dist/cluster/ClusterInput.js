@@ -278,7 +278,7 @@ class ClusterInput {
 	/**
 	 * Displays the form that collects the information in order to build
 	 * the prediction models.
-	 * @returns Promise<object> {regression_ids: string, max_combinations: string}
+	 * @returns Promise<string>
 	 */
 	async build_prediction_models() {
 		// Present the input
@@ -302,23 +302,12 @@ class ClusterInput {
 							}
 						}
 					}
-				},
-				{
-					type: "input", name: "max_combinations", message: "Enter the maximum combinations (Optional: defaults to 10000)", 
-					validate(value) {
-						if (typeof value == "string" && value.length && (isNaN(value) || Number(value) < 1 || Number(value) > 500000)) {
-							return "Please enter a max combinations. It can be an int ranging 1 - 500000.";
-						} else { return true }
-					}
 				}
 			]
 		);
 
 		// Finally, return the answer
-		return {
-			regression_ids: args["regression_ids"], 
-			max_combinations: args["max_combinations"]
-		}
+		return args["regression_ids"]
 	}
 
 

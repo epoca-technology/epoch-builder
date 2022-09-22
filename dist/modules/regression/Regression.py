@@ -15,6 +15,11 @@ class Regression:
 
     This class handles the initialization and management of a Keras Regression Model.
 
+    Class Properties:
+        MIN_FEATURE_VALUE: float = 0.01
+        MAX_FEATURE_VALUE: float = 3
+            The minimum and maximum values features are allowed to have.
+
     Instance Properties:
         id: str
             The ID of the model that was set when training.
@@ -27,6 +32,11 @@ class Regression:
         model: Sequential
             The instance of the trained model.
     """
+    # Min and max feature values
+    MIN_FEATURE_VALUE: float = 0.01
+    MAX_FEATURE_VALUE: float = 3
+
+
 
 
 
@@ -103,7 +113,7 @@ class Regression:
                 the predictions in one go.
 
         Returns:
-            List[float]
+            List[List[float]]
         """
         return self.model.predict(features, verbose=0).tolist()
 
@@ -114,6 +124,118 @@ class Regression:
 
 
 
+
+
+
+
+    #############
+    ## Feature ##
+    #############
+
+
+
+
+
+    def predict_feature(self, features: ndarray) -> List[float]:
+        """Generates predictions for the entire features dataset. Then, it converts
+        them into features.
+
+        Args:
+            features: ndarray
+                The input dataset that will be used to generate predictions.
+
+        Returns:
+            List[float]
+        """
+        # Firstly, predict the entire dataset
+        preds: List[List[float]] = self.predict(features)
+
+        # Finally, return the predicted features
+        return [
+            self._normalize_feature(Utils.get_percentage_change(features[i, -1], p[-1])) for i, p in enumerate(preds)
+        ]
+
+
+
+
+
+
+
+    def _normalize_feature(self, predicted_change: float) -> float:
+        """Given a predicted change, it will scale it to a range between
+        -1 and 1 accordingly.
+
+        Args:
+            predicted_change: float
+                The percentage change between the current price and the last
+                predicted price.
+
+        Returns:
+            float
+        """
+        # Retrieve the adjusted change
+        adjusted_change: float = self._calculate_adjusted_change(predicted_change)
+
+        # Scale the increase change
+        if adjusted_change > 0:
+            return self._scale_feature(adjusted_change)
+        
+        # Scale the decrease change, keep in mind that the decrease data is in negative numbers.
+        elif adjusted_change < 0:
+            return -(self._scale_feature(-(adjusted_change)))
+        
+        # Otherwise, return 0 as a sign of neutrality
+        else:
+            return 0
+
+
+
+
+
+
+
+    def _calculate_adjusted_change(self, change: float) -> float:
+        """Adjusts the provided change to the min and max values in the
+        regression discovery.
+
+        Args:
+            change: float
+                The percentage change from the current price to the last 
+                prediction.
+
+        Returns:
+            float
+        """
+        if change >= Regression.MIN_FEATURE_VALUE and change <= Regression.MAX_FEATURE_VALUE:
+            return change
+        elif change > Regression.MAX_FEATURE_VALUE:
+            return Regression.MAX_FEATURE_VALUE
+        elif change >= -(Regression.MAX_FEATURE_VALUE) and change <= -(Regression.MIN_FEATURE_VALUE):
+            return change
+        elif change < -(Regression.MAX_FEATURE_VALUE):
+            return -(Regression.MAX_FEATURE_VALUE)
+        else:
+            return 0
+
+
+
+
+
+    def _scale_feature(self, value: float) -> float:
+        """Scales a prediction change based on the regression's min and max
+        feature values
+
+        Args:
+            value: float
+                The predicted price change that needs to be scaled.
+
+        Returns: 
+            float
+        """
+        return round(
+            (value - Regression.MIN_FEATURE_VALUE) / (Regression.MAX_FEATURE_VALUE - Regression.MIN_FEATURE_VALUE), 
+            6
+        )
 
 
 

@@ -365,10 +365,10 @@ import { ClusterInput } from "./ClusterInput.js"
 		const server = this.cluster_server.get_server("localhost");
 
 		// Retrieve and unpack the unpacked args
-		const { regression_ids, max_combinations } = await this.cluster_input.build_prediction_models();
+		const regression_ids = await this.cluster_input.build_prediction_models();
 
 		// Finally, Run the command
-		await this.cluster_command.build_prediction_models(server, regression_ids, max_combinations); 
+		await this.cluster_command.build_prediction_models(server, regression_ids); 
 	}
 
 

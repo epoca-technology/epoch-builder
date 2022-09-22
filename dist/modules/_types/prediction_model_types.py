@@ -1,4 +1,47 @@
-from typing import TypedDict, List, Literal
+from typing import TypedDict, List, Literal, Dict
+
+
+
+############
+## Assets ##
+############
+
+
+
+
+
+# Lookback Indexer
+# The lookback indexer contains a dict with 1m candlestick open times as keys and 
+# prediction candlestick indexes as values.
+ILookbackIndexer: Dict[int, int]
+
+
+
+
+
+# Test Dataset Labels
+# A dict containing the list of labels (outcomes) within the test dataset. They are
+# grouped by price change requirement in string format.
+# It is also important to mention that they follow the adjusted prediction indexing
+# and there may be less labels than features in some cases.
+ITestDatasetLabel = Literal[0, 1]
+ITestDatasetLabels = Dict[str, List[ITestDatasetLabel]]
+
+
+
+
+
+# Test Dataset Features
+# A dict containing the list of features within the test dataset. They are grouped
+# by regression ID and follow the adjusted prediction indexing.
+ITestDatasetFeatures = Dict[str, List[float]]
+
+
+
+
+
+
+
 
 
 

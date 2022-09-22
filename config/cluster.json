@@ -16,6 +16,16 @@
             "name": "epoca-worker-03",
             "ip": "192.168.0.102",
             "is_cluster": true
+        },
+        {
+            "name": "epoca-worker-04",
+            "ip": "192.168.1.106",
+            "is_cluster": true
+        },
+        {
+            "name": "epoca-worker-05",
+            "ip": "192.168.1.108",
+            "is_cluster": true
         }
     ]
 }

@@ -370,15 +370,13 @@ import { spawn } from "child_process";
 	 * run it in inherited mode. Otherwise, it will run it in deatached mode.
 	 * @param server: object 
 	 * @param regression_ids: string
-	 * @param max_combinations: string
 	 * @returns Promise<void>
 	 */
-	build_prediction_models(server, regression_ids, max_combinations) {
+	build_prediction_models(server, regression_ids) {
 		return this.execute_eb(
 			server, "build_prediction_models.py",
 			[
-				"--regression_ids", regression_ids, 
-				"--max_combinations", max_combinations
+				"--regression_ids", regression_ids
 			]
 		);
 	}

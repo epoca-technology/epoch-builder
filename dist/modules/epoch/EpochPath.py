@@ -40,6 +40,8 @@ class EpochPath:
 
 
 
+    # Regressions
+
 
     def regression_training_configs(
         self, 
@@ -153,6 +155,8 @@ class EpochPath:
 
 
 
+    # Prediction Models
+
 
 
     def prediction_models(self) -> str:
@@ -164,6 +168,78 @@ class EpochPath:
         return self.p("prediction_models")
 
 
+
+
+
+
+
+    def prediction_models_assets(self) -> str:
+        """Builds the path for the prediction models assets root directory.
+
+        Returns:
+            str
+        """
+        return f"{self.prediction_models()}/assets"
+
+
+
+
+
+
+
+    def prediction_models_features(self, build_id: str) -> str:
+        """Builds the path for the prediction models features file.
+
+        Args:
+            build_id: str
+                The identifier of the model build.
+
+        Returns:
+            str
+        """
+        return f"{self.prediction_models_assets()}/{build_id}/features.json"
+
+
+
+
+
+
+
+    def prediction_models_labels(self) -> str:
+        """Builds the path for the prediction models labels file.
+
+        Returns:
+            str
+        """
+        return f"{self.prediction_models_assets()}/labels.json"
+
+
+
+
+
+
+
+    def prediction_models_lookback_indexer(self) -> str:
+        """Builds the path for the prediction models lookback indexer file.
+
+        Returns:
+            str
+        """
+        return f"{self.prediction_models_assets()}/lookback_indexer.json"
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # Epoch Export
 
 
 
