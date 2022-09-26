@@ -52,12 +52,17 @@ class IEpochConfig(TypedDict):
     regression_predictions: int
 
     # Prediction Model Evaluation
+    # exchange_fee: Two fees are charged per trade, one when the position is opened and then when 
+    #   it is closed. Also keep in mind that the fees are charged based on the equity_size and not 
+    #   the position_size.
+    #   Binance 0.04% | Bitfinex 0.065% | Kucoin 0.06%
     # position_size: the total amount of USD that will be used when openning positions. The 
     #   total balance of the evaluation is equals to position_size * 2.
     # leverage: the leverage that will be used by the model evaluation to simulate real life
     #   trading.
     # idle_minutes_on_position_close: the number of minutes the prediction model will remain 
     # idle when a position is closed during the model evaluation.
+    exchange_fee: float
     position_size: float
     leverage: int
     idle_minutes_on_position_close: int
@@ -77,6 +82,7 @@ class IEpochDefaults(TypedDict):
     epoch_width: int # Number of months that will comprise the Epoch
     regression_lookback: int
     regression_predictions: int
+    exchange_fee: float
     position_size: float
     leverage: int
     idle_minutes_on_position_close: int

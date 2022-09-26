@@ -232,7 +232,7 @@ class ClusterInput {
 
 	/**
 	 * Displays the forms that collect the category and the batch file.
-	 * @returns object { category: string, batch_file_name: string }
+	 * @returns Promise<object> { category: string, batch_file_name: string }
 	 */
 	async regression_training_configs() {
 		// Retrieve the list of categories
@@ -260,15 +260,6 @@ class ClusterInput {
 	}
 
 
-
-	/**
-	 * Retrieves the batch number from a given config file name.
-	 * @param config_file_name: string
-	 * @returns number
-	 */
-	get_batch_number(config_file_name) { try { return Number(config_file_name.split("_").at(-2)) } catch (e) { return 0 } }
-
-
 	
 
 
@@ -280,7 +271,7 @@ class ClusterInput {
 	 * the prediction models.
 	 * @returns Promise<string>
 	 */
-	async build_prediction_models() {
+	async initialize_prediction_models() {
 		// Present the input
 		const args = await inquirer.prompt(
 			[
@@ -319,6 +310,60 @@ class ClusterInput {
 
 
 	/**
+	 * Displays the forms that collects the batch_file_name where
+	 * profitable model configurations will be extracted.
+	 * @returns Promise<string>
+	 */
+	async find_profitable_configs() {
+		// Retrieve the list of configuration files
+		let config_files = FileSystem.get_path_content(this.cluster_path.prediction_models_configs(true));
+		config_files.files.sort((a, b) => { return this.get_batch_number(a) > this.get_batch_number(b) ? 1: -1});
+
+		// Present the list of config files
+		console.log(" ");
+		const config_file_answer = await inquirer.prompt([
+			{type: "list", name: "value", message: "Select a configuration file", choices: config_files.files}
+		]);
+
+		// Return the packed results
+		return config_file_answer["value"]
+	}
+
+
+
+
+
+
+	/**
+	 * Displays the epoch creation form.
+	 * @returns Promise<string>
+	 */
+	async build_prediction_models() {
+		// Present the form
+		const form = await inquirer.prompt([
+			{
+				type: "input", name: "limit", message: "Enter the limit of prediction models that will be placed in the build", 
+				validate(value) {
+					if (isNaN(value) || Number(value) < 10 || Number(value) > 1000) {
+						return "Please enter a valid limit. It can be an int ranging 1 - 1000.";
+					} else { return true }
+				}
+			},
+		]);
+
+		// Finally, return the limit
+		return form["limit"]
+	}
+
+
+
+
+
+
+
+
+
+	/**
 	 * Displays the form that collects the information in order to export an 
 	 * Epoch
 	 * @returns Promise<string>
@@ -338,6 +383,29 @@ class ClusterInput {
 		// Finally, return the answer
 		return args["model_id"];
 	}
+
+
+
+
+
+
+
+
+
+
+	/* Misc Helpers */
+
+
+
+
+
+
+	/**
+	 * Retrieves the batch number from a given config file name.
+	 * @param config_file_name: string
+	 * @returns number
+	 */
+	 get_batch_number(config_file_name) { try { return Number(config_file_name.split("_").at(-2)) } catch (e) { return 0 } }
 }
 
 

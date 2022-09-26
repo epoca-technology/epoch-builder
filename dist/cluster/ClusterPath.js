@@ -192,6 +192,42 @@
 
 
 
+	/**
+	 * Retrieves the path for the root prediction models directory.
+	 * @param local: boolean
+	 * @returns string
+	 */
+	prediction_models(local) { 
+		return this.epoch_path(local, "prediction_models") 
+	}
+
+
+
+
+	/**
+	 * Retrieves the path for the prediction models configurations
+	 * directory.
+	 * @param local: boolean
+	 * @returns 
+	 */
+	prediction_models_configs(local) { 
+		return this.epoch_path(local, "prediction_models/configs") 
+	}
+
+
+
+
+
+
+	/**
+	 * Retrieves the path for the profitable prediction models configurations
+	 * directory.
+	 * @param local: boolean
+	 * @returns 
+	 */
+	prediction_models_profitable_configs(local) { 
+		return this.epoch_path(local, "prediction_models/profitable_configs") 
+	}
 
 
 

@@ -6,17 +6,17 @@ from modules.epoch.Epoch import Epoch
 from modules.prediction_model.PredictionModel import PredictionModel
 
 
-# BUILD PREDICTION MODELS
+# FIND PROFITABLE CONFIGS
 # Args:
-#   --limit "100"
-endpoint_name: str = "BUILD PREDICTION MODELS"
+#   --batch_file_name "_ALPHA_1_10.json"
+endpoint_name: str = "FIND PROFITABLE CONFIGS"
 Utils.endpoint_header(Configuration.VERSION, endpoint_name)
 
 
 
 # Extract the args
 parser = ArgumentParser()
-parser.add_argument("--limit", dest="limit")
+parser.add_argument("--batch_file_name", dest="batch_file_name")
 args = parser.parse_args()
 
 
@@ -29,8 +29,8 @@ Candlestick.init(Epoch.REGRESSION_LOOKBACK, Epoch.TEST_DS_START, Epoch.TEST_DS_E
 
 
 
-# Initialize the instance of the builder
-PredictionModel().build(int(args.limit))
+# Initialize the instance of the Prediction Model and run the process
+PredictionModel().find_profitable_configs(args.batch_file_name)
 
 
 

@@ -12,6 +12,7 @@
     "lowest_price_sma": 8681.721000000001,
     "regression_lookback": 128,
     "regression_predictions": 32,
+    "exchange_fee": 0.065,
     "position_size": 10000,
     "leverage": 3,
     "idle_minutes_on_position_close": 30

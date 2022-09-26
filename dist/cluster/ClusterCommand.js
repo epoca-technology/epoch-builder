@@ -364,22 +364,62 @@ import { spawn } from "child_process";
 
 
 
-
 	/**
-	 * Initializes the Regression Training Process. If running on localhost, it will
-	 * run it in inherited mode. Otherwise, it will run it in deatached mode.
+	 * Initializes the prediction model assets and the configurations based on a 
+	 * list of regressions.
 	 * @param server: object 
 	 * @param regression_ids: string
 	 * @returns Promise<void>
 	 */
-	build_prediction_models(server, regression_ids) {
+	initialize_prediction_models(server, regression_ids) {
 		return this.execute_eb(
-			server, "build_prediction_models.py",
+			server, "initialize_prediction_models.py",
 			[
 				"--regression_ids", regression_ids
 			]
 		);
 	}
+
+
+
+
+
+
+	/**
+	 * Runs the find profitable configs process on any server in detached mode.
+	 * @param server: object 
+	 * @param batch_file_name: string
+	 * @returns Promise<void>
+	 */
+	find_profitable_configs(server, batch_file_name) {
+		return this.execute_eb(
+			server, "find_profitable_configs.py",
+			[
+				"--batch_file_name", batch_file_name
+			],
+			true
+		);
+	}
+
+
+
+
+
+	/**
+	 * Runs the prediction models build based on the profitable configs.
+	 * @param server: object 
+	 * @param limit: string
+	 * @returns Promise<void>
+	 */
+	build_prediction_models(server, limit) {
+		return this.execute_eb(
+			server, "build_prediction_models.py",
+			[
+				"--limit", limit
+			]
+		);
+	}
+
 
 
 
@@ -582,7 +622,9 @@ import { spawn } from "child_process";
 			this.cluster_path.epoch_path(false),
 			this.cluster_path.regression_training_configs(false),
 			this.cluster_path.regression_batched_certificates(false),
-			this.cluster_path.regressions(false)
+			this.cluster_path.regressions(false),
+			this.cluster_path.prediction_models(false),
+			this.cluster_path.prediction_models_configs(false),
 		];
 
 		// Iterate over each path and create it safely

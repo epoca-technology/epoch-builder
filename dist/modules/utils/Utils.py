@@ -596,7 +596,7 @@ class Utils:
 
 
     @staticmethod
-    def read(path: str, allow_empty: bool = False) -> Union[str, dict, None]:
+    def read(path: str, allow_empty: bool = False) -> Union[str, dict, list, None]:
         """Reads a file located at a given path and returns
         its contents.
 
@@ -608,7 +608,7 @@ class Utils:
                 does not exist.
         
         Returns:
-            Union[str, dict, None]
+            Union[str, dict, list, None]
 
         Raises:
             RuntimeError:

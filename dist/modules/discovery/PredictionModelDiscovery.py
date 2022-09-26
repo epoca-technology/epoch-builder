@@ -6,10 +6,10 @@ from modules.discovery.Discovery import Discovery
 
 
 
-class RegressionDiscovery(Discovery):
-    """RegressionDiscovery Class
+class PredictionModelDiscovery(Discovery):
+    """PredictionModelDiscovery Class
 
-    This class builds the discovery for a Regression Model.
+    This class builds the discovery for a Prediction Model.
 
     Instance Properties:
         ...
@@ -23,7 +23,7 @@ class RegressionDiscovery(Discovery):
         """Initializes the RegressionDiscovery Instance.
         """
         # Initialize the Discovery Instance
-        super().__init__(reward=1, penalty=1.3)
+        super().__init__(reward=1, penalty=1)
 
 
 

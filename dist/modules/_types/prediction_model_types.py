@@ -2,6 +2,49 @@ from typing import TypedDict, List, Literal, Dict
 
 
 
+###################
+## Configuration ##
+###################
+
+
+
+# Min Sum Function
+# The prediction model's discovery calculates the means and the medians of the 
+# successful predictions which then will be used to trade. For instance, If the 
+# mean function is selected, the model will make use of the discovery's 
+# increase_successful_mean and the decrease_successful_mean as the minimum sums
+# in order to generate non-neutral predictions.
+IMinSumFunction = Literal["mean", "median"]
+
+
+
+
+# Regressions Per Model
+# The number of regressions that are placed in the prediction model.
+IRegressionsPerModel = Literal[4, 8, 16]
+
+
+
+
+
+# Minified Configuration
+# The minified configuration is used in order to narrow down the variations and
+# identify which models lead to profitability.
+class IPredictionModelMinifiedConfig(TypedDict):
+    pcr: float              # Price Change Requirement
+    msf: IMinSumFunction    # Min Sum Function
+    ri: List[str]           # Regression IDs
+
+
+
+
+
+
+
+
+
+
+
 ############
 ## Assets ##
 ############
@@ -13,7 +56,7 @@ from typing import TypedDict, List, Literal, Dict
 # Lookback Indexer
 # The lookback indexer contains a dict with 1m candlestick open times as keys and 
 # prediction candlestick indexes as values.
-ILookbackIndexer: Dict[int, int]
+ILookbackIndexer = Dict[int, int]
 
 
 
@@ -25,7 +68,8 @@ ILookbackIndexer: Dict[int, int]
 # It is also important to mention that they follow the adjusted prediction indexing
 # and there may be less labels than features in some cases.
 ITestDatasetLabel = Literal[0, 1]
-ITestDatasetLabels = Dict[str, List[ITestDatasetLabel]]
+ITestDatasetLabelKey = Literal["2.5", "3", "3.5"]
+ITestDatasetLabels = Dict[ITestDatasetLabelKey, List[ITestDatasetLabel]]
 
 
 

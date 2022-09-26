@@ -187,17 +187,13 @@ class EpochPath:
 
 
 
-    def prediction_models_features(self, build_id: str) -> str:
+    def prediction_models_features(self) -> str:
         """Builds the path for the prediction models features file.
-
-        Args:
-            build_id: str
-                The identifier of the model build.
 
         Returns:
             str
         """
-        return f"{self.prediction_models_assets()}/{build_id}/features.json"
+        return f"{self.prediction_models_assets()}/features.json"
 
 
 
@@ -226,6 +222,77 @@ class EpochPath:
             str
         """
         return f"{self.prediction_models_assets()}/lookback_indexer.json"
+
+
+
+
+
+
+
+    def prediction_models_configs_receipt(self) -> str:
+        """Builds the path for the configurations receipt.
+
+        Returns:
+            str
+        """
+        return f"{self.prediction_models()}/configs_receipt.txt"
+
+
+
+
+
+
+    def prediction_models_configs(self, batch_file_name: Union[str, None] = None) -> str:
+        """Retrieves the path for the prediction models configurations directory. If 
+        a batch file name is provided, it will return the path for that file instead.
+
+        Args:
+            batch_file_name: Union[str, None]
+                The name of the config file. If provided, it must contain the ext.
+
+        Returns:
+            str
+        """
+        if isinstance(batch_file_name, str):
+            return f"{self.prediction_models()}/configs/{batch_file_name}"
+        else:
+            return f"{self.prediction_models()}/configs"
+
+
+
+
+
+
+
+    def prediction_models_profitable_configs(self, batch_file_name: Union[str, None] = None) -> str:
+        """Retrieves the path for the prediction models profitable configurations directory. If 
+        a batch file name is provided, it will return the path for that file instead.
+
+        Args:
+            batch_file_name: Union[str, None]
+                The name of the config file. If provided, it must contain the ext.
+
+        Returns:
+            str
+        """
+        if isinstance(batch_file_name, str):
+            return f"{self.prediction_models()}/profitable_configs/{batch_file_name}"
+        else:
+            return f"{self.prediction_models()}/profitable_configs"
+
+
+
+
+
+
+
+    def prediction_models_build(self) -> str:
+        """Retrieves the path for the prediction models build file.
+
+        Returns:
+            str
+        """
+        return f"{self.prediction_models()}/build.json"
 
 
 
@@ -303,4 +370,7 @@ class EpochPath:
         Utils.make_directory(f"{epoch_id}/regression_batched_certificates")
         Utils.make_directory(f"{epoch_id}/regressions")
         Utils.make_directory(f"{epoch_id}/prediction_models")
+        Utils.make_directory(f"{epoch_id}/prediction_models/assets")
+        Utils.make_directory(f"{epoch_id}/prediction_models/configs")
+        Utils.make_directory(f"{epoch_id}/prediction_models/profitable_configs")
         Utils.make_directory(f"{epoch_id}/export")

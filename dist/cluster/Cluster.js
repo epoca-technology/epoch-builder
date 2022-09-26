@@ -79,6 +79,8 @@ import { ClusterInput } from "./ClusterInput.js"
 				"create_epoch",
 				"generate_regression_training_configs",
 				"train_regression_batch",
+				"initialize_prediction_models",
+				"find_profitable_configs",
 				"build_prediction_models",
 				"export_epoch",
 				"unit_tests"
@@ -89,10 +91,12 @@ import { ClusterInput } from "./ClusterInput.js"
 				"push_candlesticks",
 				"push_dist",
 				"push_regression_training_configs",
+				"push_prediction_models",
 				"push_epoch_builder"
 			],
 			"Pull": [
 				"pull_trained_regressions",
+				"pull_prediction_models",
 			]
 		});
 
@@ -293,6 +297,8 @@ import { ClusterInput } from "./ClusterInput.js"
 	 * 	create_epoch													   		    *
 	 * 	generate_regression_training_configs									    *
 	 * 	train_regression_batch											           	*
+	 * 	initialize_prediction_models											    *
+	 * 	find_profitable_configs											           	*
 	 * 	build_prediction_models											    		*
 	 * 	export_epoch											           			*
 	 * 	unit_tests											   						*
@@ -355,9 +361,49 @@ import { ClusterInput } from "./ClusterInput.js"
 
 
 
+	/**
+	 * Initializes the prediction model assets and creates the configurations
+	 * in batches.
+	 * @returns Promise<void>
+	 */
+	async initialize_prediction_models() { 
+		// Retrieve the server
+		const server = this.cluster_server.get_server("localhost");
+
+		// Retrieve and unpack the unpacked args
+		const regression_ids = await this.cluster_input.initialize_prediction_models();
+
+		// Finally, Run the command
+		await this.cluster_command.initialize_prediction_models(server, regression_ids); 
+	}
+
+
+
+
+
 
 	/**
-	 * Initializes the build of the prediction models in the local machine.
+	 * Initializes the find profitable configs process on any server.
+	 * @returns Promise<void>
+	 */
+	async find_profitable_configs() { 
+		// Retrieve the server
+		const server = await this.cluster_input.server(true, false, true, true);
+
+		// Retrieve and unpack the category and the config file
+		const batch_file_name = await this.cluster_input.find_profitable_configs();
+
+		// Finally, Run the command
+		await this.cluster_command.find_profitable_configs(server, batch_file_name); 
+	}
+
+
+
+
+	
+
+	/**
+	 * Builds the prediction models based on the profitable configurations.
 	 * @returns Promise<void>
 	 */
 	async build_prediction_models() { 
@@ -365,11 +411,13 @@ import { ClusterInput } from "./ClusterInput.js"
 		const server = this.cluster_server.get_server("localhost");
 
 		// Retrieve and unpack the unpacked args
-		const regression_ids = await this.cluster_input.build_prediction_models();
+		const limit = await this.cluster_input.build_prediction_models();
 
 		// Finally, Run the command
-		await this.cluster_command.build_prediction_models(server, regression_ids); 
+		await this.cluster_command.build_prediction_models(server, limit); 
 	}
+
+
 
 
 
@@ -431,6 +479,7 @@ import { ClusterInput } from "./ClusterInput.js"
 	 * 	push_candlesticks											   		   *
 	 * 	push_dist											           		   *
 	 * 	push_regression_training_configs									   *
+	 * 	push_prediction_models									   			   *
 	 * 	push_epoch_builder											   		   *
      ***************************************************************************/
 
@@ -535,6 +584,28 @@ import { ClusterInput } from "./ClusterInput.js"
 
 
 
+
+	/**
+	 * Pushes the prediction models directory from the local machine to a selected server.
+	 * @param server?: object
+	 * @returns Promise<string>
+	 */
+	push_prediction_models(server = undefined) {
+		return this.push(
+			this.cluster_path.prediction_models(true), 
+			this.cluster_path.prediction_models(false), 
+			this.cluster_path.prediction_models(false), 
+			server
+		);
+	}
+
+
+
+
+
+
+
+
 	/* Full Push */
 
 
@@ -573,6 +644,7 @@ import { ClusterInput } from "./ClusterInput.js"
 		console.log(`\n\nEPOCH DIRECTORIES`);
 		await this.cluster_command.init_epoch_path(server);
 		await this.push_regression_training_configs(server);
+		await this.push_prediction_models(server);
 	}
 
 
@@ -654,6 +726,7 @@ import { ClusterInput } from "./ClusterInput.js"
 	 * 																		   *
 	 * Processes:															   *
 	 * 	pull_trained_regressions											   *
+	 * 	pull_prediction_models											   	   *
      ***************************************************************************/
 
 
@@ -687,6 +760,30 @@ import { ClusterInput } from "./ClusterInput.js"
 			true
 		);
 	}
+
+
+
+
+
+
+	/**
+	 * Pulls all the profitable prediction model configurations from any server
+	 * to the local machine.
+	 * @returns Promise<void>
+	 */
+	async pull_prediction_models() {
+		// Retrieve the server which data will be pulled from
+		const server = await this.cluster_input.server(false, false, true, true);
+		
+		// Pull the configs
+		await this.pull(
+			this.cluster_path.prediction_models_profitable_configs(false), 
+			this.cluster_path.prediction_models(true), 
+			server
+		);
+	}
+
+
 
 
 

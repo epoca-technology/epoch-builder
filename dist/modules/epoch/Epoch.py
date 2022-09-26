@@ -51,6 +51,7 @@ class Epoch:
             The lookback stands for the number of candlesticks from the past it needs to look at
             in order to generate a prediction.
             The predictions stand for the number of predictions the regressions will generate.
+        EXCHANGE_FEE: float
         POSITION_SIZE: float
         LEVERAGE: int
         IDLE_MINUTES_ON_POSITION_CLOSE: int
@@ -71,6 +72,7 @@ class Epoch:
         "validation_split": 0.2,
         "regression_lookback": 128,
         "regression_predictions": 32,
+        "exchange_fee": 0.065,
         "position_size": 10000,
         "leverage": 3,
         "idle_minutes_on_position_close": 30
@@ -108,6 +110,7 @@ class Epoch:
     REGRESSION_PREDICTIONS: int
 
     # Prediction Model Evaluation
+    EXCHANGE_FEE: float
     POSITION_SIZE: float
     LEVERAGE: int
     IDLE_MINUTES_ON_POSITION_CLOSE: int
@@ -137,6 +140,7 @@ class Epoch:
         validation_split: float,
         regression_lookback: int,
         regression_predictions: int,
+        exchange_fee: float,
         position_size: float,
         leverage: int,
         idle_minutes_on_position_close: int
@@ -166,6 +170,8 @@ class Epoch:
                 to generate predictions.
             regression_predictions: int
                 The number of predictions regressions will generate.
+            exchange_fee: float
+                The futures fee that will be used for the trading simulations.
             position_size: float
                 The amount of USD that will be used to open positions.
             leverage: int
@@ -192,6 +198,7 @@ class Epoch:
             validation_split=validation_split,
             regression_lookback=regression_lookback,
             regression_predictions=regression_predictions,
+            exchange_fee=exchange_fee,
             position_size=position_size,
             leverage=leverage,
             idle_minutes_on_position_close=idle_minutes_on_position_close
@@ -225,6 +232,7 @@ class Epoch:
             "lowest_price_sma": candlesticks_payload["lowest_price_sma"],
             "regression_lookback": regression_lookback,
             "regression_predictions": regression_predictions,
+            "exchange_fee": exchange_fee,
             "position_size": position_size,
             "leverage": leverage,
             "idle_minutes_on_position_close": idle_minutes_on_position_close
@@ -255,6 +263,7 @@ class Epoch:
         validation_split: float,
         regression_lookback: int,
         regression_predictions: int,
+        exchange_fee: float,
         position_size: float,
         leverage: int,
         idle_minutes_on_position_close: int
@@ -271,6 +280,7 @@ class Epoch:
             validation_split: float
             regression_lookback: int
             regression_predictions: int
+            exchange_fee: float
             position_size: float
             leverage: int
             idle_minutes_on_position_close: int
@@ -318,6 +328,10 @@ class Epoch:
         # Validate the provided regression_predictions
         if not isinstance(regression_predictions, int) or regression_predictions < 32 or regression_predictions > 256:
             raise ValueError(f"The provided regression_predictions is invalid {regression_predictions}. It must be an int ranging 32-256")
+
+        # Validate the provided exchange_fee
+        if not isinstance(exchange_fee, (int, float)) or exchange_fee < 0.02 or exchange_fee > 0.2:
+            raise ValueError(f"The provided exchange_fee is invalid {exchange_fee}. It must be an float ranging 0.02-0.2")
 
         # Validate the provided position_size
         if not isinstance(position_size, (int, float)) or position_size < 100 or position_size > 100000000:
@@ -396,6 +410,7 @@ class Epoch:
         receipt += f"Validation Split: {config['validation_split']}\n"
         receipt += f"Regression Lookback: {config['regression_lookback']}\n"
         receipt += f"Regression Predictions: {config['regression_predictions']}\n"
+        receipt += f"Exchange Fee: {config['exchange_fee']}%\n"
         receipt += f"Position Size: ${config['position_size']}\n"
         receipt += f"Leverage: x{config['leverage']}\n"
         receipt += f"Idle Minutes On Position Close: {config['idle_minutes_on_position_close']}\n"
@@ -465,6 +480,7 @@ class Epoch:
         Epoch.LOWEST_PRICE_SMA = config["lowest_price_sma"]
         Epoch.REGRESSION_LOOKBACK = config["regression_lookback"]
         Epoch.REGRESSION_PREDICTIONS = config["regression_predictions"]
+        Epoch.EXCHANGE_FEE = config["exchange_fee"]
         Epoch.POSITION_SIZE = config["position_size"]
         Epoch.LEVERAGE = config["leverage"]
         Epoch.IDLE_MINUTES_ON_POSITION_CLOSE = config["idle_minutes_on_position_close"]

@@ -46,12 +46,17 @@ class Discovery:
 
 
 
-    def __init__(self):
+    def __init__(self, reward: float, penalty: float):
         """Initializes the Discovery Instance.
+
+        Args:   
+            reward: float
+            penalty: float
+                The points to be used in order to score the model's discovery.
         """
         # Init the point values
-        self.reward: float = 1
-        self.penalty: float = 1.3
+        self.reward: float = reward
+        self.penalty: float = penalty
         self.points_hist: List[float] = [0]
 
         # Init the neutral prediction values
