@@ -16,8 +16,8 @@ from modules.keras_utils.KerasLoss import KerasLoss, IKerasLossInstance
 from modules.keras_utils.KerasMetric import KerasMetric, IKerasMetricInstance
 from modules.keras_utils.KerasModel import KerasModel
 from modules.keras_utils.TrainingProgressBar import TrainingProgressBar
-from modules.discovery.RegressionDiscovery import RegressionDiscovery
 from modules.keras_utils.KerasModelSummary import get_summary
+from modules.regression.RegressionDiscovery import RegressionDiscovery
 
 
 

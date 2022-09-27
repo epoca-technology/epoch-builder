@@ -1,4 +1,4 @@
-from typing import TypedDict, List, Literal, Dict
+from typing import TypedDict, List, Literal, Dict, Union
 
 
 
@@ -56,7 +56,7 @@ class IPredictionModelMinifiedConfig(TypedDict):
 # Lookback Indexer
 # The lookback indexer contains a dict with 1m candlestick open times as keys and 
 # prediction candlestick indexes as values.
-ILookbackIndexer = Dict[int, int]
+ILookbackIndexer = Dict[str, int]
 
 
 
@@ -122,12 +122,78 @@ class IPrediction(TypedDict):
 
 
 
+##############
+## Backtest ##
+##############
 
 
 
-##################
-## Interpreter  ##
-##################
+
+# Types of positions
+IBacktestPositionType = Literal[1, -1] # 1 = long, -1 = short
+
+
+
+# Backtest Position
+# When a position is closed, it is saved in a list that can be reviewed in the GUI when
+# the backtest completes.
+class IBacktestPosition(TypedDict):
+    # Type of position: 1 = long, -1 = short
+    t: IBacktestPositionType
+
+    # Prediction Dict
+    p: IPrediction
+
+    # Position Times
+    ot: int                 # Open Timestamp
+    ct: Union[int, None]    # Close Timestamp - Populated when the position is closed
+
+    # Position Prices
+    op: float   # Open Price
+    tpp: float  # Take Profit Price
+    slp: float  # Stop Loss Price
+
+    # Close Price: This property is populated when a position is closed. It will
+    # take value of the Take Profit Price or Stop Loss Price depending on the outcome.
+    cp: Union[float, None]  
+    
+    # The outcome is populated once the position is closed. True for successful and False
+    # for unsuccessful
+    o: Union[bool, None]
+
+    # Balance when the position is closed
+    b: Union[float, None]
+
+
+
+
+# Backtest Performance
+# A dict containing all the information about the backtest executed on a model.
+class IBacktestPerformance(TypedDict):
+    # General
+    position_size: float
+    initial_balance: float
+    final_balance: float
+    profit: float
+    fees: float
+    leverage: float
+
+    # Positions
+    positions: List[IBacktestPosition]
+    increase_num: int
+    decrease_num: int
+    increase_outcome_num: int
+    decrease_outcome_num: int
+
+    # Accuracy
+    increase_accuracy: float
+    decrease_accuracy: float
+    accuracy: float
+
+
+
+
+
 
 
 

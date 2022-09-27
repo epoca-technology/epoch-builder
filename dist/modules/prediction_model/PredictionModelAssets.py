@@ -273,7 +273,7 @@ class PredictionModelAssets:
             if candlestick["h"] >= increase_price:
                 return 1
             elif candlestick["l"] <= decrease_price:
-                return 0
+                return -1
         
         # If no label is determined, return None
         return None
@@ -334,7 +334,7 @@ class PredictionModelAssets:
 
         # Iterate over each candlestick and populate the indexer
         for candlestick_1m in Candlestick.DF.to_records():
-            indexer[int(candlestick_1m["ot"])] = PredictionModelAssets._get_prediction_candlestick_index(candlestick_1m["ot"])
+            indexer[str(candlestick_1m["ot"])] = PredictionModelAssets._get_prediction_candlestick_index(candlestick_1m["ot"])
             progress_bar.update()
 
         # Store the indexer for future use

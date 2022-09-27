@@ -4,8 +4,8 @@ from modules.utils.Utils import Utils
 from modules.configuration.Configuration import Configuration
 from modules.candlestick.Candlestick import Candlestick
 from modules.epoch.Epoch import Epoch
-from modules.prediction_model.PredictionModelAssets import PredictionModelAssets
 from modules.prediction_model.PredictionModelConfig import PredictionModelConfig
+from modules.prediction_model.PredictionModelAssets import PredictionModelAssets
 
 
 # INITIALIZE PREDICTION MODELS

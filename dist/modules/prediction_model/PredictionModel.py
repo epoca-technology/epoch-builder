@@ -1,8 +1,13 @@
-from typing import List
-from modules._types import IPredictionModelConfig
+from typing import List, Tuple
+from tqdm import tqdm
+from modules._types import IPredictionModelMinifiedConfig, IDiscovery, IBacktestPerformance
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
+from modules.regression.Regression import Regression
+from modules.prediction_model.PredictionModelConfig import PredictionModelConfig
 from modules.prediction_model.PredictionModelAssets import PredictionModelAssets
+from modules.prediction_model.PredictionModelDiscovery import PredictionModelDiscovery
+from modules.prediction_model.PredictionModelBacktest import PredictionModelBacktest
 
 
 
@@ -17,7 +22,7 @@ class PredictionModel:
         ...
 
     Instance Properties:
-        assets: PredictionModelBuildAssets
+        assets: PredictionModelAssets
             The instance of the assets manager.
     """
 
@@ -38,6 +43,76 @@ class PredictionModel:
         """
         # Initialize the instance of the assets
         self.assets: PredictionModelAssets = PredictionModelAssets()
+
+        # Initialize the Backtest Instance
+        self.backtest: PredictionModelBacktest = PredictionModelBacktest(self.assets.features_num, self.assets.lookback_indexer)
+
+
+
+
+
+
+    ###############################
+    ## Profitable Configurations ##
+    ###############################
+
+
+
+
+
+
+    def find_profitable_configs(self, batch_file_name: str) -> None:
+        """Given a batch config file name, it will find and save all the 
+        profitable model configurations.
+
+        Args:
+            batch_file_name: str
+                The name of the configuration file that will be explored.
+        """
+        # Retrieve the configs
+        configs: List[IPredictionModelMinifiedConfig] = PredictionModelConfig.get_batch(batch_file_name)
+
+        # Init the profitable configs
+        profitable_configs: List[IPredictionModelMinifiedConfig] = []
+
+        # A model is considered to be profitable if it generates at least 50% of the 
+        # value of the position_size property.
+        min_profit: float = Epoch.POSITION_SIZE * 0.5
+
+        # Init the progress bar
+        print(f"\nLooking for profitable prediction models...")
+        progress_bar = tqdm(bar_format='{l_bar}{bar:20}{r_bar}{bar:-20b}', total=len(configs))
+
+        # Iterate over each config
+        for config in configs:
+            # Build the features
+            features, features_sum = self._build_features(config["ri"])
+
+            # Discovery the model
+            disc: IDiscovery = PredictionModelDiscovery().discover(features_sum, self.assets.labels[str(config["pcr"])])
+
+            # Backtest the model
+            performance: IBacktestPerformance = self.backtest.calculate_performance(
+                price_change_requirement=config["pcr"],
+                min_increase_sum=disc["increase_successful_mean"] if config["msf"] == "mean" else disc["increase_successful_median"],
+                min_decrease_sum=disc["decrease_successful_mean"] if config["msf"] == "mean" else disc["decrease_successful_median"],
+                features=features,
+                features_sum=features_sum
+            )
+
+            # Shortlist the model if it is profitable
+            if performance["profit"] >= min_profit:
+                profitable_configs.append(config)
+
+            # Update the progress
+            progress_bar.update()
+
+        # Finally, save the profitable models
+        PredictionModelConfig.save_profitable_configs(batch_file_name, profitable_configs)
+
+
+
+
 
 
 
@@ -67,27 +142,6 @@ class PredictionModel:
 
 
 
-    ###############################
-    ## Profitable Configurations ##
-    ###############################
-
-
-
-
-
-
-    def find_profitable_configs(self, batch_file_name: str) -> None:
-        """
-        """
-        pass
-
-
-
-
-
-
-
-
 
 
 
@@ -102,6 +156,44 @@ class PredictionModel:
     ##################
     ## Misc Helpers ##
     ##################
+
+
+
+
+
+    def _build_features(self, regression_ids: List[str]) -> Tuple[List[List[float]], List[float]]:
+        """Builds the features lists and sums structured by index for a given
+        list of regressions.
+
+        Args:
+            regression_ids: List[str]
+                The list of regressions in the model.
+
+        Returns:
+            Tuple[List[List[float]], List[float]]
+            (features, features_sum)
+        """
+        # Init values
+        features: List[List[float]] = []
+        features_sum: List[float] = []
+
+        # Iterate over each item
+        for index in range(self.assets.features_num):
+            # Append the list of features for the index
+            feature_list: List[float] = [self.assets.features[id][index] for id in regression_ids]
+            features.append(feature_list)
+
+            # Append the sum of the features
+            features_sum.append(sum(feature_list))
+
+        # Finally, return the packed feature lists
+        return features, features_sum
+
+
+
+
+
+
 
 
 

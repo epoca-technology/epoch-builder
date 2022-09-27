@@ -32,7 +32,7 @@ class DiscoveryTestCase(TestCase):
     # Initializes an instance performs simulations and validates the integrity of the data
     def testDiscoveryProcess(self):
         # Initialize the instance
-        disc = Discovery()
+        disc = Discovery(reward=1, penalty=1.3)
         current_points: float = 0
 
         # Simulate a neutral prediction
