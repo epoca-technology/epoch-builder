@@ -1,4 +1,8 @@
 from typing import TypedDict, List, Literal, Dict, Union
+from modules._types.regression_types import IRegressionConfig
+from modules._types.discovery_types import IDiscovery
+
+
 
 
 
@@ -67,7 +71,7 @@ ILookbackIndexer = Dict[str, int]
 # grouped by price change requirement in string format.
 # It is also important to mention that they follow the adjusted prediction indexing
 # and there may be less labels than features in some cases.
-ITestDatasetLabel = Literal[0, 1]
+ITestDatasetLabel = Literal[1, -1]
 ITestDatasetLabelKey = Literal["2.5", "3", "3.5"]
 ITestDatasetLabels = Dict[ITestDatasetLabelKey, List[ITestDatasetLabel]]
 
@@ -79,6 +83,8 @@ ITestDatasetLabels = Dict[ITestDatasetLabelKey, List[ITestDatasetLabel]]
 # A dict containing the list of features within the test dataset. They are grouped
 # by regression ID and follow the adjusted prediction indexing.
 ITestDatasetFeatures = Dict[str, List[float]]
+
+
 
 
 
@@ -117,6 +123,15 @@ class IPrediction(TypedDict):
 
     # The list of predicted features 
     f: List[float]
+
+
+
+
+
+
+
+
+
 
 
 
@@ -214,7 +229,67 @@ class IBacktestPerformance(TypedDict):
 
 
 # Prediction Model Configuration
-# 
+# The configuration of the prediction model that is built for each profitable
+# model config. This dict is exported and used to initialize the Model in the
+# Prediction API.
 class IPredictionModelConfig(TypedDict):
     # Identity of the Model.
     id: str
+
+    # The price percentage change target
+    price_change_requirement: float
+
+    # Sum function used to determine the min increase and decrease sums
+    min_sum_function: IMinSumFunction
+
+    # The minimum increase and decrease sums required to generate non-neutral predictions
+    min_increase_sum: float
+    min_decrease_sum: float
+
+    # The list of regressions in the model
+    regressions: List[IRegressionConfig]
+
+
+
+
+
+
+
+
+
+
+
+#################
+## Certificate ##
+#################
+
+
+
+
+
+# Prediction Model Certificate
+# Once the profitable model configs are built, a certificate is issued
+# for each one of them.
+class IPredictionModelCertificate(TypedDict):
+    # Identity of the Model.
+    id: str
+
+    # The date in which the model was created
+    creation: int
+
+    # The date range from the epoch that was used to build the prediction models
+    test_ds_start: int
+    test_ds_end: int
+
+    # The configuration of the model
+    model: IPredictionModelConfig
+
+    # The discovery of the model
+    discovery: IDiscovery
+
+    # The backtest performance of the model
+    backtest: IBacktestPerformance
+
+
+
+    
