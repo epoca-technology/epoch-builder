@@ -314,6 +314,7 @@ import { spawn } from "child_process";
 				"--validation_split", args.validation_split,
 				"--regression_lookback", args.regression_lookback,
 				"--regression_predictions", args.regression_predictions,
+				"--exchange_fee", args.exchange_fee,
 				"--position_size", args.position_size,
 				"--leverage", args.leverage,
 				"--idle_minutes_on_position_close", args.idle_minutes_on_position_close

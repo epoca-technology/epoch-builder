@@ -196,18 +196,18 @@ class PredictionModelBacktest:
                     if closed_position:
                         idle_until = Utils.add_minutes(candlestick["ct"], Epoch.IDLE_MINUTES_ON_POSITION_CLOSE)
 
-            # Otherwise, check if a position can be opened
-            elif (self.active == None) and (candlestick["ot"] > idle_until):
-                # Retrieve the prediction result
-                pred_result: IPredictionResult = self._get_prediction_result(features_sum[current_index])
+                # Otherwise, check if a position can be opened
+                elif (self.active == None) and (candlestick["ot"] > idle_until):
+                    # Retrieve the prediction result
+                    pred_result: IPredictionResult = self._get_prediction_result(features_sum[current_index])
 
-                # If the result isn't neutral, open a position
-                if pred_result != 0:
-                    self._open_position(candlestick, {
-                        "r": pred_result,
-                        "t": int(candlestick["ot"]),
-                        "f": features[current_index]
-                    })
+                    # If the result isn't neutral, open a position
+                    if pred_result != 0:
+                        self._open_position(candlestick, {
+                            "r": pred_result,
+                            "t": int(candlestick["ot"]),
+                            "f": features[current_index]
+                        })
 
             # Otherwise, stop the process
             else:
@@ -268,6 +268,8 @@ class PredictionModelBacktest:
             "profit": self.current_balance - self.initial_balance,
             "fees": self.fees,
             "leverage": Epoch.LEVERAGE,
+            "exchange_fee": Epoch.EXCHANGE_FEE,
+            "idle_minutes_on_position_close": Epoch.IDLE_MINUTES_ON_POSITION_CLOSE,
 
             # Positions
             "positions": self.positions,

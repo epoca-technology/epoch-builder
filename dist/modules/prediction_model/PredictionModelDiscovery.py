@@ -63,5 +63,8 @@ class PredictionModelDiscovery(Discovery):
             else:
                 self.neutral_pred()
 
+            # Increase the counter
+            i += 1
+
         # Finally, build and return the discovery
         return self.build()

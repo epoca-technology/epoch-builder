@@ -74,7 +74,7 @@ class Epoch:
         "regression_predictions": 32,
         "exchange_fee": 0.065,
         "position_size": 10000,
-        "leverage": 3,
+        "leverage": 5,
         "idle_minutes_on_position_close": 30
     }
 
@@ -338,8 +338,8 @@ class Epoch:
             raise ValueError(f"The provided position_size is invalid {position_size}. It must be an float ranging 100-100000000")
 
         # Validate the provided leverage
-        if not isinstance(leverage, int) or leverage < 1 or leverage > 5:
-            raise ValueError(f"The provided leverage is invalid {leverage}. It must be an int ranging 1-5")
+        if not isinstance(leverage, int) or leverage < 1 or leverage > 10:
+            raise ValueError(f"The provided leverage is invalid {leverage}. It must be an int ranging 1-10")
 
         # Validate the provided idle_minutes_on_position_close
         if not isinstance(idle_minutes_on_position_close, int) or idle_minutes_on_position_close < 0 or idle_minutes_on_position_close > 1000:

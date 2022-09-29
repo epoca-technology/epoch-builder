@@ -182,6 +182,14 @@ class ClusterInput {
 				}
 			},
 			{
+				type: "input", name: "exchange_fee", message: "Enter the exchange fee (Optional: defaults to 0.065)", 
+				validate(value) {
+					if (typeof value == "string" && value.length && (isNaN(value) || Number(value) < 0.02 || Number(value) > 0.2)) {
+						return "Please enter a valid position size. It can be a float ranging 0.02-0.2.";
+					} else { return true }
+				}
+			},
+			{
 				type: "input", name: "position_size", message: "Enter the position size (Optional: defaults to 10000)", 
 				validate(value) {
 					if (typeof value == "string" && value.length && (isNaN(value) || Number(value) < 100 || Number(value) > 100000000)) {
@@ -190,10 +198,10 @@ class ClusterInput {
 				}
 			},
 			{
-				type: "input", name: "leverage", message: "Enter the leverage (Optional: defaults to 3)", 
+				type: "input", name: "leverage", message: "Enter the leverage (Optional: defaults to 5)", 
 				validate(value) {
-					if (typeof value == "string" && value.length && (isNaN(value) || Number(value) < 1 || Number(value) > 5)) {
-						return "Please enter a valid leverage. It can be an int ranging 1 - 5.";
+					if (typeof value == "string" && value.length && (isNaN(value) || Number(value) < 1 || Number(value) > 10)) {
+						return "Please enter a valid leverage. It can be an int ranging 1 - 10.";
 					} else { return true }
 				}
 			},
@@ -217,6 +225,7 @@ class ClusterInput {
 			validation_split: form["validation_split"],
 			regression_lookback: form["regression_lookback"],
 			regression_predictions: form["regression_predictions"],
+			exchange_fee: form["exchange_fee"],
 			position_size: form["position_size"],
 			leverage: form["leverage"],
 			idle_minutes_on_position_close: "idle_minutes_on_position_close"

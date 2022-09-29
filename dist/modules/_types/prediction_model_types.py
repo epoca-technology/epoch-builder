@@ -72,7 +72,7 @@ ILookbackIndexer = Dict[str, int]
 # It is also important to mention that they follow the adjusted prediction indexing
 # and there may be less labels than features in some cases.
 ITestDatasetLabel = Literal[1, -1]
-ITestDatasetLabelKey = Literal["2.5", "3", "3.5"]
+ITestDatasetLabelKey = Literal["3", "3.5", "4"]
 ITestDatasetLabels = Dict[ITestDatasetLabelKey, List[ITestDatasetLabel]]
 
 
@@ -192,6 +192,8 @@ class IBacktestPerformance(TypedDict):
     profit: float
     fees: float
     leverage: float
+    exchange_fee: float
+    idle_minutes_on_position_close: int
 
     # Positions
     positions: List[IBacktestPosition]
