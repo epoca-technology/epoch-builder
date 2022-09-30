@@ -1,6 +1,6 @@
-from typing import List, TypedDict, Tuple, Dict, Literal
+from typing import List, TypedDict, Tuple, Dict, Literal, Union
 from numpy import ndarray
-from modules._types.keras_utils_types import IKerasModelConfig, IKerasModelTrainingHistory, IKerasOptimizer, \
+from modules._types.keras_utils_types import IKerasActivation, IKerasModelConfig, IKerasModelTrainingHistory, IKerasOptimizer, \
     IKerasLoss, IKerasMetric, IKerasOptimizerName, IKerasModelSummary, IKerasModelTemplateName
 from modules._types.discovery_types import IDiscovery
 
@@ -136,10 +136,37 @@ class IRegressionTrainingConfigNetworksByCategory(TypedDict):
 
 
 
+
+
+
+# Regression Training Config Hyperparameters
+# These values are used to build all the training configurations and are tailored to each
+# category.
+
+
+
 # Losses and metric combinations to be used
 class IRegressionTrainingConfigLoss(TypedDict):
     name: IKerasLoss
     metric: IKerasMetric
+
+
+
+
+# Category Hyperparams
+class IRegressionCategoryHyperparams(TypedDict):
+    learning_rates: List[Union[int, float]]
+    optimizers: List[IKerasOptimizer]
+    loss_functions: List[IRegressionTrainingConfigLoss]
+    activations: Union[List[IKerasActivation], List[None]]
+    dropout_rates: List[float]
+
+
+
+# Hyperparams
+IRegressionHyperparams = Dict[IRegressionTrainingConfigCategory, IRegressionCategoryHyperparams]
+
+
 
 
 

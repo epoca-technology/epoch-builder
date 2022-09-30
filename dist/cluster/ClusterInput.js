@@ -295,10 +295,10 @@ class ClusterInput {
 						// Otherwise, make sure that at least 1 model has been provided
 						else {
 							const model_ids = value.split(",");
-							if (model_ids.length) {
+							if (model_ids.length >= 20) {
 								return true;
 							} else {
-								return "A minimum of 1 model id must be provided.";
+								return "A minimum of 20 regression ids must be provided.";
 							}
 						}
 					}
@@ -379,18 +379,32 @@ class ClusterInput {
 	 */
 	 async export_epoch() {
 		// Present the input
-		const args = await inquirer.prompt([				{
-			type: "input", name: "model_id", message: "Enter the Prediction Model ID", 
-			validate(value) {
-				if (typeof value != "string" || value.length < 30) {
-					return "Please enter a valid prediction model id.";
+		const args = await inquirer.prompt(
+			[
+				{
+					type: "input", name: "ids", message: "Enter the prediction model ids separated by commas", 
+					validate(value) {
+						// Make sure a value has been set
+						if (typeof value != "string" || !value.length) {
+							return "Please enter a valid list of model ids.";
+						}
+		
+						// Otherwise, make sure that at least 1 model has been provided
+						else {
+							const model_ids = value.split(",");
+							if (model_ids.length) {
+								return true;
+							} else {
+								return "A minimum of 1 model id must be provided.";
+							}
+						}
+					}
 				}
-				else { return true }
-			}
-		}]);
+			]
+		);
 
 		// Finally, return the answer
-		return args["model_id"];
+		return args["ids"]
 	}
 
 

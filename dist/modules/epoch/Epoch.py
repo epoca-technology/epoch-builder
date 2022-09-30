@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, List
 from random import seed
 from numpy.random import seed as npseed
 from tensorflow import random as tf_random
@@ -519,18 +519,18 @@ class Epoch:
 
 
     @staticmethod
-    def export(model_id: str) -> None:
+    def export(model_ids: List[str]) -> None:
         """Builds all the distributable assets of the epoch based on the
         provided prediction model id.
 
         Args:
-            model_id: str
-                The identifier of the prediction model that will be exported.
+            model_ids: str
+                The list of prediction model ids that will be exported to Epoca.
 
         Raises:
             RuntimeError:
                 If the epoch's directory does not exist.
-                If the prediction model does not exist.
+                If any of the prediction models dont not exist.
                 If any of the regressions don't exist
                 ...
         """
@@ -538,7 +538,7 @@ class Epoch:
         config: IEpochConfig = Configuration.get_epoch_config()
 
         # Make sure the epoch can be exported
-        Epoch._can_epoch_be_exported(config)
+        Epoch._can_epoch_be_exported(config, model_ids)
 
         # @TODO
 
@@ -548,24 +548,21 @@ class Epoch:
 
 
     @staticmethod
-    def _can_epoch_be_exported(config: IEpochConfig, model_id: str) -> None:
+    def _can_epoch_be_exported(model_ids: List[str]) -> None:
         """Verifies if an Epoch can be exported. It raises an error if any
         if the requirements is not met.
 
         Args:
-            config: IEpochConfig
-                The configuration of the epoch that will be exported
-            model_id: str
-                The identifier of the prediction model that will be exported.
+            model_ids: str
+                The list of prediction model ids that will be exported to Epoca.
             
 
         Raises:
             RuntimeError:
-                If the epoch's directory does not exist.
+                If no model ids have been provided
                 ...
         """
-        # Make sure the epoch's directory exists
-        if not Utils.directory_exists(config["id"]):
-            raise RuntimeError(f"The Epoch directory {config['id']} does not exist.")
 
-        # @TODO
+        # Make sure that at least 1 prediction model was provided
+        if len(model_ids) == 0:
+            raise RuntimeError("A minimum of 1 prediction model must be provided when exporting an Epoch.")

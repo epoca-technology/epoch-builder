@@ -429,17 +429,16 @@ import { spawn } from "child_process";
 
 
 	/**
-	 * Initializes the Regression Training Process. If running on localhost, it will
-	 * run it in inherited mode. Otherwise, it will run it in deatached mode.
+	 * Exports an epoch based on a provided list of prediction model ids.
 	 * @param server: object 
-	 * @param model_id: string
+	 * @param model_ids: string
 	 * @returns Promise<void>
 	 */
-	export_epoch(server, model_id) {
+	export_epoch(server, model_ids) {
 		return this.execute_eb(
 			server, "export_epoch.py",
 			[
-				"--model_id", model_id
+				"--model_ids", model_ids
 			]
 		);
 	}

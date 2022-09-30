@@ -5,7 +5,7 @@ from math import ceil
 from modules._types import IKerasModelConfig, IKerasOptimizer, IKerasActivation, IRegressionTrainingConfigLoss,\
     IKerasActivation, IRegressionTrainingConfig, IRegressionTrainingConfigBatch, IRegressionTrainingConfigCategory,\
         IKerasModelTemplateName, IKerasUnit, IKerasFilter, IKerasKernelSize, IKerasPoolSize,\
-            IRegressionTrainingConfigNetworkReceipt
+            IRegressionTrainingConfigNetworkReceipt, IRegressionHyperparams, IRegressionCategoryHyperparams
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.keras_utils.KerasModel import KerasModel
@@ -24,33 +24,55 @@ class RegressionTrainingConfig:
     Class Properties:
         BATCH_SIZE: int
             The number of model configs that will be included per batch
-        LEARNING_RATES: List[float]
-        OPTIMIZERS: List[IKerasOptimizer]
-        LOSS: List[IRegressionTrainingConfigLoss]
-        ACTIVATIONS: List[IKerasActivation]
-        DROPOUT_RATES: List[float]
-            Variations to be applied to the neural networks.
+        HYPERPARAMS: IRegressionHyperparams
+            A dict containing all the hyperparameters by category.
     """
     # The number of model configs that will be included per batch
-    BATCH_SIZE: int = 100
+    BATCH_SIZE: int = 50
 
-    # Learning Rate Variations
-    LEARNING_RATES: List[float] = [ -1, 0.001, 0.0001 ] # Reduced from [ -1, 0.01, 0.001, 0.0001 ]
-
-    # Optimizer Variations
-    OPTIMIZERS: List[IKerasOptimizer] = [ "adam", "rmsprop" ]
-
-    # Loss Variations
-    LOSS: List[IRegressionTrainingConfigLoss] = [ 
-        { "name": "mean_absolute_error", "metric": "mean_squared_error" },
-        { "name": "mean_squared_error", "metric": "mean_absolute_error" }
-    ]
-
-    # Activation Variations
-    ACTIVATIONS: List[IKerasActivation] = [ "relu" ] # Reduced from [ "relu", "tanh" ]
-
-    # Dropout Rate Variations
-    DROPOUT_RATES: List[float] = [] # Reduced from [ 0.25, 0.5, 0.75 ]
+    # Hyperparameters that will be used to build the training configurations
+    HYPERPARAMS: IRegressionHyperparams = {
+        "DNN": {
+            "learning_rates": [ -1, 0.001, 0.0001 ],
+            "optimizers": [ "adam", "rmsprop" ],
+            "loss_functions": [ 
+                { "name": "mean_absolute_error", "metric": "mean_squared_error" },
+                { "name": "mean_squared_error", "metric": "mean_absolute_error" }
+            ],
+            "activations": [ "relu" ],
+            "dropout_rates": []
+        },
+        "CDNN": {
+            "learning_rates": [ -1, 0.001, 0.0001 ],
+            "optimizers": [ "adam", "rmsprop" ],
+            "loss_functions": [ 
+                { "name": "mean_absolute_error", "metric": "mean_squared_error" },
+                { "name": "mean_squared_error", "metric": "mean_absolute_error" }
+            ],
+            "activations": [ "relu" ],
+            "dropout_rates": []
+        },
+        "LSTM": {
+            "learning_rates": [ -1, 0.001, 0.0001 ],
+            "optimizers": [ "adam", "rmsprop" ],
+            "loss_functions": [ 
+                { "name": "mean_absolute_error", "metric": "mean_squared_error" },
+                { "name": "mean_squared_error", "metric": "mean_absolute_error" }
+            ],
+            "activations": [ None ],
+            "dropout_rates": []
+        },
+        "CLSTM": {
+            "learning_rates": [ -1, 0.001, 0.0001 ],
+            "optimizers": [ "adam", "rmsprop" ],
+            "loss_functions": [ 
+                { "name": "mean_absolute_error", "metric": "mean_squared_error" },
+                { "name": "mean_squared_error", "metric": "mean_absolute_error" }
+            ],
+            "activations": [ "relu" ],
+            "dropout_rates": []
+        }
+    }
 
 
 
@@ -84,21 +106,24 @@ class RegressionTrainingConfig:
             print(f"\n\nGenerating {category} training configuration batches...")
             configs: List[IRegressionTrainingConfig] = []
 
+            # Init the category's hyperparams
+            category_hyperparams: IRegressionCategoryHyperparams = RegressionTrainingConfig.HYPERPARAMS[category]
+
             # Iterate over the variations
             for variation_name, variations in network_variations.items():
 
                 # Iterate over the learning rates
-                for learning_rate in RegressionTrainingConfig.LEARNING_RATES:
+                for learning_rate in category_hyperparams["learning_rates"]:
 
                     # Iterate over the optimizers
-                    for optimizer in RegressionTrainingConfig.OPTIMIZERS:
+                    for optimizer in category_hyperparams["optimizers"]:
 
                         # Iterate over the loss functions
-                        for loss in RegressionTrainingConfig.LOSS:
+                        for loss in category_hyperparams["loss_functions"]:
 
                             # Generate all the combinations for the variation and concatenate them
                             configs = configs + RegressionTrainingConfig._get_variation_configs(
-                                category=category,
+                                category_hyperparams=category_hyperparams,
                                 keras_model_name= variation_name,
                                 keras_model_variations=variations,
                                 learning_rate=learning_rate,
@@ -178,7 +203,7 @@ class RegressionTrainingConfig:
 
     @staticmethod
     def _get_variation_configs(
-        category: IRegressionTrainingConfigCategory,
+        category_hyperparams: IRegressionCategoryHyperparams,
         keras_model_name: IKerasModelTemplateName,
         keras_model_variations: List[IKerasModelConfig],
         learning_rate: float,
@@ -189,7 +214,7 @@ class RegressionTrainingConfig:
         by network.
 
         Args:
-            category: IRegressionTrainingConfigCategory
+            category_hyperparams: IRegressionCategoryHyperparams
             keras_model_name: IKerasModelTemplateName
             keras_model_variations: List[IKerasModelConfig]
             learning_rate: float
@@ -201,11 +226,8 @@ class RegressionTrainingConfig:
         # Init the Keras Models Configs
         keras_model_configs: List[IKerasModelConfig] = []
 
-        # Init the activations
-        activations: List[Union[IKerasActivation, None]] = RegressionTrainingConfig.ACTIVATIONS if category != "LSTM" else [None]
-
         # Iterate over each activation function
-        for activation in activations:
+        for activation in category_hyperparams["activations"]:
             
             # Iterate over each variation
             for variation in keras_model_variations:
@@ -213,7 +235,7 @@ class RegressionTrainingConfig:
                 # Dropout Variations
                 # Add a configuration per dropout variation specified in the Class Properties
                 if variation.get("dropout_rates") != None:
-                    for dropout in RegressionTrainingConfig.DROPOUT_RATES:
+                    for dropout in category_hyperparams["dropout_rates"]:
                         keras_model_configs.append({
                             "activations": [activation]*len(variation["activations"]) if activation is not None else None,
                             "units": variation.get("units"),

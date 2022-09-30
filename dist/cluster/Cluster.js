@@ -433,10 +433,10 @@ import { ClusterInput } from "./ClusterInput.js"
 		const server = this.cluster_server.get_server("localhost");
 
 		// Retrieve and unpack the unpacked args
-		const model_id = await this.cluster_input.export_epoch();
+		const model_ids = await this.cluster_input.export_epoch();
 
 		// Finally, Run the command
-		await this.cluster_command.export_epoch(server, model_id); 
+		await this.cluster_command.export_epoch(server, model_ids); 
 	}
 
 
