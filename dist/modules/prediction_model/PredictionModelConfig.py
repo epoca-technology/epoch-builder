@@ -19,6 +19,7 @@ class PredictionModelConfig:
             The number of minified configs that can be placed in a single batch.
         PRICE_CHANGE_REQUIREMENTS: List[float]
         MIN_SUM_FUNCTIONS: List[IMinSumFunction]
+        MIN_SUM_ADJUSTMENT_FACTORS: List[float]
         REGRESSIONS_PER_MODEL: List[IRegressionsPerModel]
             The lists of hyperparameters that will be used to generate configurations.
 
@@ -27,13 +28,16 @@ class PredictionModelConfig:
     """
     # Batch Size
     #BATCH_SIZE: int = 100000
-    BATCH_SIZE: int = 200000
+    BATCH_SIZE: int = 50000
 
     # The list of price change requirements that will be used to build configs
-    PRICE_CHANGE_REQUIREMENTS: List[float] = [3, 3.5, 4]
+    PRICE_CHANGE_REQUIREMENTS: List[float] = [2.5, 3, 3.5, 4]
 
     # Min Sum Functions
     MIN_SUM_FUNCTIONS: List[IMinSumFunction] = ["mean", "median"]
+
+    # Min Sum Adjustment Factors
+    MIN_SUM_ADJUSTMENT_FACTORS: List[float] = [2, 2.5]
 
     # Regressions per model
     REGRESSIONS_PER_MODEL: List[IRegressionsPerModel] = [4, 8, 16]
@@ -70,10 +74,12 @@ class PredictionModelConfig:
         for pcr in PredictionModelConfig.PRICE_CHANGE_REQUIREMENTS:
             # Iterate over each sum function
             for min_sum_func in PredictionModelConfig.MIN_SUM_FUNCTIONS:
-                # Iterate over each combination
-                for comb in combs:
-                    # Append the model to the list
-                    models.append({ "pcr": pcr, "msf": min_sum_func, "ri": list(comb) })
+                # Iterate over each min sum adjustment factor
+                for adj_factor in PredictionModelConfig.MIN_SUM_ADJUSTMENT_FACTORS:
+                    # Iterate over each combination
+                    for comb in combs:
+                        # Append the model to the list
+                        models.append({ "pcr": pcr, "msf": min_sum_func, "msaf": adj_factor, "ri": list(comb) })
 
         # Calculate the number of batches that will be stored
         batches: int = ceil(len(models) / PredictionModelConfig.BATCH_SIZE)

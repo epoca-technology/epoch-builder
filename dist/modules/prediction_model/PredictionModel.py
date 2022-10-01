@@ -2,6 +2,7 @@ from typing import List, Tuple, Dict
 from tqdm import tqdm
 from modules._types import IPredictionModelMinifiedConfig, IDiscovery, IBacktestPerformance, IPredictionModelCertificate,\
     IRegressionConfig
+from modules._types.prediction_model_types import IMinSumFunction
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.regression.Regression import Regression
@@ -75,12 +76,9 @@ class PredictionModel:
         # Retrieve the configs
         configs: List[IPredictionModelMinifiedConfig] = PredictionModelConfig.get_batch(batch_file_name)
 
-        # Init the profitable configs
+        # A model is considered to be profitable if it generates at least the value of the 
+        # position_size property.
         profitable_configs: List[IPredictionModelMinifiedConfig] = []
-
-        # A model is considered to be profitable if it generates at least 50% of the 
-        # value of the position_size property.
-        min_profit: float = Epoch.POSITION_SIZE * 0.5
 
         # Init the progress bar
         print(f"\nLooking for profitable prediction models...")
@@ -94,17 +92,20 @@ class PredictionModel:
             # Discovery the model
             disc: IDiscovery = PredictionModelDiscovery().discover(features_sum, self.assets.labels[str(config["pcr"])])
 
+            # Calculate the min sums
+            min_increase_sum, min_decrease_sum = self._calculate_min_sums(config["msf"], config["msaf"], disc)
+
             # Backtest the model
             performance: IBacktestPerformance = self.backtest.calculate_performance(
                 price_change_requirement=config["pcr"],
-                min_increase_sum=disc["increase_successful_mean"] if config["msf"] == "mean" else disc["increase_successful_median"],
-                min_decrease_sum=disc["decrease_successful_mean"] if config["msf"] == "mean" else disc["decrease_successful_median"],
+                min_increase_sum=min_increase_sum,
+                min_decrease_sum=min_decrease_sum,
                 features=features,
                 features_sum=features_sum
             )
 
             # Shortlist the model if it is profitable
-            if performance["profit"] >= min_profit:
+            if performance["profit"] >= Epoch.POSITION_SIZE:
                 profitable_configs.append(config)
 
             # Update the progress
@@ -166,11 +167,14 @@ class PredictionModel:
             # Discovery the model
             disc: IDiscovery = PredictionModelDiscovery().discover(features_sum, self.assets.labels[str(config["pcr"])])
 
+            # Calculate the min sums
+            min_increase_sum, min_decrease_sum = self._calculate_min_sums(config["msf"], config["msaf"], disc)
+
             # Backtest the model
             performance: IBacktestPerformance = self.backtest.calculate_performance(
                 price_change_requirement=config["pcr"],
-                min_increase_sum=disc["increase_successful_mean"] if config["msf"] == "mean" else disc["increase_successful_median"],
-                min_decrease_sum=disc["decrease_successful_mean"] if config["msf"] == "mean" else disc["decrease_successful_median"],
+                min_increase_sum=min_increase_sum,
+                min_decrease_sum=min_decrease_sum,
                 features=features,
                 features_sum=features_sum
             )
@@ -186,8 +190,9 @@ class PredictionModel:
                     "id": id,
                     "price_change_requirement": config["pcr"],
                     "min_sum_function": config["msf"],
-                    "min_increase_sum": disc["increase_successful_mean"] if config["msf"] == "mean" else disc["increase_successful_median"],
-                    "min_decrease_sum": disc["decrease_successful_mean"] if config["msf"] == "mean" else disc["decrease_successful_median"],
+                    "min_sum_adjustment_factor": config["msaf"],
+                    "min_increase_sum": min_increase_sum,
+                    "min_decrease_sum": min_decrease_sum,
                     "regressions": [regression_configs[reg_id] for reg_id in config["ri"]]
                 },
                 "discovery": disc,
@@ -265,6 +270,41 @@ class PredictionModel:
         return features, features_sum
 
 
+
+
+
+
+
+
+
+    def _calculate_min_sums(
+        self, 
+        min_sum_func: IMinSumFunction, 
+        min_sum_adjustment_factor: float,
+        discovery: IDiscovery
+    ) -> Tuple[float, float]:
+        """Calculates the minimum increase and decrease sums the model
+        will use in order to generate non-neutral predictions.
+
+        Args:
+            min_sum_func: IMinSumFunction
+                The model's min sum function.
+            min_sum_adjustment_factor: float
+                The adjustment factor that will be applied to the successful
+                predictions' mean|median.
+            discovery: IDiscovery
+                The discovery payload of the model.
+
+        Returns:
+            Tuple[float, float]
+            (min_increase_sum, min_decrease_sum)
+        """
+        # Init the base values
+        min_increase_sum: float = discovery["increase_successful_mean"] if min_sum_func == "mean" else discovery["increase_successful_median"]
+        min_decrease_sum: float = discovery["decrease_successful_mean"] if min_sum_func == "mean" else discovery["decrease_successful_median"]
+
+        # Calculate and return the adjusted values
+        return round(min_increase_sum*min_sum_adjustment_factor, 6), round(min_decrease_sum*min_sum_adjustment_factor, 6)
 
 
 
