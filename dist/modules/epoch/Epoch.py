@@ -2,7 +2,8 @@ from typing import Union, List
 from random import seed
 from numpy.random import seed as npseed
 from tensorflow import random as tf_random
-from modules._types import IEpochConfig, IEpochDefaults, ICandlestickBuildPayload
+from modules._types import IEpochConfig, IEpochDefaults, ICandlestickBuildPayload, IPredictionModelCertificate,\
+    IRegressionConfig, IRegressionTrainingCertificate
 from modules.utils.Utils import Utils
 from modules.configuration.Configuration import Configuration
 from modules.candlestick.Candlestick import Candlestick
@@ -519,28 +520,27 @@ class Epoch:
 
 
     @staticmethod
-    def export(model_ids: List[str]) -> None:
+    def export(model_id: str) -> None:
         """Builds all the distributable assets of the epoch based on the
         provided prediction model id.
 
         Args:
-            model_ids: str
-                The list of prediction model ids that will be exported to Epoca.
+            model_id: str
+                The ID of the Prediction Model that will be exported.
 
         Raises:
             RuntimeError:
-                If the epoch's directory does not exist.
-                If any of the prediction models dont not exist.
-                If any of the regressions don't exist
-                ...
+                If any of the required assets cannot be loaded for any reason.
+                If the Epoch File cannot be built.
+                If the candlesticks or the epoch's configuration cannot be moved
+                    to the epoch's root directory.
         """
-        # Retrieve the Epoch
-        config: IEpochConfig = Configuration.get_epoch_config()
+        # Extract the prediction model's certificate
+        cert: IPredictionModelCertificate = Epoch._extract_prediction_model_certificate(model_id)
 
-        # Make sure the epoch can be exported
-        Epoch._can_epoch_be_exported(config, model_ids)
+        # Extract the regression certificates
+        reg_certs: List[IRegressionTrainingCertificate] = Epoch._extract_regression_certificates(cert["model"]["regressions"])
 
-        # @TODO
 
 
 
@@ -548,21 +548,47 @@ class Epoch:
 
 
     @staticmethod
-    def _can_epoch_be_exported(model_ids: List[str]) -> None:
-        """Verifies if an Epoch can be exported. It raises an error if any
-        if the requirements is not met.
+    def _extract_prediction_model_certificate(id: str) -> IPredictionModelCertificate:
+        """Extracts the selected prediction model certificate from the build.
 
         Args:
-            model_ids: str
-                The list of prediction model ids that will be exported to Epoca.
-            
+            id: str
+                The identifier of the best prediction model.
+
+        Returns:
+            IPredictionModelCertificate
 
         Raises:
             RuntimeError:
-                If no model ids have been provided
-                ...
+                If the prediction model build cannot be loaded.
+                If the provided certificate id is not in the build.
         """
+        # Load the entire build
+        build: List[IPredictionModelCertificate] = Utils.read(Epoch.PATH.prediction_models_build())
 
-        # Make sure that at least 1 prediction model was provided
-        if len(model_ids) == 0:
-            raise RuntimeError("A minimum of 1 prediction model must be provided when exporting an Epoch.")
+        # Find the certificate that matches the model's identifier
+        model: Union[IPredictionModelCertificate, None] = next(filter(lambda x: x["id"] == id, build))
+        if model is None:
+            raise RuntimeError("The provided prediction model identifier was not found in the build.")
+        
+        # Finally, return the model
+        return model
+
+
+
+
+
+
+    @staticmethod
+    def _extract_regression_certificates(regressions: List[IRegressionConfig]) -> List[IRegressionTrainingCertificate]:
+        """Retrieves all the certificates for the regressions within the 
+        prediction model.
+
+        Args:
+            regressions: List[IRegressionConfig]
+                The list of regression configurations.
+
+        Returns:
+            List[IRegressionTrainingCertificate]
+        """
+        return [Utils.read(Epoch.PATH.regression_certificate(r["id"])) for r in regressions]

@@ -382,21 +382,13 @@ class ClusterInput {
 		const args = await inquirer.prompt(
 			[
 				{
-					type: "input", name: "ids", message: "Enter the prediction model ids separated by commas", 
+					type: "input", name: "id", message: "Enter the prediction model id", 
 					validate(value) {
-						// Make sure a value has been set
-						if (typeof value != "string" || !value.length) {
-							return "Please enter a valid list of model ids.";
-						}
-		
-						// Otherwise, make sure that at least 1 model has been provided
-						else {
-							const model_ids = value.split(",");
-							if (model_ids.length) {
-								return true;
-							} else {
-								return "A minimum of 1 model id must be provided.";
-							}
+						// Make sure the provided id is valid
+						if (typeof value == "string" && value.length >= 30 && value.length <= 60) {
+							return true
+						} else {
+							return "Please enter a valid Prediction Model ID.";
 						}
 					}
 				}
@@ -404,7 +396,7 @@ class ClusterInput {
 		);
 
 		// Finally, return the answer
-		return args["ids"]
+		return args["id"]
 	}
 
 

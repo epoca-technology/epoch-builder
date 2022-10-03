@@ -33,8 +33,8 @@ class RegressionTrainingConfig:
     # Hyperparameters that will be used to build the training configurations
     HYPERPARAMS: IRegressionHyperparams = {
         "DNN": {
-            "learning_rates": [ -1, 0.001, 0.0001 ],
-            "optimizers": [ "adam", "rmsprop" ],
+            "learning_rates": [ -1, 0.0001 ], # -> Reduced from [ -1, 0.001, 0.0001 ]
+            "optimizers": [ "adam" ], # -> Reduced from [ "adam", "rmsprop" ]
             "loss_functions": [ 
                 { "name": "mean_absolute_error", "metric": "mean_squared_error" },
                 { "name": "mean_squared_error", "metric": "mean_absolute_error" }
@@ -43,28 +43,26 @@ class RegressionTrainingConfig:
             "dropout_rates": []
         },
         "CDNN": {
-            "learning_rates": [ -1, 0.001, 0.0001 ],
-            "optimizers": [ "adam", "rmsprop" ],
-            "loss_functions": [ 
-                { "name": "mean_absolute_error", "metric": "mean_squared_error" },
+            "learning_rates": [ 0.001, 0.0001 ], # -> Reduced from [ -1, 0.001, 0.0001 ]
+            "optimizers": [ "adam" ], # -> Reduced from [ "adam", "rmsprop" ]
+            "loss_functions": [ # -> Reduced from mae and mse
                 { "name": "mean_squared_error", "metric": "mean_absolute_error" }
             ],
             "activations": [ "relu" ],
             "dropout_rates": []
         },
         "LSTM": {
-            "learning_rates": [ -1, 0.001, 0.0001 ],
-            "optimizers": [ "adam", "rmsprop" ],
-            "loss_functions": [ 
-                { "name": "mean_absolute_error", "metric": "mean_squared_error" },
-                { "name": "mean_squared_error", "metric": "mean_absolute_error" }
+            "learning_rates": [ -1 ], # -> Reduced from [ -1, 0.001, 0.0001 ]
+            "optimizers": [ "adam" ], # -> Reduced from [ "adam", "rmsprop" ]
+            "loss_functions": [ # -> Reduced from mae and mse
+                { "name": "mean_absolute_error", "metric": "mean_squared_error" }
             ],
             "activations": [ None ],
             "dropout_rates": []
         },
         "CLSTM": {
-            "learning_rates": [ -1, 0.001, 0.0001 ],
-            "optimizers": [ "adam", "rmsprop" ],
+            "learning_rates": [ -1, 0.001 ], # -> Reduced from [ -1, 0.001, 0.0001 ]
+            "optimizers": [ "adam" ], # -> Reduced from [ "adam", "rmsprop" ]
             "loss_functions": [ 
                 { "name": "mean_absolute_error", "metric": "mean_squared_error" },
                 { "name": "mean_squared_error", "metric": "mean_absolute_error" }

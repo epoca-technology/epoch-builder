@@ -76,8 +76,9 @@ class PredictionModel:
         # Retrieve the configs
         configs: List[IPredictionModelMinifiedConfig] = PredictionModelConfig.get_batch(batch_file_name)
 
-        # A model is considered to be profitable if it generates at least the value of the 
-        # position_size property.
+        # A model is considered to be profitable if it generates at least 170% of the 
+        # position_size's value.
+        min_profit: float = Epoch.POSITION_SIZE * 1.7
         profitable_configs: List[IPredictionModelMinifiedConfig] = []
 
         # Init the progress bar
@@ -105,7 +106,7 @@ class PredictionModel:
             )
 
             # Shortlist the model if it is profitable
-            if performance["profit"] >= Epoch.POSITION_SIZE:
+            if performance["profit"] >= min_profit:
                 profitable_configs.append(config)
 
             # Update the progress

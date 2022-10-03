@@ -27,8 +27,7 @@ class PredictionModelConfig:
         ...
     """
     # Batch Size
-    #BATCH_SIZE: int = 100000
-    BATCH_SIZE: int = 50000
+    BATCH_SIZE: int = 25000
 
     # The list of price change requirements that will be used to build configs
     PRICE_CHANGE_REQUIREMENTS: List[float] = [2.5, 3, 3.5, 4]
@@ -107,7 +106,7 @@ class PredictionModelConfig:
         receipt += f"Regression Combinations:\n"
         for i, comb in enumerate(combs_by_rpm):
             receipt += f"R{PredictionModelConfig.REGRESSIONS_PER_MODEL[i]}: {len(comb)}\n"
-        receipt += f"\nTotal: {len(combs)}\n\n"
+        receipt += f"Total: {len(combs)}\n\n"
         receipt += f"Configuration Batches ({batches}):\n"
         for batch_number in range(1, batches + 1, 1):
             receipt += f"{Epoch.ID}_{batch_number}: \n"

@@ -429,16 +429,16 @@ import { spawn } from "child_process";
 
 
 	/**
-	 * Exports an epoch based on a provided list of prediction model ids.
+	 * Exports an epoch based on the selected Prediction Model ID.
 	 * @param server: object 
-	 * @param model_ids: string
+	 * @param model_id: string
 	 * @returns Promise<void>
 	 */
-	export_epoch(server, model_ids) {
+	export_epoch(server, model_id) {
 		return this.execute_eb(
 			server, "export_epoch.py",
 			[
-				"--model_ids", model_ids
+				"--model_id", model_id
 			]
 		);
 	}

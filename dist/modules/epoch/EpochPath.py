@@ -327,6 +327,12 @@ class EpochPath:
 
 
 
+
+
+
+    # Epoch Path
+
+
     def p(self, path: str) -> str:
         """All the assets generated during the creation of an epoch, are stored in a
         directory named after the Epoch's ID. Therefore, this function needs to
@@ -352,7 +358,7 @@ class EpochPath:
 
 
 
-
+    # Epoch Directories Initialization
 
 
     @staticmethod
@@ -373,4 +379,3 @@ class EpochPath:
         Utils.make_directory(f"{epoch_id}/prediction_models/assets")
         Utils.make_directory(f"{epoch_id}/prediction_models/configs")
         Utils.make_directory(f"{epoch_id}/prediction_models/profitable_configs")
-        Utils.make_directory(f"{epoch_id}/export")
