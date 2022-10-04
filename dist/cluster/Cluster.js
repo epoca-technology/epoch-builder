@@ -779,7 +779,8 @@ import { ClusterInput } from "./ClusterInput.js"
 		await this.pull(
 			this.cluster_path.prediction_models_profitable_configs(false), 
 			this.cluster_path.prediction_models(true), 
-			server
+			server,
+			true
 		);
 	}
 

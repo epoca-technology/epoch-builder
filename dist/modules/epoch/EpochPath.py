@@ -317,10 +317,76 @@ class EpochPath:
         Returns:
             str
         """
-        return self.p("prediction_models")
+        return self.p("export")
 
 
 
+    
+
+
+    def export_prediction_model_certificate(self) -> str:
+        """Builds the path for the prediction model certificate that
+        will be placed in the export build.
+
+        Returns:
+            str
+        """
+        return f"{self.export()}/prediction_model_certificate.json"
+
+
+
+
+
+    def export_regression_certificates(self) -> str:
+        """Builds the path for the regression training certificates that
+        will be placed in the export build.
+
+        Returns:
+            str
+        """
+        return f"{self.export()}/regression_certificates.json"
+
+
+
+
+
+    def export_regression_model(self, regression_id: str) -> str:
+        """Builds the path for the regression model file that
+        will be placed in the export build.
+
+        Args:
+            regression_id: str
+                The identifier of the regression that will be exported.
+
+        Returns:
+            str
+        """
+        return f"{self.export()}/{regression_id}.h5"
+
+
+
+
+
+    def export_epoch_config(self) -> str:
+        """Builds the path for the epoch's configuration that
+        will be placed in the export build.
+
+        Returns:
+            str
+        """
+        return f"{self.export()}/epoch.json"
+
+
+
+
+
+    def epoch_file(self) -> str:
+        """Builds the path for the Epoch File.
+
+        Returns:
+            str
+        """
+        return self.p(f"{self.epoch_id}")
 
 
 

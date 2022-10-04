@@ -82,7 +82,8 @@ class PredictionModel:
         profitable_configs: List[IPredictionModelMinifiedConfig] = []
 
         # Init the progress bar
-        print(f"\nLooking for profitable prediction models...")
+        print(f"\nBatch: {batch_file_name}")
+        print(f"Looking for profitable prediction models...")
         progress_bar = tqdm(bar_format='{l_bar}{bar:20}{r_bar}{bar:-20b}', total=len(configs))
 
         # Iterate over each config
