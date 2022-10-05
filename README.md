@@ -10,14 +10,12 @@ The Epoch Builder is a cluster of machines designed to train and evaluate many P
 
 - Pip: v20.0.2
 
-- [PostgreSQL: v14.3](./docs/POSTGRES.md) (On the Epoca Worker Master)
-
 The dependencies are located in the **requirements.txt** file and can be installed with:
 
 `pip3 install -r requirements.txt`
 
 
-### Launcher Requirements
+### Cluster Manager Launcher Requirements
 
 - NodeJS: v16.14.0
 
@@ -27,196 +25,224 @@ The dependencies in the **package.json** file can be installed with:
 
 `npm install`
 
-
 #
 ## Structure
 
 ```
 epoch-builder
     │
-    backtest_assets/
-    ├───configurations/
-    │   ├──arima
-    │   │  └──...
-    │   └──classification
-    │      └──...
-    │
-    ├───results/
-    │   ├──BACKTEST_01_1649788629072.json
-    │   └──BACKTEST_02_1650551357902.json
+    _EPOCH_NAME/
+    ├───... <- Epoch Assets
     │
     candlesticks/
-    ├───candlesticks.csv
-    ├───prediction_candlesticks.csv
+    ├───... <- Processed candlestick's bundle
     │
     config/
-    ├───ArimaCombinations.json
-    ├───Backtest.json
-    ├───ClassificationTrainingData.json
-    ├───RegressionTraining.json
-    │
-    db_management/
-    ├───backup/
-    │   └──1652662191014.dump <- Backup File Generated through the CLI
-    ├───restore/
-    │   └──1652495666677.dump <- Backup File to be restored
+    ├───... <- Global configurations
     │
     dist/
-    ├───modules/
-    │   ├──some_module/
-    │   │  └──SomeModule.py
-    │   └──some_other_module/
-    │      └──SomeOtherModule.py
+    ├───cluster/
+    │   ├──... <- Cluster Manager's source code (pure js)
+    │   modules/
+    │   ├──... <- Epoch Builder's source code
+    │   tests/
+    │   ├──... <- Epoch Builder's unit tests
+    │   │
+    │   some_script_endpoint.py
     │
-    ├───tests/
-    │   ├──some_module_test.py
-    │   └──some_other_module_test.py
+    package.json <- Cluster Manager's dependencies
     │
-    ├───run_arima_combinations.py
-    ├───run_backtest.py
-    ├───run_classification_training_data.py
-    ├───run_db_management.py
-    ├───run_regression_training.py
-    │
-    keras_assets/
-    ├───batched_training_certificates/
-    │   ├──REGRESSION_UNIT_TEST_1652967541197.json
-    │   └──CLASSIFICATION_UNIT_TEST_1652967541197.json
-    │
-    ├───classification_training_data/
-    │   └──fed1a436-190f-473b-8f21-ae1f2ede0734.json
-    │
-    ├───model_configs/
-    │      ├──Classification/
-    │      │  └──SomeBatchConfig.json
-    │      └──Regression/
-    │         └──SomeBatchConfig.json
-    │
-    ├───models/
-    │      ├──R_UNIT_TEST/
-    │      │  ├──certificate.json
-    │      │  └──model.h5
-    │      └──C_UNIT_TEST/
-    │         ├──certificate.json
-    │         └──model.h5
-    │
-    CLI.sh
-    │
-    UnitTests.sh
+    requirements.txt <- Epoch Builder's dependencies
 ```
+
+
+#
+## Cluster Manager Launcher
+
+The launcher initializes a CLI that manages the cluster. It can be started with:
+
+`npm start`
+
 
 
 
 #
 ## Getting Started
 
-- Generate the **candlesticks.csv** and **prediction_candlesticks.csv** files through the **compose** program and place them inside of the **./candlesticks** directory.
+Generate a fresh Candlestick Bundle from the GUI and **decompress it** in the root directory.
 
-- Set the permissions on the executables (This only needs to be done once):
+```
+epoch-builder
+    candlesticks/
+    ├───candlesticks.csv <- 1m interval
+    └───prediction_candlesticks.csv <- 30m interval
+```
 
-  `chmod u+x CLI.sh UnitTests.sh`
+Once the Epoch is created, the candlestick files will be adjusted to the epoch's width and a the normalized variation of the 30m candlesticks will also be placed in the directory.
 
+```
+epoch-builder
+    candlesticks/
+    ├───candlesticks.csv
+    ├───prediction_candlesticks.csv
+    └───normalized_prediction_candlesticks.csv
+```
 
+The Epoch's configuration file is stored in the root configuration directory:
 
+```
+epoch-builder
+    config/
+    ├───cluster.json
+    └───epoch.json
+```
 
+Finally, the directory and subdirectories that hold the Epoch's assets are also created:
 
-
-#
-## Database Management
-
-Basic utility that allows interactions with the PostgreSQL Database such as:
-
-- Visualize the Database Summary
-
-- Create a Database Backup
-
-- Restore a Database Backup
-
-In order to execute the utility run the following:
-
-`./DatabaseManagement.sh`
-
-
-### Database Backup
-
-When the Database Backup is executed, the dump file is placed in the following path:
-
-**db_management/backup**
-
-### Database Restore
-
-Before running the restore function, make sure to have placed the backup file that you wish to restore in the following path:
-
-**db_management/restore**
-
-
-
-
-
-#
-## Arima Combinations
-
-Arima Combinations is a script that generates **Backtest Configuration Files** and places them in the **backtest_assets/configurations** directory. Before executing the script, input the desired configuration values in **config/ArimaCombinations.json**.
-
-Run the generator by executing the following:
-
-`./ArimaCombinations`
-
-
-
-
-
-
-#
-## Backtests
-
-Input the desired configuration values in **config/Backtest.json** and run:
-
-`./Backtest.sh`
-
-Once the execution completes, the results will be placed under the **./backtest_assets/results** directory in the following format: **{BACKTEST_ID}_{TIMESTAMP}.json**
-
-
-
-
-
-
-#
-## Regression Training
-
-Input the desired configuration values in **config/RegressionTraining.json** and run:
-
-`./RegressionTraining.sh`
-
-Once the execution completes, the models and their certificates are saved in **keras_assets/models**. The certificates batch on the other hand is stored in **keras_assets/batched_training_certificates**.
-
-
-
-
-
-#
-## Classification Training Data
-
-Input the desired configuration values in **config/ClassificationTrainingData.json** and run:
-
-`./ClassificationTrainingData`
-
-Once the execution completes, a file with a **uuid4 as the name** will be generated and placed in the **keras_assets/classification_training_data** directory.
-
-
-
-
+```
+epoch-builder
+    _EPOCH_NAME/
+    └───prediction_models/
+        ├──...
+        regression_batched_certificates/
+        ├──...
+        regression_training_configs/
+        ├──...
+        regressions/
+        ├──...
+        _EPOCH_NAME_receipt.txt
+```
 
 
 #
 ## Unit Tests
 
-Run an end-to-end unit test with the following command:
+In order to be able to run the unit tests, the regression configurations must be generated and the unit test model must be trained. 
 
-`./UnitTests`
+It is also important to mention that even though the unit tests can be executed in any machine within the cluster, they are automatically executed on the localhost machine.
 
-For the unit tests to pass, a Postgres connection must be successfully established and the unit test keras models must be in the correct directory.
 
+#
+## Regression Factory
+
+### Configurations
+
+In order to build the regressions that will be used by the prediction model, the configurations must be generated. This process is also known as Hyperparameter Tuning.
+
+The training configurations are saved in batches by category, following the structure:
+
+```
+epoch-builder
+    _EPOCH_NAME/
+    └───regression_training_configs/
+        ├──CDNN/
+        │  ├───KR_CDNN_1_10.json
+        │  └───...
+        ├──CLSTM/
+        │  └───...
+        ├──DNN/
+        │  └───...
+        ├──LSTM/
+        │  └───...
+        ├──UNIT_TEST/
+        │  └───...
+        receipt.txt
+```
+
+### Training
+
+Once the regression configurations have been generated and the unit tests are passing, the training process begins.
+
+One machine can train one batch at a time. It is important to keep track of the training progress in a platform such as Trello.
+
+When a single Regression is trained, the model's file and the training certificate are saved as follows:
+
+```
+epoch-builder
+    _EPOCH_NAME/
+    └───regressions/
+        └──KR_UNIT_TEST/
+           ├───certificate.json
+           └───model.h5
+```
+
+Moreover, when a full batch is trained, a combined certificate is stored in order to be able to visualize many certificates simultaneously through the GUI.
+
+```
+epoch-builder
+    _EPOCH_NAME/
+    └───regression_batched_certificates/
+        ├──KR_UNIT_TEST.json
+        └──...
+```
+
+
+
+#
+## Prediction Model Factory
+
+
+### Initialization
+
+Once the regressions have gone through the training process and the top 20 have been selected, the prediction model can be initialized. During this process, the prediction model assets and configurations are generated:
+
+#### Assets
+
+1) **features:** lists of all the features by regression.
+
+2) **labels:** the list of outcomes by price change requirement.
+
+3) **lookback_indexer:** A dict containing the prediction candlestick indexes mapped to 1m candlestick open times.
+
+#### Configurations
+
+In order to find the most profitable model for the test dataset, a series of configurations are generated in order to cover as many alternatives as possible by making use of Hyperparameter Tuning Techniques.
+
+An initialized prediction model has the following structure:
+
+```
+epoch-builder
+    _EPOCH_NAME/
+    └───prediction_models/
+        ├──assets/
+        │  ├──features.json
+        │  ├──labels.json
+        │  └──lookback_indexer.json
+        ├──configs/
+        │  ├──_EPOCH_NAME_1_87.json
+        │  └──...
+        ├──profitable_configs/ <- Empty
+        configs_receipt.txt
+```
+
+
+
+### Profitable Configurations
+
+As profitable configurations are found, they are placed in the **profitable_configs** directory which is then read in order to generate the Prediction Model Build:
+
+```
+epoch-builder
+    _EPOCH_NAME/
+    └───prediction_models/
+        └──build.json
+```
+
+
+
+
+#
+## Epoch Export
+
+Once the best prediction model is found, the Epoch Builder gathers all the neccessary assets and builds the **Epoch File** which then can be installed in Epoca. 
+
+```
+epoch-builder
+    _EPOCH_NAME/
+    └───_EPOCH_NAME.zip
+```
+
+Finally, the candlesticks directory (**candlesticks/**) and the epoch's configuration file (**config/epoch.json**) are placed in the root of the Epoch's directory (**_EPOCH_NAME/**) in order to make it archivable whilst maintining reproducibility.
 
 
 
@@ -224,11 +250,80 @@ For the unit tests to pass, a Postgres connection must be successfully establish
 
 
 #
-## Candlesticks
+## Cluster Manager
+
+The cluster manager can perform actions on localhost or any machine within the cluster. The actions are divided in the following categories:
+
+
+### Server
+
+`connect_to_a_server:` Opens a SSH connection with a server.
+
+`view_server_status:` Displays details about the server's resources as well as the running process.
+
+`subscribe_to_server_logs:` Creates a persistant read on the file that holds the process' logs.
+
+`reboot_server:` Resets a server (as sudo).
+
+`shutdown_server:` Turns off a server (as sudo)
+
+`kill_process:` Kills any python3 process that is running.
+
+`install_ssh_key_on_a_server:` Installs the SSH on a server in order to avoid entering the password per action.
+
+
+### Epoch Builder
+
+`create_epoch:` Creates a brand new epoch.
+
+`generate_regression_training_configs:` Generates all the regression training configurations (Hyperparameter tuning).
+
+`train_regression_batch:` Runs the regression training on a selected configuration batch.
+
+`initialize_prediction_models:` Creates all the prediction models' assets as well as the configurations.
+
+`find_profitable_configs:` Finds all the prediction model profitable configurations in a batch and then stores them separately.
+
+`build_prediction_models:` Builds the prediction models that were found profitable.
+
+`export_epoch:` Exports the selected Prediction Model as well as all the required assets in the Epoch File.
+
+`unit_tests:` Runs the end-to-end tests on the localhost machine.
+
+
+### Push
+
+`push_root_files:` Pushes any root files such as the requirements.txt, package.json, etc.
+
+`push_configuration:` Pushes the root configuration directory.
+
+`push_candlesticks:` Pushes the candlesticks directory.
+
+`push_dist:` Pushes the entire distribution directory. It contains modules, tests and script endpoints.
+
+`push_regression_training_configs:` Pushes the regression training configurations directory.
+
+`push_prediction_models:` Pushes the prediction models directory. It contains the assets and the configurations.
+
+`push_epoch_builder:` Performs a full push of the Epoch Builder.
+
+
+### Pull
+
+`pull_trained_regressions:` Pulls the model files and certificates generated from a training batch. It also pulls the combined certificates.
+
+`pull_prediction_models:` Pulls the profitable prediction model configurations.
+
+
+
+
+
+#
+## Candlestick Information
 
 A candlestick is an object comprised by 7 properties that describe the price movements during a specific period of time. 
 
-Candlesticks can be represented in intervals of 1, 15, 30 or even 60 minutes. Plutus makes use of the 1 minute interval candlesticks for evaluating trading sessions and simulations as well as 30 minute interval candlesticks for performing predictions on future prices.
+Candlesticks can be represented in intervals of 1, 15, 30 or even 60 minutes. Epoca makes use of the 1 minute interval candlesticks for evaluating backtests, trading sessions and simulations as well as 30 minute interval candlesticks for training models and generating predictions.
 
 
 ### Anatomy

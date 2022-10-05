@@ -536,12 +536,16 @@ class Epoch:
                 If the candlesticks or the epoch's configuration cannot be moved
                     to the epoch's root directory.
         """
+        # Create the export path
+        print("\n1/9) Creating export directory...")
+        Utils.make_directory(Epoch.PATH.export())
+
         # Extract the prediction model's certificate
-        print("\n1/8) Extracting prediction model certificate...")
+        print("\n2/9) Extracting prediction model certificate...")
         cert: IPredictionModelCertificate = Epoch._extract_prediction_model_certificate(model_id)
 
         # Iterate over each regression
-        print("\n2/8) Saving regression model files...")
+        print("\n3/9) Saving regression model files...")
         reg_certs: List[IRegressionTrainingCertificate] = []
         for reg in cert["model"]["regressions"]:
             # Extract the regression certificate
@@ -551,27 +555,27 @@ class Epoch:
             Utils.copy_file_or_dir(Epoch.PATH.regression_model(reg["id"]), Epoch.PATH.export_regression_model(reg["id"]))
 
         # Store the combined regression certificates
-        print("\n3/8) Saving regression certificates...")
+        print("\n4/9) Saving regression certificates...")
         Utils.write(Epoch.PATH.export_regression_certificates(), reg_certs)
 
         # Store the prediction model certificate
-        print("\n4/8) Saving prediction model certificate...")
+        print("\n5/9) Saving prediction model certificate...")
         Utils.write(Epoch.PATH.export_prediction_model_certificate(), cert)
 
         # Store the epoch's configuration
-        print("\n5/8) Saving epoch configuration...")
+        print("\n6/9) Saving epoch configuration...")
         Utils.copy_file_or_dir(Configuration.EPOCH_PATH, Epoch.PATH.export_epoch_config())
 
         # Create the epoch file
-        print("\n6/8) Creating epoch file...")
+        print("\n7/9) Creating epoch file...")
         make_archive(Epoch.PATH.epoch_file(), "zip", Epoch.PATH.export())
 
         # Clean the export directory
-        print("\n7/8) Cleaning export directory...")
+        print("\n8/9) Cleaning export directory...")
         Utils.remove_directory(Epoch.PATH.export())
 
         # Move additional assets into the epoch's directory
-        print("\n8/8) Moving additional data into the epoch's directory...")
+        print("\n9/9) Moving additional data into the epoch's directory...")
         Utils.move_file_or_dir(Configuration.EPOCH_PATH, Epoch.PATH.p("epoch.json"))
         Utils.move_file_or_dir(Candlestick.ASSETS_PATH, Epoch.PATH.p(Candlestick.ASSETS_PATH))
 
