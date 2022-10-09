@@ -35,24 +35,24 @@ epoch-builder
     ├───... <- Epoch Assets
     │
     candlesticks/
-    ├───... <- Processed candlestick's bundle
+    ├───... <- Processed candlestick bundle
     │
     config/
     ├───... <- Global configurations
     │
     dist/
     ├───cluster/
-    │   ├──... <- Cluster Manager's source code (pure js)
+    │   ├──... <- Cluster Manager source code (pure js)
     │   modules/
-    │   ├──... <- Epoch Builder's source code
+    │   ├──... <- Epoch Builder source code
     │   tests/
-    │   ├──... <- Epoch Builder's unit tests
+    │   ├──... <- Epoch Builder unit tests
     │   │
     │   some_script_endpoint.py
     │
-    package.json <- Cluster Manager's dependencies
+    package.json <- Cluster Manager dependencies
     │
-    requirements.txt <- Epoch Builder's dependencies
+    requirements.txt <- Epoch Builder dependencies
 ```
 
 
