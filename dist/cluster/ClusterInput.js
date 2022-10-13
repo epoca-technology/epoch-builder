@@ -120,8 +120,8 @@ class ClusterInput {
 			{
 				type: "input", name: "id", message: "Enter the ID", 
 				validate(value) {
-					if (typeof value != "string" || value.length < 4 || value[0] != "_") {
-						return "Please enter a valid epoch id.";
+					if (typeof value != "string" || value.length < 4 || value.length > 100 || value[0] != "_") {
+						return "Please enter a valid epoch id. It must be a string ranging 4 and 100 characters and be prefixed with _";
 					} else { return true }
 				}
 			},

@@ -304,8 +304,8 @@ class Epoch:
             raise ValueError(f"The provided seed is invalid {seed}. It must be an int ranging 1-100000000")
 
         # Validate the provided id
-        if not isinstance(id, str) or id[0] != "_" or len(id) < 4:
-            raise ValueError(f"The provided Epoch ID {id} is invalid. It must contain at least 4 characters and be prefixed with _")
+        if not isinstance(id, str) or id[0] != "_" or len(id) < 4 or len(id) > 100:
+            raise ValueError(f"The provided Epoch ID {id} is invalid. It must contain between 4 and 100 characters and be prefixed with _")
 
         # Validate the provided epoch width
         if not isinstance(epoch_width, int) or epoch_width < 6 or epoch_width > 48:
