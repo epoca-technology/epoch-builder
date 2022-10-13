@@ -28,7 +28,7 @@ class RegressionTrainingConfig:
             A dict containing all the hyperparameters by category.
     """
     # The number of model configs that will be included per batch
-    BATCH_SIZE: int = 50
+    BATCH_SIZE: int = 25
 
     # Hyperparameters that will be used to build the training configurations
     HYPERPARAMS: IRegressionHyperparams = {
