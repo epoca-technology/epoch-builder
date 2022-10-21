@@ -299,3 +299,28 @@ class IPredictionModelCertificate(TypedDict):
 
 
     
+
+
+
+
+
+#######################################
+## Profitable Configurations Journal ##
+#######################################
+
+
+
+
+# Profitable Configurations Journal
+# In order to store the progress when finding profitable configurations, they
+# will be stored temporarily in a local journal that will be checked prior to
+# starting the process in the future.
+class IProfitableConfigurationsJournal(TypedDict):
+    # The file name of the batch to be put through the process
+    batch_file_name: str
+
+    # The index when the last profitable configuration was saved 
+    current_index: int
+
+    # The list of profitable configurations found so far
+    configs: List[IPredictionModelMinifiedConfig]

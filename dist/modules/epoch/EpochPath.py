@@ -229,6 +229,19 @@ class EpochPath:
 
 
 
+    def profitable_configs_journal(self) -> str:
+        """Builds the path for the profitable prediction models journal file.
+
+        Returns:
+            str
+        """
+        return f"{self.prediction_models()}/journal.json"
+
+
+
+
+
+
     def prediction_models_configs_receipt(self) -> str:
         """Builds the path for the configurations receipt.
 

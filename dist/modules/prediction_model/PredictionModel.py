@@ -1,8 +1,7 @@
 from typing import List, Tuple, Dict
 from tqdm import tqdm
 from modules._types import IPredictionModelMinifiedConfig, IDiscovery, IBacktestPerformance, IPredictionModelCertificate,\
-    IRegressionConfig
-from modules._types.prediction_model_types import IMinSumFunction
+    IRegressionConfig, IMinSumFunction
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
 from modules.regression.Regression import Regression
@@ -10,6 +9,7 @@ from modules.prediction_model.PredictionModelConfig import PredictionModelConfig
 from modules.prediction_model.PredictionModelAssets import PredictionModelAssets
 from modules.prediction_model.PredictionModelDiscovery import PredictionModelDiscovery
 from modules.prediction_model.PredictionModelBacktest import PredictionModelBacktest
+from modules.prediction_model.ProfitableConfigsJournal import ProfitableConfigsJournal
 
 
 
@@ -73,13 +73,18 @@ class PredictionModel:
             batch_file_name: str
                 The name of the configuration file that will be explored.
         """
-        # Retrieve the configs
+        # Init the profitable configs journal
+        journal: ProfitableConfigsJournal = ProfitableConfigsJournal(batch_file_name)
+
+        # Retrieve the configs and subset them if the journal has a starting point
         configs: List[IPredictionModelMinifiedConfig] = PredictionModelConfig.get_batch(batch_file_name)
+        if journal.current_index != 0:
+            configs = configs[journal.current_index + 1:]
 
         # A model is considered to be profitable if it generates at least 150% of the 
-        # position_size's value.
+        # position_size's value or if it has an accuracy equals or greater than 65%.
         min_profit: float = Epoch.POSITION_SIZE * 1.5
-        profitable_configs: List[IPredictionModelMinifiedConfig] = []
+        min_accuracy: float = 65
 
         # Init the progress bar
         print(f"\nBatch: {batch_file_name}")
@@ -87,7 +92,7 @@ class PredictionModel:
         progress_bar = tqdm(bar_format='{l_bar}{bar:20}{r_bar}{bar:-20b}', total=len(configs))
 
         # Iterate over each config
-        for config in configs:
+        for i, config in enumerate(configs):
             # Build the features
             features, features_sum = self._build_features(config["ri"])
 
@@ -107,14 +112,17 @@ class PredictionModel:
             )
 
             # Shortlist the model if it is profitable
-            if performance["profit"] >= min_profit:
-                profitable_configs.append(config)
+            if performance["profit"] >= min_profit or performance["accuracy"] >= min_accuracy:
+                journal.save_profitable_config(i, config)
 
             # Update the progress
             progress_bar.update()
 
-        # Finally, save the profitable models
-        PredictionModelConfig.save_profitable_configs(batch_file_name, profitable_configs)
+        # Save the profitable models
+        PredictionModelConfig.save_profitable_configs(batch_file_name, journal.configs)
+
+        # Delete the journal
+        journal.clear_journal()
 
 
 
