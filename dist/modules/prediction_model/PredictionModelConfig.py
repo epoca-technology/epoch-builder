@@ -1,6 +1,7 @@
 from typing import List, Tuple
 from itertools import combinations
 from math import ceil
+from random import shuffle
 from modules._types import IMinSumFunction, IRegressionsPerModel, IPredictionModelMinifiedConfig
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
@@ -30,13 +31,13 @@ class PredictionModelConfig:
     BATCH_SIZE: int = 50000
 
     # The list of price change requirements that will be used to build configs
-    PRICE_CHANGE_REQUIREMENTS: List[float] = [ 3, 3.5, 4 ] # Reduced from [ 2.5, 3, 3.5, 4 ]
+    PRICE_CHANGE_REQUIREMENTS: List[float] = [ 2.5, 3, 3.5, 4 ] # Reduced from [ 2.5, 3, 3.5, 4 ]
 
     # Min Sum Functions
-    MIN_SUM_FUNCTIONS: List[IMinSumFunction] = [ "median" ] # Reduced from [ "mean", "median" ]
+    MIN_SUM_FUNCTIONS: List[IMinSumFunction] = [ "mean", "median" ] # Reduced from [ "mean", "median" ]
 
     # Min Sum Adjustment Factors
-    MIN_SUM_ADJUSTMENT_FACTORS: List[float] = [ 2.5 ] # Reduced from [ 1.5, 2, 2.5 ]
+    MIN_SUM_ADJUSTMENT_FACTORS: List[float] = [ 1.5, 2.5 ] # Reduced from [ 1.5, 2, 2.5 ]
 
     # Regressions per model
     REGRESSIONS_PER_MODEL: List[IRegressionsPerModel] = [ 8 ] # Reduced from [ 4, 8, 16 ]
@@ -79,6 +80,10 @@ class PredictionModelConfig:
                     for comb in combs:
                         # Append the model to the list
                         models.append({ "pcr": pcr, "msf": min_sum_func, "msaf": adj_factor, "ri": list(comb) })
+
+        # Shuffle the configurations in order to make sure that all (or most) batches contain profitable
+        # configurations and therefore, keep track of the progress. 
+        shuffle(models)
 
         # Calculate the number of batches that will be stored
         batches: int = ceil(len(models) / PredictionModelConfig.BATCH_SIZE)
