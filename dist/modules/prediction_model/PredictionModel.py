@@ -112,7 +112,7 @@ class PredictionModel:
             )
 
             # Shortlist the model if it is profitable
-            if performance["profit"] >= min_profit or performance["accuracy"] >= min_accuracy:
+            if performance["profit"] >= min_profit or (performance["accuracy"] >= min_accuracy and performance["profit"] > 0):
                 journal.save_profitable_config(i, config)
 
             # Update the progress

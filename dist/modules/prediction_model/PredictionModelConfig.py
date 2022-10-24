@@ -37,7 +37,7 @@ class PredictionModelConfig:
     MIN_SUM_FUNCTIONS: List[IMinSumFunction] = [ "mean", "median" ] # Reduced from [ "mean", "median" ]
 
     # Min Sum Adjustment Factors
-    MIN_SUM_ADJUSTMENT_FACTORS: List[float] = [ 1.5, 2.5 ] # Reduced from [ 1.5, 2, 2.5 ]
+    MIN_SUM_ADJUSTMENT_FACTORS: List[float] = [ 1, 1.5, 2 ] # Reduced from [ 1, 1.5, 2, 2.5 ]
 
     # Regressions per model
     REGRESSIONS_PER_MODEL: List[IRegressionsPerModel] = [ 8 ] # Reduced from [ 4, 8, 16 ]
