@@ -83,7 +83,7 @@ class PredictionModel:
 
         # A model is considered to be profitable if it generates at least 300% of the 
         # position_size's value or if it has an accuracy equals or greater than 60%.
-        min_profit: float = Epoch.POSITION_SIZE * 3
+        min_profit: float = Epoch.POSITION_SIZE * 3.5
         min_accuracy: float = 60
 
         # Init the progress bar
