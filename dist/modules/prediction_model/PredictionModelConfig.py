@@ -1,6 +1,7 @@
 from typing import List, Tuple
 from itertools import combinations
 from math import ceil
+from random import shuffle
 from modules._types import IMinSumFunction, IRegressionsPerModel, IPredictionModelMinifiedConfig
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
@@ -27,19 +28,19 @@ class PredictionModelConfig:
         ...
     """
     # Batch Size
-    BATCH_SIZE: int = 25000
+    BATCH_SIZE: int = 150000
 
     # The list of price change requirements that will be used to build configs
-    PRICE_CHANGE_REQUIREMENTS: List[float] = [2.5, 3, 3.5, 4]
+    PRICE_CHANGE_REQUIREMENTS: List[float] = [ 2.5, 3, 3.5, 4 ] # Reduced from [ 2.5, 3, 3.5, 4 ]
 
     # Min Sum Functions
-    MIN_SUM_FUNCTIONS: List[IMinSumFunction] = ["mean", "median"]
+    MIN_SUM_FUNCTIONS: List[IMinSumFunction] = [ "mean", "median" ] # Reduced from [ "mean", "median" ]
 
     # Min Sum Adjustment Factors
-    MIN_SUM_ADJUSTMENT_FACTORS: List[float] = [2, 2.5]
+    MIN_SUM_ADJUSTMENT_FACTORS: List[float] = [ 1, 1.5, 2 ] # Reduced from [ 1, 1.5, 2, 2.5 ]
 
     # Regressions per model
-    REGRESSIONS_PER_MODEL: List[IRegressionsPerModel] = [4, 8, 16]
+    REGRESSIONS_PER_MODEL: List[IRegressionsPerModel] = [ 8 ] # Reduced from [ 4, 8, 16 ]
 
 
 
@@ -80,6 +81,10 @@ class PredictionModelConfig:
                         # Append the model to the list
                         models.append({ "pcr": pcr, "msf": min_sum_func, "msaf": adj_factor, "ri": list(comb) })
 
+        # Shuffle the configurations in order to make sure that all (or most) batches contain profitable
+        # configurations and therefore, keep track of the progress. 
+        shuffle(models)
+
         # Calculate the number of batches that will be stored
         batches: int = ceil(len(models) / PredictionModelConfig.BATCH_SIZE)
         
@@ -101,12 +106,12 @@ class PredictionModelConfig:
         # Build and save the receipt
         receipt: str = f"{Epoch.ID}: Prediction Models\n\n"
         receipt += f"Creation: {Utils.from_milliseconds_to_date_string(Utils.get_time())}\n"
-        receipt += f"Total Models: {len(models)}\n"
         receipt += f"Batch Size: {PredictionModelConfig.BATCH_SIZE}\n\n"
-        receipt += f"Regression Combinations:\n"
+        receipt += f"\nRegression Combinations:\n"
         for i, comb in enumerate(combs_by_rpm):
             receipt += f"R{PredictionModelConfig.REGRESSIONS_PER_MODEL[i]}: {len(comb)}\n"
-        receipt += f"Total: {len(combs)}\n\n"
+        receipt += f"Total Combinations: {len(combs)}\n\n"
+        receipt += f"Total Models: {len(models)}\n\n"
         receipt += f"Configuration Batches ({batches}):\n"
         for batch_number in range(1, batches + 1, 1):
             receipt += f"{Epoch.ID}_{batch_number}: \n"
