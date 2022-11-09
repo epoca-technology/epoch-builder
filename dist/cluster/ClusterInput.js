@@ -295,10 +295,10 @@ class ClusterInput {
 						// Otherwise, make sure that at least 1 model has been provided
 						else {
 							const model_ids = value.split(",");
-							if (model_ids.length >= 20) {
+							if (model_ids.length >= 16) {
 								return true;
 							} else {
-								return "A minimum of 20 regression ids must be provided.";
+								return "A minimum of 16 regression ids must be provided.";
 							}
 						}
 					}
@@ -353,8 +353,8 @@ class ClusterInput {
 			{
 				type: "input", name: "limit", message: "Enter the limit of prediction models that will be placed in the build", 
 				validate(value) {
-					if (isNaN(value) || Number(value) < 10 || Number(value) > 1000) {
-						return "Please enter a valid limit. It can be an int ranging 1 - 1000.";
+					if (isNaN(value) || Number(value) < 10 || Number(value) > 2000) {
+						return "Please enter a valid limit. It can be an int ranging 1 - 2000.";
 					} else { return true }
 				}
 			},

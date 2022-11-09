@@ -79,9 +79,9 @@ class PredictionModelAssets:
                 The list of price change requirements that will be used to generate
                 prediction model variations.
         """
-        # Make sure there at least 20 regressions in the list
-        if len(regression_ids) < 20:
-            raise ValueError(f"A minimum of 20 regressions must be provided in order to build the prediction model's assets. Received: {len(regression_ids)}")
+        # Make sure there at least 16 regressions in the list
+        if len(regression_ids) < 16:
+            raise ValueError(f"A minimum of 16 regressions must be provided in order to build the prediction model's assets. Received: {len(regression_ids)}")
 
         # Generate the features
         PredictionModelAssets._generate_features(regression_ids)

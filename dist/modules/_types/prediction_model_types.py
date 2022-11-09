@@ -73,7 +73,7 @@ ILookbackIndexer = Dict[str, int]
 # It is also important to mention that they follow the adjusted prediction indexing
 # and there may be less labels than features in some cases.
 ITestDatasetLabel = Literal[1, -1]
-ITestDatasetLabelKey = Literal["2.5", "3", "3.5", "4"]
+ITestDatasetLabelKey = Literal["1.5", "2", "2.5", "3", "3.5", "4"]
 ITestDatasetLabels = Dict[ITestDatasetLabelKey, List[ITestDatasetLabel]]
 
 
