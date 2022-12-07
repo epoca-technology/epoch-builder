@@ -16,8 +16,8 @@ class Regression:
     This class handles the initialization and management of a Keras Regression Model.
 
     Class Properties:
-        MIN_FEATURE_VALUE: float = 0.01
-        MAX_FEATURE_VALUE: float = 3
+        MIN_FEATURE_VALUE: float
+        MAX_FEATURE_VALUE: float
             The minimum and maximum values features are allowed to have.
 
     Instance Properties:
@@ -34,7 +34,7 @@ class Regression:
     """
     # Min and max feature values
     MIN_FEATURE_VALUE: float = 0.01
-    MAX_FEATURE_VALUE: float = 3
+    MAX_FEATURE_VALUE: float = 5
 
 
 

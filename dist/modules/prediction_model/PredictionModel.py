@@ -81,9 +81,8 @@ class PredictionModel:
         if journal.current_index != 0:
             configs = configs[journal.current_index + 1:]
 
-        # A model is considered to be profitable if it generates at least 150% of the 
-        # position_size's value or if it has an accuracy equals or greater than 60%.
-        min_profit: float = Epoch.POSITION_SIZE * 1.5
+        # A model is considered to be profitable if it meets the minimum accuracy
+        # and ends up with a positive balance.
         min_accuracy: float = 60
 
         # Init the progress bar
@@ -112,7 +111,7 @@ class PredictionModel:
             )
 
             # Shortlist the model if it is profitable
-            if performance["profit"] >= min_profit or (performance["accuracy"] >= min_accuracy and performance["profit"] > 0):
+            if performance["accuracy"] >= min_accuracy and performance["profit"] > 0:
                 journal.save_profitable_config(i, config)
 
             # Update the progress
