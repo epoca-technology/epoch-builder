@@ -23,7 +23,7 @@ class RegressionDiscovery(Discovery):
         """Initializes the RegressionDiscovery Instance.
         """
         # Initialize the Discovery Instance
-        super().__init__(reward=1, penalty=1.3)
+        super().__init__(reward=1, penalty=1)
 
 
 

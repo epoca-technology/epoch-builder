@@ -4,7 +4,7 @@ from pandas import DataFrame
 from h5py import File as h5pyFile
 from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras import Sequential
-from keras.callbacks import EarlyStopping, History
+from keras.callbacks import EarlyStopping, ModelCheckpoint, History
 from modules._types import IKerasTrainingConfig, IKerasModelConfig, IKerasModelTrainingHistory,\
     IKerasTrainingConfig, IRegressionTrainingCertificate, IDiscovery, IRegressionTrainingConfig, \
         IRegressionTrainAndTestDatasets, ITestDatasetEvaluation
@@ -60,6 +60,8 @@ class RegressionTraining:
             The number of rows included in the test dataset.
         discovery: RegressionDiscovery
             The instance of the regression discovery.
+        training_weights_path: str
+            The path to the model's training weights.
     """
     # Training Configuration
     TRAINING_CONFIG: IKerasTrainingConfig = {
@@ -141,6 +143,10 @@ class RegressionTraining:
         # Initialize the Discovery Instance
         self.discovery: RegressionDiscovery = RegressionDiscovery()
 
+        # Create the weights directory in case it does not exist
+        self.training_weights_path: str = Epoch.PATH.regression_training_weights(self.id)
+        Utils.make_directory(self.training_weights_path)
+
 
 
 
@@ -166,12 +172,26 @@ class RegressionTraining:
         # Store the start time
         start_time: int = Utils.get_time()
 
+        # Initialize the training weights full path
+        training_weights_full_path: str = f"{self.training_weights_path}/checkpoint"
+
         # Initialize the early stopping callback
         early_stopping = EarlyStopping(
             monitor="val_loss", 
             mode="min", 
             patience=RegressionTraining.TRAINING_CONFIG["patience"],
-            restore_best_weights=True
+            verbose=0
+            #restore_best_weights=True <- Replaced by ModelCheckpoint.save_best_only
+        )
+
+        # Initialize the checkpoint callback
+        checkpoint_callback = ModelCheckpoint(
+            filepath=training_weights_full_path,
+            save_weights_only=True,
+            monitor="val_loss",
+            mode="min",
+            save_best_only=True,
+            verbose=0
         )
 
         # Retrieve the Keras Model
@@ -190,6 +210,7 @@ class RegressionTraining:
             validation_split=Epoch.VALIDATION_SPLIT, 
             epochs=RegressionTraining.TRAINING_CONFIG["max_epochs"],
             callbacks=[ 
+                checkpoint_callback,
                 early_stopping, 
                 TrainingProgressBar(RegressionTraining.TRAINING_CONFIG["max_epochs"], "       ") 
             ],
@@ -197,6 +218,9 @@ class RegressionTraining:
             batch_size=RegressionTraining.TRAINING_CONFIG["batch_size"],
             verbose=0
         )
+
+        # Load the best weights into the model's instance prior to saving it
+        model.load_weights(training_weights_full_path)
 
         # Initialize the Training History
         history: IKerasModelTrainingHistory = history_object.history
@@ -333,6 +357,9 @@ class RegressionTraining:
 
         # Save the certificate
         Utils.write(Epoch.PATH.regression_certificate(certificate["id"]), certificate)
+
+        # Delete the training weights directory
+        Utils.remove_directory(self.training_weights_path)
 
 
 

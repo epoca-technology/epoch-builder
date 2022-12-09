@@ -79,6 +79,24 @@ class EpochPath:
 
 
 
+    def regression_training_weights(self, id: str) -> str:
+        """Builds the path for the regression's training weights directory. If 
+        the path does not exist, it is created.
+
+        Args:
+            id: str
+                The identifier of the regression model.
+
+        Returns:
+            str
+        """
+        return self.p(f"regression_training_weights/{id}")
+
+
+
+
+
+
     def regression_batched_certificates(self) -> str:
         """Builds the path for the regression batched training certificates.
 
@@ -452,6 +470,7 @@ class EpochPath:
                 The identifier of the epoch.
         """
         Utils.make_directory(f"{epoch_id}/regression_training_configs")
+        Utils.make_directory(f"{epoch_id}/regression_training_weights")
         Utils.make_directory(f"{epoch_id}/regression_batched_certificates")
         Utils.make_directory(f"{epoch_id}/regressions")
         Utils.make_directory(f"{epoch_id}/prediction_models")
