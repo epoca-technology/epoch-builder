@@ -197,9 +197,11 @@ class PredictionModelBacktest:
                         idle_until = Utils.add_minutes(candlestick["ct"], Epoch.IDLE_MINUTES_ON_POSITION_CLOSE)
 
                 # Otherwise, check if a position can be opened
-                elif (self.active == None) and (candlestick["ot"] > idle_until):
-                    # Retrieve the prediction result
-                    pred_result: IPredictionResult = self._get_prediction_result(features_sum[current_index])
+                elif (self.active == None) and (candlestick["ot"] >= idle_until):
+                    # Retrieve the prediction result as long as there is at least 1 sum in the past
+                    pred_result: IPredictionResult = 0
+                    if current_index > 1:
+                        pred_result = self._get_prediction_result(features_sum[current_index], features_sum[current_index - 1])
 
                     # If the result isn't neutral, open a position
                     if pred_result != 0:
@@ -221,23 +223,25 @@ class PredictionModelBacktest:
 
 
 
-    def _get_prediction_result(self, features_sum: float) -> IPredictionResult:
+    def _get_prediction_result(self, features_sum: float, previous_features_sum: float) -> IPredictionResult:
         """Retrieves a prediction result based on the sum of all the features
         at the current index.
 
         Args:
             features_sum: float
                 The sum of all the features at the active index.
+            previous_features_sum: float
+                The sum of all the features at the previous index.
 
         Returns:
             IPredictionResult
         """
-        # Check if it is an increase prediction
-        if features_sum >= self.min_increase_sum:
+        # If the feature sum meets the requirement and the trend is increasing, open a long
+        if features_sum >= self.min_increase_sum and features_sum > previous_features_sum:
             return 1
 
         # Check if it is a decrease prediction
-        elif features_sum <= self.min_decrease_sum:
+        elif features_sum <= self.min_decrease_sum and features_sum < previous_features_sum:
             return -1
 
         # Otherwise, the model is neutral
