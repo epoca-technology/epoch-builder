@@ -198,10 +198,10 @@ class PredictionModelBacktest:
 
                 # Otherwise, check if a position can be opened
                 elif (self.active == None) and (candlestick["ot"] >= idle_until):
-                    # Retrieve the prediction result as long as there is at least 1 sum in the past
+                    # Retrieve the prediction result as long as there is at least 3 sums in the past
                     pred_result: IPredictionResult = 0
-                    if current_index > 1:
-                        pred_result = self._get_prediction_result(features_sum[current_index], features_sum[current_index - 1])
+                    if current_index > 3:
+                        pred_result = self._get_prediction_result(features_sum[current_index-3:current_index+1])
 
                     # If the result isn't neutral, open a position
                     if pred_result != 0:
@@ -223,25 +223,24 @@ class PredictionModelBacktest:
 
 
 
-    def _get_prediction_result(self, features_sum: float, previous_features_sum: float) -> IPredictionResult:
+    def _get_prediction_result(self, sums: List[float]) -> IPredictionResult:
         """Retrieves a prediction result based on the sum of all the features
-        at the current index.
+        at the current index as well as the general trend of the sums.
 
         Args:
-            features_sum: float
-                The sum of all the features at the active index.
-            previous_features_sum: float
-                The sum of all the features at the previous index.
+            sums: List[float]
+                The list of sums ordered ascendingly where the current
+                sum is the last.
 
         Returns:
             IPredictionResult
         """
         # If the feature sum meets the requirement and the trend is increasing, open a long
-        if features_sum >= self.min_increase_sum and features_sum > previous_features_sum:
+        if sums[3] >= self.min_increase_sum and sums[3] > sums[2] and sums[2] > sums[1] and sums[1] > sums[0]:
             return 1
 
-        # Check if it is a decrease prediction
-        elif features_sum <= self.min_decrease_sum and features_sum < previous_features_sum:
+        # If the feature sum meets the requirement and the trend is decreasing, open a short
+        elif sums[3] <= self.min_decrease_sum and sums[3] < sums[2] and sums[2] < sums[1] and sums[1] < sums[0]:
             return -1
 
         # Otherwise, the model is neutral
