@@ -68,7 +68,7 @@ class Epoch:
     # Epoch Defaults
     DEFAULTS: IEpochDefaults = {
         "seed": 60184,
-        "epoch_width": 24,
+        "epoch_width": 48,
         "sma_window_size": 100,
         "train_split": 0.75,
         "validation_split": 0.2,
@@ -308,8 +308,8 @@ class Epoch:
             raise ValueError(f"The provided Epoch ID {id} is invalid. It must contain between 4 and 100 characters and be prefixed with _")
 
         # Validate the provided epoch width
-        if not isinstance(epoch_width, int) or epoch_width < 6 or epoch_width > 48:
-            raise ValueError(f"The provided epoch_width is invalid {epoch_width}. It must be an int ranging 6-48")
+        if not isinstance(epoch_width, int) or epoch_width < 6 or epoch_width > 80:
+            raise ValueError(f"The provided epoch_width is invalid {epoch_width}. It must be an int ranging 6-80")
 
         # Validate the provided sma_window_size
         if not isinstance(sma_window_size, int) or sma_window_size < 10 or sma_window_size > 300:

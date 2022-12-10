@@ -1,5 +1,8 @@
 from typing import List
+from random import seed
 from numpy import ndarray
+from numpy.random import seed as npseed
+from tensorflow import random as tf_random
 from h5py import File as h5pyFile
 from tensorflow.python.keras.saving.hdf5_format import load_model_from_hdf5
 from keras import Sequential
@@ -82,6 +85,11 @@ class Regression:
         # Make sure the predictions were extracted
         if not isinstance(self.predictions, int):
             raise ValueError(f"Regression Predictions is invalid: {str(self.predictions)}")
+
+        # Set the random seed
+        seed(Epoch.SEED)
+        npseed(Epoch.SEED)
+        tf_random.set_seed(Epoch.SEED)
 
 
 

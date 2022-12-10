@@ -134,10 +134,10 @@ class ClusterInput {
 				}
 			},
 			{
-				type: "input", name: "epoch_width", message: "Enter the epoch's width (Optional: defaults to 24)", 
+				type: "input", name: "epoch_width", message: "Enter the epoch's width (Optional: defaults to 48)", 
 				validate(value) {
-					if (typeof value == "string" && value.length && (isNaN(value) || Number(value) < 6 || Number(value) > 48)) {
-						return "Please enter a valid epoch width. It can be an int ranging 6 - 48.";
+					if (typeof value == "string" && value.length && (isNaN(value) || Number(value) < 6 || Number(value) > 80)) {
+						return "Please enter a valid epoch width. It can be an int ranging 6 - 80.";
 					} else { return true }
 				}
 			},

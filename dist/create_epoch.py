@@ -9,7 +9,7 @@ from modules.epoch.Epoch import Epoch
 # Args:
 #   --seed? "60184"
 #   --id "_ALPHA"
-#   --epoch_width? "24"
+#   --epoch_width? "48"
 #   --sma_window_size? "100"
 #   --train_split? "0.75"
 #   --validation_split? "0.2"
