@@ -235,18 +235,44 @@ class PredictionModelBacktest:
         Returns:
             IPredictionResult
         """
+        # Calculate the prediction trend
+        trend_increasing, trend_decreasing = self._calculate_prediction_trend(sums)
+
         # If the feature sum meets the requirement and the trend is increasing, open a long
-        if sums[3] >= self.min_increase_sum and sums[3] > sums[2] and sums[2] > sums[1] and sums[1] > sums[0]:
+        if  (sums[-1] >= self.min_increase_sum and trend_increasing) or \
+            (sums[-1] <= self.min_decrease_sum and trend_increasing):
             return 1
 
         # If the feature sum meets the requirement and the trend is decreasing, open a short
-        elif sums[3] <= self.min_decrease_sum and sums[3] < sums[2] and sums[2] < sums[1] and sums[1] < sums[0]:
+        elif (sums[-1] <= self.min_decrease_sum and trend_decreasing) or \
+             (sums[-1] >= self.min_increase_sum and trend_decreasing):
             return -1
 
         # Otherwise, the model is neutral
         else:
             return 0
 
+
+
+
+    def _calculate_prediction_trend(self, sums: List[float]) -> Tuple[bool, bool]:
+        """Determines if the prediction sums are increasing or decreasing based
+        on the current and the 3 previous items.
+
+        Args:
+            sums: List[float]
+
+        Returns:
+            Tuple[bool, bool]
+            trend_increasing, trend_decreasing
+        """
+        # Check if the trend is increasing or decreasing
+        trend_increasing: bool = sums[-1] > sums[-2] and sums[-2] > sums[-3] and sums[-3] > sums[-4]
+        trend_decreasing: bool = sums[-1] < sums[-2] and sums[-2] < sums[-3] and sums[-3] < sums[-4]
+
+        # Finally, pack the results and return them
+        return trend_increasing, trend_decreasing
+        
 
 
 
