@@ -17,7 +17,7 @@ from modules.epoch.Epoch import Epoch
 #   --regression_predictions? "32"
 #   --exchange_fee? "0.065"
 #   --position_size? "10000"
-#   --leverage? "2"
+#   --leverage? "5"
 #   --idle_minutes_on_position_close? "30"
 endpoint_name: str = "CREATE EPOCH"
 Utils.endpoint_header(Configuration.VERSION, endpoint_name)
