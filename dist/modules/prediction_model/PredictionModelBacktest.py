@@ -198,10 +198,10 @@ class PredictionModelBacktest:
 
                 # Otherwise, check if a position can be opened
                 elif (self.active == None) and (candlestick["ot"] >= idle_until):
-                    # Retrieve the prediction result as long as there is at least 3 sums in the past
+                    # Retrieve the prediction result as long as there is at least 5 sums in the past
                     pred_result: IPredictionResult = 0
-                    if current_index > 3:
-                        pred_result = self._get_prediction_result(features_sum[current_index-3:current_index+1])
+                    if current_index > 5:
+                        pred_result = self._get_prediction_result(features_sum[current_index-5:current_index+1])
 
                     # If the result isn't neutral, open a position
                     if pred_result != 0:
@@ -236,16 +236,16 @@ class PredictionModelBacktest:
             IPredictionResult
         """
         # Calculate the prediction trend
-        trend_increasing, trend_decreasing = self._calculate_prediction_trend(sums)
+        increasing, increasing_strongly, decreasing, decreasing_strongly = self._calculate_prediction_trend(sums)
 
         # If the feature sum meets the requirement and the trend is increasing, open a long
-        if  (sums[-1] >= self.min_increase_sum and trend_increasing) or \
-            (sums[-1] <= self.min_decrease_sum and trend_increasing):
+        if  (sums[-1] >= self.min_increase_sum and increasing) or \
+            (sums[-1] <= self.min_decrease_sum and increasing_strongly):
             return 1
 
         # If the feature sum meets the requirement and the trend is decreasing, open a short
-        elif (sums[-1] <= self.min_decrease_sum and trend_decreasing) or \
-             (sums[-1] >= self.min_increase_sum and trend_decreasing):
+        elif (sums[-1] <= self.min_decrease_sum and decreasing) or \
+             (sums[-1] >= self.min_increase_sum and decreasing_strongly):
             return -1
 
         # Otherwise, the model is neutral
@@ -255,23 +255,25 @@ class PredictionModelBacktest:
 
 
 
-    def _calculate_prediction_trend(self, sums: List[float]) -> Tuple[bool, bool]:
+    def _calculate_prediction_trend(self, sums: List[float]) -> Tuple[bool, bool, bool, bool]:
         """Determines if the prediction sums are increasing or decreasing based
-        on the current and the 3 previous items.
+        on the current and the 5 previous items.
 
         Args:
             sums: List[float]
 
         Returns:
-            Tuple[bool, bool]
-            trend_increasing, trend_decreasing
+            Tuple[bool, bool, bool, bool]
+            increasing, increasing_strongly, decreasing, decreasing_strongly
         """
         # Check if the trend is increasing or decreasing
-        trend_increasing: bool = sums[-1] > sums[-2] and sums[-2] > sums[-3] and sums[-3] > sums[-4]
-        trend_decreasing: bool = sums[-1] < sums[-2] and sums[-2] < sums[-3] and sums[-3] < sums[-4]
+        increasing: bool = sums[-1] > sums[-2] and sums[-2] > sums[-3] and sums[-3] > sums[-4]
+        increasing_strongly: bool = sums[-1] > sums[-2] and sums[-2] > sums[-3] and sums[-3] > sums[-4] and sums[-4] > sums[-5] and sums[-5] > sums[-6]
+        decreasing: bool = sums[-1] < sums[-2] and sums[-2] < sums[-3] and sums[-3] < sums[-4]
+        decreasing_strongly: bool = sums[-1] < sums[-2] and sums[-2] < sums[-3] and sums[-3] < sums[-4] and sums[-4] < sums[-5] and sums[-5] < sums[-6]
 
         # Finally, pack the results and return them
-        return trend_increasing, trend_decreasing
+        return increasing, increasing_strongly, decreasing, decreasing_strongly
         
 
 
