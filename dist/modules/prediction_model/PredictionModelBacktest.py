@@ -1,6 +1,6 @@
 from typing import List, Union, Tuple
 from modules._types import IPredictionResult, IPrediction, IBacktestPositionType, IBacktestPosition, IBacktestPerformance,\
-    ILookbackIndexer, ICandlestick
+    ILookbackIndexer, ICandlestick, IPredictionStateIntensity
 from modules.utils.Utils import Utils
 from modules.candlestick.Candlestick import Candlestick
 from modules.epoch.Epoch import Epoch
@@ -236,16 +236,17 @@ class PredictionModelBacktest:
             IPredictionResult
         """
         # Calculate the prediction trend
-        increasing, increasing_strongly, decreasing, decreasing_strongly = self._calculate_prediction_trend(sums)
+        increasing, increasing_strongly, decreasing, decreasing_strongly, intensity = \
+            self._calculate_prediction_trend(sums)
 
         # If the feature sum meets the requirement and the trend is increasing, open a long
-        if  (sums[-1] >= self.min_increase_sum and increasing) or \
-            (sums[-1] <= self.min_decrease_sum and increasing_strongly):
+        if  (sums[-1] >= self.min_increase_sum and increasing and intensity >= 1) or \
+            (sums[-1] <= self.min_decrease_sum and increasing_strongly and intensity >= 2):
             return 1
 
         # If the feature sum meets the requirement and the trend is decreasing, open a short
-        elif (sums[-1] <= self.min_decrease_sum and decreasing) or \
-             (sums[-1] >= self.min_increase_sum and decreasing_strongly):
+        elif (sums[-1] <= self.min_decrease_sum and decreasing and intensity <= -1) or \
+             (sums[-1] >= self.min_increase_sum and decreasing_strongly and intensity <= -2):
             return -1
 
         # Otherwise, the model is neutral
@@ -255,16 +256,17 @@ class PredictionModelBacktest:
 
 
 
-    def _calculate_prediction_trend(self, sums: List[float]) -> Tuple[bool, bool, bool, bool]:
+    def _calculate_prediction_trend(self, sums: List[float]) -> Tuple[bool, bool, bool, bool, IPredictionStateIntensity]:
         """Determines if the prediction sums are increasing or decreasing based
-        on the current and the 5 previous items.
+        on the current and the 5 previous items. It also calculates the intensity
+        of the direction.
 
         Args:
             sums: List[float]
 
         Returns:
-            Tuple[bool, bool, bool, bool]
-            increasing, increasing_strongly, decreasing, decreasing_strongly
+            Tuple[bool, bool, bool, bool, IPredictionStateIntensity]
+            increasing, increasing_strongly, decreasing, decreasing_strongly, intensity
         """
         # Check if the trend is increasing or decreasing
         increasing: bool = sums[-1] > sums[-2] and sums[-2] > sums[-3] and sums[-3] > sums[-4]
@@ -272,9 +274,45 @@ class PredictionModelBacktest:
         decreasing: bool = sums[-1] < sums[-2] and sums[-2] < sums[-3] and sums[-3] < sums[-4]
         decreasing_strongly: bool = sums[-1] < sums[-2] and sums[-2] < sums[-3] and sums[-3] < sums[-4] and sums[-4] < sums[-5] and sums[-5] < sums[-6]
 
+        # Calculate the intensity of the direction
+        intensity: IPredictionStateIntensity = self._calculate_state_intensity(sums[0], sums[-1])
+
         # Finally, pack the results and return them
-        return increasing, increasing_strongly, decreasing, decreasing_strongly
+        return increasing, increasing_strongly, decreasing, decreasing_strongly, intensity
         
+
+
+
+    def _calculate_state_intensity(self, initial_sum: float, current_sum: float) -> IPredictionStateIntensity:
+        """Based on the initial and current sum, it calculates the intensity
+        of the trend's direction.
+
+        Args:
+            initial_sum: float
+                The trend sum from 5 candlesticks ago.
+            current_sum: float
+                The trend sum in the current candlestick.
+
+        Returns:
+            IPredictionStateIntensity
+        """
+        if initial_sum > 0:
+            if current_sum >= Utils.alter_number_by_percentage(initial_sum, 15):
+                return 2
+            elif current_sum >= Utils.alter_number_by_percentage(initial_sum, 5):
+                return 1
+            else:
+                return 0
+        elif initial_sum < 0:
+            if current_sum <= Utils.alter_number_by_percentage(initial_sum, 15):
+                return -2
+            elif current_sum <= Utils.alter_number_by_percentage(initial_sum, 5):
+                return -1
+            else:
+                return 0
+        else:
+            return 0
+
 
 
 

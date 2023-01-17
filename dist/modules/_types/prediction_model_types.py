@@ -127,7 +127,9 @@ class IPrediction(TypedDict):
 
 
 
-
+# Prediction State Intensity
+# The intensity of the direction the trend sum is taking.
+IPredictionStateIntensity = Literal[-2, -1, 0, 1, 2]
 
 
 
