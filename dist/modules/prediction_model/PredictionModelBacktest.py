@@ -296,20 +296,55 @@ class PredictionModelBacktest:
         Returns:
             IPredictionStateIntensity
         """
+        # Handle a positive sum
         if initial_sum > 0:
-            if current_sum >= Utils.alter_number_by_percentage(initial_sum, 15):
-                return 2
-            elif current_sum >= Utils.alter_number_by_percentage(initial_sum, 5):
-                return 1
+            # Check if there has been an increase
+            if initial_sum < current_sum:
+                if current_sum >= Utils.alter_number_by_percentage(initial_sum, 15):
+                    return 2
+                elif current_sum >= Utils.alter_number_by_percentage(initial_sum, 5):
+                    return 1
+                else:
+                    return 0
+
+            # Check if there has been a decrease
+            elif initial_sum > current_sum:
+                if current_sum <= Utils.alter_number_by_percentage(initial_sum, -15):
+                    return -2
+                elif current_sum <= Utils.alter_number_by_percentage(initial_sum, -5):
+                    return -1
+                else:
+                    return 0
+
+            # If the initial sum is equals to the current one, there is no intensity
             else:
                 return 0
+
+        # Handle a negative sum
         elif initial_sum < 0:
-            if current_sum <= Utils.alter_number_by_percentage(initial_sum, 15):
-                return -2
-            elif current_sum <= Utils.alter_number_by_percentage(initial_sum, 5):
-                return -1
+            # Check if there has been a decrease
+            if initial_sum > current_sum:
+                if current_sum <= Utils.alter_number_by_percentage(initial_sum, 15):
+                    return -2
+                elif current_sum <= Utils.alter_number_by_percentage(initial_sum, 5):
+                    return -1
+                else:
+                    return 0
+
+            # Check if there has been an increase
+            if initial_sum < current_sum:
+                if current_sum >= Utils.alter_number_by_percentage(initial_sum, -15):
+                    return 2
+                elif current_sum >= Utils.alter_number_by_percentage(initial_sum, -5):
+                    return 1
+                else:
+                    return 0
+
+            # If the initial sum is equals to the current one, there is no intensity
             else:
                 return 0
+
+        # If the initial sum is equals to 0, there is no intensity
         else:
             return 0
 
