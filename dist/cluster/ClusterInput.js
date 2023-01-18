@@ -166,7 +166,7 @@ class ClusterInput {
 				}
 			},
 			{
-				type: "input", name: "regression_lookback", message: "Enter the regression lookback (Optional: defaults to 128)", 
+				type: "input", name: "regression_lookback", message: "Enter the regression lookback (Optional: defaults to 256)", 
 				validate(value) {
 					if (typeof value == "string" && value.length && (isNaN(value) || Number(value) < 32 || Number(value) > 512)) {
 						return "Please enter a valid regression lookback. It can be an int ranging 32 - 512.";
@@ -174,7 +174,7 @@ class ClusterInput {
 				}
 			},
 			{
-				type: "input", name: "regression_predictions", message: "Enter the regression predictions (Optional: defaults to 32)", 
+				type: "input", name: "regression_predictions", message: "Enter the regression predictions (Optional: defaults to 64)", 
 				validate(value) {
 					if (typeof value == "string" && value.length && (isNaN(value) || Number(value) < 32 || Number(value) > 256)) {
 						return "Please enter a valid regression predictions. It can be an int ranging 32 - 256.";

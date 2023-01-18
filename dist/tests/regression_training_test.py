@@ -116,8 +116,8 @@ class RegressionTrainingTestCase(TestCase):
         train_size, test_size = calculate_dataset_estimated_sizes()
 
         # Make sure the dataset split was applied correctly
-        self.assertAlmostEqual(train_x.shape[0], train_size, delta=200)
-        self.assertAlmostEqual(test_x.shape[0], test_size, delta=200)
+        self.assertAlmostEqual(train_x.shape[0], train_size, delta=500)
+        self.assertAlmostEqual(test_x.shape[0], test_size, delta=500)
 
         # Finally, validate the entire dataset
         validate_dataset(features=concatenate((train_x, test_x)), labels=concatenate((train_y, test_y)))

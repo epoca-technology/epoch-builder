@@ -1,0 +1,19 @@
+{
+    "seed": 60184,
+    "id": "_EROS1",
+    "sma_window_size": 100,
+    "train_split": 0.75,
+    "validation_split": 0.2,
+    "start": 1549420200000,
+    "end": 1674068399999,
+    "test_ds_start": 1642964400000,
+    "test_ds_end": 1674068399999,
+    "highest_price_sma": 67235.38650000001,
+    "lowest_price_sma": 3405.8309999999997,
+    "regression_lookback": 256,
+    "regression_predictions": 64,
+    "exchange_fee": 0.065,
+    "position_size": 10000,
+    "leverage": 5,
+    "idle_minutes_on_position_close": 30
+}
