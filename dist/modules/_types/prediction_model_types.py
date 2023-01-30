@@ -192,6 +192,7 @@ class IBacktestPerformance(TypedDict):
     position_size: float
     initial_balance: float
     final_balance: float
+    largest_balance_drawdown: Union[float, None] # Only populated if a model has accuracy >= 60. Will always be present in the GUI
     profit: float
     fees: float
     leverage: float

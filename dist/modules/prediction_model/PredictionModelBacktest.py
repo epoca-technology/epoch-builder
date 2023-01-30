@@ -300,18 +300,18 @@ class PredictionModelBacktest:
         if initial_sum > 0:
             # Check if there has been an increase
             if initial_sum < current_sum:
-                if current_sum >= Utils.alter_number_by_percentage(initial_sum, 15):
+                if current_sum >= Utils.alter_number_by_percentage(initial_sum, 8):
                     return 2
-                elif current_sum >= Utils.alter_number_by_percentage(initial_sum, 5):
+                elif current_sum >= Utils.alter_number_by_percentage(initial_sum, 4):
                     return 1
                 else:
                     return 0
 
             # Check if there has been a decrease
             elif initial_sum > current_sum:
-                if current_sum <= Utils.alter_number_by_percentage(initial_sum, -15):
+                if current_sum <= Utils.alter_number_by_percentage(initial_sum, -8):
                     return -2
-                elif current_sum <= Utils.alter_number_by_percentage(initial_sum, -5):
+                elif current_sum <= Utils.alter_number_by_percentage(initial_sum, -4):
                     return -1
                 else:
                     return 0
@@ -324,18 +324,18 @@ class PredictionModelBacktest:
         elif initial_sum < 0:
             # Check if there has been a decrease
             if initial_sum > current_sum:
-                if current_sum <= Utils.alter_number_by_percentage(initial_sum, 15):
+                if current_sum <= Utils.alter_number_by_percentage(initial_sum, 8):
                     return -2
-                elif current_sum <= Utils.alter_number_by_percentage(initial_sum, 5):
+                elif current_sum <= Utils.alter_number_by_percentage(initial_sum, 4):
                     return -1
                 else:
                     return 0
 
             # Check if there has been an increase
             if initial_sum < current_sum:
-                if current_sum >= Utils.alter_number_by_percentage(initial_sum, -15):
+                if current_sum >= Utils.alter_number_by_percentage(initial_sum, -8):
                     return 2
-                elif current_sum >= Utils.alter_number_by_percentage(initial_sum, -5):
+                elif current_sum >= Utils.alter_number_by_percentage(initial_sum, -4):
                     return 1
                 else:
                     return 0
@@ -573,3 +573,57 @@ class PredictionModelBacktest:
         
         # Return the new value
         return self.current_balance
+
+
+
+
+
+
+
+    
+
+    ######################
+    ## Balance Drawdown ##
+    ######################
+
+
+
+
+    @staticmethod
+    def calculate_largest_balance_drawdown(initial_balance: float, positions: List[IBacktestPosition]) -> float:
+        """Calculates the largest balance drawdown the model experienced during the backtest process.
+
+        Args:
+            initial_balance: float
+                The balance when the backtest process started.
+            positions: List[IBacktestPosition]
+                The list of positions executed during the process.
+
+        Returns:
+            float
+        """
+        # Initialize the balance history
+        balance_hist: List[float] = [initial_balance] + [pos["b"] for pos in positions]
+
+        # Ensure at least 1 position was executed
+        txs: int = len(balance_hist)
+        if txs > 1:
+            # Initialize the drawdowns list
+            drawdowns: List[float] = []
+
+            # Iterate over each element
+            for i in range(txs):
+                # Ensure there are enough items
+                if i < (txs - 1):
+                    # Calculate the smallest value after the current index
+                    smallest: float = min(balance_hist[i+1:])
+
+                    # Calculate the size and add it to the list
+                    drawdowns.append(Utils.get_percentage_change(balance_hist[i], smallest))
+
+            # Finally, return the largest drawdown
+            return min(drawdowns)
+
+        # Otherwise, there is no drawdown
+        else:
+            return 0

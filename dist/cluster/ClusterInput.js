@@ -174,7 +174,7 @@ class ClusterInput {
 				}
 			},
 			{
-				type: "input", name: "regression_predictions", message: "Enter the regression predictions (Optional: defaults to 64)", 
+				type: "input", name: "regression_predictions", message: "Enter the regression predictions (Optional: defaults to 32)", 
 				validate(value) {
 					if (typeof value == "string" && value.length && (isNaN(value) || Number(value) < 32 || Number(value) > 256)) {
 						return "Please enter a valid regression predictions. It can be an int ranging 32 - 256.";

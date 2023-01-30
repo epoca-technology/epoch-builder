@@ -4,7 +4,7 @@ from copy import deepcopy
 from math import ceil
 from modules._types import IKerasModelConfig, IKerasOptimizer, IKerasActivation, IRegressionTrainingConfigLoss,\
     IKerasActivation, IRegressionTrainingConfig, IRegressionTrainingConfigBatch, IRegressionTrainingConfigCategory,\
-        IKerasModelTemplateName, IKerasUnit, IKerasFilter, IKerasKernelSize, IKerasPoolSize,\
+        IKerasModelTemplateName, IKerasUnit, IKerasFilter, IKerasKernelSize, IKerasPoolSize, IRegressionBatchSizes,\
             IRegressionTrainingConfigNetworkReceipt, IRegressionHyperparams, IRegressionCategoryHyperparams
 from modules.utils.Utils import Utils
 from modules.epoch.Epoch import Epoch
@@ -22,13 +22,19 @@ class RegressionTrainingConfig:
     This singleton handles the generation and management of the regression training configurations.
 
     Class Properties:
-        BATCH_SIZE: int
+        BATCH_SIZE: IRegressionBatchSizes
             The number of model configs that will be included per batch
         HYPERPARAMS: IRegressionHyperparams
             A dict containing all the hyperparameters by category.
     """
     # The number of model configs that will be included per batch
-    BATCH_SIZE: int = 5
+    BATCH_SIZE: IRegressionBatchSizes = {
+        "DNN": 150,
+        "CDNN": 50,
+        "LSTM": 5,
+        "CLSTM": 5,
+        "UNIT_TEST": 1
+    }
 
     # Hyperparameters that will be used to build the training configurations
     HYPERPARAMS: IRegressionHyperparams = {
@@ -162,7 +168,7 @@ class RegressionTrainingConfig:
         """
         # Init counts
         models: int = len(configs)
-        batches: int = ceil(models / RegressionTrainingConfig.BATCH_SIZE)
+        batches: int = ceil(models / RegressionTrainingConfig.BATCH_SIZE[category])
 
         # Init the batched training config file
         training_config: IRegressionTrainingConfigBatch = {
@@ -177,7 +183,7 @@ class RegressionTrainingConfig:
             training_config["name"] = f"KR_{category}_{batch_number}_{batches}"
 
             # Include the sliced configs
-            slice_end: int = slice_start + RegressionTrainingConfig.BATCH_SIZE
+            slice_end: int = slice_start + RegressionTrainingConfig.BATCH_SIZE[category]
             training_config["configs"] = configs[slice_start:slice_end]
 
             # Save the batch
@@ -411,7 +417,6 @@ class RegressionTrainingConfig:
         # Configuration
         receipt += f"Creation: {Utils.from_milliseconds_to_date_string(Utils.get_time())}\n"
         receipt += f"Total Models: {total_models}\n"
-        receipt += f"Batch Size: {RegressionTrainingConfig.BATCH_SIZE}\n"
 
         # Networks
         for net in network_receipts:

@@ -81,9 +81,10 @@ class PredictionModel:
         if journal.current_index != 0:
             configs = configs[journal.current_index + 1:]
 
-        # A model is considered to be profitable if it meets the minimum accuracy
-        # and ends up with a positive balance.
+        # A model is considered to be profitable if it meets the minimum accuracy,
+        # ends up with a positive balance and has a balance drawdown that meets the requirements.
         min_accuracy: float = 60
+        max_balance_drawdown: float = -30
 
         # Init the progress bar
         print(f"\nBatch: {batch_file_name}")
@@ -110,9 +111,15 @@ class PredictionModel:
                 features_sum=features_sum
             )
 
-            # Shortlist the model if it is profitable
+            # Check if the accuracy and the profit requirements have been met
             if performance["accuracy"] >= min_accuracy and performance["profit"] > 0:
-                journal.save_profitable_config(i, config)
+                # Calculate the largest balance drawdown and ensure it meets the requirements
+                balance_drawdown: float = PredictionModelBacktest.calculate_largest_balance_drawdown(
+                    performance["initial_balance"],
+                    performance["positions"]
+                )
+                if balance_drawdown >= max_balance_drawdown:
+                    journal.save_profitable_config(i, config)
 
             # Update the progress
             progress_bar.update()
@@ -187,6 +194,13 @@ class PredictionModel:
                 features=features,
                 features_sum=features_sum
             )
+
+            # Calculate the largest balance drawdown and insert it into the backtest performance
+            balance_drawdown: float = PredictionModelBacktest.calculate_largest_balance_drawdown(
+                performance["initial_balance"],
+                performance["positions"]
+            )
+            performance["largest_balance_drawdown"] = balance_drawdown
 
             # Append the certificate to the list
             id: str = self._generate_model_id()

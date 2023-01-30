@@ -162,6 +162,8 @@ class IRegressionCategoryHyperparams(TypedDict):
     dropout_rates: List[float]
 
 
+# Batch Sizes
+IRegressionBatchSizes = Dict[IRegressionTrainingConfigCategory, int]
 
 # Hyperparams
 IRegressionHyperparams = Dict[IRegressionTrainingConfigCategory, IRegressionCategoryHyperparams]

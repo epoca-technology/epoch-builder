@@ -73,7 +73,7 @@ class Epoch:
         "train_split": 0.75,
         "validation_split": 0.2,
         "regression_lookback": 256,
-        "regression_predictions": 64,
+        "regression_predictions": 32,
         "exchange_fee": 0.065,
         "position_size": 10000,
         "leverage": 5,
