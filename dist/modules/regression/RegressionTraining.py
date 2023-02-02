@@ -72,7 +72,7 @@ class RegressionTraining:
         "decay_rate": 0.1,
         "max_epochs": 1000,
         "patience": 25,
-        "batch_size": 256
+        "batch_size": 512
     }
 
 
