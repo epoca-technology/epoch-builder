@@ -119,7 +119,7 @@ class IRegressionTrainingConfigBatch(TypedDict):
 
 
 # Categories (directories) that hold the regression training configs within
-IRegressionTrainingConfigCategory = Literal["UNIT_TEST", "DNN", "CDNN", "LSTM", "CLSTM"]
+IRegressionTrainingConfigCategory = Literal["UNIT_TEST", "CNN", "DNN", "CDNN", "LSTM", "BDLSTM", "CLSTM", "GRU"]
 
 
 
@@ -129,10 +129,13 @@ IRegressionTrainingConfigNetworks = Dict[IKerasModelTemplateName, List[IKerasMod
 
 # Variations by network
 class IRegressionTrainingConfigNetworksByCategory(TypedDict):
+    CNN: IRegressionTrainingConfigNetworks
     DNN: IRegressionTrainingConfigNetworks
     CDNN: IRegressionTrainingConfigNetworks
     LSTM: IRegressionTrainingConfigNetworks
+    BDLSTM: IRegressionTrainingConfigNetworks
     CLSTM: IRegressionTrainingConfigNetworks
+    GRU: IRegressionTrainingConfigNetworks
 
 
 
@@ -159,7 +162,6 @@ class IRegressionCategoryHyperparams(TypedDict):
     optimizers: List[IKerasOptimizer]
     loss_functions: List[IRegressionTrainingConfigLoss]
     activations: Union[List[IKerasActivation], List[None]]
-    dropout_rates: List[float]
 
 
 # Batch Sizes

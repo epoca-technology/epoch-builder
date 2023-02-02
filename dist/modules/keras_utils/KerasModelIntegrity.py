@@ -8,7 +8,6 @@ def validate(
     config: IKerasModelConfig,
     name: str,
     units: int = 0,
-    dropout_rates: int = 0,
     activations: int = 0,
     filters: int = 0,
     kernel_sizes: int = 0,
@@ -24,8 +23,6 @@ def validate(
             The name of the model that will be built.
         units: int
             The number of unit items that should have been provided in the config.
-        dropout_rates: int
-            The number of dropout rates items that should have been provided in the config.
         activations: int
             The number of activation items that should have been provided in the config.
         filters: int
@@ -52,9 +49,6 @@ def validate(
 
     # Validate the units
     _validate_config_param(units, "units", config.get("units"))
-
-    # Validate the required dropout rates
-    _validate_config_param(dropout_rates, "dropout_rates", config.get("dropout_rates"))
 
     # Validate the required activations
     _validate_config_param(activations, "activations", config.get("activations"))

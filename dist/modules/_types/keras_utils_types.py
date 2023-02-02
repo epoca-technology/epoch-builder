@@ -13,12 +13,16 @@ from typing import Literal, TypedDict, Union, List, Tuple
 
 # Name of the variations within each network
 IKerasModelTemplateName = Literal[
+    "KR_CNN_S2", "KR_CNN_S3", "KR_CNN_S4", "KR_CNN_S5",
+    "KR_CNN_MP_S2", "KR_CNN_MP_S3", "KR_CNN_MP_S4", "KR_CNN_MP_S5",
     "KR_DNN_S2", "KR_DNN_S3", "KR_DNN_S4", "KR_DNN_S5",
     "KR_CDNN_S2", "KR_CDNN_S3", "KR_CDNN_S4", "KR_CDNN_S5",
     "KR_CDNN_MP_S2", "KR_CDNN_MP_S3", "KR_CDNN_MP_S4", "KR_CDNN_MP_S5",
     "KR_LSTM_S2", "KR_LSTM_S3", "KR_LSTM_S4", "KR_LSTM_S5",
+    "KR_BDLSTM_S2", "KR_BDLSTM_S3", "KR_BDLSTM_S4", "KR_BDLSTM_S5",
     "KR_CLSTM_S2", "KR_CLSTM_S3", "KR_CLSTM_S4", "KR_CLSTM_S5",
-    "KR_CLSTM_MP_S2", "KR_CLSTM_MP_S3", "KR_CLSTM_MP_S4", "KR_CLSTM_MP_S5"
+    "KR_CLSTM_MP_S2", "KR_CLSTM_MP_S3", "KR_CLSTM_MP_S4", "KR_CLSTM_MP_S5",
+    "KR_GRU_S2", "KR_GRU_S3", "KR_GRU_S4", "KR_GRU_S5",
 ]
 
 
@@ -74,9 +78,6 @@ class IKerasModelConfig(TypedDict):
 
     # Units
     units: Union[List[IKerasUnit], None]
-
-    # Dropout rates
-    dropout_rates: Union[List[float], None]
 
     # Activations
     activations: Union[List[str], List[IKerasActivation], None]

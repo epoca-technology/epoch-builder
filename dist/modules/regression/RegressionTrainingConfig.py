@@ -2,6 +2,7 @@ from typing import Union, List, Tuple
 from functools import reduce
 from copy import deepcopy
 from math import ceil
+from random import shuffle
 from modules._types import IKerasModelConfig, IKerasOptimizer, IKerasActivation, IRegressionTrainingConfigLoss,\
     IKerasActivation, IRegressionTrainingConfig, IRegressionTrainingConfigBatch, IRegressionTrainingConfigCategory,\
         IKerasModelTemplateName, IKerasUnit, IKerasFilter, IKerasKernelSize, IKerasPoolSize, IRegressionBatchSizes,\
@@ -29,53 +30,81 @@ class RegressionTrainingConfig:
     """
     # The number of model configs that will be included per batch
     BATCH_SIZE: IRegressionBatchSizes = {
-        "DNN": 150,
-        "CDNN": 50,
+        "CNN": 150,
+        "DNN": 200,
+        "CDNN": 150,
         "LSTM": 5,
+        "BDLSTM": 5,
         "CLSTM": 5,
+        "GRU": 5,
         "UNIT_TEST": 1
     }
 
     # Hyperparameters that will be used to build the training configurations
     HYPERPARAMS: IRegressionHyperparams = {
+        "CNN": {
+            "learning_rates": [ -1, 0.001, 0.0001 ],
+            "optimizers": [ "adam" ],
+            "loss_functions": [
+                { "name": "mean_absolute_error", "metric": "mean_squared_error" },
+                { "name": "mean_squared_error", "metric": "mean_absolute_error" }
+            ],
+            "activations": [ "relu" ]
+        },
         "DNN": {
-            "learning_rates": [ -1, 0.0001 ], # -> Reduced from [ -1, 0.001, 0.0001 ]
-            "optimizers": [ "adam" ], # -> Reduced from [ "adam", "rmsprop" ]
+            "learning_rates": [ -1, 0.001, 0.0001 ],
+            "optimizers": [ "adam" ],
             "loss_functions": [ 
                 { "name": "mean_absolute_error", "metric": "mean_squared_error" },
                 { "name": "mean_squared_error", "metric": "mean_absolute_error" }
             ],
-            "activations": [ "relu" ],
-            "dropout_rates": []
+            "activations": [ "relu" ]
         },
         "CDNN": {
-            "learning_rates": [ 0.001, 0.0001 ], # -> Reduced from [ -1, 0.001, 0.0001 ]
-            "optimizers": [ "adam" ], # -> Reduced from [ "adam", "rmsprop" ]
-            "loss_functions": [ # -> Reduced from mae and mse
+            "learning_rates": [ -1, 0.001, 0.0001 ],
+            "optimizers": [ "adam" ],
+            "loss_functions": [
+                { "name": "mean_absolute_error", "metric": "mean_squared_error" },
                 { "name": "mean_squared_error", "metric": "mean_absolute_error" }
             ],
-            "activations": [ "relu" ],
-            "dropout_rates": []
+            "activations": [ "relu" ]
         },
         "LSTM": {
-            "learning_rates": [ -1 ], # -> Reduced from [ -1, 0.001, 0.0001 ]
-            "optimizers": [ "adam" ], # -> Reduced from [ "adam", "rmsprop" ]
-            "loss_functions": [ # -> Reduced from mae and mse
-                { "name": "mean_absolute_error", "metric": "mean_squared_error" }
+            "learning_rates": [ -1 ],
+            "optimizers": [ "adam" ],
+            "loss_functions": [
+                { "name": "mean_absolute_error", "metric": "mean_squared_error" },
+                { "name": "mean_squared_error", "metric": "mean_absolute_error" }
             ],
-            "activations": [ None ],
-            "dropout_rates": []
+            "activations": [ None ]
+        },
+        "BDLSTM": {
+            "learning_rates": [ -1 ],
+            "optimizers": [ "adam" ],
+            "loss_functions": [
+                { "name": "mean_absolute_error", "metric": "mean_squared_error" },
+                { "name": "mean_squared_error", "metric": "mean_absolute_error" }
+            ],
+            "activations": [ None ]
         },
         "CLSTM": {
-            "learning_rates": [ -1, 0.001 ], # -> Reduced from [ -1, 0.001, 0.0001 ]
-            "optimizers": [ "adam" ], # -> Reduced from [ "adam", "rmsprop" ]
+            "learning_rates": [ -1 ],
+            "optimizers": [ "adam" ],
             "loss_functions": [ 
                 { "name": "mean_absolute_error", "metric": "mean_squared_error" },
                 { "name": "mean_squared_error", "metric": "mean_absolute_error" }
             ],
-            "activations": [ "relu" ],
-            "dropout_rates": []
-        }
+            "activations": [ "relu" ]
+        },
+        "GRU": {
+            "learning_rates": [ -1 ],
+            "optimizers": [ "adam" ],
+            "loss_functions": [
+                { "name": "mean_absolute_error", "metric": "mean_squared_error" },
+                { "name": "mean_squared_error", "metric": "mean_absolute_error" }
+            ],
+            "activations": [ None ]
+        },
     }
 
 
@@ -166,6 +195,10 @@ class RegressionTrainingConfig:
             Tuple[int, int]
             (models, batches)
         """
+        # Shuffle the configurations in order to ensure any architectures can be found
+        # at any batch and therefore remove the need to train all the batches.
+        shuffle(configs)
+
         # Init counts
         models: int = len(configs)
         batches: int = ceil(models / RegressionTrainingConfig.BATCH_SIZE[category])
@@ -233,31 +266,15 @@ class RegressionTrainingConfig:
         # Iterate over each activation function
         for activation in category_hyperparams["activations"]:
             
-            # Iterate over each variation
+            # Iterate over each variation and add it to the list
             for variation in keras_model_variations:
-
-                # Dropout Variations
-                # Add a configuration per dropout variation specified in the Class Properties
-                if variation.get("dropout_rates") != None:
-                    for dropout in category_hyperparams["dropout_rates"]:
-                        keras_model_configs.append({
-                            "activations": [activation]*len(variation["activations"]) if activation is not None else None,
-                            "units": variation.get("units"),
-                            "filters": variation.get("filters"),
-                            "kernel_sizes": variation.get("kernel_sizes"),
-                            "pool_sizes": variation.get("pool_sizes"),
-                            "dropout_rates": [dropout]*len(variation["dropout_rates"])
-                        })
-
-                # Otherwise, just add the traditional model
-                else:
-                    keras_model_configs.append({
-                        "activations": [activation]*len(variation["activations"]) if activation is not None else None,
-                        "units": variation.get("units"),
-                        "filters": variation.get("filters"),
-                        "kernel_sizes": variation.get("kernel_sizes"),
-                        "pool_sizes": variation.get("pool_sizes")
-                    })
+                keras_model_configs.append({
+                    "activations": [activation]*len(variation["activations"]) if activation is not None else None,
+                    "units": variation.get("units"),
+                    "filters": variation.get("filters"),
+                    "kernel_sizes": variation.get("kernel_sizes"),
+                    "pool_sizes": variation.get("pool_sizes")
+                })
 
         # Finally, return the list of configs
         return [RegressionTrainingConfig._generate_model_config(
@@ -269,8 +286,7 @@ class RegressionTrainingConfig:
             units=c.get("units"),
             filters=c.get("filters"),
             kernel_sizes=c.get("kernel_sizes"),
-            pool_sizes=c.get("pool_sizes"),
-            dropout_rates=c.get("dropout_rates")
+            pool_sizes=c.get("pool_sizes")
         ) for c in keras_model_configs]
 
 
@@ -289,8 +305,7 @@ class RegressionTrainingConfig:
         units: Union[List[IKerasUnit], None]=None,
         filters: Union[List[IKerasFilter], None]=None,
         kernel_sizes: Union[List[IKerasKernelSize], None]=None,
-        pool_sizes: Union[List[IKerasPoolSize], None]=None,
-        dropout_rates: Union[List[float], None]=None
+        pool_sizes: Union[List[IKerasPoolSize], None]=None
     ) -> IRegressionTrainingConfig:
         """Builds the configuration for a model ready to be trained and evaluated.
 
@@ -304,7 +319,6 @@ class RegressionTrainingConfig:
             filters: Union[List[IKerasFilter], None]
             kernel_sizes: Union[List[IKerasKernelSize], None]
             pool_sizes: Union[List[IKerasPoolSize], None]
-            dropout_rates: Union[List[float], None]
 
         Returns:
             IRegressionTrainingConfig
@@ -325,10 +339,6 @@ class RegressionTrainingConfig:
         # Populate the activations if any
         if isinstance(activations, list):
             keras_model["activations"] = activations
-
-        # Populate the dropout_rates if any
-        if isinstance(dropout_rates, list):
-            keras_model["dropout_rates"] = dropout_rates
 
         # Populate the filters if any
         if isinstance(filters, list):
