@@ -28,19 +28,19 @@ class PredictionModelConfig:
         ...
     """
     # Batch Size
-    BATCH_SIZE: int = 100000
+    BATCH_SIZE: int = 50000
 
     # The list of price change requirements that will be used to build configs
-    PRICE_CHANGE_REQUIREMENTS: List[float] = [ 3 ] # Reduced from [ 1.5, 2, 2.5, 3, 3.5, 4 ]
+    PRICE_CHANGE_REQUIREMENTS: List[float] = [ 3 ]
 
     # Min Sum Functions
-    MIN_SUM_FUNCTIONS: List[IMinSumFunction] = [ "mean", "median" ] # Reduced from [ "mean", "median" ]
+    MIN_SUM_FUNCTIONS: List[IMinSumFunction] = [ "mean", "median" ]
 
     # Min Sum Adjustment Factors
-    MIN_SUM_ADJUSTMENT_FACTORS: List[float] = [ 1, 1.5, 2 ] # Reduced from [ 0.5, 1, 1.5, 2, 2.5 ]
+    MIN_SUM_ADJUSTMENT_FACTORS: List[float] = [ 1, 1.5, 2 ]
 
     # Regressions per model
-    REGRESSIONS_PER_MODEL: List[IRegressionsPerModel] = [ 8 ] # Reduced from [ 4, 8, 16 ]
+    REGRESSIONS_PER_MODEL: List[IRegressionsPerModel] = [ 8 ]
 
 
 

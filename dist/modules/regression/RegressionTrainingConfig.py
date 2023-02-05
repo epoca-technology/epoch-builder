@@ -30,13 +30,13 @@ class RegressionTrainingConfig:
     """
     # The number of model configs that will be included per batch
     BATCH_SIZE: IRegressionBatchSizes = {
-        "CNN": 150,
-        "DNN": 200,
-        "CDNN": 150,
-        "LSTM": 5,
-        "BDLSTM": 5,
-        "CLSTM": 5,
-        "GRU": 5,
+        "CNN": 15,
+        "DNN": 100,
+        "CDNN": 30,
+        "LSTM": 3,
+        "BDLSTM": 3,
+        "CLSTM": 3,
+        "GRU": 3,
         "UNIT_TEST": 1
     }
 
