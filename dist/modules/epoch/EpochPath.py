@@ -79,6 +79,37 @@ class EpochPath:
 
 
 
+    def regression_training_checkpoints(self, id: str) -> str:
+        """Builds the path for the regression training checkpoints. This directory
+        should be removed once the model finishes training.
+
+        Args:
+            id: str
+                The identifier of the regression.
+
+        Returns:
+            str
+        """
+        return self.p(f"regression_training_checkpoints/{id}")
+
+
+
+
+    def regression_training_active_epoch(self, id: str) -> str:
+        """As epochs are completed, their number is stored in a file 
+        in case the training was interrupted for any reason.
+
+        Args:
+            id: str
+                The identifier of the regression.
+
+        Returns:
+            str
+        """
+        return self.p(f"regression_training_checkpoints/{id}/active_epoch.txt")
+
+
+
 
 
 
@@ -455,6 +486,7 @@ class EpochPath:
                 The identifier of the epoch.
         """
         Utils.make_directory(f"{epoch_id}/regression_training_configs")
+        Utils.make_directory(f"{epoch_id}/regression_training_checkpoints")
         Utils.make_directory(f"{epoch_id}/regression_batched_certificates")
         Utils.make_directory(f"{epoch_id}/regressions")
         Utils.make_directory(f"{epoch_id}/prediction_models")

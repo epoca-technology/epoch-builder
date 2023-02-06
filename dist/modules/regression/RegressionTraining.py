@@ -8,7 +8,7 @@ from h5py import File as h5pyFile
 from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras.backend import clear_session
 from keras import Sequential
-from keras.callbacks import EarlyStopping, History
+from keras.callbacks import EarlyStopping, ModelCheckpoint, History
 from modules._types import IKerasTrainingConfig, IKerasModelConfig, IKerasModelTrainingHistory,\
     IKerasTrainingConfig, IRegressionTrainingCertificate, IDiscovery, IRegressionTrainingConfig, \
         IRegressionTrainAndTestDatasets, ITestDatasetEvaluation
@@ -192,6 +192,23 @@ class RegressionTraining:
         # Compile the model
         print("    2/8) Compiling Model...")
         model.compile(optimizer=self.optimizer, loss=self.loss, metrics=[ self.metric ])
+
+        # ModelCheckpoint Callback
+        # Initialize the training checkpoints and load the existing weights (if any)
+        # It is important to note that when a model's training is resumed, the final
+        # output will be different to what the original would've been as the
+        # EarlyStopping Callback has no access to the weights history by epoch. Instead,
+        # it has access to the latest weights.
+        checkpoint_root_path: str = Epoch.PATH.regression_training_checkpoints(self.id)
+        checkpoint_path: str = f"{checkpoint_root_path}/checkpoint"
+        active_epoch_path: str = Epoch.PATH.regression_training_active_epoch(self.id)
+        initial_epoch: int = 0
+        if Utils.directory_exists(checkpoint_root_path) and Utils.file_exists(active_epoch_path):
+            initial_epoch = int(Utils.read(active_epoch_path))
+            model.load_weights(checkpoint_path)
+        else:
+            Utils.make_directory(checkpoint_root_path)
+        model_checkpoint_callback = ModelCheckpoint(filepath=checkpoint_path, save_weights_only=True, save_freq="epoch")
   
         # Train the model
         print("    3/8) Training Model")
@@ -199,10 +216,12 @@ class RegressionTraining:
             self.train_x, 
             self.train_y, 
             validation_split=Epoch.VALIDATION_SPLIT, 
+            initial_epoch=initial_epoch,
             epochs=RegressionTraining.TRAINING_CONFIG["max_epochs"],
             callbacks=[ 
                 early_stopping, 
-                TrainingProgressBar(RegressionTraining.TRAINING_CONFIG["max_epochs"], "       ") 
+                model_checkpoint_callback,
+                TrainingProgressBar(active_epoch_path, initial_epoch, RegressionTraining.TRAINING_CONFIG["max_epochs"], "       ") 
             ],
             shuffle=True,
             batch_size=RegressionTraining.TRAINING_CONFIG["batch_size"],
@@ -244,6 +263,9 @@ class RegressionTraining:
         # Save the model
         print("    8/8) Saving Model...")
         self._save_model(certificate, model)
+
+        # Delete the checkpoint directory
+        Utils.remove_directory(checkpoint_root_path)
 
         # Return it so it can be added to the batch
         return certificate
