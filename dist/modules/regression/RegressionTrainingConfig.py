@@ -33,10 +33,9 @@ class RegressionTrainingConfig:
         "CNN": 15,
         "DNN": 100,
         "CDNN": 30,
-        "LSTM": 3,
-        "BDLSTM": 3,
-        "CLSTM": 3,
-        "GRU": 3,
+        "LSTM": 5,
+        "CLSTM": 5,
+        "GRU": 5,
         "UNIT_TEST": 1
     }
 
@@ -70,15 +69,6 @@ class RegressionTrainingConfig:
             "activations": [ "relu" ]
         },
         "LSTM": {
-            "learning_rates": [ -1 ],
-            "optimizers": [ "adam" ],
-            "loss_functions": [
-                { "name": "mean_absolute_error", "metric": "mean_squared_error" },
-                { "name": "mean_squared_error", "metric": "mean_absolute_error" }
-            ],
-            "activations": [ None ]
-        },
-        "BDLSTM": {
             "learning_rates": [ -1 ],
             "optimizers": [ "adam" ],
             "loss_functions": [

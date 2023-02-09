@@ -1,6 +1,6 @@
 {
 	"name": "epoch-builder",
-	"version": "1.4.0",
+	"version": "1.4.1",
 	"description": "The Epoch Builder is a cluster of machines designed to train and evaluate Prediction Models. It also outputs an Epoch File that can be installed in Epoca's Platform.",
 	"main": "start.js",
 	"scripts": {

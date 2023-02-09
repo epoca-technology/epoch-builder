@@ -119,7 +119,7 @@ class IRegressionTrainingConfigBatch(TypedDict):
 
 
 # Categories (directories) that hold the regression training configs within
-IRegressionTrainingConfigCategory = Literal["UNIT_TEST", "CNN", "DNN", "CDNN", "LSTM", "BDLSTM", "CLSTM", "GRU"]
+IRegressionTrainingConfigCategory = Literal["UNIT_TEST", "CNN", "DNN", "CDNN", "LSTM", "CLSTM", "GRU"]
 
 
 
@@ -133,7 +133,6 @@ class IRegressionTrainingConfigNetworksByCategory(TypedDict):
     DNN: IRegressionTrainingConfigNetworks
     CDNN: IRegressionTrainingConfigNetworks
     LSTM: IRegressionTrainingConfigNetworks
-    BDLSTM: IRegressionTrainingConfigNetworks
     CLSTM: IRegressionTrainingConfigNetworks
     GRU: IRegressionTrainingConfigNetworks
 
