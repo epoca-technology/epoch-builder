@@ -69,10 +69,10 @@ class Epoch:
     DEFAULTS: IEpochDefaults = {
         "seed": 60184,
         "epoch_width": 48,
-        "sma_window_size": 100,
+        "sma_window_size": 70,
         "train_split": 0.75,
         "validation_split": 0.2,
-        "regression_lookback": 256,
+        "regression_lookback": 128,
         "regression_predictions": 32,
         "exchange_fee": 0.065,
         "position_size": 10000,

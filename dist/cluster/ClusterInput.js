@@ -142,7 +142,7 @@ class ClusterInput {
 				}
 			},
 			{
-				type: "input", name: "sma_window_size", message: "Enter the SMA Window Size (Optional: defaults to 100)", 
+				type: "input", name: "sma_window_size", message: "Enter the SMA Window Size (Optional: defaults to 70)", 
 				validate(value) {
 					if (typeof value == "string" && value.length && (isNaN(value) || Number(value) < 10 || Number(value) > 300)) {
 						return "Please enter a valid sma window size. It can be an int ranging 10 - 300.";
@@ -166,7 +166,7 @@ class ClusterInput {
 				}
 			},
 			{
-				type: "input", name: "regression_lookback", message: "Enter the regression lookback (Optional: defaults to 256)", 
+				type: "input", name: "regression_lookback", message: "Enter the regression lookback (Optional: defaults to 128)", 
 				validate(value) {
 					if (typeof value == "string" && value.length && (isNaN(value) || Number(value) < 32 || Number(value) > 512)) {
 						return "Please enter a valid regression lookback. It can be an int ranging 32 - 512.";
