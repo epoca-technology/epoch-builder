@@ -54,7 +54,7 @@ class Candlestick:
     PREDICTION_CANDLESTICK_CONFIG: ICandlestickConfig = {
         "columns": ("ot", "ct", "o", "h", "l", "c", "v"),
         "csv_file": f"{ASSETS_PATH}/prediction_candlesticks.csv",
-        "interval_minutes": 30
+        "interval_minutes": 15
     }
 
 
@@ -182,7 +182,7 @@ class Candlestick:
         # Calculate the number of candlesticks that form the epoch
         epoch_width_days: int = ceil(epoch_width * 30)
         mins_in_a_day: int = 24 * 60
-        candles_in_a_day: float = mins_in_a_day / 30
+        candles_in_a_day: float = mins_in_a_day / Candlestick.PREDICTION_CANDLESTICK_CONFIG["interval_minutes"]
         candles_in_range: int = ceil(candles_in_a_day * epoch_width_days)
 
         # Load the entire prediction candlesticks df
