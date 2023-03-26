@@ -198,7 +198,7 @@ class ClusterInput {
 				}
 			},
 			{
-				type: "input", name: "leverage", message: "Enter the leverage (Optional: defaults to 5)", 
+				type: "input", name: "leverage", message: "Enter the leverage (Optional: defaults to 3)", 
 				validate(value) {
 					if (typeof value == "string" && value.length && (isNaN(value) || Number(value) < 1 || Number(value) > 10)) {
 						return "Please enter a valid leverage. It can be an int ranging 1 - 10.";
