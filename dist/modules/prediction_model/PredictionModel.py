@@ -83,8 +83,8 @@ class PredictionModel:
 
         # A model is considered to be profitable if it meets the minimum accuracy,
         # ends up with a positive balance and has a balance drawdown that meets the requirements.
-        min_accuracy: float = 60
-        max_balance_drawdown: float = -30
+        min_accuracy: float = 55
+        #max_balance_drawdown: float = -50
 
         # Init the progress bar
         print(f"\nBatch: {batch_file_name}")
@@ -114,12 +114,13 @@ class PredictionModel:
             # Check if the accuracy and the profit requirements have been met
             if performance["accuracy"] >= min_accuracy and performance["profit"] > 0:
                 # Calculate the largest balance drawdown and ensure it meets the requirements
-                balance_drawdown: float = PredictionModelBacktest.calculate_largest_balance_drawdown(
-                    performance["initial_balance"],
-                    performance["positions"]
-                )
-                if balance_drawdown >= max_balance_drawdown:
-                    journal.save_profitable_config(i, config)
+                #balance_drawdown: float = PredictionModelBacktest.calculate_largest_balance_drawdown(
+                #    performance["initial_balance"],
+                #    performance["positions"]
+                #)
+                #if balance_drawdown >= max_balance_drawdown:
+                #    journal.save_profitable_config(i, config)
+                journal.save_profitable_config(i, config)
 
             # Update the progress
             progress_bar.update()
