@@ -37,7 +37,7 @@ class Regression:
     """
     # Min and max feature values
     MIN_FEATURE_VALUE: float = 0.01
-    MAX_FEATURE_VALUE: float = 5
+    MAX_FEATURE_VALUE: float = 1
 
 
 

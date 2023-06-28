@@ -69,9 +69,9 @@ class RegressionTraining:
     TRAINING_CONFIG: IKerasTrainingConfig = {
         "initial_lr": 0.005,
         "decay_steps": 10,
-        "decay_rate": 0.1,
-        "max_epochs": 1000,
-        "patience": 25,
+        "decay_rate": 0.15,
+        "max_epochs": 500,
+        "patience": 10,
         "batch_size": 512
     }
 

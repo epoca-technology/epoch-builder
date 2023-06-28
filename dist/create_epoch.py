@@ -10,15 +10,15 @@ from modules.epoch.Epoch import Epoch
 #   --seed? "60184"
 #   --id "_ALPHA"
 #   --epoch_width? "48"
-#   --sma_window_size? "100"
+#   --sma_window_size? "25"
 #   --train_split? "0.75"
 #   --validation_split? "0.2"
 #   --regression_lookback? "256"
 #   --regression_predictions? "32"
 #   --exchange_fee? "0.065"
 #   --position_size? "10000"
-#   --leverage? "5"
-#   --idle_minutes_on_position_close? "30"
+#   --leverage? "3"
+#   --idle_minutes_on_position_close? "180"
 endpoint_name: str = "CREATE EPOCH"
 Utils.endpoint_header(Configuration.VERSION, endpoint_name)
 

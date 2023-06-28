@@ -28,7 +28,7 @@ class PredictionModelConfig:
         ...
     """
     # Batch Size
-    BATCH_SIZE: int = 200000
+    BATCH_SIZE: int = 100000
 
     # The list of price change requirements that will be used to build configs
     PRICE_CHANGE_REQUIREMENTS: List[float] = [ 3 ]

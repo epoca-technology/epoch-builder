@@ -142,7 +142,7 @@ class ClusterInput {
 				}
 			},
 			{
-				type: "input", name: "sma_window_size", message: "Enter the SMA Window Size (Optional: defaults to 70)", 
+				type: "input", name: "sma_window_size", message: "Enter the SMA Window Size (Optional: defaults to 25)", 
 				validate(value) {
 					if (typeof value == "string" && value.length && (isNaN(value) || Number(value) < 10 || Number(value) > 300)) {
 						return "Please enter a valid sma window size. It can be an int ranging 10 - 300.";
@@ -206,7 +206,7 @@ class ClusterInput {
 				}
 			},
 			{
-				type: "input", name: "idle_minutes_on_position_close", message: "Enter the idle minutes on position_close (Optional: defaults to 30)", 
+				type: "input", name: "idle_minutes_on_position_close", message: "Enter the idle minutes on position_close (Optional: defaults to 180)", 
 				validate(value) {
 					if (typeof value == "string" && value.length && (isNaN(value) || Number(value) < 0 || Number(value) > 1000)) {
 						return "Please enter a valid idle minutes on position_close. It can be an int ranging 0 - 1000.";

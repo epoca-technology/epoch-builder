@@ -69,7 +69,7 @@ class Epoch:
     DEFAULTS: IEpochDefaults = {
         "seed": 60184,
         "epoch_width": 48,
-        "sma_window_size": 70,
+        "sma_window_size": 25,
         "train_split": 0.75,
         "validation_split": 0.2,
         "regression_lookback": 128,
@@ -77,7 +77,7 @@ class Epoch:
         "exchange_fee": 0.065,
         "position_size": 10000,
         "leverage": 3,
-        "idle_minutes_on_position_close": 30
+        "idle_minutes_on_position_close": 180
     }
 
     # The set that will be used to set randomness in all required libs
