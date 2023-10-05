@@ -9,16 +9,12 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+ssh://git@bitbucket.org/projectplutus/epoch-builder.git"
+		"url": "git@github.com:epoca-technology/epoch-builder.git"
 	},
-	"author": "JessDotJS",
+	"author": "Jesus Graterol",
 	"license": "ISC",
-	"bugs": {
-		"url": "https://bitbucket.org/projectplutus/epoch-builder/issues"
-	},
-	"homepage": "https://bitbucket.org/projectplutus/epoch-builder#readme",
+	"homepage": "https://github.com/epoca-technology/epoch-builder",
 	"dependencies": {
 		"inquirer": "9.1.0"
-	},
-	"type": "module"
+	}
 }
